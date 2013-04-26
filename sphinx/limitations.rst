@@ -1,11 +1,5 @@
-Bugs and limitations
-********************
-
-* This bug list is here in the ``README`` instead of a real bug tracker.
-
-* Paths in the config files must be relative to the location of the config
-  file specified on the command line (specifically, absolute paths don't
-  work).
+Limitations
+***********
 
 * Adventures with ``joblib``:
 
@@ -30,36 +24,3 @@ Bugs and limitations
     but I guess it's not close enough.)
 
   * Same deal with ``PyICU``. Calling ``tokenizers.ICU.tokenize()`` hangs.
-
-* ``Geo_GMM`` objects can't be printed because of a ``RuntimeError`` arising
-  from (IMO) a design error. I filed a `bug report
-  <https://github.com/scikit-learn/scikit-learn/issues/1463>`_.
-
-* There are several places where a ``verbose`` argument could be eliminated by
-  interrogating the logger instead (i.e., are we at ``DEBUG`` log level).
-
-* Write a "contributing" section for these docs. Ideas:
-
-  * where is the master repository
-
-    * there is none - it's distributed
-    * reid's branch is the de facto master
-    * he pushes to ``FIXME`` regularly
-    * do not push to ``FIXME``
-
-  * updating your working directory
-
-    * hg pull
-    * hg update
-
-  * edit in a branch, not on ``master``
-  * coding style
-  * say ``test.sh`` a lot
-
-* Parsing related:
-
-  * ``summarize-days`` should output nulls for days where we didn't collect
-    any data.
-
-* Console logging claims it's going to ``stdout`` when it fact it's
-  ``stderr``. Update docs and comments.
