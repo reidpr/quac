@@ -1,0 +1,53 @@
+Overview
+--------
+
+QUAC ("Quantitative analysis of chatter" or any related acronym you like) is a
+package for acquiring and analyzing social internet content. It can:
+
+* Reliably collect tweets from the Twitter Streaming API and convert them into
+  a convenient TSV format.
+
+* Estimate the origin location of tweets with no geotag.
+
+Parallelism is implemented using various combinations of make, joblib, and a
+simple map-reduce framework called "makereduce" which is included.
+
+For more information, see the documentation rooted at doc/index.html. If
+there's nothing there, that means you need to build the docs. The command for
+that is "cd sphinx && make". You will need Sphinx (http://sphinx-doc.org/)
+installed.
+
+QUAC was formerly known as TWEPI ("Twitter for epidemic analysis").
+
+
+Copyright
+---------
+
+QUAC is copyright (c) 2013 Los Alamos National Security, LLC and others.
+
+This material was produced under U.S. Government contract DE-AC52-06NA25396
+for Los Alamos National Laboratory (LANL), which is operated by Los Alamos
+National Security, LLC for the U.S. Department of Energy. The U.S. Government
+has rights to use, reproduce, and distribute this software. NEITHER THE
+GOVERNMENT NOR LOS ALAMOS NATIONAL SECURITY, LLC MAKES ANY WARRANTY, EXPRESS
+OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE. If software
+is modified to produce derivative works, such modified software should be
+clearly marked, so as not to confuse it with the version available from LANL.
+
+This software is licensed under the Apache License, Version 2.0 (the
+"License"); you may not use it except in compliance with the License. A copy
+of the License is available in the file LICENSE or at
+<http://www.apache.org/licenses/LICENSE-2.0>.
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+
+
+Funding acknowledgements
+------------------------
+
+This software is supported in part by NIH/NIGMS under the MIDAS program, grant
+U01-GM097658-01.

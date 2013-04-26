@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+
+'''Parse the given metadata pickle file and print, in Twepi TSV format, a
+   summary of each raw tweet file's metadata on stdout. See README for column
+   order.'''
+
+import argparse
+import sys
+
+import pickle_glue
+import tsv_glue
+import u
+
+ap = argparse.ArgumentParser()
+ap.add_argument('file', metavar='METADATA_FILE')
+args = u.parse_args(ap)
+
+tsv = tsv_glue.Writer(fp=sys.stdout)  # FIXME: will puke if we send Unicode?
+
+for (f, md) in sorted(pickle_glue.File(args.file).data['raw_files'].items()):
+   tsv.writerow([f,
+                 md['time_collected'],
+                 md['time_preprocessed'].isoformat(),
+                 md.get('second_ct'),
+                 md['object_ct'],
+                 md['tweet_ct'],
+                 md.get('byte_ct_raw'),
+                 md.get('byte_ct_comp')])

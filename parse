@@ -1,0 +1,357 @@
+#!/usr/bin/env python
+
+# This script parses files of raw tweets and stores a useful subset of their
+# data in per-day structured files.
+#
+# Run with --help for usage information.
+#
+# Idempotency: Running the script on a file a second time does nothing (the
+# script notices the file has been loaded already and skips it). You can force
+# a re-load with the --re-load switch.
+#
+# WARNING: Keep the metadata format consistent with README.
+#
+# TIPS:
+#
+# * To get a few raw data files that are small, but not tiny, for easy testing:
+#
+#   $ ls -Srsh /path/to/raw/tweets/*.gz | head -200 | tail -10
+#
+# * Line numbers may not be correct in multicore mode.
+#
+# FIXME/TODO:
+#
+# * Create metadata with NaNs for days where we didn't collect any data.
+#
+# * Give a count of the actual number of files to be processed (i.e., don't
+#   count already-loaded files when reporting progress).
+#
+# * Implement deletion directives. Suggested doc: "As required by Twitter, it
+#   is tolerant of duplicate and out-of-order tweets, and it respects deletion
+#   notices (by removing those tweets from the database), even if the deletion
+#   notice arrives before the tweet."
+#
+# * Figure out if a non-default (i.e., larger) buffer size makes any
+#   difference on other systems. On my Linux box, it seems to make none.
+
+import argparse
+from collections import defaultdict
+import cProfile
+import gc
+import gzip
+import io
+import multicore
+import os.path
+import pstats
+import re
+import subprocess
+import sys
+import time
+
+import pickle_glue
+import tsv_glue
+import tweet
+import u
+
+
+### Constants ###
+
+TWEET_FILE_EXTENSION = '.gz'
+STATS_FILE_EXTENSION = '.stats'
+
+
+### Setup ###
+
+ap = argparse.ArgumentParser(
+   description='Load raw tweets into well-organized TSV files.')
+ap.add_argument('--config',
+                help='location of config file',
+                metavar='FILE')
+ap.add_argument('--cores',
+                metavar='N',
+                type=int,
+                default=1,
+                help='use this many processes (default: 1)')
+ap.add_argument('--file-count',
+                type=int,
+                help='stop after N files',
+                metavar='N')
+ap.add_argument('--reload',
+                action='store_true',
+                help='reload tweet files that have already been loaded')
+ap.add_argument('--shuffle',
+                action='store_true',
+                help='load files in random order')
+ap.add_argument('--verbose',
+                action='store_true',
+                help='be more verbose in console output')
+ap.add_argument('--profile-speed',
+                action='store_true',
+                help='profile for speed and dump results at the end')
+ap.add_argument('output_dir',
+                metavar='OUTPUT_DIR',
+                help='directory for output')
+ap.add_argument('files',
+                metavar='FILE',
+                nargs='+',
+                help='compressed files of tweets to load')
+args = u.parse_args(ap)
+if (args.cores > 1 and args.profile_speed):
+   ap.error('cannot profile with --cores > 1')
+
+if (args.shuffle):
+   u.rand.shuffle(args.files)
+
+c = u.configure(args.config)
+l = u.logging_init('twpar')
+tweet.init_timezone(c.get('pars', 'local_timezone'))
+
+
+### Program ###
+
+def main():
+   l.info('starting with %s cores' % (multicore.core_ct))
+   lockname = args.output_dir + '/parse'
+   u.lock_acquire(lockname)
+   try:
+      if (args.profile_speed):
+         prof = cProfile.Profile()
+         prof.enable()
+      main_real()
+      if (args.profile_speed):
+         prof_file = args.output_dir + '/speed.prof'
+         prof.disable()
+         prof.dump_stats(prof_file)
+         fp = open(prof_file + '.txt', 'w')
+         p = pstats.Stats(prof_file, stream=fp)
+         p.sort_stats('cumulative')
+         p.print_stats()
+         l.info('dumped profile %s' % (prof_file))
+   except Exception:
+      u.abort('unhandled exception:', exc_info=True)
+   finally:
+      u.lock_release(lockname)
+   l.info('done')
+
+def main_real():
+   # We create an autovivifying dictionary like this, rather than relying on
+   # u.defaultdict_recursive, so that the pickle files can be read without
+   # importing anything from this package.
+   def empty_dict():
+      return { 'raw_files':       defaultdict(dict),
+               'day_files':       defaultdict(dict),
+               'day_files_dirty': set() }
+   metadata_pkl = pickle_glue.File('%s/metadata.pickle' % (args.output_dir),
+                                   default=empty_dict, writable=True)
+   json_files_parse(metadata_pkl)
+   day_files_clean(metadata_pkl)
+   #deleted_remove(metadata_pkl)
+   #day_files_clean(metadata_pkl)
+
+def day_files_clean(metadata_pkl):
+   l.debug('cleaning day files')
+   for day_file in metadata_pkl.data['day_files_dirty']:
+      day = day_file[0]
+      filename = day_file[1]
+      day_file_clean(day, filename, metadata_pkl.data['day_files'][day])
+   metadata_pkl.data['day_files_dirty'] = set()
+   metadata_pkl.commit()  # FIXME: should we commit more frequently?
+
+def day_file_clean(day, basename, metadata):
+   # Sort and remove duplicate tweets. We use the external `sort` program
+   # because it can do an external sort quite fast.
+   filename = '%s/%s' % (args.output_dir, basename)
+   tmpfile = args.output_dir + '/temp.tsv'
+   sort_args = ['sort', '-n', '-u', '-o', tmpfile,
+                '-T', args.output_dir, '-S', c.get('pars', 'sort_mem'),
+                filename]
+   l.info('sorting %s' % (basename))
+   l.debug('args = %s' % (str(sort_args)))
+   subprocess.check_call(sort_args)
+   os.rename(tmpfile, filename)
+   # Compute metadata for the TSV file (we can't keep running counts because
+   # they don't take into account duplicate tweets). Again, we use external
+   # programs for speed.
+   l.info('computing metadata for %s' % (basename))
+   def int_cmd(c):
+      return int(subprocess.check_output(c % (filename), shell=True))
+   metadata['min_id'] = int_cmd('head -1 %s | cut -f1')
+   metadata['max_id'] = int_cmd('tail -1 %s | cut -f1')
+   # FIXME: It would be nice if we could read the file just once, instead of
+   # twice (once for wc and once for grep).
+   metadata['count'] = int_cmd("wc -l %s | cut -d' ' -f1")
+   # WARNING: This depends on latitude or longitude being the last column;
+   # i.e., if the line closes with a tab, then the last column is empty and
+   # there is no geotag.
+   #
+   # The crap at the end of the line is because grep's exit codes can be
+   # either 0 (matches found) or 1 (no matches found). Only code >= 2 means a
+   # real error. And on older tweet files, no geotagged tweets is common.
+   metadata['count_geotag'] = int_cmd('grep -Pvc "\t$" %s ; [ $? -le 1 ]')
+   if (not metadata.has_key('count_deleted')):
+      # no previous run, so initialize to zero
+      metadata['count_deleted'] = 0
+
+# FIXME: This function is too long!
+def json_files_parse(metadata_pkl):
+   ## Which files do we need to actually process?
+   files = []
+   for file_ in args.files:
+      file_basename = os.path.basename(file_)
+      if (file_basename in metadata_pkl.data['raw_files']):
+         if (not args.reload):
+            l.debug('%s is already loaded, skipping' % (file_basename))
+            continue
+         else:
+            l.debug('%s is already loaded, will re-load' % (file_basename))
+      files.append((file_, file_basename))
+   ## Loop over files
+   files_ct = 0
+   for (file_, file_basename) in files:
+      files_ct += 1
+      ## Have we seen this file before?
+      if (args.file_count is not None and files_ct > args.file_count):
+         l.info('stopping after %d files per --file-count' % (args.file_count))
+         break
+      ## Read the file's metadata (note that we add more metadata below)
+      metadata_raw = metadata_pkl.data['raw_files'][file_basename]
+      metadata_days = metadata_pkl.data['day_files']
+      metadata_raw['time_collected'] = iso8601ify_timestamp(file_)
+      stats = stats_file_read(file_)
+      if (stats):
+         metadata_raw['second_ct'] = float(stats['seconds'])
+         metadata_raw['byte_ct_raw'] = int(stats['bytes_raw'])
+         metadata_raw['byte_ct_comp'] = int(stats['bytes_comp'])
+      ## Open the file
+      fp = gzip.open(file_)
+      tweet_tsv_fps = tsv_glue.Dict('%s/tweets_' % (args.output_dir),
+                                    class_=tsv_glue.Writer_Unicode)
+      l.info('opened %s (%d of %d)'
+             % (file_basename, files_ct, len(files)))
+      ## Loop over tweets in this file
+      load_start = time.time()
+      line_number = 0
+      object_ct_raw = 0
+      tweet_ct_raw = 0
+      parse_failure_ct = 0
+      try:
+         lines = fp.readlines()
+      except IOError, x:
+         l.error('I/O error reading %s, skipping: %s' % (file_basename, x))
+         continue
+      l.debug('read file')
+      if (len(lines) == 0):
+         l.warning('%s is empty, skipping' % (file_basename))
+         continue
+      parses = multicore.do(parse_line, (), lines)
+      l.debug('done with hickenloop')
+      # try to reduce memory use
+      del lines
+      gc.collect()
+      l.debug('done with garbage collection')
+      for p in parses:
+         line_number += 1
+         # FIXME: This is a really weird way of dealing with exceptions...
+         if (p is None):
+            # blank line
+            pass
+         elif (isinstance(p, tuple)):
+            # tweet line
+            object_ct_raw += 1
+            tweet_ct_raw += 1
+            tweet_tsv_fps[p[0]].write(p[1])
+         elif (isinstance(p, tweet.Deletion_Notice)):
+            object_ct_raw += 1
+            pass  # FIXME: implement
+         elif (isinstance(p, tweet.Status_Withheld)):
+            object_ct_raw += 1
+            pass  # FIXME: implement
+         elif (isinstance(p, Exception)):
+            if (isinstance(p, ValueError)):
+               l.info('JSON parsing failed on line %d, skipping: %s'
+                      % (line_number, str(p)))
+               parse_failure_ct += 1
+               if (parse_failure_ct > c.getint('pars', 'parse_failure_max')):
+                  u.abort('too many parse failures, aborting')
+            elif (isinstance(p, tweet.Unknown_Object_Error)):
+               l.warning('Unknown object found on line %d, skipping' % (line_number))
+            else:
+               l.fatal('exception on line %d' % (line_number))
+               raise p
+         else:
+            u.abort('total confusion on line %d: %s' % (line_number, line))
+      ## Close TSV files
+      tweet_tsv_fps.close()
+      dirties = [(day, os.path.basename(w.filename))
+                 for (day, w) in tweet_tsv_fps.iteritems()]
+      metadata_pkl.data['day_files_dirty'].update(dirties)
+      ## Close out metadata for raw file
+      metadata_raw['time_preprocessed'] = u.utcnow()
+      metadata_raw['object_ct'] = object_ct_raw
+      metadata_raw['tweet_ct'] = tweet_ct_raw
+      metadata_pkl.commit()
+      elapsed = time.time() - load_start
+      l.info('loaded file: %d objects in %s (%s per second), %d tweets'
+             % (object_ct_raw, u.fmt_seconds(elapsed),
+                u.fmt_si(object_ct_raw / elapsed), tweet_ct_raw))
+
+def iso8601ify_timestamp(t):
+   """Given filename including timestamp string t, translate it into ISO 8601
+      extended format. E.g.:
+
+      >>> iso8601ify_timestamp('/foo/bar/tweets.20120301_172758.stats')
+      '2012-03-01T17:27:58' """
+   return re.sub(r'^.*(\d{4})(\d\d)(\d\d)_(\d\d)(\d\d)(\d\d).*$',
+                 r'\1-\2-\3T\4:\5:\6', t)
+
+# FIXME: This function is extremely messy.
+def parse_line(line):
+   if (re.search(r'^\s*$', line)):
+      # line is nothing but whitespace, skip
+      return None
+   try:
+      o = tweet.from_json(line)
+      if (isinstance(o, tweet.Tweet)):
+         # FIXME: function copy-n-pasted from tsv_glue
+         def _unicodify(s):
+            if s is None:
+               return u''
+            elif isinstance(s, unicode):
+               return s
+            else:
+               return unicode(s)
+         return (o.day, '\t'.join(map(_unicodify, (i for i in o.to_list()))) + '\n')
+      else:
+         return o
+   except (ValueError, tweet.Unknown_Object_Error), x:
+      return x
+
+def stats_file_read(f):
+   '''Read the stats file corresponding to tweet file f and return its fields
+      as a dictionary. If no stats file exists, return None. Fields are
+      uninterpreted, so all values are strings.'''
+   sf = stats_file_get(f)
+   if (sf is None):
+      return None
+   d = dict()
+   for line in io.open(sf):
+      fields = line.split()
+      d[fields[0]] = fields[1]
+   return d
+
+def stats_file_get(f):
+   'Translate tweet filename f into the corresponding stats file.'
+   # FIXME: the dot in ".gz" will be interpreted as a wildcard
+   sf = re.sub(r'%s$' % (TWEET_FILE_EXTENSION), STATS_FILE_EXTENSION, f)
+   if (sf == f):
+      u.abort('%s is not a %s file' % (f, TWEET_FILE_EXTENSION))
+   if (not os.path.exists(sf)):
+      l.warning("stats file %s does not exist" % (sf))
+      return None
+   return sf
+
+
+### Make it a script ###
+
+if (__name__ == '__main__'):
+   main()

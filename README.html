@@ -1,0 +1,597 @@
+<div class="toc">
+<ul>
+<li><a href="#what-does-this-package-do">What does this package do?</a><ul>
+<li><a href="#collecting-tweets">Collecting tweets</a></li>
+<li><a href="#geographic-analysis">Geographic analysis</a></li>
+<li><a href="#miscellaneous">Miscellaneous</a></li>
+</ul>
+</li>
+<li><a href="#citing-twepi">Citing Twepi</a></li>
+<li><a href="#dependencies">Dependencies</a><ul>
+<li><a href="#debs">.debs</a></li>
+<li><a href="#pypi-python-packages">PyPI Python packages</a></li>
+<li><a href="#scipy">SciPy</a></li>
+<li><a href="#one-file-python-modules">One-file Python modules</a></li>
+<li><a href="#gis-stuff">GIS stuff</a><ul>
+<li><a href="#spatialite">SpatiaLite</a></li>
+<li><a href="#qgis-18">QGIS 1.8</a></li>
+<li><a href="#from-pypi">From PyPI</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#getting-started">Getting started</a></li>
+<li><a href="#editing-the-software">Editing the software</a></li>
+<li><a href="#configuration">Configuration</a></li>
+<li><a href="#file-formats">File formats</a><ul>
+<li><a href="#a-caution-about-tweet-ids">A caution about tweet IDs</a></li>
+<li><a href="#this-file">This file</a></li>
+<li><a href="#raw-tweet-files">Raw tweet files</a></li>
+<li><a href="#preprocessed-tweet-files">Preprocessed tweet files</a></li>
+<li><a href="#geographic-stuff">Geographic stuff</a></li>
+</ul>
+</li>
+<li><a href="#faq">FAQ</a></li>
+<li><a href="#bugs-and-limitations">Bugs and limitations</a></li>
+<li><a href="#code-from-cyclopath">Code from Cyclopath</a></li>
+</ul>
+</div>
+<h1 id="what-does-this-package-do">What does this package do?</h1>
+<p>Twepi ("Twitter for epidemic analysis") package is for acquiring and analyzing
+Twitter messages, called <em>tweets</em>. The principal functionality is as follows.</p>
+<p>For more details, each script has pretty nice help which you can print using
+the <code>--help</code> option and/or look at in comments at the top of the script.
+Modules also have good docstrings.</p>
+<h2 id="collecting-tweets">Collecting tweets</h2>
+<p>You can acquire tweets from the Twitter and preprocess them into an easily
+accessible form. To do so, use the following two scripts.</p>
+<ol>
+<li>
+<p><code>collect</code> downloads tweets from the Twitter streaming API and stores them as
+    raw JSON, exactly as downloaded. Generally, you will run this continuously
+    in daemon mode.</p>
+</li>
+<li>
+<p><code>parse</code> transforms this JSON into something more workable (TSV files) and
+    removes deleted tweets (which we are required to do by the Twitter TOS).</p>
+</li>
+</ol>
+<p>Note that this acquisition process is <em>not</em> parallelizable; one of the
+purposes here is to transform the tweets into well-organized files that can be
+fed into parallel workflows.</p>
+<h2 id="geographic-analysis">Geographic analysis</h2>
+<p>Twepi provides accurate probabilistic estimates of the origin location of a
+tweet.</p>
+<ol>
+<li>
+<p><code>geotags-extract</code> tokenizes tweets and builds a database of (token, geotag)
+    pairs. In theory, it is parallelizable, though this is untested.</p>
+</li>
+<li>
+<p><code>geomodel.py</code> is a module to read this database and create a model which can
+    then be queried for the location of a tweet.</p>
+</li>
+</ol>
+<h2 id="miscellaneous">Miscellaneous</h2>
+<p>Utility scripts include:</p>
+<ul>
+<li><code>geotags-trim</code> removes the long tail of tokens in a geotag database.</li>
+<li><code>json-dump</code> is a handy way to examine the raw JSON files.</li>
+<li><code>profile-dump</code> shows the results of Python profiler output.</li>
+<li><code>summarize-days</code> shows a summary of preprocessed tweets by day.</li>
+<li><code>summarize-raw</code> shows a summary of preprocessed tweets by raw file.</li>
+<li><code>topsy</code> searches the Topsy API and produces a graph of mentions. It is
+    pretty crufty and worthless.</li>
+</ul>
+<h1 id="citing-twepi">Citing Twepi</h1>
+<p>If you use Twepi in scientific work, you are ethically obligated to cite it in
+your relevant publications. How to do so depends on what exactly you are
+doing:</p>
+<ul>
+<li>If you use or extend the geographic analysis components: FIXME</li>
+</ul>
+<p>Otherwise, please contact us and we'll figure something out.</p>
+<h1 id="dependencies">Dependencies</h1>
+<p>Twepi has been tested only on Linux; specifically, Ubuntu Oneiric. It requires
+Python 2.7 and some other stuff listed below. Note that depending on what you
+are doing, you might not need all the dependencies. Use your judgement.</p>
+<p>FIXME: This section may be incomplete. Please improve it.</p>
+<p>FIXME: Turn these lists into a chart with <code>.deb</code>, <code>pip</code>, and source
+distribution columns.</p>
+<h2 id="debs"><code>.deb</code>s</h2>
+<ul>
+<li><code>.deb</code>s (install me first):<ul>
+<li><code>mercurial</code></li>
+<li><code>parallel</code> (i.e., GNU Parallel)</li>
+<li><code>python-anyjson</code></li>
+<li><code>python-daemon</code></li>
+<li><code>python-dateutil</code></li>
+<li><code>python-dev</code></li>
+<li><code>python-joblib</code></li>
+<li><code>python-markdown</code></li>
+<li><code>python-matplotlib</code></li>
+<li><code>python-meliae</code> (optional, for memory profiling, see <a href="http://jam-bazaar.blogspot.com/2010/08/step-by-step-meliae.html">blog post</a>)</li>
+<li><code>python-numpy</code></li>
+<li><code>python-pyicu</code></li>
+<li><code>python-tz</code></li>
+<li><code>randomize-lines</code></li>
+<li><code>runsnakerun</code> (optional, for profiling)</li>
+<li><code>sqlite3</code></li>
+<li><code>sqlite3-pcre</code></li>
+</ul>
+</li>
+<li>A <a href="https://bitbucket.org/reidpr/tweetstream-reidpr">custom version</a> of <code>tweetstream</code> Twitter library (hacked by Reid)</li>
+<li><a href="https://github.com/reidpr/PyVowpal">PyVowpal</a> interface to the <a href="https://github.com/JohnLangford/vowpal_wabbit/wiki">Vowpal Wabbit</a> machine learning
+    library, also hacked by Reid. (Not implemented yet.)</li>
+</ul>
+<h2 id="pypi-python-packages">PyPI Python packages</h2>
+<p>Install package <code>FOO</code> with <code>pip install FOO</code>.</p>
+<ul>
+<li><a href="http://pypi.python.org/pypi/isodate/"><code>isodate</code></a> parsing and formatting of ISO dates, times, and intervals.
+    (Also availale as <code>python-isodate</code> in <code>wheezy</code> and <code>quetzal</code>.)</li>
+</ul>
+<h2 id="scipy">SciPy</h2>
+<p>Twepi needs SciPy version 0.11 or better.</p>
+<p>Both Debian and Ubuntu only have 0.10, even in the bleeding-edge development
+releases (as of 12/18/2012). You can install it with <code>pip</code>. It's worth looking
+at the <a href="http://www.scipy.org/Installing_SciPy/Linux">installation documentation for Linux</a>. Try:</p>
+<ol>
+<li>Remove existing <code>python-scipy</code> package.</li>
+<li>Install ATLAS: <code>libatlas-base-dev libatlas3-base</code></li>
+<li>Remove old LAPACK: <code>liblapack3</code></li>
+</ol>
+<p>Note that this does not get you a (supposedly significantly faster) optimized
+ATLAS. You can do that by building it from source; directions are in
+<code>README.Debian</code>.</p>
+<h2 id="one-file-python-modules">One-file Python modules</h2>
+<p>Download the modules (they are single <code>.py</code> files) and place them somewhere in
+your Python path (e.g., <code>/usr/local/lib/python2.7/dist-packages</code>).</p>
+<ul>
+<li><a href="http://lilyx.net/tinysegmenter-in-python/">TinySegmenter</a> is a compact tokenization library for Japanese.</li>
+</ul>
+<h2 id="gis-stuff">GIS stuff</h2>
+<p>You only need these prerequisites if you want to do geography-related things.</p>
+<h3 id="spatialite">SpatiaLite</h3>
+<p><a href="https://www.gaia-gis.it/fossil/libspatialite/index">SpatiaLite</a> is spatial extensions for SQLite. You need a few <code>.deb</code>s:</p>
+<ul>
+<li><code>libspatialite-dev</code></li>
+<li><code>libspatialite3</code> (SpatiaLite 3.0 or higher is required)</li>
+<li><code>spatialite-bin</code></li>
+<li><code>python-pysqlite2</code></li>
+</ul>
+<p><code>spatialite-bin</code> provides (among other things) a binary <code>spatialite</code> which is
+essentially a wrapper for <code>sqlite3</code> that autoloads the SpatiaLite extensions.</p>
+<p><code>python-psqlite2</code> is worth a little discussion. While (a slightly older
+version of) this module is built into Python as <code>sqlite3</code>, in the
+<strike>infinite wisdom</strike> baffling stupidity of multiple layers of
+people, it's built without loadable extension support on <em>all</em> platforms
+because the underlying support in SQLite is unavailable on <em>some</em> platforms
+(other than Linux). The former package does not include that brain damage.</p>
+<p>Asides:</p>
+<ul>
+<li>
+<p>The SpatiaLite guy also provides a <a href="http://pypi.python.org/pypi/pyspatialite">database adapter</a>, but I didn't
+    see the point given a <code>.deb</code> to install without any apparent functionality
+    disadvantages. Also it seems hard to build.</p>
+</li>
+<li>
+<p>Python also has pretty good support for shapefiles, another flat-file GIS
+    format which is actually much more common, but those are limited to 2GB in
+    size and have other drawbacks. Also, PostGIS is superb but requires setting
+    up a Postgres server, which is a hassle.</p>
+</li>
+</ul>
+<h3 id="qgis-18">QGIS 1.8</h3>
+<p><a href="http://www.qgis.org/">QGIS</a> is an open source GIS system. While Ubuntu comes with QGIS, it is
+a little crusty. However, the QGIS project provides package repositories with
+new versions; see the <a href="http://www.qgis.org/">download page</a>. You probably want the "release"
+one.</p>
+<p>You only need QGIS if you want to use it to visualize stuff (it can read
+SpatiaLite databases natively). It's not required for processing.</p>
+<p>Note: As of 1/2/2013, the <code>qgis-plugin-grass</code> package is not installable on
+Debian Wheezy because it depends on <code>grass641</code>, which is not available any
+more (<code>grass642</code> is). The workaround is to build the <code>.deb</code>s from source as
+explained in this bug report: <a href="http://hub.qgis.org/issues/6438">http://hub.qgis.org/issues/6438</a></p>
+<h3 id="from-pypi">From PyPI</h3>
+<ul>
+<li><a href="https://www.djangoproject.com/"><code>Django</code></a> contains a <a href="https://docs.djangoproject.com/en/dev/ref/contrib/gis/geos/">GEOS wrapper</a> which we use.</li>
+<li><a href="http://scikit-learn.org/stable/index.html"><code>scikit-learn</code></a> (v0.13) is a machine learning library.</li>
+<li><code>pyproj</code> is an interface to the PROJ.4 library.</li>
+</ul>
+<h1 id="getting-started">Getting started</h1>
+<p>These are basic directions to get started using the <code>collect</code> script to
+download tweets from the Streaming API.</p>
+<p>FIXME: This section is incomplete. Please improve it.</p>
+<ol>
+<li>
+<p>Create an account on Twitter to use for collection. (I suggest you do not
+    use your normal Twitter account, if you have one.)</p>
+</li>
+<li>
+<p>Install the dependencies above.</p>
+</li>
+<li>
+<p>Grab the code using Mercurial (a.k.a. <code>hg</code>):</p>
+<blockquote>
+<pre><code>hg clone ssh://doug-aws//mnt/TwitterData/twepi-master twepi
+</code></pre>
+</blockquote>
+</li>
+<li>
+<p>Create directories to hold the collected tweets (e.g., <code>tweets</code>) and your
+    configuration and logs (e.g., <code>config</code>).</p>
+</li>
+<li>
+<p>In <code>config</code>, create a file <code>sample.cfg</code>; look through the options in
+    <code>default.cfg</code> and add to <code>sample.cfg</code> the ones that need to be customized.
+    <em>Because this file will contain passwords, ensure it has appropriate
+    permissions!</em> (Also note that <code>default.cfg</code> contains defaults common to
+    <em>all</em> installations of Twepi; don't edit it to add your configuration.)</p>
+</li>
+<li>
+<p>Start the collector, e.g.:</p>
+<blockquote>
+<pre><code>./collect.py --config /path/to/sample.cfg
+</code></pre>
+</blockquote>
+</li>
+</ol>
+<h1 id="editing-the-software">Editing the software</h1>
+<ul>
+<li>FIXME<ul>
+<li>where is the master repository<ul>
+<li>there is none - it's distributed</li>
+<li>reid's branch is the de facto master</li>
+<li>he pushes to FIXME regularly</li>
+<li>do not push to FIXME</li>
+</ul>
+</li>
+<li>updating your working directory<ul>
+<li>hg pull</li>
+<li>hg update</li>
+</ul>
+</li>
+<li>edit in a branch, not on <code>master</code></li>
+<li>coding style</li>
+</ul>
+</li>
+</ul>
+<h1 id="configuration">Configuration</h1>
+<p>Twepi uses <code>.ini</code>-style configuration files; most scripts require a <code>--config</code>
+argument pointing to the main configuration file.</p>
+<p>Loading the configuration is a multi-step process in order to (a) keep
+passwords out of the source repository and (b) support a DRY configuration
+that also allows different programs in the collection to have different
+configurations.</p>
+<p>Configuration files are loaded in the following order. Later files overwrite
+any values that overlap with earlier files. Note that this order is <em>not</em>
+general to specific!</p>
+<ol>
+<li><code>default.cfg</code> in the same directory as the script. (This file also serves
+    as a complete listing of and documentation for the various config keys.)</li>
+<li>The file specified with <code>--config</code> on the command line.</li>
+<li>The file given as paths.next_config in #2.</li>
+</ol>
+<p>Note that step 3 does not recurse.</p>
+<h1 id="file-formats">File formats</h1>
+<h2 id="a-caution-about-tweet-ids">A caution about tweet IDs</h2>
+<p>Tweet IDs are 64-bit integers. This exceeds the capacity of double-precision
+floating point numbers, which can cause a variety of problems. For example,
+loading TSV files without declaring the column as text can silently truncate
+digits, and JSON parsing in some languages can fail silently.</p>
+<h2 id="this-file">This file</h2>
+<p>This README file is written in <a href="http://daringfireball.net/projects/markdown/syntax">Markdown</a>, which is a very lightweight
+markup language; specifically, the variant parsed by <a href="http://freewisdom.org/projects/python-markdown/"><code>python-markdown</code></a>
+plus two modifications:</p>
+<ul>
+<li>
+<p>The four-space indenting of standard Markdown makes me bazooka barf, so here
+    it's two spaces.</p>
+</li>
+<li>
+<p>Numbered lists are led by <code>+</code> characters rather than <code>1.</code>. (Note that this
+    redefines the standard use of <code>+</code> for non-numbered lists.)</p>
+</li>
+</ul>
+<p>Rebuild the HTML version with <code>make</code>. The <code>Makefile</code> contains the necessary
+options for <code>markdown_py</code>. <strong>Don't forget to do this if you make edits!</strong></p>
+<h2 id="raw-tweet-files">Raw tweet files</h2>
+<p>The raw tweet files are (compressed) sequences of JSON-encoded tweets
+separated by a newline (i.e., a file cannot be parsed as a single JSON
+object). Newlines do not appear within tweets, so they can safely be used as a
+separator.</p>
+<p>Tweets are Unicode and indeed contain high characters, so care must be taken
+in handling encodings.</p>
+<p><code>collect</code> saves the raw bytes of each tweet it receives from the Twitter
+Streaming API, without any parsing or encoding/decoding. There are a few
+quirks of this stream. (I am pretty sure, but not 100% sure, that these are
+all real, and not quirks of Python -- they're consistent between <code>curl</code>,
+Firefox, and my Python code.) These quirks do not appear to affect the
+parsability of the JSON.</p>
+<ul>
+<li>
+<p>While the encoding of the output is ostensibly UTF-8, it appears that high
+    characters are escaped with the "\uXXXX" notation. For example:</p>
+<blockquote>
+<pre><code>"text":"\u2606\u2606\u2606\u2606\u2606#Cruzeiro"
+</code></pre>
+</blockquote>
+</li>
+<li>
+<p>Some text has excessive escaping. For example, forward slashes do not need
+    to be escaped, but they are anyway:</p>
+<blockquote>
+<pre><code>"source":"\u003Ca href=\"http:\/\/blackberry.com\/twitter"
+</code></pre>
+</blockquote>
+</li>
+</ul>
+<h2 id="preprocessed-tweet-files">Preprocessed tweet files</h2>
+<p>For a variety of reasons, the raw tweet files are not so convenient to work
+with. Therefore, <code>parse</code> parses them and saves them into a nicer form; that
+is, easy to parse, easy to apply parallel workflows to, and streamable. This
+nicer form is a directory containing two types of files:</p>
+<ul>
+<li>
+<p><code>tweets_YYYY-MM-DD.tsv</code>. For each day, where "day" is midnight to 11:59:59
+    PM Mountain Standard Time (because UTC gives inconvenient day boundaries for
+    looking at US data), we create one tab-separated-values (TSV) file
+    containing tweets in increasing ID order. There is no header line, no
+    quoting, and no within-record newlines (we strip tabs and newlines before
+    storing the tweets). The encoding is UTF-8. The files contain the following
+    possibly-empty fields, in this order:</p>
+<ul>
+<li><code>id</code>: Tweet ID from Twitter</li>
+<li><code>created_at</code>: When the tweet was created (UTC), in <a href="http://en.wikipedia.org/wiki/ISO_8601">ISO 8601 format</a></li>
+<li><code>day</code>: Day of tweet creation (MST), in ISO format</li>
+<li><code>hour</code>: Hour of tweet creation (MST)</li>
+<li><code>text</code>: Text of the tweet</li>
+<li><code>user_screen_name</code>: Who wrote the tweet</li>
+<li><code>user_description</code>: "Bio" field in user profile</li>
+<li><code>user_lang</code>: <a href="http://en.wikipedia.org/wiki/ISO_639-1">ISO 639-1</a> two-letter language code set by user</li>
+<li><code>user_location</code>: Text location field from user profile</li>
+<li><code>user_time_zone</code>: Time zone in profile, chosen from a set of options</li>
+<li><code>location_lon</code>: Longitude of <code>coordinates</code> geotag</li>
+<li><code>location_lat</code>: Latitude of geotag</li>
+</ul>
+<p>For more on what the fields mean, see the <a href="https://dev.twitter.com/docs/platform-objects">Twitter documentation</a> for
+tweets and users.</p>
+</li>
+<li>
+<p><code>metadata.pickle</code>: This single file is a pickled Python dictionary
+    containing metadata about the rest of the directory. It contains two items:</p>
+<ol>
+<li>
+<p><code>raw_files</code> is a <code>defaultdict</code> of JSON filenames that have been processed.
+    Keys are filenames, and values are dictionaries with the following fields:</p>
+<ul>
+<li><code>time_collected</code>: When collection for this file was completed (local
+    time!)</li>
+<li><code>time_preprocessed</code>: When pre-processing for this file was completed (UTC)</li>
+<li><code>second_ct</code>: Duration of collection for the file, in seconds</li>
+<li><code>object_ct</code>: Number of objects (tweets, deletion notices, etc.) in
+    the file</li>
+<li><code>tweet_ct</code>: Number of tweets in the file</li>
+<li><code>byte_ct_raw</code>: Number of bytes downloaded</li>
+<li><code>byte_ct_comp</code>: Number of bytes saved to disk after compression</li>
+</ul>
+<p>(Note: Some of these names are different, and hopefully better than, the
+same values in the <code>.stats</code> files.)</p>
+</li>
+<li>
+<p><code>day_files</code> is a <code>defaultdict</code> listing metadata for the daily files below.
+    Keys are filenames, and values are dictionaries with the following fields:</p>
+<ul>
+<li><code>count</code>: Number of tweets in the file</li>
+<li><code>count_geotag</code>: Number of geotagged tweets in the file</li>
+<li><code>count_deleted</code>: Number of tweets deleted from the file</li>
+<li><code>min_id</code>: Minimum tweet ID in the file</li>
+<li><code>max_id</code>: Maximum tweet ID in the file</li>
+</ul>
+<p>Note that <code>count</code> and <code>count_geotag</code> take into account deletions; that is,
+<code>count</code> + <code>count_deleted</code> = the number of tweets we originally downloaded.</p>
+</li>
+</ol>
+</li>
+</ul>
+<p>These preprocessed files contain no data that can't be regenerated. But
+rebuilding them is slow, on the order of 24 hours per month of data. (There is
+some opportunity for parallelizing this process.)</p>
+<p>Quirks:</p>
+<ul>
+<li>
+<p>To emphasize: The attributes <code>day</code> and <code>hour</code> are in MST, while <code>created_at</code>
+    is in UTC.</p>
+</li>
+<li>
+<p><code>time_collected</code> is the <em>local time</em> when the file was saved. (Oops!)</p>
+</li>
+<li>
+<p>Tweet IDs are 64-bit integers, so make sure later stages in your analysis
+    can handle this.</p>
+</li>
+<li>
+<p>When analyzing, use caution with the autovivifying behavior of the
+    <code>defaultdict</code>s.</p>
+</li>
+</ul>
+<p>Things to try in the future:</p>
+<ul>
+<li>Gzip the TSV files; some quick and dirty tests suggest that processing time
+    (with <code>gzip -1</code>) will roughly double and file sizes will roughly halve.</li>
+</ul>
+<p>Alternatives that were considered and rejected:</p>
+<ul>
+<li>
+<p>Postgres: We tried using Postgres, which is a very nice open source RDBMS that
+    has great spatial support (PostGIS), but it was just too slow. Also, it
+    requires setting up a server and doesn't lend itself to a distributed
+    approach.</p>
+</li>
+<li>
+<p>DBM-style databases (e.g., BerkeleyDB): We need key/tuple storage, not just
+    key/value (unless we want to do our own pickling of Python objects into
+    values, which seems lame).</p>
+</li>
+<li>
+<p>SQLite: Again, rather slow, and overkill since we need key/tuple storage.
+    Doesn't support streaming very well.</p>
+</li>
+<li>
+<p>ZODB: This is a Python-native object database (from the Zope project). I
+    implemented it as far as actually storing data, but the documentation is
+    poor (e.g., the ZODB Book recommends a technique for subtransactions that
+    doesn't work any more), the interface is a bit awkward, it produces several
+    files per database, and the databases are rather large (a subset of 8 fields
+    is nearly as large as the gzipped raw tweet files).</p>
+</li>
+<li>
+<p>NoSQL: There are lots of very hip NoSQL databases (e.g. CouchDB, MongoDB,
+    etc.). However, none seem to offer both an embedded option (i.e., no server
+    process) and key/tuple (document- or column-oriented?) rather than simply
+    key/value.</p>
+</li>
+</ul>
+<h2 id="geographic-stuff">Geographic stuff</h2>
+<ul>
+<li>
+<p>The geotag/token store is a SQLite database with SpatiaLite extensions,
+    created by the <code>geotags-extract</code> script. Geotags are stored as (and assumed
+    to have originated in) the WGS84 geodesic coordinate system (EPSG 4326).</p>
+<ul>
+<li>
+<p>The table <code>token</code> contains (token, geotag) pairs. A given pair can be
+    repeated.</p>
+</li>
+<li>
+<p>The table <code>tweet</code> contains complete tweets with geotags and timestamps.</p>
+</li>
+<li>
+<p>The table <code>metadata</code> contains key/value metadata related to the
+    construction of the database.</p>
+</li>
+</ul>
+<p>The column <code>field</code> specifies which part of the tweet the token came from.
+Possible values are: FIXME.</p>
+<p><strong>Warning:</strong> While SQLite has some rudimentary support for dates &amp; times, it
+does not support time zones in ISO 8601 strings. Therefore, take care to
+only store UTC in the database.</p>
+<p>You can use QGIS to poke around in the file.</p>
+</li>
+<li>
+<p>Geo-location models are stored as pickled Python objects. These are
+    generally not portable.</p>
+</li>
+</ul>
+<h1 id="faq">FAQ</h1>
+<ol>
+<li>
+<p><strong>My python script barfs with UnicodeDecodeError when printing tweets!</strong></p>
+<p>The output encoding must be UTF-8; sometimes, your terminal is capable, but
+Python fails to detect this (e.g., Mac OS X 10.4). In this case, you can set
+the <code>LANG</code> environment variable to <code>en_US.UTF-8</code>, or (as a last resort)
+<code>PYTHONIOENCODING</code> to <code>utf8</code>. If your terminal is incapable, you're just out
+of luck. Get a Mac?</p>
+</li>
+<li>
+<p><strong>Unicode works OK in the terminal, but Python barfs when redirecting
+    stdout.</strong></p>
+<p>I could not figure out how to make this work without changing the source
+code. Snippet:</p>
+<blockquote>
+<pre><code>import codecs
+utf8_stdout = codecs.getwriter("utf8")(sys.stdout)
+</code></pre>
+</blockquote>
+<p>Now <code>utf8_stdout</code> is a file-like object that can print UTF8 to stdout.</p>
+</li>
+<li>
+<p><strong>The collector fails to start with <code>--daemon</code> and there's no error
+    message.</strong></p>
+<p>During the daemonization procedure, there's an interval between when
+<code>stdout</code> and <code>stderr</code> are closed and the logging starts up. If something
+goes wrong during this period, the failure is silent (I'm not sure where the
+exception is being eaten -- the <code>python-daemon</code> library, or something else).</p>
+<p>To diagnose, pass the <code>--daemon-debug</code> switch, which prevents stdout and
+stderr from being closed. It also aborts the program after logging is set
+up, because running a daemon with <code>stdout</code> and <code>stderr</code> open can cause weird
+problems.</p>
+</li>
+<li>
+<p><strong>Why use a custom object-database mapper (ODM/ORM) instead of something
+    like SQLAlchemy?</strong></p>
+<p>Several reasons:</p>
+<ul>
+<li>Not-invented-here syndrome.</li>
+<li>We're interested in moving data into and out of the databases as quickly
+    as possible, and if we have our own ORM that's easier to optimize.</li>
+<li>We don't actually want a SQL database, but there's no embedded non-SQL
+    databases (that I could find). If we have our own mapper, then it can be
+    easily adapted should such a database arise.</li>
+</ul>
+</li>
+<li>
+<p><strong>How do I quickly see a tweet as it's "supposed" to look?</strong></p>
+<p>You can look at any tweet in your browser with the following URL:</p>
+<blockquote>
+<pre><code>https://twitter.com/#!/FOO/status/174159225168203778
+</code></pre>
+</blockquote>
+<p><em>FOO</em> is ostensibly the username of the user who created the tweet, but it
+doesn't seem to matter what you put there. Obviously, replace the ID with
+the one you're actually interested in.</p>
+<p>This seems to work sometimes and not work sometimes. I haven't figured out
+the pattern.</p>
+</li>
+</ol>
+<h1 id="bugs-and-limitations">Bugs and limitations</h1>
+<ul>
+<li>
+<p>This bug list is here in the README instead of a real bug tracker.</p>
+</li>
+<li>
+<p>Paths in the config files must be relative to the location of the config
+    file specified on the command line (specifically, absolute paths don't
+    work).</p>
+</li>
+<li>
+<p>Adventures with <code>joblib</code>:</p>
+<ul>
+<li>
+<p><code>Parallel</code> has a <code>verbose</code> argument that is underdocumented ("[I]f non
+    zero, progress messages are printed. Above 50, the output is sent to
+    stdout. The frequency of the messages increases with the verbosity level.
+    If it more than 10, all iterations are reported."). I even looked at the
+    code and can't figure it out. Anyway, some experimentation suggests 9
+    seems to be a reasonable value; the frequency of messages decays over time
+    at a decent rate.</p>
+</li>
+<li>
+<p><code>sqlite3.Row</code> objects interact badly with <code>joblib</code>. The symptoms are very
+    strange: functions run under 2 or more jobs that touch such an object
+    simply stop, with no obvious exception or other error (though segfaults do
+    appear in the system logs), and the job starts all its iterations but then
+    hangs. For now, because it seems more elegant to not pass those tuples
+    through <code>joblib</code>, I haven't removed <code>row_factory = sqlite3.Row</code> from
+    <code>db_glue.py</code>, but it's something to consider for the future. We don't
+    currently used named columns very much. (<code>sqlite3.Row</code> "<a href="https://pysqlite.readthedocs.org/en/latest/sqlite3.html#sqlite3.Row">tries to mimic a
+    tuple in most of its features</a>", but I guess it's not close enough.)</p>
+</li>
+<li>
+<p>Same deal with <code>PyICU</code>. Calling <code>tokenizers.ICU.tokenize()</code> hangs.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>Geo_GMM</code> objects can't be printed because of a <code>RuntimeError</code> arising from
+    (IMO) a design error. I filed a <a href="https://github.com/scikit-learn/scikit-learn/issues/1463">bug report</a>.</p>
+</li>
+<li>
+<p>There are several places where a <code>verbose</code> argument could be eliminated by
+    interrogating the logger instead (i.e., are we at <code>DEBUG</code> log level).</p>
+</li>
+</ul>
+<h1 id="code-from-cyclopath">Code from Cyclopath</h1>
+<p>This project contains code from Cyclopath, which is copyright (c) 2006-2012
+Regents of the University of Minnesota and open source under the Apache
+license. Grep for "Cyclopath" to find the relevant files.</p>
