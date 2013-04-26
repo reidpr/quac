@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+
+'''Parse the given metadata pickle file and print, TSV format, a summary of
+   each day's metadata on stdout. Column order matches the metadata field
+   documentation.'''
+
+import argparse
+import sys
+
+import pickle_glue
+import tsv_glue
+import u
+
+ap = argparse.ArgumentParser()
+ap.add_argument('file', metavar='METADATA_FILE')
+args = u.parse_args(ap)
+
+tsv = tsv_glue.Writer(fp=sys.stdout)  # FIXME: will puke if we send Unicode?
+
+for (day, md) in sorted(pickle_glue.File(args.file).data['days'].items()):
+   tsv.writerow([str(day),
+                 md['count'] or 0,
+                 md['count_geotag'],
+                 md['min_id'],
+                 md['max_id']])

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Find the right gnuplot script for the given .pdf and run it on the data
+# presented on stdin. (I couldn't figure out how to make Make do this.)
+
+gpscript=`dirname $0`/`echo $1 | sed -r 's/^(.*\/)?(.+)(\.pdf)$/\2/'`
+gnuplot $gpscript > $1
+pdfcrop $1 $1

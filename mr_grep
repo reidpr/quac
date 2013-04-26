@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+
+'''
+Search TSV tweets stored in DDFS for a regular expression. Results are stored
+in DDFS, under tags ending in :summary (the number of hits per day) and
+:matches (the actual matching tweets). The script will tell you which specific
+tags were used. Output data are not chunked.'''
+
+help_epilogue = '''
+Note: If you want to restrict the search to whole-word matches, you must
+include that in your pattern. For example, "foo" will match "foo" and
+"foobar", but "\\bfoo\\b" will match only "foo".'''
+
+import argparse
+
+import mr_base
+import mr_grep
+import u
+
+ap = argparse.ArgumentParser(description=__doc__, epilog=help_epilogue,
+                             formatter_class=argparse.RawTextHelpFormatter)
+#ap._optionals.title = 'arguments'  # see http://bugs.python.org/issue9694
+ap.add_argument('--verbose',
+                action='store_true',
+                help='be more verbose, wait until job finishes before exiting')
+ap.add_argument('regex',
+                metavar='PATTERN',
+                help='regular expression to search for')
+ap.add_argument('input',
+                metavar='TAG',
+                help='tag containing TSV tweets to search')
+
+args = u.parse_args(ap)
+l = u.logging_init('mgrep')
+mr_base.run(mr_grep.Job, args)

@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+
+'Compute time series for each token that appears in the input tweets.'
+
+help_epilogue = '''
+Output is placed in DDFS under the given tag. Each output blob is a binary
+file containing a sequence of pickled objects. The first object is a metadata
+dictionary:
+
+  { 'args': <command line arguments of this script (argparse.Namespace)>,
+    'tokens': { <token>: { 'count': <total number of token appearances>,
+                           'first_day': <first day of series (datetime)> }
+                ... } }
+
+Subsequent objects are (token, numpy array time series) tuples.
+
+Notes:
+
+  1. --partitions also affects the number of output shards and thus the
+     available parallelism for downstream mappers.
+
+  2. args.min_instances combined with the total number of token appearances
+     will tell you if the token's time series is present.
+
+  3. This script is unaware of and does nothing for days without valid data.'''
+
+import argparse
+
+import mr_base
+import mr_ts_compute
+import u
+
+ap = argparse.ArgumentParser(description=__doc__, epilog=help_epilogue,
+                             formatter_class=argparse.RawTextHelpFormatter)
+ap.add_argument('--limit',
+                metavar='N',
+                type=int,
+                help='read N tweets from each input blob and then stop')
+ap.add_argument('--min-instances',
+                metavar='N',
+                type=int,
+                default=100,
+                help="token must appear N times to be included (default 100)")
+ap.add_argument('--ngram',
+                metavar='N',
+                type=int,
+                default=2,
+                help='use N-grams (default N=2, i.e. bigrams)')
+ap.add_argument('--partitions',
+                metavar='N',
+                type=int,
+                default=1,
+                help='use N reduce partitions')
+ap.add_argument('--tokenizer',
+                metavar='T',
+                default='tok.unicode_props.UP_Tiny',
+                help='tokenizer class to use')
+ap.add_argument('--verbose',
+                action='store_true',
+                help='be more verbose, wait until job finishes before exiting')
+ap.add_argument('input',
+                metavar='IN_TAG',
+                help='tag containing TSV tweets to process')
+ap.add_argument('output',
+                metavar='OUT_TAG',
+                help='tag to use for output')
+
+args = u.parse_args(ap)
+l = u.logging_init('tscmp')
+mr_base.run(mr_ts_compute.Job, args)

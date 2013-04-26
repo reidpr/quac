@@ -1,0 +1,101 @@
+#!/usr/bin/env python
+
+'Given a set of .all.tsv and corresponding .geo.tsv, update a metadata file.'
+
+import argparse
+import datetime
+import re
+import subprocess
+
+import pickle_glue
+import testable
+import time_
+import u
+l = u.l
+
+
+### Setup ###
+
+ap = argparse.ArgumentParser(description=__doc__)
+ap.add_argument('--unittest',
+                nargs=0,
+                action=testable.Raise_Unittest_Exception,
+                help='run unit tests instead of real stuff')
+ap.add_argument('--verbose',
+                action='store_true',
+                help='be more verbose with log output')
+ap.add_argument('outfile',
+                metavar='OUTFILE',
+                help='.stats for raw tweet file to parse')
+ap.add_argument('tsv_files',
+                metavar='TSV',
+                nargs='+',
+                help='.tsv files to add to metadata')
+
+### Main ###
+
+def main():
+   global l
+   l = u.logging_init('mdata', file_=args.outfile + '.log', truncate=True)
+   l.info('starting')
+   mdp = metadata_pkl_open(args.outfile)
+   for filename in args.tsv_files:
+      tsv_process(filename, mdp.data['days'])
+   l.debug('writing %s' % (args.outfile))
+   mdp.commit()
+   l.info('done')
+
+
+### Support functions and classes ###
+
+def tsv_process(tsv_name, md):
+   '''Compute and save metadata for the given .all.tsv and its companion
+      .geo.tsv.'''
+   date = date_parse(tsv_name)
+   metadata_init(md, date)
+   def int_cmd(c, fname):
+      return int(subprocess.check_output(c % (fname), shell=True))
+   if (re.search(r'\.geo\.tsv$', tsv_name)):
+      l.info('reading %s (geo)' % (tsv_name))
+      md[date]['count_geotag'] = int_cmd("wc -l %s | cut -d' ' -f1", tsv_name)
+   elif (re.search(r'\.all\.tsv$', tsv_name)):
+      l.info('reading %s (all)' % (tsv_name))
+      md[date]['count'] = int_cmd("wc -l %s | cut -d' ' -f1", tsv_name)
+      md[date]['min_id'] = int_cmd('head -1 %s | cut -f1', tsv_name)
+      md[date]['max_id'] = int_cmd('tail -1 %s | cut -f1', tsv_name)
+   else:
+      u.abort('unknown file type: %s' % (tsv_name))
+
+def date_parse(fname):
+   '''e.g.:
+
+      >>> date_parse('pre/2012-10-01.all.tsv')
+      datetime.date(2012, 10, 1)
+      '''
+   p = r'.*(\d{4})-(\d\d)-(\d\d)'
+   return datetime.date(*map(int, re.search(p, fname).groups()))
+
+def metadata_pkl_open(filename):
+   '''Read in the pickle file filename and return the data structure within,
+      if the file exists. Otherwise, return an empty dictionary.'''
+   return pickle_glue.File(filename, writable=True, default={ 'days': {} })
+
+def metadata_init(md, date):
+   'Initialize metadata for all dates from the given date to present.'
+   for dt in time_.dateseq(date, datetime.datetime.utcnow()):
+      md.setdefault(dt.date(), { 'count': None,
+                                 'count_geotag': None,
+                                 'min_id': None,
+                                 'max_id': None })
+
+
+### Bootstrap ###
+
+try:
+   args = u.parse_args(ap)
+   u.configure(None)
+
+   if (__name__ == '__main__'):
+      main()
+except testable.Unittests_Only_Exception:
+   testable.register('')

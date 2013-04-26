@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Grep the text fields of preprocessed tweets. If -v is given, print the
+# content of matching fields; if not, just a count of hits per day.
+
+# Regex should be an extended regular expression (i.e., egrep). If you want to
+# restrict to word boundaries, you must specify explicitly (e.g. '\bfoo\b').
+
+# Note: This operation is entirely disk-bound. We assume a serial filesystem
+# and do not parallelize. The search takes approximately 10 seconds per day.
+
+while getopts "v" opt; do
+    case $opt in
+        v)
+            verbose=1
+            ;;
+        \?)
+            exit 1
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+cd $1/pre
+
+for i in *.all.tsv; do
+    date=$(echo $i | sed -r 's/\.all\.tsv$//')
+    if [ $verbose ]; then
+        grepextra=
+    else
+        echo -n $date '	'  # that's a tab
+        grepextra=-c
+    fi
+    cut -f3 $i | grep -i $grepextra $2
+done

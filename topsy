@@ -1,0 +1,141 @@
+#!/usr/bin/env python
+
+# Search Topsy for the given query strings; then, create a graph comparing the
+# number of mentions over time of the queries.
+#
+# FIXME/TODO:
+#
+# * Implement methods other than "searchhistogram"?
+#
+# * Smarter/better time parsing; see perhaps:
+#   http://stackoverflow.com/questions/9775743/how-can-i-parse-free-text-time-intervals-in-python-ranging-from-years-to-seconds
+#
+# * Cache results to be thrifty with Topsy quota
+#
+# * Results start from "now" backwards. The precise definition of "now" is
+#   unclear.
+#
+# * Should use center of bins, not beginning.
+
+from __future__ import division
+
+import argparse
+import csv
+import datetime
+import sys
+import json
+
+import numpy as np
+import matplotlib
+matplotlib.use("ps")
+import matplotlib.dates
+import matplotlib.pyplot as plt
+
+import u
+
+
+### Setup ###
+
+ap = argparse.ArgumentParser(
+   description="Query the Topsy API.",
+   epilog="Time intervals can be days, hours, minutes, or seconds.")
+ap.add_argument("--config",
+                required=True,
+                help="location of config file",
+                metavar="FILE")
+ap.add_argument("--output",
+                metavar="FILE",
+                required=True,
+                help="base name of output files")
+ap.add_argument("--period",
+                metavar="N",
+                default="1095 days",
+                help="total length of analysis period (default %(default)s)")
+ap.add_argument("--slice",
+                metavar="N",
+                default="7 days",
+                help="length of each histogram bin (default %(default)s)")
+ap.add_argument("query",
+                metavar="QUERY",
+                nargs="+",
+                help="query string for Topsy")
+args = u.parse_args(ap)
+
+g_slice = u.interval_parse(args.slice)
+g_slice_ct = int(u.interval_parse(args.period).total_seconds()
+                 // g_slice.total_seconds())
+g_now = datetime.datetime.utcnow()
+
+c = u.configure(args.config)
+l = u.logging_init("twtop")
+
+import otter  # it's in a funny place
+
+
+### Program ###
+
+def main():
+   l.info("starting")
+   results = [Histogram(q) for q in args.query]
+   #plot(results)
+   csv_dump(results)
+   l.info("done")
+
+def csv_dump(results):
+   w = csv.writer(open("%s.csv" % (args.output), "w"))
+   w.writerow(["time_utc"] + [h.query for h in results])
+   # FIXME: assumes bins are all the same
+   w.writerows(zip([t.strftime("%Y-%m-%d_%H:%M:%S") for t in results[0].bins],
+                   *[h.histogram for h in results]))
+
+def plot(results):
+   plt.figure(figsize=(8,6))
+   for r in results:
+      (query, hist) = r
+      l.debug("plotting %s" % (query))
+      # FIXME: The alignment of the bins is a guess. We are trying to mark the
+      # begin time of each bin.
+      plt.plot_date([matplotlib.dates.date2num(g_now + i*g_slice)
+                           for i in xrange(-len(hist), 0)],
+                    hist,
+                    fmt="-",
+                    label=query)
+   plt.tick_params(labelsize=6)
+   plt.xlabel("Date")
+   plt.ylabel("Mentions")
+   plt.legend(prop={"size":8})
+   plt.savefig("%s.eps" % (args.output), bbox_inches="tight")
+   plt.close()
+
+def searchhistogram(query):
+   kw = { "apikey":        c.get("tops", "apikey"),
+          "q":             query,
+          "count_method":  c.get("tops", "count_method"),
+          "period":        g_slice_ct,
+          "slice":         g_slice.total_seconds() }
+
+   # don't log apikey
+   for (k, v) in [i for i in kw.iteritems() if i[0] != "apikey"]:
+      l.debug("%s: %s" % (k, v))
+
+   r = otter.Resource('searchhistogram', **kw)
+   l.info("calling Topsy API")
+   r()  # REST API call
+   h = r.response.o['histogram']
+   h.reverse()
+   return h
+
+
+class Histogram(object):
+
+   __slots__ = ('query', 'histogram', 'bins')
+
+   def __init__(self, query):
+      self.query = query
+      self.histogram = searchhistogram(query)
+      self.bins = [(g_now + i*g_slice)
+                   for i in xrange(-len(self.histogram), 0)]
+
+
+if (__name__ == "__main__"):
+   main()

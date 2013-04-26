@@ -1,0 +1,149 @@
+#!/usr/bin/env python
+
+'Convert .json.gz into one or more .raw.tsv and a .d (see the docs).'
+
+help_epilogue = '''
+This script takes a .stats parameter rather than a .json.gz. This is because
+the latter can sometimes be broken (in particular, if it is in the midst of
+being written by collect). The reasoning is that the relatively small number
+of tweets that could be recovered by working with the questionable .json.gz
+does not outweigh the complexity of doing so (e.g., we don't need to warn if
+the file is broken because it's in progress, but we probably should if it's
+just broken). We don't actually do anything with the content of the .stats
+file, though.
+
+Memory usage is O(1), as we stream the parsing rather than loading everything
+at once.'''
+
+import argparse
+import gzip
+import sys
+import time
+
+import testable
+import tsv_glue
+import tweet
+import u
+c = u.c
+l = u.l
+
+
+### Constants ###
+
+TWEET_FILE_EXTENSION = '.json.gz'
+STATS_FILE_EXTENSION = '.stats'
+DEP_FILE_EXTENSION = '.json.d'
+
+
+### Setup ###
+
+ap = argparse.ArgumentParser(description=__doc__,
+                             epilog=help_epilogue,
+                             formatter_class=argparse.RawTextHelpFormatter)
+ap.add_argument('--limit',
+                type=int,
+                help='stop after parsing N objects',
+                metavar='N')
+ap.add_argument('--unittest',
+                nargs=0,
+                action=testable.Raise_Unittest_Exception,
+                help='run unit tests instead of real stuff')
+ap.add_argument('--verbose',
+                action='store_true',
+                help='be more verbose with log output')
+ap.add_argument('file',
+                metavar='FILE',
+                help='.stats for raw tweet file to parse')
+
+### Main ###
+
+def main():
+   # init
+   t_start = time.time()
+   try:
+      filename_stats = args.file
+      filename_base = u.without_ext(filename_stats, STATS_FILE_EXTENSION)
+      filename_json = filename_base + TWEET_FILE_EXTENSION
+      filename_deps = filename_base + DEP_FILE_EXTENSION
+   except ValueError, x:
+      u.abort('bad .stats file: %s' % (x))
+   global l
+   l = u.logging_init('parse', file_=filename_base + '.log', truncate=True,
+                      stdout_force=True)
+   l.info('starting')
+   try:
+      json_fp = gzip.open(filename_json)
+   except IOError, x:
+      u.abort("can't open raw tweet file: %s" % (x))
+   out_tsvs = TSV_Dict(filename_base)
+   l.info('opened %s' % (filename_json))
+   # loop over raw tweets
+   line_no = 0
+   object_ct = 0
+   tweet_ct = 0
+   parse_failure_ct = 0
+   for line in json_fp:
+      line_no += 1
+      if (args.limit is not None and line_no > args.limit):
+         l.info('stopping after %d objects per --limit' % (args.limit))
+         break
+      try:
+         po = tweet.from_json(line)
+      except tweet.Nothing_To_Parse_Error, x:
+         # blank line, silently skip
+         continue
+      except ValueError, x:
+         # some other parse error, warn and abort if too many
+         l.info('parsing failed on line %d, skipping: %s' % (line_no, x))
+         parse_failure_ct += 1
+         if (parse_failure_ct > c.getint('pars', 'parse_failure_max')):
+            u.abort('too many parse failures, aborting')
+         continue
+      object_ct += 1
+      if (isinstance(po, tweet.Tweet)):
+         tweet_ct += 1
+         out_tsvs[po.day].writerow(po)
+      else:
+         pass  # FIXME: do something with the other types of objects?
+   # write dependencies
+   dep_fp = open(filename_deps, 'w')
+   for date in out_tsvs:
+      rawtsv = '%s.%s.raw.tsv' % (filename_base, date)
+      alltsv = 'pre/%s.all.tsv' % (date)
+      geotsv = 'pre/%s.geo.tsv' % (date)
+      print >>dep_fp, '%s : %s' % (rawtsv, filename_stats)
+      #print >>dep_fp, '.INTERMEDIATE : %s' % (rawtsv)
+      print >>dep_fp, '%s : %s %s' % (alltsv, rawtsv, filename_deps)
+      print >>dep_fp, 'pre/metadata: %s %s' % (alltsv, geotsv)
+   # done
+   elapsed = time.time() - t_start
+   l.info('done: %d objects in %s (%s/second); %d tweets; %d parse failures'
+          % (object_ct, u.fmt_seconds(elapsed),
+             u.fmt_si(object_ct / elapsed), tweet_ct, parse_failure_ct))
+
+
+### Support functions and classes ###
+
+class TSV_Dict(tsv_glue.Dict):
+   '''Lazy-loading TSV output dict that deals in date strings and has some of
+      the defaults different.'''
+
+   def __init__(self, *args, **kwargs):
+      kwargs.setdefault('clobber', True)
+      kwargs.setdefault('class_', tweet.Writer)
+      tsv_glue.Dict.__init__(self, *args, **kwargs)
+
+   def filename_from_key(self, key):
+      return tsv_glue.Dict.filename_from_key(self, '.%s.raw' % (key))
+
+
+### Bootstrap ###
+
+try:
+   args = u.parse_args(ap)
+   u.configure(None)
+
+   if (__name__ == '__main__'):
+      main()
+except testable.Unittests_Only_Exception:
+   testable.register('')
