@@ -10,6 +10,7 @@ foo.geo.tsv, it emits:
 import argparse
 
 import testable
+import tweet
 import u
 l = u.l
 
@@ -35,6 +36,10 @@ ap.add_argument('input',
 
 def main():
    l.info('starting')
+   tweets = list(tweet.Reader(args.input))
+   l.info('loaded %d tweets' % (len(tweets)))
+   #dump_geojson(tweets)
+   #dump_geotiff(make_heatmap(tweets))
    l.info('done')
 
                 
