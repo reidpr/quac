@@ -110,3 +110,68 @@ Note: As of 1/2/2013, the ``qgis-plugin-grass`` package is not installable on
 Debian Wheezy because it depends on ``grass641``, which is not available any
 more (``grass642`` is). The workaround is to build the ``.deb`` from source as
 explained in this bug report: http://hub.qgis.org/issues/6438
+
+Installing on Mac OS
+====================
+
+Running QUAC on a Mac involves `brew` and `pip`. On 10.7, the following is enough to make most of the tests pass (except for ICU & Disco stuff and modulo bugs). See also bugs tagged `mac`.
+
+Note that many of these items are automatically installed dependencies.
+
+Brew
+----
+
+::
+
+    $ brew list | cat
+    emacs
+    freexl
+    gdal
+    gdbm
+    geos
+    gfortran
+    giflib
+    git
+    gmp
+    jpeg
+    libgeotiff
+    libmpc
+    libspatialite
+    libtiff
+    lzlib
+    mercurial
+    mpfr
+    pkg-config
+    proj
+    python
+    readline
+    sqlite
+    wget
+
+pip
+---
+
+::
+
+    $ pip list
+    distribute (0.6.36)
+    Django (1.5.1)
+    docutils (0.10)
+    git-remote-helpers (0.1.0)
+    isodate (0.4.9)
+    Jinja2 (2.6)
+    joblib (0.7.0d)
+    matplotlib (1.2.1)
+    numpy (1.7.1)
+    Pygments (1.6)
+    pyproj (1.9.3)
+    pysqlite (2.6.3)
+    python-dateutil (2.1)
+    pytz (2013b)
+    scikit-learn (0.13.1)
+    scipy (0.12.0)
+    six (1.3.0)
+    Sphinx (1.2b1)
+    vboxapi (1.0)
+    wsgiref (0.1.2)
+
