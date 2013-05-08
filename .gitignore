@@ -2,3 +2,7 @@
 *.log
 
 sphinx/_build
+
+# Prevent checking in TinySegmenter when it's been installed quick-and-dirty
+# instead of right.
+tinysegmenter.py
