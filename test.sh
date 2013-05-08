@@ -53,7 +53,7 @@ while getopts "il" opt; do
             ;;
         l)
             echo '+ lenient mode'
-            import_skip='import'
+            import_skip='^(import|from [^.])'
             ;;
         \?)
             exit 1
@@ -79,16 +79,16 @@ fi
 
 for mraw in $modules; do
     m=`echo $mraw |  sed $sedopt 's/^(\.\/)?(.*)\.py$/\2/g' | sed $sedopt 's/\//./g'`
-    echo -n "+ $m"
+    echo -n "+ $m... "
     if [ $interactive ]; then
         echo
         python -c "import $m ; $m.test_interactive()"
     else
-        if ( fgrep $import_skip $mraw | python >& /dev/null ); then
+        # Python will give an ImportError message in case of import skips
+        # FIXME: This doesn't test "from . import foo" correctly.
+        if ( egrep "$import_skip" $mraw | python $testimports 2> >(tail -n1) ); then
             echo
             python -m $m
-        else
-            echo ' skipped: missing module(s)'
         fi
     fi
 done
