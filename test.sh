@@ -24,22 +24,36 @@
 #     harness. This is good for drawing pictures and whatnot that need human
 #     interpretation to determine correctness.
 #
-#   * If an import line contains the string testable.SKIP_IF_NOT_FOUND, then
-#     this script will try that import; if it fails, the module will not be
-#     tested. (This does not apply for interactive tests.)
+#   * The script does not test modules that have import problems:
+#
+#     * If -l (lenient mode) is specified, any modules that have imports which
+#       fail are skipped.
+#
+#     * Otherwise, only imports explicitly marked with
+#       "testable.SKIP_IF_NOT_FOUND" (in a comment) are skipped.
+#
+#     * There is no skipping for interactive tests.
 #
 # BUGS:
 #
 #   * Fails on filenames with spaces or other funny characters.
+#
+#   * Does not say which modules couldn't be imported.
 
 set -e
 #set -x
 
-while getopts "i" opt; do
+import_skip='testable.SKIP_IF_NOT_FOUND'
+
+while getopts "il" opt; do
     case $opt in
         i)
             echo '+ interactive mode'
             interactive=1
+            ;;
+        l)
+            echo '+ lenient mode'
+            import_skip='import'
             ;;
         \?)
             exit 1
@@ -70,7 +84,7 @@ for mraw in $modules; do
         echo
         python -c "import $m ; $m.test_interactive()"
     else
-        if ( fgrep 'testable.SKIP_IF_NOT_FOUND' $mraw | python >& /dev/null ); then
+        if ( fgrep $import_skip $mraw | python >& /dev/null ); then
             echo
             python -m $m
         else
