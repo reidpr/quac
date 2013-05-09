@@ -80,8 +80,8 @@ class GeoTIFF(object):
    
    @data.setter
    def data(self, value):
-      if (len(value.shape) != 2):
-         raise ValueError('data dimensions must be 2, not %d' % (len(value.shape)))
+      if (value.ndim != 2):
+         raise ValueError('data dimensions must be 2, not %d' % (value.ndim))1
    
    def height_for_square(self, width):
       '''Return the height which gives square pixels for width. (Note that
