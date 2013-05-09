@@ -188,6 +188,8 @@ LATMAX = 89.99
 LATMIN = -LATMAX
 LONMAX = 180
 LONMIN = -LONMAX
+NWMAX = geos.Point(LONMIN, LATMAX, srid=SRID_WGS84)
+SEMAX = geos.Point(LONMAX, LATMIN, srid=SRID_WGS84)
 LON_BUFFER = 12
 
 @u.memoize
@@ -285,6 +287,30 @@ def dump_geojson(basename, geoms):
       assert (isinstance(json_, unicode))
       fp = io.open(basename + '.geojson', mode='wt', encoding='utf8')
       fp.write(json_)
+
+### Miscellaneous ###
+
+def is_northwest(nw, se):
+   '''Return True if Point nw is strictly northwest of se, False otherwise.
+      For example:
+
+      >>> nw = NWMAX
+      >>> ne = geos.Point(LATMAX, LONMAX, srid=SRID_WGS84)
+      >>> se = SEMAX
+      >>> is_northwest(nw, se)
+      True
+      >>> is_northwest(se, nw)
+      False
+      >>> is_northwest(nw, nw)
+      False
+      >>> is_northwest(nw, ne)
+      False'''
+   # verify that nw is northwest of se
+   nw84 = transform(nw, SRID_WGS84)
+   se84 = transform(se, SRID_WGS84)
+   #       longitude           latitude
+   return (nw84.x < se84.x and nw84.y > se84.y)
+
 
 
 ### Tests ###
