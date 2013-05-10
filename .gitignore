@@ -1,3 +1,92 @@
+# Gitignore policy: Each repository has a more or less comprehensive
+# .gitignore; developers shouldn't need any global gitignore.
+#
+# This file uses relevant shippets from <https://github.com/github/gitignore>.
+# Leave these unmodified. Custom stuff and overrides go at the end.
+
+
+### Global/Emacs.gitignore (0aeefb48c0) ###
+
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+.elc
+auto-save-list
+tramp
+.\#*
+
+# Org-mode
+.org-id-locations
+*_archive
+
+
+### Global/OSX.gitignore (0aeefb48c0) ###
+
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+
+### Global/vim.gitignore (0aeefb48c0) ###
+
+.*.s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~
+
+
+### Python.gitignore (0aeefb48c0) ###
+
+*.py[cod]
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+__pycache__
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+
+### Custom ###
+
 *.cfg
 *.log
 
