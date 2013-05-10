@@ -2,7 +2,7 @@
 # .gitignore; developers shouldn't need any global gitignore.
 #
 # This file uses relevant shippets from <https://github.com/github/gitignore>.
-# Leave these unmodified. Custom stuff and overrides goes at the end.
+# Leave these unmodified. Custom stuff and overrides go at the end.
 
 
 ### Global/Emacs.gitignore (0aeefb48c0) ###
@@ -83,9 +83,6 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
-
-
-### ###
 
 
 ### Custom ###
