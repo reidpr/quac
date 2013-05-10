@@ -12,6 +12,7 @@ from __future__ import division
 import argparse
 
 import numpy as np
+import osgeo.gdal as ogdal
 
 from geo import srs
 import testable
@@ -44,7 +45,7 @@ def main():
    l.info('starting')
    tweets = list(tweet.Reader(args.input))
    l.info('loaded %d tweets' % (len(tweets)))
-   #dump_geojson(tweets)
+   #dump_geojson(tweets)  # FIXME
    #dump_geotiff(make_heatmap(tweets))
    l.info('done')
 
@@ -54,12 +55,13 @@ def main():
 class GeoTIFF(object):
    '''Create a GeoTIFF file from a NumPy array and write it to disk. E.g.:
 
-      >>> import tempfile
-      >>> d = np.array([[1, 0.5, 0.5], [0.5, 0.5, 0.25]])
+      >>> import os.path, tempfile
+      >>> d = np.array([[1, 0, 0], [0, 0, 0.5]])
       >>> f = GeoTIFF(srs.NWMAX, srs.SEMAX, d)
-      >>> fn = tempfile.mktemp()  # insecure
-      >>> f.write(fn + '.tif')
-      >>> os.getsize(fn) == 1234
+      >>> fn = tempfile.mktemp() + '.tif'  # insecure
+      >>> f.write(fn)
+      >>> os.path.getsize(fn) == 671
+      True
 
       Note that the above doesn't verify that the GeoTIFF is actually correct.
       What you should see (and the above leaves the temp file laying around) is
@@ -82,6 +84,7 @@ class GeoTIFF(object):
          raise ValueError('corner %s must be northwest of %s' % (nw, se))
       self.nw = nw
       self.se = se
+      self._data = None
       if (data is not None):
          self.data = data
 
@@ -91,8 +94,10 @@ class GeoTIFF(object):
 
    @data.setter
    def data(self, value):
-      if (value.ndim != 2):
-         raise ValueError('data dimensions must be 2, not %d' % (value.ndim))1
+      if (not (isinstance(value, np.ndarray) and value.ndim == 2)):
+         raise ValueError('data must be 2-dimensional NumPy array')
+      self._data = value
+      (self.height_px, self.width_px) = value.shape
 
    def height_for_square(self, width):
       '''Return the height which gives square pixels for width. (Note that
@@ -100,20 +105,23 @@ class GeoTIFF(object):
          display.)'''
       assert False, 'unimplemented'
 
-   def write(self, filename, type='Float32', jpeg=False):
+   def write(self, filename, type_='Float32', jpeg=False):
       'Write a GeoTIFF to filename with data type type.'
       assert (not jpeg), 'unimplemented'
       if (jpeg):
          assert False, 'unimplemented'
-         if (type != 'Byte'):
-            raise ValueError('jpeg requires Byte type, not %s' % (type))
+         if (type_ != 'Byte'):
+            raise ValueError('jpeg requires Byte type, not %s' % (type_))
          options = ['COMPRESS=JPEG', 'JPEG_QUALITY=95']
       else:
          options = ['COMPRESS=DEFLATE', 'PREDICTOR=2']
+      # Consistency check
+      if (self.data is None):
+         raise ValueError("can't call write() until data is set")
       # Set up GDAL driver
       driver = ogdal.GetDriverByName('GTiff')
-      out = driver.create(filename, data.shape[0], data.shape[1],
-                          1, getattr(ogdal, 'GDT_' + type), options)
+      out = driver.Create(filename, self.width_px, self.height_px,
+                          1, getattr(ogdal, 'GDT_' + type_), options)
       # Affine transform from image space to projected space. I don't quite
       # understand what is going on here; the resulting image has upper left
       # and lower left corners reversed according to gdalinfo (and same for
@@ -121,11 +129,17 @@ class GeoTIFF(object):
       # ymax and invert the pixel size (making it negative), which gives
       # corners that seem right but then the image is upside down.
       # http://gdal.org/classGDALDataset.html#af9593cc241e7d140f5f3c4798a43a668
-      out.SetGeoTransform([xmin, (xmax - xmin) / width_px, 0,
-                           ymin, 0, (ymax - ymin) / height_px])
-      out.SetProjection(srs.wkt(nw.srid))
+      xmin = self.nw.x
+      xmax = self.se.x
+      ymin = self.nw.y
+      ymax = self.se.y
+      out.SetGeoTransform([xmin, (xmax - xmin) / self.width_px, 0,
+                           ymin, 0, (ymax - ymin) / self.height_px])
+      # Cast to str because wkt is a unicode object, which breaks GDAL with
+      # an impressively confusing TypeError.
+      out.SetProjection(str(srs.SRS[self.nw.srid].wkt))
       # Write the main data.
-      out.GetRasterBand(1).WriteArray(probs)
+      out.GetRasterBand(1).WriteArray(self.data)
       # In order to correctly display in QGIS, you need to compute the exact
       # statistics. A bug prevents QGIS from doing this
       # http://hub.qgis.org/issues/6496(), and also if use this call, then

@@ -577,7 +577,7 @@ class Geo_GMM(base.Location_Estimate, sklearn.mixture.GMM):
       #
       #   https://gist.github.com/205115
       #   http://www.gdal.org/gdal_tutorial.html
-      #   http://trac.osgeo.org/gdal/wiki/PythonGotcha
+      #   http://trac.osgeo.org/gdal/wiki/PythonGotchas
       #   http://www.gdal.org/frmt_gtiff.html
 
       # Find the bounds and image dimensions in this estimate's SRS, aiming
