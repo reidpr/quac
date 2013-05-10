@@ -19,6 +19,7 @@ import tweet
 import u
 l = u.l
 
+
 ap = argparse.ArgumentParser(description=__doc__,
                              formatter_class=argparse.RawTextHelpFormatter)
 ap.add_argument('--tiff-width',
@@ -37,32 +38,42 @@ ap.add_argument('input',
                 help='TSV file containing geocoded tweets')
 
 
-### Classes ###
+### Main ###
 
+def main():
+   l.info('starting')
+   tweets = list(tweet.Reader(args.input))
+   l.info('loaded %d tweets' % (len(tweets)))
+   #dump_geojson(tweets)
+   #dump_geotiff(make_heatmap(tweets))
+   l.info('done')
+
+
+### Classes ###
 
 class GeoTIFF(object):
    '''Create a GeoTIFF file from a NumPy array and write it to disk. E.g.:
-   
+
       >>> import tempfile
       >>> d = np.array([[1, 0.5, 0.5], [0.5, 0.5, 0.25]])
       >>> f = GeoTIFF(srs.NWMAX, srs.SEMAX, d)
       >>> fn = tempfile.mktemp()  # insecure
       >>> f.write(fn + '.tif')
       >>> os.getsize(fn) == 1234
-      
+
       Note that the above doesn't verify that the GeoTIFF is actually correct.
       What you should see (and the above leaves the temp file laying around) is
       a six-pixel image across the whole map with the northwest pixel darker
       and the southeast pixel lighter. The pixels will not be square.'''
    pass
-   
+
    def __init__(self, nw, se, data=None):
       '''Parameters:
-      
+
            nw ..... Northwest corner of geodata (geopoint)
            se ..... Southwest corner (geopoint)
            data ... Grid to write (2-D NumPy array) (optional)
-         
+
          nw and se must have a valid (and the same) SRS.'''
       if (nw.srid is None or nw.srid != se.srid):
          raise ValueError('one or more invalid SRS: (%s, %s)'
@@ -73,21 +84,22 @@ class GeoTIFF(object):
       self.se = se
       if (data is not None):
          self.data = data
-   
+
    @property
    def data(self):
       return self._data
-   
+
    @data.setter
    def data(self, value):
       if (value.ndim != 2):
          raise ValueError('data dimensions must be 2, not %d' % (value.ndim))1
-   
+
    def height_for_square(self, width):
       '''Return the height which gives square pixels for width. (Note that
-         squareness only holds if the image is not reprojected before display.)'''
+         squareness only holds if the image is not reprojected before
+         display.)'''
       assert False, 'unimplemented'
-   
+
    def write(self, filename, type='Float32', jpeg=False):
       'Write a GeoTIFF to filename with data type type.'
       assert (not jpeg), 'unimplemented'
@@ -120,24 +132,13 @@ class GeoTIFF(object):
       # it's embedded in the file and no auxiliary .xml file is created.
       out.GetRasterBand(1).GetStatistics(0,1)
 
-                
-### Main ###
 
-def main():
-   l.info('starting')
-   tweets = list(tweet.Reader(args.input))
-   l.info('loaded %d tweets' % (len(tweets)))
-   #dump_geojson(tweets)
-   #dump_geotiff(make_heatmap(tweets))
-   l.info('done')
-
-                
 ### Bootstrap ###
 
 try:
    args = u.parse_args(ap)
    u.logging_init('goviz')
-   
+
    if (__name__ == '__main__'):
         main()
 except testable.Unittests_Only_Exception:
