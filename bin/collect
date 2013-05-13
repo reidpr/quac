@@ -67,6 +67,7 @@ import time
 import daemon
 import tweetstream as ts  # need my hacked version of tweetstream
 
+import quacpath
 import u
 
 

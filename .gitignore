@@ -91,3 +91,5 @@ nosetests.xml
 *.log
 
 sphinx/_build
+
+!bin

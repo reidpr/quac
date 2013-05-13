@@ -20,6 +20,7 @@ import gzip
 import sys
 import time
 
+import quacpath
 import testable
 import tsv_glue
 import tweet

@@ -3,4 +3,6 @@
 import pstats
 import sys
 
+import quacpath
+
 pstats.Stats(sys.argv[1]).sort_stats('cumulative').print_stats(40)

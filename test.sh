@@ -17,7 +17,8 @@
 #
 #   * If you pass the filename of a module, it will be tested.
 #
-#   * Otherwise, this script will find all candidate modules and test them.
+#   * Otherwise, this script will find all candidate modules under lib/ and
+#     test them.
 #
 #   * If you pass -i as the first argument, then the function
 #     test_interactive() will be called instead of the non-interactive test
@@ -37,22 +38,22 @@
 # BUGS:
 #
 #   * Fails on filenames with spaces or other funny characters.
-#
-#   * Does not say which modules couldn't be imported.
 
 set -e
 #set -x
+
+BASEDIR=$(cd $(dirname $0); pwd)
 
 import_skip='testable.SKIP_IF_NOT_FOUND'
 
 while getopts "il" opt; do
     case $opt in
         i)
-            echo '+ interactive mode'
+            echo '* interactive mode'
             interactive=1
             ;;
         l)
-            echo '+ lenient mode'
+            echo '* lenient mode'
             import_skip='^(import|from [^.])'
             ;;
         \?)
@@ -62,24 +63,73 @@ while getopts "il" opt; do
 done
 shift $((OPTIND-1))
 
-modules=$*
-if [ "$modules" == "" ]; then
-    modules=`find . -name '*.py' -exec grep -l 'testable.register' {} \;`
+to_test=$*
+
+
+## Scripts ##
+
+cd $BASEDIR/bin
+
+# Can't specify scripts to test.sh (use --unittest), so do nothing if anything
+# is specified.
+if [ "$to_test" == "" ]; then
+    for script in $(find . -xtype f); do
+        # is it really a Python script? hacky test...
+        if ( head -n1 $script | fgrep -q python ); then
+
+            echo -n "+ $script ... "
+
+            if ( ! fgrep -q quacpath $script ); then
+                echo 'Does not import quacpath'
+                continue
+            else
+                echo
+            fi
+
+            if ( fgrep -q -- --unittest $script ); then
+                # FIXME: needs import test barrier
+                $script --unittest
+            fi
+
+        fi
+    done
+fi
+
+
+## Modules ##
+
+cd $BASEDIR/lib
+
+if [ "$to_test" == "" ]; then
+    modules=$(find . -name '*.py' -exec grep -l 'testable.register' {} \;)
 fi
 
 # Remove all .pyc files: otherwise, importing modules that were removed or
 # renamed will still work!
 find . -name '*.pyc' -exec rm {} \;
 
-# On MacOS, sed's -r option is -E
-sedopt='-r'
-if [ `uname` == "Darwin" ]; then
-    sedopt='-E'
-fi
+# Choose the right option for extended regexes, in a lame way.
+case $(uname) in
+    Linux)
+        sed='sed -r'
+        ;;
+    Darwin)
+        sed='sed -E'
+        ;;
+    *)
+        echo "don't know how to sed on your platform" >&2
+        exit 1
+        ;;
+esac
 
 for mraw in $modules; do
-    m=`echo $mraw |  sed $sedopt 's/^(\.\/)?(.*)\.py$/\2/g' | sed $sedopt 's/\//./g'`
-    echo -n "+ $m... "
+    # Strip leading lib/, if present (so you can use tab completion with
+    # test.sh at top level).
+    mraw=$(echo $mraw | $sed 's/lib\///' )
+    # Transform filename to Python module name: strip leading ./, if any, and
+    # trailing .py, and change slashes to dots.
+    m=$(echo $mraw | $sed 's/^(\.\/)?(.*)\.py$/\2/g' | $sed 's/\//./g')
+    echo -n "+ $m ... "
     if [ $interactive ]; then
         echo
         python -c "import $m ; $m.test_interactive()"
