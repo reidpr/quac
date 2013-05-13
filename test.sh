@@ -73,16 +73,28 @@ cd $BASEDIR/bin
 # Can't specify scripts to test.sh (use --unittest), so do nothing if anything
 # is specified.
 if [ "$to_test" == "" ]; then
-
-    echo "* scripts that don't import quacpath: "
     for script in $(find . -xtype f); do
         # is it really a Python script? hacky test...
         if ( head -n1 $script | fgrep -q python ); then
-            fgrep -L quacpath $script
+
+            echo -n "+ $script ... "
+
+            if ( ! fgrep -q quacpath $script ); then
+                echo 'Does not import quacpath'
+                continue
+            else
+                echo
+            fi
+
+            if ( fgrep -q -- --unittest $script ); then
+                # FIXME: needs import test barrier
+                $script --unittest
+            fi
+
         fi
     done
-
 fi
+
 
 ## Modules ##
 
