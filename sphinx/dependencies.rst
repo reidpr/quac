@@ -36,6 +36,7 @@ Install these guys first.
 * ``python-numpy``
 * ``python-oauth2``
 * ``python-pip``
+* ``python-psutil``
 * ``python-pyicu`` (optional)
 * ``python-sphinx``
 * ``python-tz``
