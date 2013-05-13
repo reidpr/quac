@@ -36,6 +36,7 @@ import os
 
 from django.contrib.gis import geos
 
+import quacpath
 import db_glue
 import geo.base
 import geo.srs

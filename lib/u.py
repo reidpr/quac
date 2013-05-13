@@ -204,7 +204,7 @@ def configure(config_path):
       config file given on the command line. Also adjust the load path as
       specified in the files."""
    global cpath
-   config_read(path_relative(__file__, "default.cfg"))  # 1. default.cfg
+   config_read(path_relative(__file__, "../misc/default.cfg"))  # 1. default.cfg
    if (config_path is not None):
       # this need to be an absolute path in case we change directories later
       cpath = os.path.abspath(config_path)

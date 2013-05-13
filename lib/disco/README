@@ -1,0 +1,8 @@
+This directory contains Disco modules and scripts. They are here because (a)
+Disco has some weird problems with placement of these things (see mr_path.py
+for more) and (b) I don't want them cluttering things up.
+
+Currently, they won't run while they're sequestered in here (for the above
+reason, but also because the directory name conflicts with Disco's own Python
+stuff), but the effort is on hold, so it's OK. Feel free to move things
+around if you want to do Disco stuff.
