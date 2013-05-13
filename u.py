@@ -19,6 +19,7 @@ import logging
 import numbers
 import os
 import cPickle as pickle
+import psutil
 import pytz
 import random
 import re
@@ -395,34 +396,22 @@ def memoize(f):
 
    return wrapper
 
-def memory_use(peak=False):
-   '''Return the amount of virtual memory currently (if when == 'now') or at
-      most (if when == 'peak') allocated to this process, in bytes. E.g.:
+def memory_use():
+   '''Return the amount of virtual memory currently allocated to this process,
+      in bytes. E.g.:
 
       >>> a = 'a' * int(2e9)  # string 2 billion chars long
-      >>> big = memory_use()
-      >>> fmt_bytes(big)
-      '...GiB'
+      >>> fmt_bytes(memory_use())
+      '2.0GiB'
       >>> del a
-      >>> small = memory_use()
-      >>> peak = memory_use(peak=True)
-      >>> big > small
-      True
-      >>> big == peak
-      True'''
-   # Based on http://stackoverflow.com/a/898406/396038
-   ss = open('/proc/self/status').read()
-   field = 'VmPeak' if peak else 'VmSize'
-   m = re.search(r'^%s:\s+(\d+) kB' % field, ss, re.MULTILINE)
-   if (m):
-      return int(m.group(1)) * 1024
-   else:
-      l.warn('memory usage unsupported on this architecture')
-      return 1
+
+      Note: This used to have an option to get peak usage, in addition to
+      current usage. However, Macs seem not to be able to do this, and since
+      it's not critical information for our uses, that feature was removed.'''
+   return psutil.Process(os.getpid()).get_memory_info().vms
 
 def memory_use_log():
-   l.debug('virtual memory used: %s now, %s peak'
-           % (fmt_bytes(memory_use()), fmt_bytes(memory_use(True))))
+   l.debug('virtual memory in use: %s' % (fmt_bytes(memory_use())))
 
 
 def path_configured(path):
