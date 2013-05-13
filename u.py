@@ -398,11 +398,12 @@ def memoize(f):
 
 def memory_use():
    '''Return the amount of virtual memory currently allocated to this process,
-      in bytes. E.g.:
+      in bytes. For example (note flexibility in results to accomodate
+      different operating systems):
 
       >>> a = 'a' * int(2e9)  # string 2 billion chars long
-      >>> fmt_bytes(memory_use())
-      '2.0GiB'
+      >>> 2e9 < memory_use() < 5e9
+      True
       >>> del a
 
       Note: This used to have an option to get peak usage, in addition to
