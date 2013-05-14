@@ -65,6 +65,10 @@ def register(teststr):
       if (run_tests):
          test(calling_module)
 
+manualonly_register = register
+'''Same as register(), but normally not invoked when test.sh is automatically
+   collecting modules to test.'''
+
 def test(module):
    options = doctest.ELLIPSIS | doctest.REPORT_ONLY_FIRST_FAILURE
    doctest.testmod(module, optionflags=options)

@@ -17,8 +17,10 @@
 #
 #   * If you pass the filename of a module, it will be tested.
 #
-#   * Otherwise, this script will find all candidate modules under lib/ and
-#     test them.
+#   * Otherwise, this script will find all candidate modules under lib/, all
+#     scripts under bin/ and test them. Modules can declare that they should
+#     not be included in these automatic tests but remain testable manually;
+#     if you pass -a, then these are included anyway.
 #
 #   * If you pass -i as the first argument, then the function
 #     test_interactive() will be called instead of the non-interactive test
@@ -46,8 +48,12 @@ BASEDIR=$(cd $(dirname $0); pwd)
 
 import_skip='testable.SKIP_IF_NOT_FOUND'
 
-while getopts "il" opt; do
+while getopts "ail" opt; do
     case $opt in
+        a)
+            echo '* test everything (override manual-only)'
+            test_all=1
+            ;;
         i)
             echo '* interactive mode'
             interactive=1
@@ -101,7 +107,14 @@ fi
 cd $BASEDIR/lib
 
 if [ "$to_test" == "" ]; then
-    modules=$(find . -name '*.py' -exec grep -l 'testable.register' {} \;)
+    if [ $test_all ]; then
+        grepstr='testable\.(manualonly_)?register'
+    else
+        grepstr='testable\.register'
+    fi
+    modules=$(find . -name '*.py' -exec egrep -l $grepstr {} \;)
+else
+    modules=$to_test
 fi
 
 # Remove all .pyc files: otherwise, importing modules that were removed or

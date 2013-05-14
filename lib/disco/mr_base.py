@@ -94,4 +94,4 @@ class TSV_Reader_Job(object):
          yield line.split('\t')
 
 
-testable.register('')
+testable.manualonly_register('')

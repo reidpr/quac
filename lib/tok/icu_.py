@@ -2,7 +2,7 @@
 
 import re
 
-import icu  # testable.SKIP_IF_NOT_FOUND
+import icu
 
 from . import base
 from . import tiny
@@ -144,7 +144,7 @@ class Tiny_ICU(base.Tzer):
       return tokens
 
 
-testable.register(u'''
+testable.manualonly_register(u'''
 
 >>> Tiny_ICU(1).tokenize(base.T_PUNCT) == base.T_PUNCT_TOKS
 True
