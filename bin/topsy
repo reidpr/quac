@@ -70,7 +70,10 @@ g_now = datetime.datetime.utcnow()
 c = u.configure(args.config)
 l = u.logging_init("twtop")
 
-import otter  # it's in a funny place
+# Commented out so test doesn't fail; if we want to revive this script, need
+# to uncomment the import (and also put it in the correct place above) and
+# add otter to the dependencies.
+#import otter  # it's in a funny place
 
 
 ### Program ###

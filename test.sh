@@ -27,15 +27,8 @@
 #     harness. This is good for drawing pictures and whatnot that need human
 #     interpretation to determine correctness.
 #
-#   * The script does not test modules that have import problems:
-#
-#     * If -l (lenient mode) is specified, any modules that have imports which
-#       fail are skipped.
-#
-#     * Otherwise, only imports explicitly marked with
-#       "testable.SKIP_IF_NOT_FOUND" (in a comment) are skipped.
-#
-#     * There is no skipping for interactive tests.
+#   * If a script has import problems, a complaint about that will be printed
+#     instead of running the tests (which obviously can't be done).
 #
 # BUGS:
 #
@@ -46,9 +39,7 @@ set -e
 
 BASEDIR=$(cd $(dirname $0); pwd)
 
-import_skip='testable.SKIP_IF_NOT_FOUND'
-
-while getopts "ail" opt; do
+while getopts "ai" opt; do
     case $opt in
         a)
             echo '* test everything (override manual-only)'
@@ -57,10 +48,6 @@ while getopts "ail" opt; do
         i)
             echo '* interactive mode'
             interactive=1
-            ;;
-        l)
-            echo '* lenient mode'
-            import_skip='^(import|from [^.])'
             ;;
         \?)
             exit 1
@@ -71,8 +58,55 @@ shift $((OPTIND-1))
 
 to_test=$*
 
+# Choose the right sed option for extended regexes, in a lame way.
+case $(uname) in
+    Linux)
+        sed='sed -r'
+        ;;
+    Darwin)
+        sed='sed -E'
+        ;;
+    *)
+        echo "don't know how to sed on your platform" >&2
+        exit 1
+        ;;
+esac
 
-## Scripts ##
+
+## Functions ##
+
+# Test whether the imports in script or module $1 can work. This is done by
+# extracting all the imports into a test .py file in the same directory as $1,
+# and then running that file. Only the first import failure is reported.
+import_test () {
+    local traw=$(dirname $1)/IMPORTTEST.py
+    # strip indents and doctest stuff on import lines
+    egrep '^[ >]*(import|from)' $1 | $sed 's/^[ >]*//' > $traw
+    python -m $(file_to_module $traw) 2> >(tail -n1)
+    local retval=$?
+    if [ $retval -eq 0 ]; then
+        # success; need newline (on failure, Python error message has one)
+        echo
+    fi
+    rm $traw
+    return $retval
+}
+
+# Transform filename to Python module name: strip leading ./, if any, and
+# trailing .py, and change slashes to dots.
+file_to_module () {
+    echo $1 | $sed 's/^(\.\/)?(.*)\.py$/\2/g' | $sed 's/\//./g'
+}
+
+        # # Python will give an ImportError message in case of import skips
+        # # FIXME: This doesn't test "from . import foo" correctly.
+        # if ( egrep "$import_skip" $mraw | python $testimports 2> >(tail -n1) ); then
+        #     echo
+        #     python -m $m
+        # fi
+
+
+## Test scripts ##
 
 cd $BASEDIR/bin
 
@@ -88,21 +122,19 @@ if [ "$to_test" == "" ]; then
             if ( ! fgrep -q quacpath $script ); then
                 echo 'Does not import quacpath'
                 continue
-            else
-                echo
             fi
 
-            if ( fgrep -q -- --unittest $script ); then
-                # FIXME: needs import test barrier
-                $script --unittest
+            if ( import_test $script ); then
+                if ( fgrep -q -- --unittest $script ); then
+                    $script --unittest
+                fi
             fi
-
         fi
     done
 fi
 
 
-## Modules ##
+## Test modules ##
 
 cd $BASEDIR/lib
 
@@ -121,36 +153,17 @@ fi
 # renamed will still work!
 find . -name '*.pyc' -exec rm {} \;
 
-# Choose the right option for extended regexes, in a lame way.
-case $(uname) in
-    Linux)
-        sed='sed -r'
-        ;;
-    Darwin)
-        sed='sed -E'
-        ;;
-    *)
-        echo "don't know how to sed on your platform" >&2
-        exit 1
-        ;;
-esac
-
 for mraw in $modules; do
     # Strip leading lib/, if present (so you can use tab completion with
     # test.sh at top level).
     mraw=$(echo $mraw | $sed 's/lib\///' )
-    # Transform filename to Python module name: strip leading ./, if any, and
-    # trailing .py, and change slashes to dots.
-    m=$(echo $mraw | $sed 's/^(\.\/)?(.*)\.py$/\2/g' | $sed 's/\//./g')
+    m=$(file_to_module $mraw)
     echo -n "+ $m ... "
     if [ $interactive ]; then
         echo
         python -c "import $m ; $m.test_interactive()"
     else
-        # Python will give an ImportError message in case of import skips
-        # FIXME: This doesn't test "from . import foo" correctly.
-        if ( egrep "$import_skip" $mraw | python $testimports 2> >(tail -n1) ); then
-            echo
+        if ( import_test $mraw ); then
             python -m $m
         fi
     fi
