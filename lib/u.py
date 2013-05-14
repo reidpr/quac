@@ -299,6 +299,8 @@ def logging_init(tag, file_=None, stdout_force=False, level=None,
       4. If truncate is given, then truncate the log file before using it.
          (Note this is only allowed for log_file_base.)
 
+      Warning: This setup makes it difficult to use scripts as pipes.
+
       This function can be called more than once. Last call wins. Note that
       truncations happens on each call!'''
    if (verbose_):
@@ -349,7 +351,7 @@ def logging_init(tag, file_=None, stdout_force=False, level=None,
    if (stdout_force
        or (hasattr(sys.stdout, 'isatty') and sys.stdout.isatty())
        or file_ is None):
-      clog = logging.StreamHandler()
+      clog = logging.StreamHandler(sys.stdout)
       clog.setLevel(level)
       clog.setFormatter(form)
       l.addHandler(clog)
