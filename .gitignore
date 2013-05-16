@@ -90,6 +90,7 @@ nosetests.xml
 *.cfg
 *.log
 
+doc
 sphinx/_build
 
 !bin

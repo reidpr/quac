@@ -47,6 +47,11 @@ html:
 	$(SPHINXBUILD) -b html -D html_title="QUAC commit $$(git rev-parse --short HEAD)" $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
+	@echo
+	rsync -a --delete $(BUILDDIR)/html/ ../doc
+	touch ../doc/.nojekyll
+	@echo
+	@echo "HTML pages copied to doc/."
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
