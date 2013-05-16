@@ -1,0 +1,333 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3. Preprocessing &mdash; QUAC commit 98d213d</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="QUAC commit 98d213d" href="index.html" />
+    <link rel="next" title="4. Map-Reduce with makereduce" href="map_reduce.html" />
+    <link rel="prev" title="2. Dependencies" href="dependencies.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="map_reduce.html" title="4. Map-Reduce with makereduce"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="dependencies.html" title="2. Dependencies"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">QUAC commit 98d213d</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">3. Preprocessing</a><ul>
+<li><a class="reference internal" href="#overview">3.1. Overview</a></li>
+<li><a class="reference internal" href="#file-organization">3.2. File organization</a></li>
+<li><a class="reference internal" href="#file-formats">3.3. File formats</a><ul>
+<li><a class="reference internal" href="#raw-json-tweets">3.3.1. Raw JSON tweets</a></li>
+<li><a class="reference internal" href="#tsv-files">3.3.2. TSV files</a></li>
+<li><a class="reference internal" href="#preprocessing-metadata-file">3.3.3. Preprocessing metadata file</a></li>
+<li><a class="reference internal" href="#geo-located-tweets">3.3.4. Geo-located tweets</a></li>
+<li><a class="reference internal" href="#alternatives-that-were-considered-and-rejected">3.3.5. Alternatives that were considered and rejected</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dependencies.html"
+                        title="previous chapter">2. Dependencies</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="map_reduce.html"
+                        title="next chapter">4. Map-Reduce with <tt class="docutils literal docutils literal docutils literal"><span class="pre">makereduce</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/pipeline.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="preprocessing">
+<h1>3. Preprocessing<a class="headerlink" href="#preprocessing" title="Permalink to this headline">¶</a></h1>
+<p><em>Note: All times and dates are in UTC except as otherwise noted.</em></p>
+<p>This preprocessing pipeline translates tweets from raw JSON to a form more
+suitable for later study.</p>
+<div class="section" id="overview">
+<h2>3.1. Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>QUAC preprocessing has three basic steps:</p>
+<ol class="arabic simple">
+<li>Collect tweets using the streaming API. (Do this with the <tt class="docutils literal"><span class="pre">collect</span></tt>
+script.)</li>
+<li>Convert the tweets from the raw JSON, de-duplicate and clean them up, and
+produce nicely organized and ordered TSV files. (Do this with <tt class="docutils literal"><span class="pre">make</span> <span class="pre">-f</span>
+<span class="pre">parse.mk</span></tt> in the root tweet directory.)</li>
+<li>Geo-locate tweets that do not contain a geotag. (Do this with <tt class="docutils literal"><span class="pre">make</span> <span class="pre">-f</span>
+<span class="pre">geo.mk</span></tt> in the root tweet directory.)</li>
+</ol>
+</div>
+<div class="section" id="file-organization">
+<h2>3.2. File organization<a class="headerlink" href="#file-organization" title="Permalink to this headline">¶</a></h2>
+<p>A fully populated data directory looks something like this:</p>
+<ul class="simple">
+<li><tt class="samp docutils literal"><span class="pre">raw/</span></tt> &#8212; Raw JSON tweets fresh from the Streaming API.<ul>
+<li><tt class="samp docutils literal"><span class="pre">2012-04/</span></tt> &#8212; Tweets from <tt class="docutils literal"><span class="pre">collect</span></tt>. Each month gets its own
+directory.<ul>
+<li><tt class="samp docutils literal"><span class="pre">20120401_003115</span><em><span class="pre">.json.gz</span></em></tt> &#8212; Sequence of JSON tweet objects.</li>
+<li><tt class="samp docutils literal"><span class="pre">20120401_003115</span><em><span class="pre">.stats</span></em></tt> &#8212; Text file containing a few statistics
+about the above.</li>
+<li><tt class="samp docutils literal"><span class="pre">20120401_003115</span><em><span class="pre">.2012-03-31.raw.tsv</span></em></tt> &#8212; Direct TSV translation
+of tweets from March 31 contained in the JSON file above (i.e., still
+contains duplicates and is in arbitrary order).</li>
+<li><tt class="samp docutils literal"><span class="pre">20120401_003115</span><em><span class="pre">.2013-04-01.raw.tsv</span></em></tt> &#8212; A given JSON file can
+have tweets from multiple days, so it may produce more than one
+<tt class="docutils literal"><span class="pre">.raw.tsv</span></tt> file.</li>
+<li><tt class="samp docutils literal"><span class="pre">20120401_003115</span><em><span class="pre">.d</span></em></tt> &#8211; Makefile listing dependencies related to
+the above JSON and <tt class="docutils literal"><span class="pre">.raw.tsv</span></tt> files.</li>
+<li>... (lots more of the above)</li>
+</ul>
+</li>
+<li><tt class="samp docutils literal"><span class="pre">legacy/</span></tt> &#8212; Subdirectories don&#8217;t have to be named after dates.
+(Perhaps you have some existing Twitter data that were not collected with
+Twepi.)</li>
+<li>... (more subdirs)</li>
+</ul>
+</li>
+<li><tt class="samp docutils literal"><span class="pre">pre/</span></tt><ul>
+<li><tt class="samp docutils literal"><span class="pre">2012-03-31</span><em><span class="pre">.all.tsv</span></em></tt> &#8212; Processed tweets from March 31 from all
+raw JSON files. No duplicates and in ascending order by tweet ID.</li>
+<li><tt class="samp docutils literal"><span class="pre">2012-03-31</span><em><span class="pre">.geo.tsv</span></em></tt> &#8212; Subset of the above that contain a
+geotag.</li>
+<li>... (two <tt class="docutils literal"><span class="pre">.tsv</span></tt> per day in the data)</li>
+<li><tt class="samp docutils literal"><span class="pre">metadata</span></tt> &#8212; Python pickle file summarizing metadata for the above
+files.</li>
+</ul>
+</li>
+<li><tt class="samp docutils literal"><span class="pre">geo/</span></tt> &#8212; <cite>FIXME</cite></li>
+</ul>
+<p>In addition to the above, you will find <tt class="docutils literal"><span class="pre">.log</span></tt> files scattered about. These
+are simply log files produced during processing.</p>
+</div>
+<div class="section" id="file-formats">
+<h2>3.3. File formats<a class="headerlink" href="#file-formats" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="raw-json-tweets">
+<h3>3.3.1. Raw JSON tweets<a class="headerlink" href="#raw-json-tweets" title="Permalink to this headline">¶</a></h3>
+<p>Each raw tweet file (<tt class="docutils literal"><span class="pre">.json.gz</span></tt>) is a gzipped sequence of JSON-encoded
+tweets in the <a class="reference external" href="https://dev.twitter.com/docs/platform-objects">format documented by Twitter</a>, separated by newlines
+(i.e., a file cannot be parsed as a single JSON object). Non-tweet objects do
+appear; these are also JSON encoded. Newlines do not appear within encoded
+tweets, so they can safely be used as a separator. Files are named with a
+timestamp of when collection started for that file (time zone is <em>local</em>, a
+historical artifact which will not be fixed &#8211; be careful!) and placed in a
+1-level hierarchy by year and month. The collection process caps the number of
+tweets in each raw file to a &#8220;reasonable&#8221; number that changes occasionally.</p>
+<p>Along with each <tt class="docutils literal"><span class="pre">.json.gz</span></tt> is a <tt class="docutils literal"><span class="pre">.stats</span></tt> file. This contains a few
+statistics about the raw file&#8217;s data, though its key purpose is simply to mark
+that the collector closed the tweet file in an orderly way. Bare <tt class="docutils literal"><span class="pre">.json.gz</span></tt>
+files may be still in progress, broken, etc. and should be read with caution.
+Tweets are Unicode and indeed contain high characters, so care must be taken
+in handling character encodings.</p>
+<p><cite>collect</cite> saves the raw bytes of each tweet it receives from the Twitter
+Streaming API, without any parsing or encoding/decoding. There are a few
+quirks of this stream. (I am pretty sure, but not 100% sure, that these are
+all real, and not quirks of Python &#8211; they&#8217;re consistent between <cite>curl</cite>,
+Firefox, and my Python code.) These quirks do not appear to affect the
+parsability of the JSON.</p>
+<ul>
+<li><p class="first">While the encoding of the output is ostensibly UTF-8, it appears that high
+characters are escaped with the &#8220;uXXXX&#8221; notation. For example:</p>
+<div class="highlight-python"><pre>"text":"\u2606\u2606\u2606\u2606\u2606#Cruzeiro"</pre>
+</div>
+</li>
+<li><p class="first">Some text has excessive escaping. For example, forward slashes do not need
+to be escaped, but they are anyway:</p>
+<div class="highlight-python"><pre>"source":"\u003Ca href=\"http:\/\/blackberry.com\/twitter"</pre>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="tsv-files">
+<h3>3.3.2. TSV files<a class="headerlink" href="#tsv-files" title="Permalink to this headline">¶</a></h3>
+<p>The raw tweet files are not so convenient to work with: JSON parsing is slow,
+and tweets can be duplicated and out of order (including between files, which
+makes parallelization difficult). Therefore, we pre-process the JSON into a
+TSV format which addresses these issues. The final product is a pair of TSV
+files for each day:</p>
+<ul class="simple">
+<li><tt class="samp docutils literal"><span class="pre">YYYY-DD-MM.</span><em><span class="pre">all</span></em><span class="pre">.tsv</span></tt> &#8212; For each day, we build one
+tab-separated-values (TSV) file containing tweets created on that day, in
+ascending ID order. There is no header line, no quoting, and no
+within-record newlines or tabs (these are stripped before storing the
+tweets). There is some other cleaup that goes on as well; consult the source
+code for this. The encoding is UTF-8. The files contain the following
+possibly-empty fields, in this order (note that field names generally
+correspond to those in the JSON; refer to the Twitter docs):<ol class="arabic">
+<li><em>id</em>: Tweet ID from Twitter (64-bit integer)</li>
+<li><em>created_at</em>: When the tweet was created, in <a class="reference external" href="http://en.wikipedia.org/wiki/ISO_8601">ISO 8601 format</a>.</li>
+<li><em>text</em>: The actual &#8220;message&#8221;; free text</li>
+<li><em>user_screen_name</em>: free text with some restrictions</li>
+<li><em>user_description</em>: free text</li>
+<li><em>user_lang</em>: <a class="reference external" href="http://en.wikipedia.org/wiki/ISO_639-1">ISO 639-1</a>
+language code set by user. Note that this is a fairly unreliable means of
+determining the language of <tt class="docutils literal"><span class="pre">text</span></tt>. <cite>FIXME: take advantage of new
+lang tweet attribute when it comes out.</cite></li>
+<li><em>user_location</em>: free text</li>
+<li><em>user_time_zone</em>: self-selected from a few dozen options</li>
+<li><em>location_lon</em>: longitude of geotag (WGS84)</li>
+<li><em>location_lat</em>: latitude of geotag</li>
+<li><em>location_src</em>: code indicating source of geotag; one of:<ul>
+<li><tt class="docutils literal"><span class="pre">co</span></tt>: <tt class="docutils literal"><span class="pre">coordinates</span></tt> attribute (GeoJSON)</li>
+<li><tt class="docutils literal"><span class="pre">ge</span></tt>: <tt class="docutils literal"><span class="pre">geo</span></tt> attribute (an older form of official geotag) <cite>FIXME</cite></li>
+<li><tt class="docutils literal"><span class="pre">lo</span></tt>: coordinates appearing in user <tt class="docutils literal"><span class="pre">location</span></tt> field <cite>FIXME</cite></li>
+<li>... <cite>FIXME</cite></li>
+</ul>
+</li>
+</ol>
+</li>
+<li><tt class="samp docutils literal"><span class="pre">YYYY-DD-MM.</span><em><span class="pre">geo</span></em><span class="pre">.tsv</span></tt> &#8212; The subset of the above which have a
+geotag.</li>
+</ul>
+<p>There are also intermediate TSV files (<tt class="docutils literal"><span class="pre">.raw.tsv</span></tt>) which are in the above
+format but have not yet had de-duplication and re-ordering. Downstream
+applications should ignore them.</p>
+<p><cite>FIXME</cite>:</p>
+<ul class="simple">
+<li>Try gzipping the TSV files. Some quick and dirty tests suggest that
+processing time (with <tt class="docutils literal"><span class="pre">gzip</span> <span class="pre">-1</span></tt>) will roughly double and file sizes will
+roughly halve.</li>
+</ul>
+</div>
+<div class="section" id="preprocessing-metadata-file">
+<h3>3.3.3. Preprocessing metadata file<a class="headerlink" href="#preprocessing-metadata-file" title="Permalink to this headline">¶</a></h3>
+<p>This file is a pickled Python dictionary containing metadata about the
+directory of preprocessed TSV files. It currently contains one item:</p>
+<ol class="arabic simple">
+<li><tt class="docutils literal"><span class="pre">days</span></tt> is a <tt class="docutils literal"><span class="pre">dict</span></tt> listing metadata for the daily TSV files above. Keys
+are <tt class="docutils literal"><span class="pre">datetime.date</span></tt> instances, and values are dictionaries with the
+following fields:<ul>
+<li><em>count</em>: Number of tweets</li>
+<li><em>count_geotag</em>: Number of geotagged tweets</li>
+<li><em>min_id</em>: Minimum tweet ID in the file</li>
+<li><em>max_id</em>: Maximum tweet ID in the file</li>
+</ul>
+</li>
+</ol>
+<p><em>Note: The metadata file used to contain information about the raw tweet files
+as well. This proved to be not so useful, and so it hasn&#8217;t been reimplemented
+in the new make-based processing scheme.</em></p>
+</div>
+<div class="section" id="geo-located-tweets">
+<h3>3.3.4. Geo-located tweets<a class="headerlink" href="#geo-located-tweets" title="Permalink to this headline">¶</a></h3>
+<p><cite>FIXME</cite></p>
+<ul class="simple">
+<li>TSV, one per day</li>
+<li>Tweet ID, pickled Geo_GMM instance</li>
+<li>GMM even if geotagged</li>
+</ul>
+</div>
+<div class="section" id="alternatives-that-were-considered-and-rejected">
+<h3>3.3.5. Alternatives that were considered and rejected<a class="headerlink" href="#alternatives-that-were-considered-and-rejected" title="Permalink to this headline">¶</a></h3>
+<p>We tried the following and ultimately rejected them (for now). A key
+requirement (as of 2/21/2013) is that we&#8217;d like convenient parallel access and
+not to mess with setting up servers.</p>
+<ul class="simple">
+<li>Postgres: We tried using Postgres, which is a very nice open source RDBMS
+that has great spatial support (PostGIS), but it was just too slow. Also, it
+requires setting up a server and doesn&#8217;t lend itself to a distributed
+approach.</li>
+<li>DBM-style databases (e.g., BerkeleyDB): We need key/tuple storage, not just
+key/value (unless we want to do our own pickling of Python objects into
+values, which seems lame).</li>
+<li>SQLite/SpatiaLite: Again, rather slow, and overkill since we need key/tuple
+storage. Doesn&#8217;t support streaming or parallel access very well.</li>
+<li>ZODB: This is a Python-native object database (from the Zope project). I
+implemented it as far as actually storing data, but the documentation is
+poor (e.g., the ZODB Book recommends a technique for subtransactions that
+doesn&#8217;t work any more), the interface is a bit awkward, it produces several
+files per database, and the databases are rather large (a subset of 8 fields
+is nearly as large as the gzipped raw tweet files).</li>
+<li>NoSQL: There are lots of very hip NoSQL databases (e.g. CouchDB, MongoDB,
+etc.). However, none seem to offer both an embedded option (i.e., no server
+process) and key/tuple (document- or column-oriented?) rather than simply
+key/value.</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="map_reduce.html" title="4. Map-Reduce with makereduce"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="dependencies.html" title="2. Dependencies"
+             >previous</a> |</li>
+        <li><a href="index.html">QUAC commit 98d213d</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012-2013, Los Alamos National Security, LLC and others.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

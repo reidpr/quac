@@ -1,0 +1,159 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>6. FAQ &mdash; QUAC commit 98d213d</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="QUAC commit 98d213d" href="index.html" />
+    <link rel="next" title="7. Limitations" href="limitations.html" />
+    <link rel="prev" title="5. Configuration" href="config.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="limitations.html" title="7. Limitations"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="config.html" title="5. Configuration"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">QUAC commit 98d213d</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="config.html"
+                        title="previous chapter">5. Configuration</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="limitations.html"
+                        title="next chapter">7. Limitations</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/faq.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="faq">
+<h1>6. FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h1>
+<ol class="arabic">
+<li><p class="first">A caution about tweet IDs</p>
+<p>Tweet IDs are 64-bit integers. This exceeds the capacity of double-precision
+floating point numbers, which can cause a variety of problems. For example,
+loading TSV files without declaring the column as text can silently truncate
+digits, and JSON parsing in some languages can fail silently.</p>
+</li>
+<li><p class="first">My python script barfs with <tt class="docutils literal"><span class="pre">UnicodeDecodeError</span></tt> when printing tweets!</p>
+<p>The output encoding must be UTF-8; sometimes, your terminal is capable, but
+Python fails to detect this (e.g., Mac OS X 10.4). In this case, you can
+set the <tt class="docutils literal"><span class="pre">LANG</span></tt> environment variable to <tt class="docutils literal"><span class="pre">en_US.UTF-8</span></tt>, or (as a last
+resort) <tt class="docutils literal"><span class="pre">PYTHONIOENCODING</span></tt> to <tt class="docutils literal"><span class="pre">utf8</span></tt>. If your terminal is incapable,
+you&#8217;re just out of luck. Get a Mac?</p>
+</li>
+<li><p class="first">Unicode works OK in the terminal, but Python barfs when redirecting stdout.</p>
+<p>I could not figure out how to make this work without changing the source
+code. Snippet:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">codecs</span>
+<span class="n">utf8_stdout</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">getwriter</span><span class="p">(</span><span class="s">&quot;utf8&quot;</span><span class="p">)(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now <tt class="docutils literal"><span class="pre">utf8_stdout</span></tt> is a file-like object that can print UTF8 to stdout.</p>
+</li>
+<li><p class="first">The collector fails to start with <tt class="docutils literal"><span class="pre">--daemon</span></tt> and there&#8217;s no error
+message.</p>
+<p>During the daemonization procedure, there&#8217;s an interval between when
+<tt class="docutils literal"><span class="pre">stdout</span></tt> and <tt class="docutils literal"><span class="pre">stderr</span></tt> are closed and the logging starts up. If
+something goes wrong during this period, the failure is silent (I&#8217;m not
+sure where the exception is being eaten &#8211; the <tt class="docutils literal"><span class="pre">python-daemon</span></tt> library,
+or something else).</p>
+<p>To diagnose, pass the <tt class="docutils literal"><span class="pre">--daemon-debug</span></tt> switch, which prevents stdout and
+stderr from being closed. It also aborts the program after logging is set
+up, because running a daemon with <tt class="docutils literal"><span class="pre">stdout</span></tt> and <tt class="docutils literal"><span class="pre">stderr</span></tt> open can cause
+weird problems.</p>
+</li>
+<li><p class="first">How do I quickly see a tweet as it&#8217;s &#8220;supposed&#8221; to look?</p>
+<p>You can look at any tweet in your browser with the following URL:</p>
+<div class="highlight-python"><pre>https://twitter.com/#!/FOO/status/174159225168203778</pre>
+</div>
+<p><tt class="docutils literal"><span class="pre">FOO</span></tt> is ostensibly the username of the user who created the tweet, but
+it doesn&#8217;t seem to matter what you put there. Obviously, replace the ID
+with the one you&#8217;re actually interested in.</p>
+<p>This seems to work sometimes and not work sometimes. I haven&#8217;t figured out
+the pattern.</p>
+</li>
+</ol>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="limitations.html" title="7. Limitations"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="config.html" title="5. Configuration"
+             >previous</a> |</li>
+        <li><a href="index.html">QUAC commit 98d213d</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012-2013, Los Alamos National Security, LLC and others.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
