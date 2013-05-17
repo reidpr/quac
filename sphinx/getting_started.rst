@@ -10,16 +10,25 @@ Install QUAC
 
 #. Install the dependencies.
 
-#. Grab the code using Mercurial (a.k.a. ``hg``)::
+#. Grab the code using Git::
 
-     hg clone ssh://path/to/repo quac
+     git clone https://github.com/reidpr/quac.git
+
+   *Note: This creates a read-only repository. If you plan to contribute to
+   QUAC, you should fork the repo on Github and clone yours instead.*
 
 #. Run the tests::
 
      ./test.sh
 
+Collect some tweets
+===================
+
+*Note: You may not need to do this. If you have collaborators who are already
+collecting tweets, you should in fact not do this. Just use their data.*
+
 Set up Twitter
-==============
+--------------
 
 You need both a user account and an application, as well as four different
 authentication parameters, to access the streaming API using OAuth.
@@ -40,8 +49,8 @@ authentication parameters, to access the streaming API using OAuth.
    * access token
    * access secret
 
-Collect some tweets
-===================
+Run the collector
+-----------------
 
 #. Create directories to hold the collected tweets (e.g., ``tweets``) and your
    configuration and logs (e.g., ``config``).
@@ -57,7 +66,22 @@ Collect some tweets
 
    (Type Control-C to stop.)
 
-#. Build the TSV files::
+Build the TSV files
+-------------------
 
-     cd tweets
-     make -f /path/to/quac/parse.mk all clean-rawtsv
+::
+
+   /path/to/quac/misc/parse.sh 1 /path/to/tweets
+
+Doing it seriously
+------------------
+
+The above will get you a few tweets to play with. If you want to actually
+collect tweets in a serious and reliable way (i.e., without gaps):
+
+#. Run ``collect`` with the ``--daemon`` option, and set up ``logcheck`` to
+   watch the log files and e-mail you if something goes wrong.
+
+#. Set up a cron job to build the TSVs regularly, e.g.::
+
+     27 3 * * *  nice bash -l -c '/path/to/quac/misc/parse.sh 4 /path/to/tweets >> /path/to/logs/parse.log'

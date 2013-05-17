@@ -5,7 +5,7 @@ QUAC ("Quantitative analysis of chatter" or any related acronym you like) is a
 package for acquiring and analyzing social internet content. Features:
 
 * Reliably collect tweets from the Twitter Streaming API and convert them into
-  a convenient and fast TSV format.
+  an easy-to-parse, de-duplicated, well-ordered, and fast TSV format.
 
 * Estimate the origin location of tweets with no geotag. (But see `issue #13
   <https://github.com/reidpr/quac/issues/13>`_.)
