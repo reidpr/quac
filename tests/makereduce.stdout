@@ -1,0 +1,19 @@
+4.2.1. Create sample input
+foo bar baz
+foo foo
+bar
+4.2.2. Define the map operator
+foo
+bar
+baz
+foo
+foo
+bar
+4.2.3. Define the reduce operator
+      2 b
+      1 a
+      3 c
+4.2.4. Test the operators together
+      2 bar
+      1 baz
+      3 foo

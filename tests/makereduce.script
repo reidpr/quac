@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Test that the makereduce script works, using shell commands for map and
+# reduce (see makereduce-python test for the Python version). Section numbers
+# refer to the "Map-Reduce with makereduce" section in the documentation; make
+# sure these two files match.
+
+. ./environment.sh
+
+cd $DATADIR
+
+
+## Test map-reduce using shell pipeline
+
+echo '4.2.1. Create sample input'
+echo -e 'foo bar baz\nfoo foo' > foo1.txt
+echo -e 'bar' > foo2.txt
+cat foo*.txt
+
+echo '4.2.2. Define the map operator'
+cat foo*.txt | tr '[:blank:]' '\n'
+
+echo '4.2.3. Define the reduce operator'
+echo -e 'b\nb\na\nc\nc\nc' | uniq -c
+
+echo '4.2.4. Test the operators together'
+cat foo*.txt | tr '[:blank:]' '\n' | sort -sk1 | uniq -c
+
+
+## Test map-reduce using makereduce

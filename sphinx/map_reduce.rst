@@ -35,6 +35,10 @@ problems. It works on both a single node as well as in a SLURM allocation.
 Example
 =======
 
+.. NOTE: This example is tested in tests/makereduce.script; make sure the two
+   examples match.
+
+
 The basic paradigm is that the ``makereduce`` command creates a makefile which
 you then run with ``make`` (either directly or wrapped).
 
