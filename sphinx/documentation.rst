@@ -1,6 +1,15 @@
 Writing documentation
 *********************
 
+Building the docs
+=================
+
+To build HTML::
+
+   $ (cd sphinx && make)
+
+Eventually we may build a few other formats too (e.g., PDF via LaTeX).
+
 Conventions
 ===========
 
