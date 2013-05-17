@@ -11,15 +11,12 @@ Overview
 
 QUAC preprocessing has three basic steps:
 
-#. Collect tweets using the streaming API. (Do this with the ``collect``
-   script.)
+#. Collect tweets using the streaming API. (``collect`` script.)
 
 #. Convert the tweets from the raw JSON, de-duplicate and clean them up, and
-   produce nicely organized and ordered TSV files. (Do this with ``make -f
-   parse.mk`` in the root tweet directory.)
+   produce nicely organized and ordered TSV files. (``parse.mk`` makefile.)
 
-#. Geo-locate tweets that do not contain a geotag. (Do this with ``make -f
-   geo.mk`` in the root tweet directory.)
+#. Geo-locate tweets that do not contain a geotag. (``geo.mk`` makefile.)
 
 
 File organization
@@ -52,7 +49,7 @@ A fully populated data directory looks something like this:
 
   * :samp:`legacy/` --- Subdirectories don't have to be named after dates.
     (Perhaps you have some existing Twitter data that were not collected with
-    Twepi.)
+    QUAC.)
 
   * ... (more subdirs)
 

@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>2. Dependencies &mdash; QUAC commit 71b8ebf</title>
+    <title>2. Dependencies &mdash; QUAC documentation for commit bd63093</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="QUAC commit 71b8ebf" href="index.html" />
+    <link rel="top" title="QUAC documentation for commit bd63093" href="index.html" />
     <link rel="next" title="3. Preprocessing" href="pipeline.html" />
     <link rel="prev" title="1. Getting started" href="getting_started.html" /> 
   </head>
@@ -35,15 +35,12 @@
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
           <a href="pipeline.html" title="3. Preprocessing"
-             accesskey="N">next</a> |</li>
+             accesskey="N">next</a></li>
         <li class="right" >
           <a href="getting_started.html" title="1. Getting started"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">QUAC commit 71b8ebf</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit bd63093</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -57,6 +54,7 @@
 <li><a class="reference internal" href="#scipy">2.4. SciPy</a></li>
 <li><a class="reference internal" href="#one-file-python-modules">2.5. One-file Python modules</a></li>
 <li><a class="reference internal" href="#qgis">2.6. QGIS</a></li>
+<li><a class="reference internal" href="#os-x-notes">2.7. OS X notes</a></li>
 </ul>
 </li>
 </ul>
@@ -67,11 +65,6 @@
   <h4>Next topic</h4>
   <p class="topless"><a href="pipeline.html"
                         title="next chapter">3. Preprocessing</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/dependencies.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -95,7 +88,7 @@
             
   <div class="section" id="dependencies">
 <h1>2. Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h1>
-<p>Installation of Twepi has been documented only on Ubunti Linux (&#8220;Precise
+<p>Installation of QUAC has been documented only on Ubuntu Linux (&#8220;Precise
 Pangolin&#8221;), though it also runs on Macs and a few Red Hat variants. Probably
 any UNIX would be fine.</p>
 <p>It requires Python 2.7 and some other stuff listed below. Note that depending
@@ -156,7 +149,7 @@ machine learning library.</li>
 </div>
 <div class="section" id="scipy">
 <h2>2.4. SciPy<a class="headerlink" href="#scipy" title="Permalink to this headline">¶</a></h2>
-<p>Twepi needs SciPy version 0.11 or better.</p>
+<p>QUAC needs SciPy version 0.11 or better.</p>
 <p>Both Debian and Ubuntu only have 0.10, even in the bleeding-edge development
 releases (as of 2/20/2013). You can install it with <tt class="docutils literal"><span class="pre">pip</span></tt>. It&#8217;s worth
 looking at the <a class="reference external" href="http://www.scipy.org/Installing_SciPy/Linux">installation documentation for Linux</a>. Try:</p>
@@ -191,6 +184,26 @@ Debian Wheezy because it depends on <tt class="docutils literal"><span class="pr
 more (<tt class="docutils literal"><span class="pre">grass642</span></tt> is). The workaround is to build the <tt class="docutils literal"><span class="pre">.deb</span></tt> from source as
 explained in this bug report: <a class="reference external" href="http://hub.qgis.org/issues/6438">http://hub.qgis.org/issues/6438</a></p>
 </div>
+<div class="section" id="os-x-notes">
+<h2>2.7. OS X notes<a class="headerlink" href="#os-x-notes" title="Permalink to this headline">¶</a></h2>
+<p><cite>FIXME: these are out of date</cite></p>
+<ul class="simple">
+<li>SpatialLite<ul>
+<li>brew install libspatialite</li>
+</ul>
+</li>
+<li>pysqlite<ul>
+<li>Must install pysqlite from source (pip won&#8217;t work): <a class="reference external" href="http://code.google.com/p/pysqlite/">http://code.google.com/p/pysqlite/</a></li>
+<li>Modify setup.cfg by commenting out the line
+define=SQLITE_OMIT_LOAD_EXTENSION</li>
+<li>python setup.py build_static (&lt;&#8212;Note the static part!)</li>
+<li>sudo python setup.py install</li>
+<li>See <a class="reference external" href="http://stackoverflow.com/a/1546162">http://stackoverflow.com/a/1546162</a></li>
+<li>EDIT db_glu.py with path to libspatialite  (e.g., if you installed from brew, /usr/local/lib/libspatialite.dylib )</li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 
 
@@ -203,20 +216,16 @@ explained in this bug report: <a class="reference external" href="http://hub.qgi
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
           <a href="pipeline.html" title="3. Preprocessing"
-             >next</a> |</li>
+             >next</a></li>
         <li class="right" >
           <a href="getting_started.html" title="1. Getting started"
              >previous</a> |</li>
-        <li><a href="index.html">QUAC commit 71b8ebf</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit bd63093</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2012-2013, Los Alamos National Security, LLC and others.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

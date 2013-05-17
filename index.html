@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Overview &mdash; QUAC commit 71b8ebf</title>
+    <title>About QUAC &mdash; QUAC documentation for commit bd63093</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="QUAC commit 71b8ebf" href="#" />
+    <link rel="top" title="QUAC documentation for commit bd63093" href="#" />
     <link rel="next" title="1. Getting started" href="getting_started.html" /> 
   </head>
   <body>
@@ -34,33 +34,31 @@
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
           <a href="getting_started.html" title="1. Getting started"
-             accesskey="N">next</a> |</li>
-        <li><a href="#">QUAC commit 71b8ebf</a> &raquo;</li> 
+             accesskey="N">next</a></li>
+        <li><a href="#">QUAC documentation for commit bd63093</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Overview</a></li>
+<li><a class="reference internal" href="#">About QUAC</a><ul>
+<li><a class="reference internal" href="#how-to-get-quac">How to get QUAC</a></li>
+<li><a class="reference internal" href="#if-you-find-quac-useful">If you find QUAC useful</a></li>
+<li><a class="reference internal" href="#for-more-information">For more information</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#table-of-contents">Table of contents</a><ul>
 </ul>
 </li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+<li><a class="reference internal" href="#copyright">Copyright</a></li>
+<li><a class="reference internal" href="#funding">Funding</a></li>
 </ul>
 
   <h4>Next topic</h4>
   <p class="topless"><a href="getting_started.html"
                         title="next chapter">1. Getting started</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/index.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -82,49 +80,125 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="overview">
-<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
-<p>Twepi (&#8220;Twitter for epidemic analysis&#8221;) is a package is for acquiring and
-analyzing Twitter messages, called <em>tweets</em>. It can:</p>
+  <div class="section" id="about-quac">
+<h1>About QUAC<a class="headerlink" href="#about-quac" title="Permalink to this headline">¶</a></h1>
+<p>QUAC (&#8220;Quantitative analysis of chatter&#8221; or any related acronym you like) is a
+package for acquiring and analyzing social internet content. Features:</p>
 <ul class="simple">
 <li>Reliably collect tweets from the Twitter Streaming API and convert them into
-a convenient TSV format.</li>
-<li>Estimate the origin location of tweets with no geotag.</li>
+an easy-to-parse, de-duplicated, well-ordered, and fast TSV format.</li>
+<li>Estimate the origin location of tweets with no geotag. (But see <a class="reference external" href="https://github.com/reidpr/quac/issues/13">issue #13</a>.)</li>
+<li>Careful preservation of Unicode throughout the processing pipeline.</li>
+<li>Various cleanup steps to deal with tweet quirks, including very rare ones
+(we&#8217;ve seen certain weirdnesses in only one of our 1.3+ billion tweets).
+That is, we deal with the special cases so you don&#8217;t have to.</li>
+<li>Parallel processing using various combinations of <tt class="docutils literal"><span class="pre">make</span></tt>, <tt class="docutils literal"><span class="pre">joblib</span></tt>, and
+a simple map-reduce framework called <tt class="docutils literal"><span class="pre">makereduce</span></tt> which is included. (But
+see <a class="reference external" href="https://github.com/reidpr/quac/issues/15">issue #15</a>.)</li>
 </ul>
-<p>Each script has pretty nice help which you can print using the <tt class="docutils literal"><span class="pre">--help</span></tt>
-option and/or look at in comments at the top of the script. Modules also have
-good docstrings.</p>
-<p>Note that for many uses of Twepi (especially research) you are ethically
-oblicated to cite it. For guidelines on how to do this, see <a class="reference internal" href="citing.html"><em>Citing Twepi</em></a>.</p>
-<p>Twepi is open source under the Apache license.</p>
-<p><em>Note: This documentation is used as a planning tool, so it sometimes
-describes things that reflect the future, not the present. We try to mark such
-things, but sometimes we fail.</em></p>
+<p>QUAC is open source under the Apache license and was formerly known as Twepi
+(&#8220;Twitter for epidemic analysis&#8221;).</p>
+<div class="section" id="how-to-get-quac">
+<h2>How to get QUAC<a class="headerlink" href="#how-to-get-quac" title="Permalink to this headline">¶</a></h2>
+<p>Download it from our <a class="reference external" href="https://github.com/reidpr/quac">Github project</a>. See
+also the <a class="reference internal" href="getting_started.html"><em>Getting started</em></a> section.</p>
+</div>
+<div class="section" id="if-you-find-quac-useful">
+<h2>If you find QUAC useful<a class="headerlink" href="#if-you-find-quac-useful" title="Permalink to this headline">¶</a></h2>
+<p>Please send us a note at <tt class="docutils literal"><span class="pre">reidpr&#64;lanl.gov</span></tt> if you use QUAC, even for small
+uses, and/or star the project on GitHub. This type of feedback is very
+important for continued justification of the project to our sponsors.</p>
+<p>Note that for many uses of QUAC (especially research) you are ethically
+oblicated to cite it. For guidelines on how to do this, see <a class="reference internal" href="citing.html"><em>Citing QUAC</em></a>.</p>
+</div>
+<div class="section" id="for-more-information">
+<h2>For more information<a class="headerlink" href="#for-more-information" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Documentation is online at &lt;<a class="reference external" href="http://reidpr.github.io/quac">http://reidpr.github.io/quac</a>&gt;. (Note: this may
+describe a different version of QUAC than the one you have.)</li>
+<li>Current documentation is rooted at <tt class="docutils literal"><span class="pre">doc/index.html</span></tt>. (You&#8217;ll probably need
+to build it first.)</li>
+<li>Most scripts have pretty help which you can print using the <tt class="docutils literal"><span class="pre">--help</span></tt>
+option and/or look at in comments at the top of the script. Modules also
+usually have good docstrings.</li>
+</ul>
+</div>
 </div>
 <div class="section" id="table-of-contents">
 <h1>Table of contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">1. Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dependencies.html">2. Dependencies</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pipeline.html">3. Preprocessing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="map_reduce.html">4. Map-Reduce with <tt class="docutils literal"><span class="pre">makereduce</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">1. Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#install-quac">1.1. Install QUAC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#collect-some-tweets">1.2. Collect some tweets</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dependencies.html">2. Dependencies</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dependencies.html#debian-packages">2.1. Debian packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dependencies.html#pypi-python-packages">2.2. PyPI Python packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dependencies.html#other-python-packages">2.3. Other Python packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dependencies.html#scipy">2.4. SciPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dependencies.html#one-file-python-modules">2.5. One-file Python modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dependencies.html#qgis">2.6. QGIS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dependencies.html#os-x-notes">2.7. OS X notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">3. Preprocessing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#overview">3.1. Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#file-organization">3.2. File organization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#file-formats">3.3. File formats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="map_reduce.html">4. Map-Reduce with <tt class="docutils literal"><span class="pre">makereduce</span></tt></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#introduction">4.1. Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#example">4.2. Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#drawbacks">4.3. Drawbacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#fixme">4.4. FIXME</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="config.html">5. Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="faq.html">6. FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="limitations.html">7. Limitations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="documentation.html">8. Writing documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="citing.html">9. Citing Twepi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="documentation.html">8. Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="documentation.html#building-the-docs">8.1. Building the docs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="documentation.html#conventions">8.2. Conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="documentation.html#publishing-to-the-web">8.3. Publishing to the web</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">9. Citing QUAC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="credits.html">10. Credits</a></li>
 </ul>
 </div>
 </div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
-<ul class="simple">
-<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
-<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
-<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
-</ul>
+<div class="section" id="copyright">
+<h1>Copyright<a class="headerlink" href="#copyright" title="Permalink to this headline">¶</a></h1>
+<p>QUAC is copyright © 2013 Los Alamos National Security, LLC and others.</p>
+<p>This material was produced under U.S. Government contract DE-AC52-06NA25396
+for Los Alamos National Laboratory (LANL), which is operated by Los Alamos
+National Security, LLC for the U.S. Department of Energy. The U.S. Government
+has rights to use, reproduce, and distribute this software. NEITHER THE
+GOVERNMENT NOR LOS ALAMOS NATIONAL SECURITY, LLC MAKES ANY WARRANTY, EXPRESS
+OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE. If software
+is modified to produce derivative works, such modified software should be
+clearly marked, so as not to confuse it with the version available from LANL.</p>
+<p>This software is licensed under the Apache License, Version 2.0 (the
+&#8220;License&#8221;); you may not use it except in compliance with the License. A copy
+of the License is available in the file LICENSE or at
+<a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &#8220;AS IS&#8221; BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.</p>
+<p>This project contains code from Cyclopath, which is copyright (c) 2006-2012
+Regents of the University of Minnesota and open source under the Apache
+license. Grep for &#8220;Cyclopath&#8221; to find the relevant files.</p>
+<p><em>This software has been approved for open source release, LACC #12-038.</em></p>
+</div>
+<div class="section" id="funding">
+<h1>Funding<a class="headerlink" href="#funding" title="Permalink to this headline">¶</a></h1>
+<p>This software is supported in part by NIH/NIGMS under the MIDAS program, grant
+U01-GM097658-01.</p>
 </div>
 
 
@@ -137,17 +211,13 @@ things, but sometimes we fail.</em></p>
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
           <a href="getting_started.html" title="1. Getting started"
-             >next</a> |</li>
-        <li><a href="#">QUAC commit 71b8ebf</a> &raquo;</li> 
+             >next</a></li>
+        <li><a href="#">QUAC documentation for commit bd63093</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2012-2013, Los Alamos National Security, LLC and others.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

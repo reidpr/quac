@@ -1,7 +1,7 @@
 Dependencies
 ************
 
-Installation of Twepi has been documented only on Ubunti Linux ("Precise
+Installation of QUAC has been documented only on Ubuntu Linux ("Precise
 Pangolin"), though it also runs on Macs and a few Red Hat variants. Probably
 any UNIX would be fine.
 
@@ -71,7 +71,7 @@ Other Python packages
 SciPy
 =====
 
-Twepi needs SciPy version 0.11 or better.
+QUAC needs SciPy version 0.11 or better.
 
 Both Debian and Ubuntu only have 0.10, even in the bleeding-edge development
 releases (as of 2/20/2013). You can install it with ``pip``. It's worth
@@ -111,3 +111,23 @@ Note: As of 1/2/2013, the ``qgis-plugin-grass`` package is not installable on
 Debian Wheezy because it depends on ``grass641``, which is not available any
 more (``grass642`` is). The workaround is to build the ``.deb`` from source as
 explained in this bug report: http://hub.qgis.org/issues/6438
+
+
+OS X notes
+==========
+
+`FIXME: these are out of date`
+
+* SpatialLite
+
+  - brew install libspatialite
+
+* pysqlite
+
+  - Must install pysqlite from source (pip won't work): http://code.google.com/p/pysqlite/
+  - Modify setup.cfg by commenting out the line
+    define=SQLITE_OMIT_LOAD_EXTENSION
+  - python setup.py build_static (<---Note the static part!)
+  - sudo python setup.py install
+  - See http://stackoverflow.com/a/1546162
+  - EDIT db_glu.py with path to libspatialite  (e.g., if you installed from brew, /usr/local/lib/libspatialite.dylib )
