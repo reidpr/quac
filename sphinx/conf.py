@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Twepi documentation build configuration file, created by
+# QUAC documentation build configuration file, created by
 # sphinx-quickstart on Wed Feb 20 12:04:35 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Twepi'
+project = u'QUAC'
 copyright = u'2012-2013, Los Alamos National Security, LLC and others'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -170,7 +170,7 @@ html_show_sphinx = False
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Twepidoc'
+htmlhelp_basename = 'QUACdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -189,8 +189,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Twepi.tex', u'Twepi Documentation',
-   u'Reid Priedhorsky and Aron Culotta', 'manual'),
+  ('index', 'QUAC.tex', u'QUAC Documentation',
+   u'Reid Priedhorsky, Aron Culotta, and others', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -219,8 +219,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'twepi', u'Twepi Documentation',
-     [u'Reid Priedhorsky and Aron Culotta'], 1)
+    ('index', 'QUAC', u'QUAC Documentation',
+     [u'Reid Priedhorsky, Aron Culotta, and others'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -233,8 +233,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Twepi', u'Twepi Documentation',
-   u'Reid Priedhorsky and Aron Culotta', 'Twepi', 'One line description of project.',
+  ('index', 'QUAC', u'QUAC Documentation',
+   u'Reid Priedhorsky, Aron Culotta, and others', 'QUAC', 'One line description of project.',
    'Miscellaneous'),
 ]
 

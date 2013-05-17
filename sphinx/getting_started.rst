@@ -5,14 +5,14 @@ These are basic directions to collect some tweets and put them in TSV files so
 you can do something awesome with them. These directions aren't comprehensive;
 you may need to consult other sources to fill in some gaps.
 
-Install Twepi
-=============
+Install QUAC
+============
 
 #. Install the dependencies.
 
 #. Grab the code using Mercurial (a.k.a. ``hg``)::
 
-     hg clone ssh://path/to/repo twepi
+     hg clone ssh://path/to/repo quac
 
 #. Run the tests::
 
@@ -60,4 +60,4 @@ Collect some tweets
 #. Build the TSV files::
 
      cd tweets
-     make -f /path/to/twepi/parse.mk all clean-rawtsv
+     make -f /path/to/quac/parse.mk all clean-rawtsv

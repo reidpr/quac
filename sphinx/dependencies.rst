@@ -1,7 +1,7 @@
 Dependencies
 ************
 
-Installation of Twepi has been documented only on Ubunti Linux ("Precise
+Installation of QUAC has been documented only on Ubuntu Linux ("Precise
 Pangolin"), though it also runs on Macs and a few Red Hat variants. Probably
 any UNIX would be fine.
 
@@ -71,7 +71,7 @@ Other Python packages
 SciPy
 =====
 
-Twepi needs SciPy version 0.11 or better.
+QUAC needs SciPy version 0.11 or better.
 
 Both Debian and Ubuntu only have 0.10, even in the bleeding-edge development
 releases (as of 2/20/2013). You can install it with ``pip``. It's worth

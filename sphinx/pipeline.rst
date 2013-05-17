@@ -52,7 +52,7 @@ A fully populated data directory looks something like this:
 
   * :samp:`legacy/` --- Subdirectories don't have to be named after dates.
     (Perhaps you have some existing Twitter data that were not collected with
-    Twepi.)
+    QUAC.)
 
   * ... (more subdirs)
 

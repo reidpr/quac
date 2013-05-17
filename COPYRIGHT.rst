@@ -22,3 +22,9 @@ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
+
+This project contains code from Cyclopath, which is copyright (c) 2006-2012
+Regents of the University of Minnesota and open source under the Apache
+license. Grep for "Cyclopath" to find the relevant files.
+
+*This software has been approved for open source release, LACC #12-038.*

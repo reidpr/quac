@@ -1,7 +1,7 @@
-Citing Twepi
-************
+Citing QUAC
+***********
 
-How to cite Twepi depends on what exactly you are doing.
+How to cite QUAC depends on what exactly you are doing.
 
 * If you use or extend the geographic analysis components: `FIXME`
 

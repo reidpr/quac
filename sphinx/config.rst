@@ -1,7 +1,7 @@
 Configuration
 *************
 
-Twepi uses ``.ini``-style configuration files; many scripts require a
+QUAC uses ``.ini``-style configuration files; many scripts require a
 ``--config`` argument pointing to the main configuration file.
 
 Loading the configuration is a multi-step process in order to (a) keep
