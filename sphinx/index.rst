@@ -37,9 +37,9 @@ Table of contents
    config
    faq
    limitations
+   documentation
    citing
    credits
-   doc_conventions
 
 Indices and tables
 ==================

@@ -14,7 +14,7 @@ ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 # the i18n builder cannot share the environment and doctrees with the others
 I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
-.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext
+.PHONY: help clean html web dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext
 
 all: html
 
@@ -48,10 +48,21 @@ html:
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 	@echo
-	rsync -a --delete $(BUILDDIR)/html/ ../doc
+	rsync -a --delete --exclude .git $(BUILDDIR)/html/ ../doc
 	touch ../doc/.nojekyll
 	@echo
 	@echo "HTML pages copied to doc/."
+
+# see http://stackoverflow.com/a/2659808/396038
+web: html
+	@echo
+	@echo Making sure there are no uncommitted changes
+	git diff-index --quiet --cached HEAD
+	git diff-files --quiet
+	@echo Publishing new docs
+	cd ../doc && git add --all
+	cd ../doc && git commit -a -m "docs for commit $$(cd .. && git rev-parse --short HEAD)"
+	cd ../doc && git push
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml

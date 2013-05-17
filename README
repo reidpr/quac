@@ -4,18 +4,22 @@ Overview
 QUAC ("Quantitative analysis of chatter" or any related acronym you like) is a
 package for acquiring and analyzing social internet content. It can:
 
-* Reliably collect tweets from the Twitter Streaming API and convert them into
-  a convenient TSV format.
+  * Reliably collect tweets from the Twitter Streaming API and convert them
+    into a convenient and fast TSV format.
 
-* Estimate the origin location of tweets with no geotag.
+  * Estimate the origin location of tweets with no geotag.
 
 Parallelism is implemented using various combinations of make, joblib, and a
 simple map-reduce framework called "makereduce" which is included.
 
-For more information, see the documentation rooted at doc/index.html. If
-there's nothing there, that means you need to build the docs. The command for
-that is "cd sphinx && make". You will need Sphinx (http://sphinx-doc.org/)
-installed.
+For more information:
+
+  * Documentation is online at <http://reidpr.github.io/quac>. (Note: this may
+    describe a different version of QUAC than the one you have.)
+
+  * Current documentation is rooted at doc/index.html. You'll probably need to
+    build it. The command for that is "cd sphinx && make". You will need
+    Sphinx (http://sphinx-doc.org/) installed.
 
 QUAC was formerly known as TWEPI ("Twitter for epidemic analysis").
 
