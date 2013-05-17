@@ -111,3 +111,23 @@ Note: As of 1/2/2013, the ``qgis-plugin-grass`` package is not installable on
 Debian Wheezy because it depends on ``grass641``, which is not available any
 more (``grass642`` is). The workaround is to build the ``.deb`` from source as
 explained in this bug report: http://hub.qgis.org/issues/6438
+
+
+OS X notes
+==========
+
+`FIXME: these are out of date`
+
+* SpatialLite
+
+  - brew install libspatialite
+
+* pysqlite
+
+  - Must install pysqlite from source (pip won't work): http://code.google.com/p/pysqlite/
+  - Modify setup.cfg by commenting out the line
+    define=SQLITE_OMIT_LOAD_EXTENSION
+  - python setup.py build_static (<---Note the static part!)
+  - sudo python setup.py install
+  - See http://stackoverflow.com/a/1546162
+  - EDIT db_glu.py with path to libspatialite  (e.g., if you installed from brew, /usr/local/lib/libspatialite.dylib )
