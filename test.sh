@@ -30,6 +30,8 @@
 #   * If a script has import problems, a complaint about that will be printed
 #     instead of running the tests (which obviously can't be done).
 #
+#   * This script will also run all the cmdtests under tests/.
+#
 # BUGS:
 #
 #   * Fails on filenames with spaces or other funny characters.
@@ -113,6 +115,7 @@ cd $BASEDIR/bin
 # Can't specify scripts to test.sh (use --unittest), so do nothing if anything
 # is specified.
 if [ "$to_test" == "" ]; then
+    echo '*** testing scripts'
     for script in $(find . -xtype f); do
         # is it really a Python script? hacky test...
         if ( head -n1 $script | fgrep -q python ); then
@@ -137,6 +140,7 @@ fi
 ## Test modules ##
 
 cd $BASEDIR/lib
+echo '*** testing modules'
 
 if [ "$to_test" == "" ]; then
     if [ $test_all ]; then
@@ -168,3 +172,14 @@ for mraw in $modules; do
         fi
     fi
 done
+
+
+## Test cmdtests ##
+
+cd $BASEDIR/tests
+
+# Can't specify cmdtests to test.sh, so do nothing if anything is specified.
+if [ "$to_test" == "" ]; then
+    echo '*** testing cmdtests'
+    cmdtest .
+fi

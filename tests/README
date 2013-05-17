@@ -1,0 +1,10 @@
+This directory contains tests using the "cmdtest" framework. These are shell
+scripts (which might be quite involved); standard output and error are tested
+against expected values. "man cmdtest" for the details.
+
+Test scripts can assume that pwd is this directory.
+
+../test.sh runs all tests here. To run just one, say "cmdtest -t foo ."
+
+Note that the Python code contains tons of doctests as well. This isn't all
+the testing we do.

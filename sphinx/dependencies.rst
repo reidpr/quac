@@ -25,6 +25,7 @@ Install these guys first.
 * ``mercurial``
 * ``libgeos-c1``
 * ``python-anyjson``
+* ``python-cmdtest``
 * ``python-daemon``
 * ``python-dateutil``
 * ``python-dev``

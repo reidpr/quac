@@ -94,3 +94,9 @@ doc
 sphinx/_build
 
 !bin
+
+# cmdtest output
+*.stderr-actual
+*.stderr-diff
+*.stdout-actual
+*.stdout-diff

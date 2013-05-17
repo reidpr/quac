@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Test that cmdtest works.
+
+. ./environment.sh
+
+echo hello
