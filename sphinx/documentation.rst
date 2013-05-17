@@ -1,5 +1,5 @@
-Writing documentation
-*********************
+Documentation
+*************
 
 Building the docs
 =================

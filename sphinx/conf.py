@@ -96,7 +96,11 @@ html_theme = 'sphinxdoc'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
+#html_theme_options = {'bodyfont': 'serif',  # for agogo
+#                      'pagewidth': '60em',
+#                      'documentwidth': '43em',
+#                      'sidebarwidth': '17em',
+#                      'textalign':'left'}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
@@ -152,7 +156,7 @@ html_theme = 'sphinxdoc'
 #html_show_sourcelink = True
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
-#html_show_sphinx = True
+html_show_sphinx = False
 
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
 #html_show_copyright = True
