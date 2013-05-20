@@ -12,25 +12,19 @@ issues:
   <http://en.wikipedia.org/wiki/Apache_Hadoop>`_, `Disco
   <http://discoproject.org/>`_) are difficult to install and use.
 
-- Frameworks assume that nodes have no performant shared parallel filesystem
-  like `Panasas <http://www.panasas.com/products/panfs>`_. Therefore, they
-  implement a non-POSIX distributed filesystem using node-local storage (e.g.,
-  Hadoop's HDFS).
-
-  While this condition is simpler from a hardware perspective, if you don't
-  have access to node-local disks for whatever reason (e.g., they don't
-  exist), you're in a pretty inconvenient situation. Typically, clusters like
-  this *do* have a nice parallel filesystem, but support for using it directly
-  is poor or nonexistent. You can of course run a distributed filesystem on
-  top of the parallel filesystem, but this is an unnecessary level of
-  indirection and throws away the convenience of the parallel filesystem.
+- Frameworks tend to assume node-local storage. However, traditional HPC
+  clusters tend to have a fast parallel filesystem like `Panasas
+  <http://www.panasas.com/products/panfs>`_; node-local storage, if present,
+  typically does not persist between jobs. [#]_
 
 - Map-reduce jobs cannot be run incrementally; if new input data are added,
   the entire job must be re-run.
 
-``makereduce`` is a simple wrapper included with QUAC that solves these
-problems. It works on both a single node as well as in a SLURM allocation.
-
+``quacreduce`` is a simple wrapper included with QUAC that solves these
+problems: it is designed for a fast filesystem shared by all nodes and can
+take advantage of nonpersistent node-local storage. It runs on top of ``make``
+for incremental processing and works on both a single node as well as in a
+SLURM allocation.
 
 Example
 =======
@@ -285,3 +279,7 @@ FIXME
 
 .. [#] I know that it's usually spelled MapReduce, but I think InterCapping is
        stupid.
+
+.. [#] This is because (a) it's difficult to ensure that a new job is assigned
+       exactly the same set of nodes as a previous job and/or (b) node-local
+       storage is explicitly wiped between jobs.
