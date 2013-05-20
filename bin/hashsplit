@@ -1,0 +1,37 @@
+#!/usr/bin/env python
+
+'''
+Standard input is a text stream of key/value pairs separated by a single tab.
+Split lines into several output files according to the hash value of the
+keys.'''
+
+import argparse
+import sys
+
+import quacpath
+import testable
+import u
+
+ap = u.ArgumentParser(description=__doc__)
+gr = ap.default_group
+gr.add_argument('n',
+                type=int,
+                metavar='N',
+                help='split into N files')
+gr.add_argument('basename',
+                type=str,
+                metavar='BASENAME',
+                help='basename of output (dot and hash value are appended)')
+
+try:
+
+   args = u.parse_args(ap)
+
+   out = [open('%s.%d' % (args.basename, i), 'w') for i in xrange(args.n)]
+
+   for line in sys.stdin:
+      hv = hash(line.split('\t', 1)[0]) % args.n
+      out[hv].write(line)
+
+except testable.Unittests_Only_Exception:
+   testable.register('')
