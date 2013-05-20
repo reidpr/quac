@@ -4,6 +4,8 @@
 
 . ./environment.sh
 
+cd $DATADIR
+
 set +e
 exec 1>&2  # send echo to stderr to make output more readable
 #set -x     # safe because we have no pipelines in this script
@@ -13,6 +15,11 @@ echo '*** Check input files for unique names'
 x quacreduce --map cat --reduce cat job foo/bar.txt baz/qux.txt
 echo $?
 x quacreduce --map cat --reduce cat job foo/bar.txt baz/bar.txt
+echo $?
+
+echo '*** Fail if jobdir exists'
+x mkdir jobexists
+x quacreduce --map cat --reduce cat jobexists foo/bar.txt
 echo $?
 
 echo '*** Check that either --python xor --map and --reduce are specified'

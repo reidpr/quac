@@ -85,6 +85,8 @@ try:
       ap.error('--python cannot be specified with --map and/or --reduce')
    if (args.map and not args.reduce or args.reduce and not args.map):
       ap.error('--map and --reduce must both be specified if one is')
+   if (os.path.exists(args.jobdir)):
+      ap.error('job dir "%s" already exists' % (args.jobdir))
 
    if (__name__ == '__main__'):
       main()

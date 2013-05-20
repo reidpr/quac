@@ -7,6 +7,14 @@ usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--partitions N]
                   JOBDIR FILE [FILE ...]
 quacreduce: error: input file basenames must be unique
 2
+*** Fail if jobdir exists
+$ mkdir jobexists
+$ quacreduce --map cat --reduce cat jobexists foo/bar.txt
+usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--partitions N]
+                  [--sortdir DIR] [-h] [--notimes] [--unittest] [--verbose]
+                  JOBDIR FILE [FILE ...]
+quacreduce: error: job dir "jobexists" already exists
+2
 *** Check that either --python xor --map and --reduce are specified
 *** these should succeed
 $ quacreduce --python foo job1 input.txt
