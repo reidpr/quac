@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Test that the makereduce script works, using shell commands for map and
-# reduce (see makereduce-python test for the Python version). Section numbers
-# refer to the "Map-Reduce with makereduce" section in the documentation; make
+# Test that the quacreduce script works, using shell commands for map and
+# reduce (see quacreduce-python test for the Python version). Section numbers
+# refer to the "Map-Reduce with quacreduce" section in the documentation; make
 # sure these two files match.
 
 . ./environment.sh
@@ -27,4 +27,5 @@ echo '4.2.4. Test the operators together'
 cat foo*.txt | tr '[:blank:]' '\n' | sort -sk1 | uniq -c
 
 
-## Test map-reduce using makereduce
+## Test map-reduce using quacreduce
+
