@@ -6,6 +6,7 @@
 #   and then uses them, so the caller should take care to not somehow acquire
 #   different ones.
 
+import argparse
 import codecs
 import collections
 import ConfigParser
@@ -107,6 +108,38 @@ class Accumulator(object):
    def add(self, x):
       self.sum_ += x
       self.count += 1
+
+class ArgumentParser(argparse.ArgumentParser):
+   '''Add a few arguments common to all QUAC scripts. A group called
+      "functionality" is available in .default_group; an additional group of
+      common options is added at the end in parse_args().'''
+
+   def __init__(self, **kw):
+      kw.update({ 'add_help': False,
+                  'formatter_class': argparse.RawTextHelpFormatter })
+      super(ArgumentParser, self).__init__(**kw)
+      self.default_group = self.add_argument_group('functionality')
+
+   def parse_args(self):
+      gr = self.add_argument_group('help, etc.')
+      gr.add_argument(
+         '-h', '--help',
+         action='help',
+         help='show this help message and exit')
+      gr.add_argument(
+         '--notimes',
+         action='store_true',
+         help='omit timestamps from log messages (useful for testing)')
+      gr.add_argument(
+         '--unittest',
+         nargs=0,
+         action=testable.Raise_Unittest_Exception,
+         help='run unit tests instead of doing real stuff')
+      gr.add_argument(
+         '--verbose',
+         action='store_true',
+         help='be more verbose with log output')
+      super(ArgumentParser, self).parse_args()
 
 class defaultdict_recursive(collections.defaultdict):
    'defaultdict which autovivifies arbitrarily deeply.'

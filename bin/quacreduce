@@ -1,0 +1,79 @@
+#!/usr/bin/env python
+
+'''
+Set up a map-reduce job that can be executed with Make. See section
+"Map-Reduce with quacreduce" in the docs for more info.'''
+
+help_epilogue = '''
+Note that --python is mutually exclusive with --map and --reduce (which must
+both be specified if one is).
+
+--sortdir need not be (and probably should not be) on the shared filesystem;
+the point is to leverage node-local storage for sorting during the
+partitioning phase. However, this storage must be available on the same path
+for each node.
+
+Beware shell quoting with --map and --reduce!
+'''
+
+import argparse
+
+import quacpath
+import testable
+import u
+l = u.l
+
+# FIXME:
+#
+# - check names for uniqueness (test?)
+# - check --python, --map/--reduce rules (test)
+
+
+### Setup ###
+
+ap = u.ArgumentParser(description=__doc__, epilog=help_epilogue)
+gr = ap.add_argument_group('operators')
+gr.add_argument('--map',
+                type=str,
+                metavar='CMD',
+                help='shell pipeline for map function')
+gr.add_argument('--reduce',
+                type=str,
+                metavar='CMD',
+                help='shell pipeline for reduce function')
+gr.add_argument('--python',
+                type=str,
+                metavar='CLASS',
+                help='Python class containing map-reduce implementation')
+gr = ap.add_argument_group('job logistics')
+gr.add_argument('jobdir',
+                metavar='JOBDIR',
+                help='job directory (must not exist)')
+gr.add_argument('inputs',
+                metavar='FILE',
+                nargs='+',
+                help='input files (must have unique names)')
+gr.add_argument('--partitions',
+                type=int,
+                metavar='N',
+                default=1,
+                help='number of partitions to use (default 1)')
+gr.add_argument('--sortdir',
+                metavar='DIR',
+                help='directory for offline sort temp files (default JOBDIR)')
+
+
+### Main ###
+
+
+### Bootstrap ###
+
+try:
+   args = u.parse_args(ap)
+   u.configure(None)
+   u.logging_init('makrd')
+
+   if (__name__ == '__main__'):
+      main()
+except testable.Unittests_Only_Exception:
+   testable.register('')
