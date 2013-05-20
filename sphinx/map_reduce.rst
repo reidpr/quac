@@ -5,7 +5,7 @@ Introduction
 ============
 
 `Map-reduce <http://en.wikipedia.org/wiki/MapReduce>`_ is a neat and easy to
-use parallel programming paradigm. [#]_ However, its implementations have some
+use parallel programming paradigm. [1]_ However, its implementations have some
 issues:
 
 - Industrial strength map-reduce frameworks (e.g., `Hadoop
@@ -15,7 +15,7 @@ issues:
 - Frameworks tend to assume node-local storage. However, traditional HPC
   clusters tend to have a fast parallel filesystem like `Panasas
   <http://www.panasas.com/products/panfs>`_; node-local storage, if present,
-  typically does not persist between jobs. [#]_
+  typically does not persist between jobs. [2]_
 
 - Map-reduce jobs cannot be run incrementally; if new input data are added,
   the entire job must be re-run.
@@ -26,19 +26,28 @@ take advantage of nonpersistent node-local storage. It runs on top of ``make``
 for incremental processing and works on both a single node as well as in a
 SLURM allocation.
 
+Summary of API
+==============
+
+The basic paradigm is that map and reduce operators produce and accept
+line-oriented input, with key and value separated by a single tab character.
+[3]_ All characters except tab, return, and newline are permitted in keys and
+values (though this is untested). Null values are permitted; in this case the
+separating tab may or may be omitted. [4]_
+
+The ``quacreduce`` command implements this API by creating a makefile, which
+you then run with ``make`` (either directly or wrapped).
+
+``quacreduce`` also has a Python API which we do not cover here.
+
 Example
 =======
 
 .. NOTE: This example is tested in tests/quacreduce.script; make sure the two
    examples match.
 
-
-The basic paradigm is that the ``quacreduce`` command creates a makefile which
-you then run with ``make`` (either directly or wrapped).
-
 This example implements a toy version of the classic "word count" example
-using standard UNIX tools. ``quacreduce`` also has a Python API which we do
-not cover here.
+using standard UNIX tools.
 
 Create sample input
 -------------------
@@ -57,8 +66,6 @@ Define the *map* operator
 -------------------------
 
 This converts standard input into a sequence of key/value pairs, one per line.
-The key can be any string and is separated from the value (which is opaque to
-``quacreduce`` but must not contain newline characters) by a single space.
 
 We will use ``tr`` for this::
 
@@ -277,9 +284,16 @@ FIXME
 .. Footnotes
    =========
 
-.. [#] I know that it's usually spelled MapReduce, but I think InterCapping is
+.. [1] I know that it's usually spelled MapReduce, but I think InterCapping is
        stupid.
 
-.. [#] This is because (a) it's difficult to ensure that a new job is assigned
+.. [2] This is because (a) it's difficult to ensure that a new job is assigned
        exactly the same set of nodes as a previous job and/or (b) node-local
        storage is explicitly wiped between jobs.
+
+.. [3] This is the same as Hadoop Streaming; the goal is to make
+       ``quacreduce`` components with non-null values work without
+       modification in that framework, though this is untested.
+
+.. [4] Note that this contrasts with Hadoop Streaming, where a null key is
+       permitted but a null value isn't.
