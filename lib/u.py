@@ -139,7 +139,7 @@ class ArgumentParser(argparse.ArgumentParser):
          '--verbose',
          action='store_true',
          help='be more verbose with log output')
-      super(ArgumentParser, self).parse_args()
+      return super(ArgumentParser, self).parse_args()
 
 class defaultdict_recursive(collections.defaultdict):
    'defaultdict which autovivifies arbitrarily deeply.'

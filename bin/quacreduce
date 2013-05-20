@@ -17,6 +17,7 @@ Beware shell quoting with --map and --reduce!
 '''
 
 import argparse
+import os
 
 import quacpath
 import testable
@@ -65,6 +66,9 @@ gr.add_argument('--sortdir',
 
 ### Main ###
 
+def main():
+   pass
+
 
 ### Bootstrap ###
 
@@ -72,6 +76,15 @@ try:
    args = u.parse_args(ap)
    u.configure(None)
    u.logging_init('makrd')
+
+   if (len(set(os.path.basename(i) for i in args.inputs)) != len(args.inputs)):
+      ap.error('input file basenames must be unique')
+   if (not (args.python or args.map or args.reduce)):
+      ap.error('--python or --map and --reduce must be specified')
+   if (args.python and (args.map or args.reduce)):
+      ap.error('--python cannot be specified with --map and/or --reduce')
+   if (args.map and not args.reduce or args.reduce and not args.map):
+      ap.error('--map and --reduce must both be specified if one is')
 
    if (__name__ == '__main__'):
       main()

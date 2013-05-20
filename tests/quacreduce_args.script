@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Test that quacreduce argument parsing works correctly.
+
+. ./environment.sh
+
+set +e
+exec 1>&2  # send echo to stderr to make output more readable
+#set -x     # safe because we have no pipelines in this script
+
+
+echo '*** Check input files for unique names'
+x quacreduce --map cat --reduce cat job foo/bar.txt baz/qux.txt
+echo $?
+x quacreduce --map cat --reduce cat job foo/bar.txt baz/bar.txt
+echo $?
+
+echo '*** Check that either --python xor --map and --reduce are specified'
+
+echo '*** these should succeed'
+x quacreduce --python foo job1 input.txt
+echo $?
+x quacreduce --map foo --reduce bar job2 input.txt
+echo $?
+
+echo '*** these should fail'
+x quacreduce job input.txt
+echo $?
+x quacreduce --map bar job input.txt
+echo $?
+x quacreduce --reduce bar job input.txt
+echo $?
+x quacreduce --python foo --map bar job input.txt
+echo $?
+x quacreduce --python foo --reduce bar job input.txt
+echo $?
+x quacreduce --python foo --map bar --reduce baz job input.txt
+echo $?
+
+# exit with success
+exit 0
