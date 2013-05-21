@@ -126,10 +126,10 @@ class ArgumentParser(argparse.ArgumentParser):
          '-h', '--help',
          action='help',
          help='show this help message and exit')
-      gr.add_argument(
-         '--notimes',
-         action='store_true',
-         help='omit timestamps from log messages (useful for testing)')
+      #gr.add_argument(
+      #   '--notimes',
+      #   action='store_true',
+      #   help='omit timestamps from log messages (useful for testing)')
       gr.add_argument(
          '--unittest',
          nargs=0,

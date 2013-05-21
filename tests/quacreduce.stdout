@@ -17,3 +17,61 @@ bar
       2 bar
       1 baz
       3 foo
+4.2.5 Prepare the job
+4.2.6 Run the job with make
+$ ls -R job
+job:
+Makefile
+out
+tmp
+
+job/out:
+
+job/tmp:
+$ (cd job && make --quiet)
+$ ls -R job
+job:
+Makefile
+out
+tmp
+
+job/out:
+0
+1
+
+job/tmp:
+0.reduced
+1.reduced
+foo1.txt.0
+foo1.txt.1
+foo1.txt.mapped
+foo2.txt.0
+foo2.txt.1
+foo2.txt.mapped
+$ (cat job/out/* | sort)
+      1 baz
+      2 bar
+      3 foo
+*** Test cleanup
+$ (cd job && make --quiet clean)
+$ ls -R job
+job:
+Makefile
+out
+tmp
+
+job/out:
+0
+1
+
+job/tmp:
+$ (cd job && make --quiet reallyclean)
+$ ls -R job
+job:
+Makefile
+out
+tmp
+
+job/out:
+
+job/tmp:

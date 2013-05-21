@@ -113,6 +113,11 @@ Debian Wheezy because it depends on ``grass641``, which is not available any
 more (``grass642`` is). The workaround is to build the ``.deb`` from source as
 explained in this bug report: http://hub.qgis.org/issues/6438
 
+Make
+====
+
+QUAC requires GNU Make 3.81.
+
 
 OS X notes
 ==========

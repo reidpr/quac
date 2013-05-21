@@ -25,8 +25,8 @@ echo $?
 echo '*** Check that either --python xor --map and --reduce are specified'
 
 echo '*** these should succeed'
-x quacreduce --python foo job1 input.txt
-echo $?
+#x quacreduce --python foo job1 input.txt
+#echo $?
 x quacreduce --map foo --reduce bar job2 input.txt
 echo $?
 

@@ -7,8 +7,8 @@ package for acquiring and analyzing social internet content. Features:
 * Reliably collect tweets from the Twitter Streaming API and convert them into
   an easy-to-parse, de-duplicated, well-ordered, and fast TSV format.
 
-* Estimate the origin location of tweets with no geotag. (But see `issue #13
-  <https://github.com/reidpr/quac/issues/13>`_.)
+* Estimate the origin location of tweets with no geotag. (But see `issue #15
+  <https://github.com/reidpr/quac/issues/15>`_.)
 
 * Careful preservation of Unicode throughout the processing pipeline.
 
@@ -16,9 +16,9 @@ package for acquiring and analyzing social internet content. Features:
   (we've seen certain weirdnesses in only one of our 1.3+ billion tweets).
   That is, we deal with the special cases so you don't have to.
 
-* Parallel processing using various combinations of ``make``, ``joblib``, and
-  a simple map-reduce framework called ``quacreduce`` which is included. (But
-  see `issue #15 <https://github.com/reidpr/quac/issues/15>`_.)
+* Parallel processing using various combinations of Make, ``joblib``, and a
+  simple map-reduce framework called QUACreduce which is included. (But see
+  `issue #13 <https://github.com/reidpr/quac/issues/13>`_.)
 
 QUAC is open source under the Apache license and was formerly known as Twepi
 ("Twitter for epidemic analysis").
