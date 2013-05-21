@@ -10,6 +10,8 @@ b	2
 c	3
 a	4
 b	5
+nullvaluewithtab	
+nullvaluenotab
 EOF
 
 x cat in.txt

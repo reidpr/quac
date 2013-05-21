@@ -4,6 +4,8 @@ b	2
 c	3
 a	4
 b	5
+nullvaluewithtab	
+nullvaluenotab
 $ (hashsplit 2 out < in.txt)
 $ cat out.0
 a	1
@@ -12,3 +14,5 @@ a	4
 $ cat out.1
 b	2
 b	5
+nullvaluewithtab	
+nullvaluenotab
