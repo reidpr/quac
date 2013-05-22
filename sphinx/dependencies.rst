@@ -116,7 +116,7 @@ explained in this bug report: http://hub.qgis.org/issues/6438
 Make
 ====
 
-QUAC requires GNU Make 3.81.
+QUAC requires GNU Make 3.81 and ``gcc``.
 
 
 OS X notes
