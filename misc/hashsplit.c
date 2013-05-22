@@ -1,3 +1,6 @@
+/* Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others. See
+   the file COPYRIGHT for details. */
+
 /* FIXME: This is not the most robust program. Patches to improve this are
    super welcome. In particular, I think it only compiles with gcc, which
    makes me sad.
