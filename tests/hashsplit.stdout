@@ -1,9 +1,67 @@
+$ hashsplit
+usage: hashsplit N BASENAME
+
+Split standard input containing a stream of key/value lines separated
+by a single tab into N output files named BASENAME.i according to the
+hash values of the keys. The value may be absent, either with or
+without a tab following the key. Keys and values may contain any bytes
+except zero, tab, and newline.
+1
+$ hashsplit 2
+usage: hashsplit N BASENAME
+
+Split standard input containing a stream of key/value lines separated
+by a single tab into N output files named BASENAME.i according to the
+hash values of the keys. The value may be absent, either with or
+without a tab following the key. Keys and values may contain any bytes
+except zero, tab, and newline.
+1
+$ hashsplit foo
+usage: hashsplit N BASENAME
+
+Split standard input containing a stream of key/value lines separated
+by a single tab into N output files named BASENAME.i according to the
+hash values of the keys. The value may be absent, either with or
+without a tab following the key. Keys and values may contain any bytes
+except zero, tab, and newline.
+1
+$ hashsplit 0 foo
+invalid number of output files: 0
+1
+$ hashsplit 1 foo
+invalid number of output files: 1
+1
+$ (hashsplit '' foo)
+invalid number of output files: 0
+1
+$ (hashsplit 2 '')
+length of BASENAME cannot be 0
+1
+$ (hashsplit 2 /does/not/exist < /dev/null)
+can't open /does/not/exist.0: No such file or directory
+1
 $ cat in.txt
 a	1
 b	2
 c	3
 a	4
 b	5
+a	6
+a	7
+a	8
+a	9
+a	10
+a	11
+a	12
+a	13
+a	14
+a	15
+a	16
+a	17
+a	18
+a	19
+a	20
+a	21
 nullvaluewithtab	
 nullvaluenotab
 $ (hashsplit 2 out < in.txt)
@@ -11,8 +69,24 @@ $ cat out.0
 a	1
 c	3
 a	4
+a	6
+a	7
+a	8
+a	9
+a	10
+a	11
+a	12
+a	13
+a	14
+a	15
+a	16
+a	17
+a	18
+a	19
+a	20
+a	21
+nullvaluewithtab	
 $ cat out.1
 b	2
 b	5
-nullvaluewithtab	
 nullvaluenotab
