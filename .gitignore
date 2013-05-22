@@ -95,6 +95,8 @@ sphinx/_build
 
 !bin
 
+bin/hashsplit
+
 # cmdtest output
 *.stderr-actual
 *.stderr-diff
