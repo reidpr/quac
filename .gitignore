@@ -94,3 +94,4 @@ doc
 sphinx/_build
 
 !bin
+!lib
