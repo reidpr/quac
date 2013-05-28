@@ -87,13 +87,14 @@ nosetests.xml
 
 ### Custom ###
 
+!bin
+!lib
+
 *.cfg
 *.log
 
 doc
 sphinx/_build
-
-!bin
 
 bin/hashsplit
 
