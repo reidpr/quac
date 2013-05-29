@@ -5,6 +5,9 @@ that each database handle contains a set of objects of a single type.
 The type to be stored needs to implement a few housekeeping methods.
 '''
 
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+
 import collections
 
 import db_glue

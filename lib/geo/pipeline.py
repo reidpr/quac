@@ -1,5 +1,8 @@
 'Try sub-models in order and return the first estimate that is not None.'
 
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+
 import base
 import u
 

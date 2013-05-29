@@ -1,4 +1,6 @@
 # A klugy but functional makefile to build the various stuff.
+#
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
 all: bin/hashsplit doc
 

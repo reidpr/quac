@@ -2,6 +2,8 @@
 
 'Convert .json.gz into one or more .raw.tsv and a .d (see the docs).'
 
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
 help_epilogue = '''
 This script takes a .stats parameter rather than a .json.gz. This is because
 the latter can sometimes be broken (in particular, if it is in the midst of

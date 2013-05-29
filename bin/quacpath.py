@@ -5,6 +5,9 @@
 # there won't be one in PYTHONPATH at all. However, if you are in this
 # situation, it might not be obvious because the other QUAC is only slightly
 # different.
+#
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
 
 import os
 import sys

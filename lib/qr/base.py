@@ -30,6 +30,8 @@
       mixins aren't implemented correctly; patches welcome. Or, they're not
       really mixins (inheriting from :class:`Job` isn't actually required)?'''
 
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
 
 from abc import ABCMeta, abstractmethod
 import base64

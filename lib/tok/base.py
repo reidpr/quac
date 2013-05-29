@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
 # A note on implementation of ngrams: subclasses should not worry about
 # ngrams. The base class will assemble ngrams if needed.
+
 
 from abc import ABCMeta, abstractmethod
 import itertools

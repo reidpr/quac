@@ -1,4 +1,5 @@
 #!/bin/bash
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
 # It used to be that you could test a Python module which called
 # testable.register() simply by running it as a script. However, the Powers

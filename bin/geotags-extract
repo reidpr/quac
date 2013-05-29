@@ -6,6 +6,8 @@ This script parses a day file containing tweets, extracts the ones with a
 geotag, splits those into tokens, and saves the individual (token or n-gram,
 geotag) pairs into a SpatiaLite database.'''
 
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
 help_epilogue = '''
 
 DB_FILE should not immediately follow --input; otherwise, it will be consumed

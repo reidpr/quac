@@ -1,3 +1,5 @@
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
 set terminal pdfcairo enhanced rounded size 5in,3.5in
 font_ = "Helvetica Bold"
 

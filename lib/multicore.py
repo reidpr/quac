@@ -2,6 +2,9 @@
 # spawn a few large jobs instead of many small jobs, repacking small jobs into
 # bigger ones if needed.
 
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+
 from __future__ import division
 
 import itertools

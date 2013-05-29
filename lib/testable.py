@@ -37,6 +37,9 @@
    so you can't do something analagous to argparse._HelpAction (do your thing
    and then exit immediately).'''
 
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+
 import argparse
 import doctest
 import inspect

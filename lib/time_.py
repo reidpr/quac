@@ -3,7 +3,8 @@
 # Why this isn't simply a part of the standard library, I have no idea. IMO
 # there is a special place in hell for the people who designed Python time
 # handling -- why are simple things so hard?
-
+#
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
 from datetime import tzinfo, timedelta, datetime
 import pytz

@@ -1,6 +1,8 @@
 '''This module contains models with a few variations on estimating locations
    with fitted Gaussian mixture models (GMMs).'''
 
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
 from __future__ import division
 
 from collections import Counter, OrderedDict

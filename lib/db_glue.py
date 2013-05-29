@@ -1,4 +1,5 @@
-# This file is based on db_glue.py from Cyclopath. Therefore, portions are
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others. This
+# file is based on db_glue.py from Cyclopath. Therefore, portions are
 # copyright (c) 2006-2010 Regents of the University of Minnesota.
 #
 # FIXME: Columns containing geodata must end in "geom", and other columns

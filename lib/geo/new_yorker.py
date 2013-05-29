@@ -2,6 +2,8 @@
    sometimes it returns None. Good for testing (see base.py docstring for
    sample usage).'''
 
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
 from django.contrib.gis import geos
 
 import u

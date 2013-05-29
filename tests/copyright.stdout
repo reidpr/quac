@@ -1,0 +1,10 @@
+.gitignore
+COPYRIGHT.rst
+LICENSE
+lib/disco/README
+lib/geo/__init__.py
+lib/qr/__init__.py
+lib/unicodedata2.py
+sphinx/Makefile
+sphinx/conf.py
+tests/README

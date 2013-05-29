@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
 import re
 
 import icu

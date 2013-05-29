@@ -1,4 +1,6 @@
 # Classes to represent objects found in tweet streams.
+#
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
 from datetime import datetime
 import dateutil.parser

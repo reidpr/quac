@@ -1,10 +1,13 @@
-# Utility routines for the Twitter analysis package
-#
-# BUGS / WARNINGS / FIXME:
-#
-# * This module keeps references to the config and logger objects it returns,
-#   and then uses them, so the caller should take care to not somehow acquire
-#   different ones.
+'''
+Utility routines for the Twitter analysis package.
+
+BUGS / WARNINGS / FIXME:
+
+* This module keeps references to the config and logger objects it returns,
+  and then uses them, so the caller should take care to not somehow acquire
+  different ones.'''
+
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
 import argparse
 import codecs

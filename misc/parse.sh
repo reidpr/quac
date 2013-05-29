@@ -4,6 +4,8 @@
 # a lock directory, to avoid multiple makes working in the same directory at
 # the same time.
 
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
 set -e  # stop script on error
 #set -x  # echo commands
 

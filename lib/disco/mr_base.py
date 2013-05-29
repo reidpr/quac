@@ -1,5 +1,7 @@
 'Base classes and stuff for Disco jobs.'
 
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
 import datetime
 import io
 import os.path

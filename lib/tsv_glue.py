@@ -14,6 +14,8 @@
    See http://docs.python.org/library/io.html for the meaning of the buffering
    parameter. '''
 
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
 import collections
 import io
 

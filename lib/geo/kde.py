@@ -1,3 +1,5 @@
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
 from django.contrib.gis import geos
 import numpy as np
 import scipy.stats.kde as kde
