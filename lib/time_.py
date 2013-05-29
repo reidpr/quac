@@ -102,6 +102,11 @@ def iso8601_parse(text):
       dt = utcify(dt)
    return dt
 
+def nowstr_human():
+   '''Return a human-readable string representing the current time, including
+      time zone.'''
+   return _time.strftime('%c %Z')
+
 def utcify(dt):
    'Convert a native datetime object into aware one in UTC.'
    return dt.replace(tzinfo=pytz.utc)

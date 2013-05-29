@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# Test that the quacreduce script works, using shell commands for map and
+# reduce (see quacreduce-python test for the Python version). Section numbers
+# refer to the "Map-Reduce with quacreduce" section in the documentation; make
+# sure these two files match.
+
+. ./environment.sh
+
+cd $DATADIR
+
+
+## Test map-reduce using shell pipeline
+
+echo '4.2.1. Create sample input'
+echo -e 'foo bar baz\nfoo foo' > foo1.txt
+echo -e 'bar' > foo2.txt
+cat foo*.txt
+
+echo '4.2.2. Define the map operator'
+cat foo*.txt | tr '[:blank:]' '\n'
+
+echo '4.2.3. Define the reduce operator'
+echo -e 'b\nb\na\nc\nc\nc' | uniq -c
+
+echo '4.2.4. Test the operators together'
+cat foo*.txt | tr '[:blank:]' '\n' | sort -sk1 -t '	' | uniq -c
+
+
+## Test map-reduce using quacreduce
+
+echo '4.2.5 Prepare the job'
+quacreduce --map 'tr "[:blank:]" "\n"' \
+           --reduce 'uniq -c > out/%(RID)' \
+           --partitions 2 \
+           ./job foo*.txt
+
+echo '4.2.6 Run the job with make'
+x ls -R job
+y "cd job && make --quiet"  # output contains temp dirs that vary between tests
+x ls -R job
+y "cat job/out/* | sort"
+
+#echo '4.2.8 Add more input data'
+#echo 'qux' > foo3.txt
+#quacreduce --update job /tmp/foo*.txt
+#(cd job && make -j2)
+#cat out/*
+
+
+## Test cleanup
+
+echo '*** Test cleanup'
+y "cd job && make --quiet clean"
+x ls -R job
+y "cd job && make --quiet reallyclean"
+x ls -R job
+
+
+## Clean up for subsequent tests
+
+rm -Rf job

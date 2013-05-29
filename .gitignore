@@ -87,11 +87,19 @@ nosetests.xml
 
 ### Custom ###
 
+!bin
+!lib
+
 *.cfg
 *.log
 
 doc
 sphinx/_build
 
-!bin
-!lib
+bin/hashsplit
+
+# cmdtest output
+*.stderr-actual
+*.stderr-diff
+*.stdout-actual
+*.stdout-diff

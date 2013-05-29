@@ -1,0 +1,18 @@
+This directory contains the subset of tests which use the "cmdtest" framework.
+These are shell scripts (which might be quite involved); standard output and
+error are tested against expected values. "man cmdtest" for the details.
+
+Test scripts can assume that pwd is this directory.
+
+../test.sh runs all tests here. To run just one, say "cmdtest -t foo ."
+
+You might be inclined to use "set -x" in your script to intermingle echoed
+commands and output. The problem here is that it's not consistent which
+command in a pipeline is printed first, so you'll get spurious failures. You
+could try "echo" commands to make the output more digestible.
+
+If cmdtest crashes with "NameError: global name 'errno' is not defined", that
+means you need to make your test executable (there is a bug in the error
+reporting).
+
+

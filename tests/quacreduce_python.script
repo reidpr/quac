@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Test that the Python interface of QUACreduce works.
+
+. ./environment.sh
+
+cd $DATADIR
+
+
+## Set up input
+
+y "echo -e 'foo bar baz\nfoo foo' > foo1.txt"
+y "echo -e 'bar' > foo2.txt"
+y "cat foo*.txt"
+
+
+## Do map-reduce
+
+y "quacreduce --python qr.wordcount.Job ./job foo*.txt"
+y "cd job && make --quiet"  # output contains temp dirs that vary between tests
+y "cat job/out/* | sort"
+
+
+## Clean up for subsequent tests
+
+rm -Rf job

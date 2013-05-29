@@ -1,0 +1,12 @@
+$ (echo -e 'foo bar baz\nfoo foo' > foo1.txt)
+$ (echo -e 'bar' > foo2.txt)
+$ (cat foo*.txt)
+foo bar baz
+foo foo
+bar
+$ (quacreduce --python qr.wordcount.Job ./job foo*.txt)
+$ (cd job && make --quiet)
+$ (cat job/out/* | sort)
+1 baz
+2 bar
+3 foo
