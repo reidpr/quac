@@ -14,6 +14,10 @@ judgement.
 `FIXME: Turn these lists into a chart with .deb, pip, and source distribution
 columns.`
 
+You will need Git to install QUAC. The wrapper `hub
+<https://github.com/defunkt/hub>`_ is also recommended if you are going to
+hack on QUAC at all.
+
 Debian packages
 ===============
 
