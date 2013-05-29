@@ -8,3 +8,7 @@ bin/hashsplit: misc/hashsplit.c
 .PHONY: doc
 doc:
 	cd sphinx && $(MAKE)
+
+.PHONY: doc-web
+doc-web:
+	cd sphinx && $(MAKE) web
