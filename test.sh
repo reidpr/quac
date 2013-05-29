@@ -117,7 +117,7 @@ cd $BASEDIR/bin
 # is specified.
 if [ "$to_test" == "" ]; then
     echo '*** testing scripts'
-    for script in $(find . -xtype f); do
+    for script in $(find -L . -type f); do
         # is it really a Python script? hacky test...
         if ( head -n1 $script | fgrep -q python ); then
 
