@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>About QUAC &mdash; QUAC documentation for commit bd63093</title>
+    <title>About QUAC &mdash; QUAC documentation for commit 3e8dd20</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="QUAC documentation for commit bd63093" href="#" />
+    <link rel="top" title="QUAC documentation for commit 3e8dd20" href="#" />
     <link rel="next" title="1. Getting started" href="getting_started.html" /> 
   </head>
   <body>
@@ -36,7 +36,7 @@
         <li class="right" style="margin-right: 10px">
           <a href="getting_started.html" title="1. Getting started"
              accesskey="N">next</a></li>
-        <li><a href="#">QUAC documentation for commit bd63093</a> &raquo;</li> 
+        <li><a href="#">QUAC documentation for commit 3e8dd20</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -87,14 +87,14 @@ package for acquiring and analyzing social internet content. Features:</p>
 <ul class="simple">
 <li>Reliably collect tweets from the Twitter Streaming API and convert them into
 an easy-to-parse, de-duplicated, well-ordered, and fast TSV format.</li>
-<li>Estimate the origin location of tweets with no geotag. (But see <a class="reference external" href="https://github.com/reidpr/quac/issues/13">issue #13</a>.)</li>
+<li>Estimate the origin location of tweets with no geotag. (But see <a class="reference external" href="https://github.com/reidpr/quac/issues/15">issue #15</a>.)</li>
 <li>Careful preservation of Unicode throughout the processing pipeline.</li>
 <li>Various cleanup steps to deal with tweet quirks, including very rare ones
 (we&#8217;ve seen certain weirdnesses in only one of our 1.3+ billion tweets).
 That is, we deal with the special cases so you don&#8217;t have to.</li>
-<li>Parallel processing using various combinations of <tt class="docutils literal"><span class="pre">make</span></tt>, <tt class="docutils literal"><span class="pre">joblib</span></tt>, and
-a simple map-reduce framework called <tt class="docutils literal"><span class="pre">makereduce</span></tt> which is included. (But
-see <a class="reference external" href="https://github.com/reidpr/quac/issues/15">issue #15</a>.)</li>
+<li>Parallel processing using various combinations of Make, <tt class="docutils literal"><span class="pre">joblib</span></tt>, and a
+simple map-reduce framework called QUACreduce which is included. (But see
+<a class="reference external" href="https://github.com/reidpr/quac/issues/13">issue #13</a>.)</li>
 </ul>
 <p>QUAC is open source under the Apache license and was formerly known as Twepi
 (&#8220;Twitter for epidemic analysis&#8221;).</p>
@@ -140,7 +140,8 @@ usually have good docstrings.</li>
 <li class="toctree-l2"><a class="reference internal" href="dependencies.html#scipy">2.4. SciPy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dependencies.html#one-file-python-modules">2.5. One-file Python modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dependencies.html#qgis">2.6. QGIS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dependencies.html#os-x-notes">2.7. OS X notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dependencies.html#make">2.7. Make</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dependencies.html#os-x-notes">2.8. OS X notes</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="pipeline.html">3. Preprocessing</a><ul>
@@ -149,11 +150,13 @@ usually have good docstrings.</li>
 <li class="toctree-l2"><a class="reference internal" href="pipeline.html#file-formats">3.3. File formats</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="map_reduce.html">4. Map-Reduce with <tt class="docutils literal"><span class="pre">makereduce</span></tt></a><ul>
+<li class="toctree-l1"><a class="reference internal" href="map_reduce.html">4. Map-Reduce with QUACreduce</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="map_reduce.html#introduction">4.1. Introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#example">4.2. Example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#drawbacks">4.3. Drawbacks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#fixme">4.4. FIXME</a></li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#summary-of-api">4.2. Summary of API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#example">4.3. Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#drawbacks">4.4. Drawbacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#fixme">4.5. FIXME</a></li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#footnotes">4.6. Footnotes</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="config.html">5. Configuration</a></li>
@@ -213,7 +216,7 @@ U01-GM097658-01.</p>
         <li class="right" style="margin-right: 10px">
           <a href="getting_started.html" title="1. Getting started"
              >next</a></li>
-        <li><a href="#">QUAC documentation for commit bd63093</a> &raquo;</li> 
+        <li><a href="#">QUAC documentation for commit 3e8dd20</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

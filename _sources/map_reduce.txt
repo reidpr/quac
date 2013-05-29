@@ -1,46 +1,53 @@
-Map-Reduce with ``makereduce``
+Map-Reduce with QUACreduce
 ******************************
 
 Introduction
 ============
 
-`Map-reduce <http://en.wikipedia.org/wiki/MapReduce>`_ [#]_ is a neat and easy
-to use parallel programming paradigm. However, its implementations have some
+`Map-reduce <http://en.wikipedia.org/wiki/MapReduce>`_ is a neat and easy to
+use parallel programming paradigm. [1]_ However, its implementations have some
 issues:
 
 - Industrial strength map-reduce frameworks (e.g., `Hadoop
   <http://en.wikipedia.org/wiki/Apache_Hadoop>`_, `Disco
   <http://discoproject.org/>`_) are difficult to install and use.
 
-- Frameworks assume that nodes have no performant shared parallel filesystem
-  like `Panasas <http://www.panasas.com/products/panfs>`_. Therefore, they
-  implement a non-POSIX distributed filesystem using node-local storage (e.g.,
-  Hadoop's HDFS).
-
-  While this condition is simpler from a hardware perspective, if you don't
-  have access to node-local disks for whatever reason (e.g., they don't
-  exist), you're in a pretty inconvenient situation. Typically, clusters like
-  this *do* have a nice parallel filesystem, but support for using it directly
-  is poor or nonexistent. You can of course run a distributed filesystem on
-  top of the parallel filesystem, but this is an unnecessary level of
-  indirection and throws away the convenience of the parallel filesystem.
+- Frameworks tend to assume node-local storage. However, traditional HPC
+  clusters tend to have a fast parallel filesystem like `Panasas
+  <http://www.panasas.com/products/panfs>`_; node-local storage, if present,
+  typically does not persist between jobs. [2]_
 
 - Map-reduce jobs cannot be run incrementally; if new input data are added,
   the entire job must be re-run.
 
-``makereduce`` is a simple wrapper included with QUAC that solves these
-problems. It works on both a single node as well as in a SLURM allocation.
+QUACreduce is a simple wrapper included with QUAC that solves these
+problems: it is designed for a fast filesystem shared by all nodes and can
+take advantage of nonpersistent node-local storage. It runs on top of ``make``
+for incremental processing and works on both a single node as well as in a
+SLURM allocation.
 
+Summary of API
+==============
+
+The basic paradigm is that map and reduce operators produce and accept
+line-oriented input, with key and value separated by a single tab character.
+[3]_ All characters except tab, return, and newline are permitted in keys and
+values (though this is untested). Null values are permitted; in this case the
+separating tab may or may be omitted. [4]_
+
+The ``quacreduce`` command implements this API by creating a makefile, which
+you then run with ``make`` (either directly or wrapped).
+
+QUACreduce also has a Python API which we do not cover here.
 
 Example
 =======
 
-The basic paradigm is that the ``makereduce`` command creates a makefile which
-you then run with ``make`` (either directly or wrapped).
+.. NOTE: This example is tested in tests/quacreduce.script; make sure the two
+   examples match.
 
 This example implements a toy version of the classic "word count" example
-using standard UNIX tools. ``makereduce`` also has a Python API which we do
-not cover here.
+using standard UNIX tools.
 
 Create sample input
 -------------------
@@ -59,8 +66,6 @@ Define the *map* operator
 -------------------------
 
 This converts standard input into a sequence of key/value pairs, one per line.
-The key can be any string and is separated from the value (which is opaque to
-``makereduce`` but must not contain newline characters) by a single space.
 
 We will use ``tr`` for this::
 
@@ -73,7 +78,7 @@ We will use ``tr`` for this::
   bar
 
 (Note that in the standard map-reduce word count examples, the mapper emits
-the value 1 for each word. ``makereduce`` is perfectly happy with null values,
+the value 1 for each word. QUACreduce is perfectly happy with null values,
 and counting the length of a set is the same as summing a set of 1's of the
 same size, so we do the former.)
 
@@ -99,41 +104,41 @@ Test the operators together
 
 ::
 
-  $ cat /tmp/foo*.txt | tr '[:blank:]' '\n' | sort -sk1 | uniq -c
+  $ cat /tmp/foo*.txt | tr '[:blank:]' '\n' | sort -sk1 -t '	' | uniq -c
   2 bar
   1 baz
   3 foo
 
 Congratulations, you've just run map-reduce in serial mode, with one mapper
 and one reducer! The next step is to run lots of mappers and reducers in
-parallel, which is one thing ``makereduce`` helps with.
+parallel, which is one thing QUACreduce helps with.
 
 Prepare the job
 ---------------
 
-The ``makereduce`` command is used to prepare a makefile as well as a SLURM
+The ``quacreduce`` command is used to prepare a makefile as well as a SLURM
 job file::
 
-  $ makereduce -m 'tr "[:blank:]" "\n"' \
-               -r 'uniq -c > out/$RID' \
-               -p 2 \
+  $ quacreduce --map 'tr "[:blank:]" "\n"' \
+               --reduce 'uniq -c > out/%(RID)' \
+               --partitions 2 \
                /tmp/mrjob /tmp/foo*.txt
 
 What's going on here?
 
-* ``-m`` defines the map operator. This can be any shell pipeline; watch
-  quoting carefully!
+* ``--map`` defines the map operator. This can be any shell pipeline; watch
+  quoting carefully! The CWD is the job directory.
 
-* ``-r`` defines the reduce operator. The environment variable ``$RID`` is
-  the reducer ID; this is important for keeping output from different
-  reducers separate.
+* ``--reduce`` defines the reduce operator. The variable ``%(RID)`` is the
+  reducer ID; this is important for keeping output from different reducers
+  separate. It is substituted by QUACreduce during job construction.
 
-* ``-p`` defines the number of partitions. There is one reducer per
-  partition, so this limits the available parallelism for the reduce step
-  (as well as downstream map-reduce jobs unless you take other measures).
-  The limiting factor to keep in mind is that if you have :math:`n` input
-  files and :math:`p` partitions, you will need :math:`n \times p`
-  temporary files, which can grow quickly.
+* ``--partitions`` defines the number of partitions. There is one reducer per
+  partition, so this limits the available parallelism for the reduce step (as
+  well as downstream map-reduce jobs unless you take other measures). The
+  limiting factor to keep in mind is that if you have :math:`n` input files
+  and :math:`p` partitions, you will need :math:`n \times p` temporary files,
+  which can grow quickly.
 
 * ``/tmp/mrjob`` is a directory in which to build the job.
 
@@ -151,13 +156,13 @@ step). For example::
   $ cd /tmp/mrjob
   $ ls -R
   .:
-  Makefile  slurm_job  tmp
+  Makefile  slurm_job  out  tmp
 
   ./out:
 
   ./tmp:
 
-``makereduce`` has created two files and two directories:
+QUACreduce has created two files and two directories:
 
 * ``Makefile`` is what you expect; it defines the dependency graph among
   the temporary and job management files.
@@ -218,15 +223,15 @@ total number of tasks ``make`` will run simultaneously, must be coordinated
 for good performance. The above might be appropriate for a cluster with two
 cores per node. Memory could be a limitation also, along with myriad others.
 
-Adding more input data
-----------------------
+Add more input data
+-------------------
 
-One of the neat things that ``makereduce`` can do is add additional data
+One of the neat things that QUACreduce can do is add additional data
 and then only re-run the parts of the job that are affected. For example::
 
   $ echo 'qux' > /tmp/foo3.txt
   $ cd /tmp/mrjob
-  $ makereduce --update . /tmp/foo*.txt
+  $ quacreduce --update . /tmp/foo*.txt
   $ make -j2
   [...FIXME...]
   $ cat out/*
@@ -241,14 +246,14 @@ for ``foo1.txt`` and ``foo2.txt``.
 What's next?
 ------------
 
-For further help, say ``makereduce --help`` or see ``makr/grep.py`` for a
+For further help, say ``quacreduce --help`` or see ``makr/grep.py`` for a
 Python example.
 
 
 Drawbacks
 =========
 
-``makereduce`` is pretty simple and has a number of limitations. If these are
+QUACreduce is pretty simple and has a number of limitations. If these are
 a problem, perhaps you are better off with something else. Some of these could
 be fixed, and others are more fundamental.
 
@@ -260,12 +265,12 @@ be fixed, and others are more fundamental.
   something without newlines, which is kind of annoying and wastes spacetime.
 
 * Scaling is not as good. If you need to run 10,000 mappers in parallel,
-  ``makereduce`` is probably not for you.
+  QUACreduce is probably not for you.
 
 * As mentioned earlier, input filenames must be unique even if they came from
   different directories.
 
-* No automatic chunking of input; ``makereduce`` cannot map a single file in
+* No automatic chunking of input; QUACreduce cannot map a single file in
   parallel.
 
 
@@ -276,8 +281,19 @@ FIXME
 - parallel sorts
 
 
-.. Footnotes
-   =========
+Footnotes
+=========
 
-.. [#] I know that it's usually spelled MapReduce, but I think InterCapping is
+.. [1] I know that it's usually spelled MapReduce, but I think InterCapping is
        stupid.
+
+.. [2] This is because (a) it's difficult to ensure that a new job is assigned
+       exactly the same set of nodes as a previous job and/or (b) node-local
+       storage is explicitly wiped between jobs.
+
+.. [3] This is the same as Hadoop Streaming; the goal is to make QUACreduce
+       components with non-null values work without modification in that
+       framework, though this is untested.
+
+.. [4] Note that this contrasts with Hadoop Streaming, where a null key is
+       permitted but a null value isn't.

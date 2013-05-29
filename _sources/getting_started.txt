@@ -17,6 +17,11 @@ Install QUAC
    *Note: This creates a read-only repository. If you plan to contribute to
    QUAC, you should fork the repo on Github and clone yours instead.*
 
+#. Build executables and the documentation::
+
+     cd quac
+     make
+
 #. Run the tests::
 
      ./test.sh
