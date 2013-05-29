@@ -62,7 +62,7 @@ web: html
 	@echo Publishing new docs
 	cd ../doc && git add --all
 	cd ../doc && git commit -a -m "docs for commit $$(cd .. && git rev-parse --short HEAD)"
-	cd ../doc && git push
+	cd ../doc && git push origin gh-pages
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
