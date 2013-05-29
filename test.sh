@@ -58,16 +58,19 @@ shift $((OPTIND-1))
 
 to_test=$*
 
-# Choose the right sed option for extended regexes, in a lame way.
+# Choose the right sed option for extended regexes and find options for
+# symlinks, in a lame way.
 case $(uname) in
     Linux)
         sed='sed -r'
+        find='find . -xtype f'
         ;;
     Darwin)
         sed='sed -E'
+        find='find -L . -type f'
         ;;
     *)
-        echo "don't know how to sed on your platform" >&2
+        echo "don't know how to sed or find on your platform" >&2
         exit 1
         ;;
 esac
@@ -113,7 +116,7 @@ cd $BASEDIR/bin
 # Can't specify scripts to test.sh (use --unittest), so do nothing if anything
 # is specified.
 if [ "$to_test" == "" ]; then
-    for script in $(find . -xtype f); do
+    for script in $($find); do
         # is it really a Python script? hacky test...
         if ( head -n1 $script | fgrep -q python ); then
 
