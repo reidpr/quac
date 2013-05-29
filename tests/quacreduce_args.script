@@ -44,5 +44,8 @@ echo $?
 x quacreduce --python foo --map bar --reduce baz job input.txt
 echo $?
 
+# clean up for subsequent tests
+rm -Rf job
+
 # exit with success
 exit 0

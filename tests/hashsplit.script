@@ -18,8 +18,6 @@ x hashsplit foo
 echo $?
 x hashsplit 0 foo
 echo $?
-x hashsplit 1 foo
-echo $?
 y "hashsplit '' foo"
 echo $?
 y "hashsplit 2 ''"

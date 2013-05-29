@@ -30,7 +30,8 @@
 #   * If a script has import problems, a complaint about that will be printed
 #     instead of running the tests (which obviously can't be done).
 #
-#   * This script will also run all the cmdtests under tests/.
+#   * This script will also run all the cmdtests under tests/. (To run an
+#     individual cmdtest test, "cd tests" and then "cmdtest -t foo .".)
 #
 # BUGS:
 #

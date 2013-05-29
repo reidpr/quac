@@ -28,9 +28,6 @@ except zero, tab, and newline.
 $ hashsplit 0 foo
 invalid number of output files: 0
 1
-$ hashsplit 1 foo
-invalid number of output files: 1
-1
 $ (hashsplit '' foo)
 invalid number of output files: 0
 1

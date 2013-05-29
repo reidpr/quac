@@ -79,6 +79,8 @@ gr.add_argument('--update',
 
 def main():
    directories_setup()
+   if (args.python):
+      pythonify()
    makefile_dump()
    slurm_dump()
 
@@ -133,6 +135,14 @@ reallyclean: clean
         'reducedone': 'tmp/%d.reduced' % (rid),
         'sortdir': args.sortdir })
    fp.close()
+
+def pythonify():
+   'Adjust args.map and args.reduce to call the appropriate Python methods.'
+   assert (args.python)
+   module = args.python.rpartition('.')[0]
+   class_ = args.python
+   args.map = "python -c 'import %(module)s; %(class_)s.map_stdinout()'" % locals()
+   args.reduce = "python -c 'import %(module)s; %(class_)s.reduce_stdinout(%%(RID))'" % locals()
 
 def slurm_dump():
    pass  # unimplemented, see issue #33

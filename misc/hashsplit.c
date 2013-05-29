@@ -20,7 +20,8 @@
 /** Constants **/
 
 /* We use a relatively large output buffer size of 512K to be prepared for
-   filesystems that use large blocks (e.g., Panasas, some RAID).
+   filesystems that use large blocks (e.g., Panasas, some RAID). (See also
+   OUTPUT_BUFSIZE in lib/qr/base.py.)
 
    FIXME: this parameter has not been tuned experimentally. */
 #define OUTPUT_BUFSIZE 524288
@@ -47,7 +48,7 @@ int main(int argc, char * argv[])
    if (argc != 3)
       usage();
    output_ct = atoi(argv[1]);
-   if (output_ct <= 1)
+   if (output_ct < 1)
       fatal("invalid number of output files: %d", output_ct);
    if (strlen(argv[2]) == 0)
       fatal("length of BASENAME cannot be 0");

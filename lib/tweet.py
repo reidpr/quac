@@ -201,7 +201,7 @@ class Tweet(object):
       # WARNING: Make sure this is consistent with to_list() and README.
       o = class_()
       o.id = int(list_[0])
-      o.created_at = time_.iso8601utc_parse(list_[1])  # FIXME: Slow
+      o.created_at = time_.iso8601utc_parse(list_[1])  # FIXME: Slow? Issue #46
       o.text = list_[2]
       o.user_screen_name = list_[3]
       o.user_description = list_[4]
