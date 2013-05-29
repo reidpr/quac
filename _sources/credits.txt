@@ -1,3 +1,5 @@
+.. Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
 .. Please add yourself to this file if you make a nontrivial contribution!
 
 Credits
