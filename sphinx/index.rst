@@ -19,6 +19,7 @@ Table of contents
    limitations
    documentation
    citing
+   release_notes
    credits
 
 
