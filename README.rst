@@ -24,6 +24,14 @@ QUAC is copyright © 2012-2013 Los Alamos National Security, LLC, and others.
 It is open source under the Apache license and was formerly known as Twepi
 ("Twitter for epidemic analysis").
 
+Reporting bugs
+--------------
+
+Use our `list of issues <https://github.com/reidpr/quac/issues>`_. To maximize
+the chances of your bug being understood and fixed, you should read `"Three
+parts to every good bug report"
+<http://www.joelonsoftware.com/articles/fog0000000029.html>`_ (scroll down).
+
 If you find QUAC useful
 -----------------------
 
