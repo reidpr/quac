@@ -1,41 +1,25 @@
 .. Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
-Getting started
+Collecting data
 ***************
 
-These are basic directions to collect some tweets and put them in TSV files so
-you can do something awesome with them. These directions aren't comprehensive;
-you may need to consult other sources to fill in some gaps.
+These are basic directions to collect and preprocess data so you can do
+something awesome with them. These directions aren't comprehensive; you may
+need to consult other sources to fill in some gaps.
 
-Install QUAC
-============
+.. note:: You may not need to do this. If you have collaborators who are
+   already collecting data, you should probably in fact *not* do this. Just
+   use their data.
 
-#. Install the dependencies.
 
-#. Grab the code using Git::
+Twitter
+=======
 
-     git clone https://github.com/reidpr/quac.git
+These instructions will help you collect and archive tweets as they appear in
+the Streaming API. QUAC currently cannot acquire past tweets.
 
-   *Note: This creates a read-only repository. If you plan to contribute to
-   QUAC, you should fork the repo on Github and clone yours instead.*
-
-#. Build executables and the documentation::
-
-     cd quac
-     make
-
-#. Run the tests::
-
-     ./test.sh
-
-Collect some tweets
-===================
-
-*Note: You may not need to do this. If you have collaborators who are already
-collecting tweets, you should in fact not do this. Just use their data.*
-
-Set up Twitter
---------------
+Set up authentication
+---------------------
 
 You need both a user account and an application, as well as four different
 authentication parameters, to access the streaming API using OAuth.
@@ -64,8 +48,10 @@ Run the collector
 
 #. In ``config``, create a file ``sample.cfg``; look through the options in
    ``default.cfg`` and add to ``sample.cfg`` the ones that need to be
-   customized. **Because this file will contain authentication secrets, ensure
-   it has appropriate permissions.**
+   customized.
+
+   .. warning:: Because this file will contain authentication secrets, ensure
+      that it has appropriate permissions.
 
 #. Run the collector for a while, e.g.::
 

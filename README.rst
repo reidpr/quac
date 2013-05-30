@@ -18,17 +18,11 @@ package for acquiring and analyzing social internet content. Features:
 
 * Parallel processing using various combinations of Make, ``joblib``, and a
   simple map-reduce framework called QUACreduce which is included. (But see
-  `issue #13 <https://github.com/reidpr/quac/issues/13>`_.)
+  `issue #33 <https://github.com/reidpr/quac/issues/33>`_.)
 
-QUAC is copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+QUAC is copyright © 2012-2013 Los Alamos National Security, LLC, and others.
 It is open source under the Apache license and was formerly known as Twepi
 ("Twitter for epidemic analysis").
-
-How to get QUAC
----------------
-
-Download it from our `Github project <https://github.com/reidpr/quac>`_. See
-also the :doc:`getting_started` section.
 
 If you find QUAC useful
 -----------------------
@@ -38,7 +32,8 @@ uses, and/or star the project on GitHub. This type of feedback is very
 important for continued justification of the project to our sponsors.
 
 Note that for many uses of QUAC (especially research) you are ethically
-oblicated to cite it. For guidelines on how to do this, see :doc:`citing`.
+oblicated to cite it. For guidelines on how to do this, see the *Citing*
+section of the documentation.
 
 For more information
 --------------------

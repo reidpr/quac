@@ -10,8 +10,8 @@ Table of contents
    :maxdepth: 2
    :numbered:
 
-   getting_started
-   dependencies
+   install
+   collecting
    pipeline
    map_reduce
    config
