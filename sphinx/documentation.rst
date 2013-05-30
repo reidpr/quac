@@ -8,7 +8,7 @@ Building the docs
 
 To build HTML::
 
-   $ (cd sphinx && make)
+   $ make doc
 
 Eventually we may build a few other formats too (e.g., PDF via LaTeX).
 
@@ -56,5 +56,5 @@ set that up:
 Publishing
 ----------
 
-Just say ``(cd sphinx && make web)``. Note that it can sometimes take a few
-minutes for the new version to be published.
+Just say ``make doc-web``. Note that it can sometimes take a few minutes for
+the new version to be published.
