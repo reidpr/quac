@@ -18,7 +18,8 @@ Summary
      cd quac
      make
 
-#. Run the tests::
+#. Run the tests (this is actually pretty important, as it tells you whether
+   you've installed all the dependencies correctly)::
 
      ./test.sh
 
