@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>2. Dependencies &mdash; QUAC documentation for commit cdafde4</title>
+    <title>1. Installing QUAC &mdash; QUAC documentation for commit b9b6ab0</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,46 +26,50 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="QUAC documentation for commit cdafde4" href="index.html" />
-    <link rel="next" title="3. Preprocessing" href="pipeline.html" />
-    <link rel="prev" title="1. Getting started" href="getting_started.html" /> 
+    <link rel="top" title="QUAC documentation for commit b9b6ab0" href="index.html" />
+    <link rel="next" title="2. Collecting data" href="collecting.html" />
+    <link rel="prev" title="Table of contents" href="index.html" /> 
   </head>
   <body>
     <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
-          <a href="pipeline.html" title="3. Preprocessing"
+          <a href="collecting.html" title="2. Collecting data"
              accesskey="N">next</a></li>
         <li class="right" >
-          <a href="getting_started.html" title="1. Getting started"
+          <a href="index.html" title="Table of contents"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit cdafde4</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit b9b6ab0</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">2. Dependencies</a><ul>
-<li><a class="reference internal" href="#debian-packages">2.1. Debian packages</a></li>
-<li><a class="reference internal" href="#pypi-python-packages">2.2. PyPI Python packages</a></li>
-<li><a class="reference internal" href="#other-python-packages">2.3. Other Python packages</a></li>
-<li><a class="reference internal" href="#scipy">2.4. SciPy</a></li>
-<li><a class="reference internal" href="#one-file-python-modules">2.5. One-file Python modules</a></li>
-<li><a class="reference internal" href="#qgis">2.6. QGIS</a></li>
-<li><a class="reference internal" href="#make">2.7. Make</a></li>
-<li><a class="reference internal" href="#os-x-notes">2.8. OS X notes</a></li>
+<li><a class="reference internal" href="#">1. Installing QUAC</a><ul>
+<li><a class="reference internal" href="#summary">1.1. Summary</a></li>
+<li><a class="reference internal" href="#dependencies">1.2. Dependencies</a><ul>
+<li><a class="reference internal" href="#debian-packages">1.2.1. Debian packages</a></li>
+<li><a class="reference internal" href="#pypi-python-packages">1.2.2. PyPI Python packages</a></li>
+<li><a class="reference internal" href="#other-python-packages">1.2.3. Other Python packages</a></li>
+<li><a class="reference internal" href="#scipy">1.2.4. SciPy</a></li>
+<li><a class="reference internal" href="#one-file-python-modules">1.2.5. One-file Python modules</a></li>
+<li><a class="reference internal" href="#qgis">1.2.6. QGIS</a></li>
+<li><a class="reference internal" href="#make">1.2.7. Make</a></li>
+<li><a class="reference internal" href="#os-x-notes">1.2.8. OS X notes</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="getting_started.html"
-                        title="previous chapter">1. Getting started</a></p>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Table of contents</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="pipeline.html"
-                        title="next chapter">3. Preprocessing</a></p>
+  <p class="topless"><a href="collecting.html"
+                        title="next chapter">2. Collecting data</a></p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -87,21 +91,52 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="dependencies">
-<h1>2. Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="installing-quac">
+<h1>1. Installing QUAC<a class="headerlink" href="#installing-quac" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="summary">
+<h2>1.1. Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">Install the dependencies below.</p>
+</li>
+<li><p class="first">Download the code using Git:</p>
+<div class="highlight-python"><pre>git clone https://github.com/reidpr/quac.git</pre>
+</div>
+</li>
+<li><p class="first">Build executables and the documentation:</p>
+<div class="highlight-python"><pre>cd quac
+make</pre>
+</div>
+</li>
+<li><p class="first">Run the tests (this is actually pretty important, as it tells you whether
+you&#8217;ve installed all the dependencies correctly):</p>
+<div class="highlight-python"><pre>./test.sh</pre>
+</div>
+<p>(While some parts of QUAC will work if some tests fail, we recommend
+installing everything necessary to make them pass, as this will make your
+life much easier going forward.)</p>
+</li>
+</ol>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you plan to <a class="reference internal" href="contributing.html"><em>contribute to QUAC</em></a>, you
+should fork the repository on Github and clone that fork instead.</p>
+</div>
+</div>
+<div class="section" id="dependencies">
+<h2>1.2. Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
 <p>Installation of QUAC has been documented only on Ubuntu Linux (&#8220;Precise
 Pangolin&#8221;), though it also runs on Macs and a few Red Hat variants. Probably
 any UNIX would be fine.</p>
 <p>It requires Python 2.7 and some other stuff listed below. Note that depending
 on what you are doing, you might not need all the dependencies. Use your
 judgement.</p>
-<p><cite>FIXME: This section may be incomplete. Please improve it.</cite></p>
+<p><cite>FIXME: This section is incomplete and out of date. Please improve it.</cite></p>
 <p><cite>FIXME: Turn these lists into a chart with .deb, pip, and source distribution
 columns.</cite></p>
-<p>You will need Git to install QUAC. The wrapper <a class="reference external" href="https://github.com/defunkt/hub">hub</a> is also recommended if you are going to
+<p>You need Git to install QUAC and run the tests. The wrapper <a class="reference external" href="https://github.com/defunkt/hub">hub</a> is also recommended if you are going to
 hack on QUAC at all.</p>
 <div class="section" id="debian-packages">
-<h2>2.1. Debian packages<a class="headerlink" href="#debian-packages" title="Permalink to this headline">¶</a></h2>
+<h3>1.2.1. Debian packages<a class="headerlink" href="#debian-packages" title="Permalink to this headline">¶</a></h3>
 <p>Install these guys first.</p>
 <ul class="simple">
 <li><tt class="docutils literal"><span class="pre">gdal-bin</span></tt></li>
@@ -130,7 +165,7 @@ hack on QUAC at all.</p>
 </ul>
 </div>
 <div class="section" id="pypi-python-packages">
-<h2>2.2. PyPI Python packages<a class="headerlink" href="#pypi-python-packages" title="Permalink to this headline">¶</a></h2>
+<h3>1.2.2. PyPI Python packages<a class="headerlink" href="#pypi-python-packages" title="Permalink to this headline">¶</a></h3>
 <p>Install with <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">foo</span></tt>.</p>
 <ul class="simple">
 <li><a class="reference external" href="https://pypi.python.org/pypi/isodate">isodate</a> parsing and formatting
@@ -145,14 +180,14 @@ machine learning library.</li>
 </ul>
 </div>
 <div class="section" id="other-python-packages">
-<h2>2.3. Other Python packages<a class="headerlink" href="#other-python-packages" title="Permalink to this headline">¶</a></h2>
+<h3>1.2.3. Other Python packages<a class="headerlink" href="#other-python-packages" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>A <a class="reference external" href="https://bitbucket.org/reidpr/tweetstream-reidpr">custom version</a> of
 <tt class="docutils literal"><span class="pre">tweetstream</span></tt> Twitter library (hacked by Reid)</li>
 </ul>
 </div>
 <div class="section" id="scipy">
-<h2>2.4. SciPy<a class="headerlink" href="#scipy" title="Permalink to this headline">¶</a></h2>
+<h3>1.2.4. SciPy<a class="headerlink" href="#scipy" title="Permalink to this headline">¶</a></h3>
 <p>QUAC needs SciPy version 0.11 or better.</p>
 <p>Both Debian and Ubuntu only have 0.10, even in the bleeding-edge development
 releases (as of 2/20/2013). You can install it with <tt class="docutils literal"><span class="pre">pip</span></tt>. It&#8217;s worth
@@ -167,7 +202,7 @@ probably not terribly important for us) optimized ATLAS. You can do that by
 building it from source; directions are in <tt class="docutils literal"><span class="pre">README.Debian</span></tt>.</p>
 </div>
 <div class="section" id="one-file-python-modules">
-<h2>2.5. One-file Python modules<a class="headerlink" href="#one-file-python-modules" title="Permalink to this headline">¶</a></h2>
+<h3>1.2.5. One-file Python modules<a class="headerlink" href="#one-file-python-modules" title="Permalink to this headline">¶</a></h3>
 <p>Download the modules (they are single <tt class="docutils literal"><span class="pre">.py</span></tt> files) and place them somewhere
 in your Python path (e.g., <tt class="docutils literal"><span class="pre">/usr/local/lib/python2.7/dist-packages</span></tt>).</p>
 <ul class="simple">
@@ -176,7 +211,7 @@ tokenization library for Japanese.</li>
 </ul>
 </div>
 <div class="section" id="qgis">
-<h2>2.6. QGIS<a class="headerlink" href="#qgis" title="Permalink to this headline">¶</a></h2>
+<h3>1.2.6. QGIS<a class="headerlink" href="#qgis" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="http://www.qgis.org/">QGIS</a> is an open source GIS system. While Ubuntu
 comes with QGIS, it is a little crusty. However, the QGIS project provides
 package repositories with new versions; see the <a class="reference external" href="http://hub.qgis.org/projects/quantum-gis/wiki/Download">download page</a>. You probably want
@@ -189,11 +224,11 @@ more (<tt class="docutils literal"><span class="pre">grass642</span></tt> is). T
 explained in this bug report: <a class="reference external" href="http://hub.qgis.org/issues/6438">http://hub.qgis.org/issues/6438</a></p>
 </div>
 <div class="section" id="make">
-<h2>2.7. Make<a class="headerlink" href="#make" title="Permalink to this headline">¶</a></h2>
+<h3>1.2.7. Make<a class="headerlink" href="#make" title="Permalink to this headline">¶</a></h3>
 <p>QUAC requires GNU Make 3.81 and <tt class="docutils literal"><span class="pre">gcc</span></tt>.</p>
 </div>
 <div class="section" id="os-x-notes">
-<h2>2.8. OS X notes<a class="headerlink" href="#os-x-notes" title="Permalink to this headline">¶</a></h2>
+<h3>1.2.8. OS X notes<a class="headerlink" href="#os-x-notes" title="Permalink to this headline">¶</a></h3>
 <p><cite>FIXME: these are out of date</cite></p>
 <ul class="simple">
 <li>SpatialLite<ul>
@@ -213,6 +248,7 @@ define=SQLITE_OMIT_LOAD_EXTENSION</li>
 </ul>
 </div>
 </div>
+</div>
 
 
           </div>
@@ -224,12 +260,12 @@ define=SQLITE_OMIT_LOAD_EXTENSION</li>
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
-          <a href="pipeline.html" title="3. Preprocessing"
+          <a href="collecting.html" title="2. Collecting data"
              >next</a></li>
         <li class="right" >
-          <a href="getting_started.html" title="1. Getting started"
+          <a href="index.html" title="Table of contents"
              >previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit cdafde4</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit b9b6ab0</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

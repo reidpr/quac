@@ -1,0 +1,292 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>9. How to contribute &mdash; QUAC documentation for commit b9b6ab0</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="QUAC documentation for commit b9b6ab0" href="index.html" />
+    <link rel="next" title="10. Release notes" href="release_notes.html" />
+    <link rel="prev" title="8. Citing QUAC" href="citing.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="release_notes.html" title="10. Release notes"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="citing.html" title="8. Citing QUAC"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">QUAC documentation for commit b9b6ab0</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">9. How to contribute</a><ul>
+<li><a class="reference internal" href="#basic-workflow">9.1. Basic workflow</a><ul>
+<li><a class="reference internal" href="#branching-model">9.1.1. Branching model</a></li>
+<li><a class="reference internal" href="#doing-actual-work">9.1.2. Doing actual work</a></li>
+<li><a class="reference internal" href="#merging-to-master">9.1.3. Merging to <tt class="docutils literal"><span class="pre">master</span></tt></a></li>
+<li><a class="reference internal" href="#cutting-a-release">9.1.4. Cutting a release</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#code-style">9.2. Code style</a></li>
+<li><a class="reference internal" href="#documentation">9.3. Documentation</a><ul>
+<li><a class="reference internal" href="#building-the-docs">9.3.1. Building the docs</a></li>
+<li><a class="reference internal" href="#conventions">9.3.2. Conventions</a></li>
+<li><a class="reference internal" href="#publishing-to-the-web">9.3.3. Publishing to the web</a><ul>
+<li><a class="reference internal" href="#prerequisites">9.3.3.1. Prerequisites</a></li>
+<li><a class="reference internal" href="#publishing">9.3.3.2. Publishing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="citing.html"
+                        title="previous chapter">8. Citing QUAC</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="release_notes.html"
+                        title="next chapter">10. Release notes</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="how-to-contribute">
+<h1>9. How to contribute<a class="headerlink" href="#how-to-contribute" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This section is definitely a work in progress.</p>
+</div>
+<div class="section" id="basic-workflow">
+<h2>9.1. Basic workflow<a class="headerlink" href="#basic-workflow" title="Permalink to this headline">¶</a></h2>
+<p>These are the rough steps we follow to get things done. Use your judgement
+too!</p>
+<div class="section" id="branching-model">
+<h3>9.1.1. Branching model<a class="headerlink" href="#branching-model" title="Permalink to this headline">¶</a></h3>
+<p>We try to keep the branching model simple. Right now, ours is fairly similar
+to Scott Chacon&#8217;s <a class="reference external" href="http://scottchacon.com/2011/08/31/github-flow.html">&#8220;GitHub Flow&#8221;</a>: <tt class="docutils literal"><span class="pre">master</span></tt> is stable;
+do (non-trivial, i.e. multi-commit) work on topic branches; use pull requests
+to ask for merging. One thing we do take from Driessen&#8217;s <a class="reference external" href="http://nvie.com/posts/a-successful-git-branching-model/">Git-Flow</a> model is an
+avoidance of fast-forward merges in most cases.</p>
+<p>We do tag versions. At this point, this is a planning tool rather than any
+statement about stability.</p>
+</div>
+<div class="section" id="doing-actual-work">
+<h3>9.1.2. Doing actual work<a class="headerlink" href="#doing-actual-work" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic">
+<li><p class="first">Select an issue to work on and assign it to yourself. If there isn&#8217;t one,
+create one. You might want to discuss your plans before diving in. Make
+sure no one else is working on it already.</p>
+<p>Sometimes your plans involve multiple issues. In this case, pick one to be
+the &#8220;leader&#8221; (you&#8217;ll use this below).</p>
+</li>
+<li><p class="first">Create (and switch to) a branch to do your work on:</p>
+<div class="highlight-python"><pre>git checkout -b foo-branch</pre>
+</div>
+<p>Name the branch after the issue, including issue number, if that will be
+helpful.</p>
+</li>
+<li><p class="first">Work, work, work. Commit lots. Use test-driven development. If a commit
+will close an issue, use the GitHub commit-message syntax to do so.</p>
+</li>
+<li><p class="first">(Optional.) If your history is particularly insane, clean it up with <tt class="docutils literal"><span class="pre">git</span>
+<span class="pre">rebase</span></tt>.</p>
+</li>
+<li><p class="first">Merge <tt class="docutils literal"><span class="pre">master</span></tt> into your branch. Repair any conflicts that arise. (This
+is so the later merge in the opposite direction will be clean.)</p>
+</li>
+<li><p class="first">Run the tests. If they don&#8217;t pass, keep working until they do.</p>
+</li>
+<li><p class="first">Push your branch to GitHub. If you&#8217;re a core contributor (i.e., you have
+write access to <tt class="docutils literal"><span class="pre">reidpr/quac</span></tt>), put your branch there. Otherwise, put it
+in your QUAC fork on GitHub.</p>
+</li>
+<li><p class="first">Create a pull request. (Do this any time you want feedback &#8212; you don&#8217;t
+have to be ready to merge. However, in this case say clearly in the pull
+request comments that you don&#8217;t want a merge yet.)</p>
+<p>Core contributors should transform the lead issue into a pull request with
+<tt class="samp docutils literal"><span class="pre">hub</span> <span class="pre">pull-request</span> <span class="pre">-i</span> <em><span class="pre">ISSUENUM</span></em></tt>.</p>
+<p>Others should comment on the lead issue with a pointer to the pull request;
+the pull request should in turn have a pointer to the issue.</p>
+</li>
+<li><p class="first">Assign the issue to the <tt class="docutils literal"><span class="pre">master</span></tt> master (if you can) and add a comment
+requesting the pull.</p>
+</li>
+<li><p class="first">Once your work is merged and pushed, remove your local branch.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="merging-to-master">
+<h3>9.1.3. Merging to <tt class="docutils literal"><span class="pre">master</span></tt><a class="headerlink" href="#merging-to-master" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic">
+<li><p class="first">Go to the pull request &amp; read about what&#8217;s going on.</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">git</span> <span class="pre">checkout</span> <span class="pre">master</span></tt></p>
+</li>
+<li><p class="first">Merge the relevant branch:</p>
+<div class="highlight-python"><pre>git merge --no-ff --no-commit remote/foo-branch</pre>
+</div>
+<p>(Note that you don&#8217;t need to create a local branch; you can merge a remote
+branch directly.)</p>
+</li>
+<li><p class="first">If there were any conflicts, abort the merge and complain.</p>
+</li>
+<li><p class="first">Run the tests. If any failed, abort the merge and complain.</p>
+</li>
+<li><p class="first">Commit, push.</p>
+</li>
+<li><p class="first">Verify that the relevant issues were closed on GitHub.</p>
+</li>
+<li><p class="first">Remove the branch:</p>
+<div class="highlight-python"><pre>git push origin --delete {branch}</pre>
+</div>
+</li>
+</ol>
+</div>
+<div class="section" id="cutting-a-release">
+<h3>9.1.4. Cutting a release<a class="headerlink" href="#cutting-a-release" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Make sure no issues remain for the GitHub milestone.</li>
+<li>Edit release notes and commit.</li>
+<li>Run the tests (they should pass).</li>
+<li><tt class="docutils literal"><span class="pre">make</span> <span class="pre">doc-web</span></tt></li>
+<li>Tag the appropriate commit, e.g.: <tt class="samp docutils literal"><span class="pre">git</span> <span class="pre">tag</span> <span class="pre">-a</span> <span class="pre">v0.</span><em><span class="pre">foo</span></em></tt></li>
+<li>Push.</li>
+</ol>
+</div>
+</div>
+<div class="section" id="code-style">
+<h2>9.2. Code style<a class="headerlink" href="#code-style" title="Permalink to this headline">¶</a></h2>
+<p>At a high level, follow the style of surrounding code. We more or less follow
+PEP 8 style, except:</p>
+<ul class="simple">
+<li>3 spaces per indent.</li>
+<li>Put parentheses around the conditions in <tt class="docutils literal"><span class="pre">if</span></tt>, <tt class="docutils literal"><span class="pre">for</span></tt>, etc.</li>
+</ul>
+<p>Note that Reid is very picky about code style, so don&#8217;t feel singled out if he
+complains (or even updates this section based on your patch!). He tries to be
+nice about it.</p>
+</div>
+<div class="section" id="documentation">
+<h2>9.3. Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="building-the-docs">
+<h3>9.3.1. Building the docs<a class="headerlink" href="#building-the-docs" title="Permalink to this headline">¶</a></h3>
+<p>To build HTML:</p>
+<div class="highlight-python"><pre>$ make doc</pre>
+</div>
+<p>Eventually we may build a few other formats too (e.g., PDF via LaTeX).</p>
+<p>Sometimes, Sphinx gets confused about removed files. In this case, before
+building, try:</p>
+<div class="highlight-python"><pre>$ (cd sphinx &amp;&amp; make clean)</pre>
+</div>
+</div>
+<div class="section" id="conventions">
+<h3>9.3.2. Conventions<a class="headerlink" href="#conventions" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">`FIXME`</span></tt> (i.e., interpreted text containing the word &#8220;FIXME&#8221;, all caps)</p>
+<div class="highlight-python"><pre>Chapter title (once per file)
+*****************************
+
+Heading 1
+=========
+
+Heading 2
+---------
+
+Heading 3 (use sparingly)
+~~~~~~~~~~~~~~~~~~~~~~~~~</pre>
+</div>
+</div>
+<div class="section" id="publishing-to-the-web">
+<h3>9.3.3. Publishing to the web<a class="headerlink" href="#publishing-to-the-web" title="Permalink to this headline">¶</a></h3>
+<p>If you have write access to the master repository, you can update the web
+documentation.</p>
+<div class="section" id="prerequisites">
+<h4>9.3.3.1. Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h4>
+<p>Normally, HTML documentation is copied to <tt class="docutils literal"><span class="pre">doc/</span></tt>, which is a regular old
+directory that is ignored by Git. To publish to the web, that directory needs
+to contain a Git checkout of the <tt class="docutils literal"><span class="pre">gh-pages</span></tt> branch (<em>not</em> a submodule). To
+set that up:</p>
+<div class="highlight-python"><pre>$ rm -Rf doc
+$ git clone git@github.com:reidpr/quac.git doc
+$ cd doc
+$ git checkout gh-pages</pre>
+</div>
+</div>
+<div class="section" id="publishing">
+<h4>9.3.3.2. Publishing<a class="headerlink" href="#publishing" title="Permalink to this headline">¶</a></h4>
+<p>Just say <tt class="docutils literal"><span class="pre">make</span> <span class="pre">doc-web</span></tt>. Note that it can sometimes take a few minutes for
+the new version to be published.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="release_notes.html" title="10. Release notes"
+             >next</a></li>
+        <li class="right" >
+          <a href="citing.html" title="8. Citing QUAC"
+             >previous</a> |</li>
+        <li><a href="index.html">QUAC documentation for commit b9b6ab0</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012-2013, Los Alamos National Security, LLC and others.
+    </div>
+  </body>
+</html>

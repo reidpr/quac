@@ -1,7 +1,38 @@
 .. Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
+Installing QUAC
+***************
+
+
+Summary
+=======
+
+#. Install the dependencies below.
+
+#. Download the code using Git::
+
+     git clone https://github.com/reidpr/quac.git
+
+#. Build executables and the documentation::
+
+     cd quac
+     make
+
+#. Run the tests (this is actually pretty important, as it tells you whether
+   you've installed all the dependencies correctly)::
+
+     ./test.sh
+
+   (While some parts of QUAC will work if some tests fail, we recommend
+   installing everything necessary to make them pass, as this will make your
+   life much easier going forward.)
+
+.. note:: If you plan to :doc:`contribute to QUAC <contributing>`, you
+          should fork the repository on Github and clone that fork instead.
+
+
 Dependencies
-************
+============
 
 Installation of QUAC has been documented only on Ubuntu Linux ("Precise
 Pangolin"), though it also runs on Macs and a few Red Hat variants. Probably
@@ -11,17 +42,17 @@ It requires Python 2.7 and some other stuff listed below. Note that depending
 on what you are doing, you might not need all the dependencies. Use your
 judgement.
 
-`FIXME: This section may be incomplete. Please improve it.`
+`FIXME: This section is incomplete and out of date. Please improve it.`
 
 `FIXME: Turn these lists into a chart with .deb, pip, and source distribution
 columns.`
 
-You will need Git to install QUAC. The wrapper `hub
+You need Git to install QUAC and run the tests. The wrapper `hub
 <https://github.com/defunkt/hub>`_ is also recommended if you are going to
 hack on QUAC at all.
 
 Debian packages
-===============
+---------------
 
 Install these guys first.
 
@@ -51,7 +82,7 @@ Install these guys first.
 * ``runsnakerun`` (optional, for profiling)
 
 PyPI Python packages
-====================
+--------------------
 
 Install with ``pip install foo``.
 
@@ -70,13 +101,13 @@ Install with ``pip install foo``.
 * ``pyproj`` is an interface to the PROJ.4 library.
 
 Other Python packages
-=====================
+---------------------
 
 * A `custom version <https://bitbucket.org/reidpr/tweetstream-reidpr>`_ of
   ``tweetstream`` Twitter library (hacked by Reid)
 
 SciPy
-=====
+-----
 
 QUAC needs SciPy version 0.11 or better.
 
@@ -94,7 +125,7 @@ probably not terribly important for us) optimized ATLAS. You can do that by
 building it from source; directions are in ``README.Debian``.
 
 One-file Python modules
-=======================
+-----------------------
 
 Download the modules (they are single ``.py`` files) and place them somewhere
 in your Python path (e.g., ``/usr/local/lib/python2.7/dist-packages``).
@@ -103,7 +134,7 @@ in your Python path (e.g., ``/usr/local/lib/python2.7/dist-packages``).
   tokenization library for Japanese.
 
 QGIS
-====
+----
 
 `QGIS <http://www.qgis.org/>`_ is an open source GIS system. While Ubuntu
 comes with QGIS, it is a little crusty. However, the QGIS project provides
@@ -120,13 +151,13 @@ more (``grass642`` is). The workaround is to build the ``.deb`` from source as
 explained in this bug report: http://hub.qgis.org/issues/6438
 
 Make
-====
+----
 
 QUAC requires GNU Make 3.81 and ``gcc``.
 
 
 OS X notes
-==========
+----------
 
 `FIXME: these are out of date`
 

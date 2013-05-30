@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>About QUAC &mdash; QUAC documentation for commit cdafde4</title>
+    <title>Table of contents &mdash; QUAC documentation for commit b9b6ab0</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,30 +26,30 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="QUAC documentation for commit cdafde4" href="#" />
-    <link rel="next" title="1. Getting started" href="getting_started.html" /> 
+    <link rel="top" title="QUAC documentation for commit b9b6ab0" href="#" />
+    <link rel="next" title="1. Installing QUAC" href="install.html" /> 
   </head>
   <body>
     <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
-          <a href="getting_started.html" title="1. Getting started"
+          <a href="install.html" title="1. Installing QUAC"
              accesskey="N">next</a></li>
-        <li><a href="#">QUAC documentation for commit cdafde4</a> &raquo;</li> 
+        <li><a href="#">QUAC documentation for commit b9b6ab0</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">About QUAC</a><ul>
-<li><a class="reference internal" href="#how-to-get-quac">How to get QUAC</a></li>
-<li><a class="reference internal" href="#if-you-find-quac-useful">If you find QUAC useful</a></li>
-<li><a class="reference internal" href="#for-more-information">For more information</a></li>
+<li><a class="reference internal" href="#">Table of contents</a><ul>
 </ul>
 </li>
-<li><a class="reference internal" href="#table-of-contents">Table of contents</a><ul>
+<li><a class="reference internal" href="#about-quac">About QUAC</a><ul>
+<li><a class="reference internal" href="#reporting-bugs">Reporting bugs</a></li>
+<li><a class="reference internal" href="#if-you-find-quac-useful">If you find QUAC useful</a></li>
+<li><a class="reference internal" href="#for-more-information">For more information</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#copyright">Copyright</a></li>
@@ -57,8 +57,8 @@
 </ul>
 
   <h4>Next topic</h4>
-  <p class="topless"><a href="getting_started.html"
-                        title="next chapter">1. Getting started</a></p>
+  <p class="topless"><a href="install.html"
+                        title="next chapter">1. Installing QUAC</a></p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -80,7 +80,25 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="about-quac">
+  <div class="section" id="table-of-contents">
+<h1>Table of contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">1. Installing QUAC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collecting.html">2. Collecting data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">3. Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map_reduce.html">4. Map-Reduce with QUACreduce</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">5. Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">6. FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="limitations.html">7. Limitations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">8. Citing QUAC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">9. How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release_notes.html">10. Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="credits.html">11. Credits</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="about-quac">
 <h1>About QUAC<a class="headerlink" href="#about-quac" title="Permalink to this headline">¶</a></h1>
 <p>QUAC (&#8220;Quantitative analysis of chatter&#8221; or any related acronym you like) is a
 package for acquiring and analyzing social internet content. Features:</p>
@@ -94,15 +112,16 @@ an easy-to-parse, de-duplicated, well-ordered, and fast TSV format.</li>
 That is, we deal with the special cases so you don&#8217;t have to.</li>
 <li>Parallel processing using various combinations of Make, <tt class="docutils literal"><span class="pre">joblib</span></tt>, and a
 simple map-reduce framework called QUACreduce which is included. (But see
-<a class="reference external" href="https://github.com/reidpr/quac/issues/13">issue #13</a>.)</li>
+<a class="reference external" href="https://github.com/reidpr/quac/issues/33">issue #33</a>.)</li>
 </ul>
-<p>QUAC is copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+<p>QUAC is copyright © 2012-2013 Los Alamos National Security, LLC, and others.
 It is open source under the Apache license and was formerly known as Twepi
 (&#8220;Twitter for epidemic analysis&#8221;).</p>
-<div class="section" id="how-to-get-quac">
-<h2>How to get QUAC<a class="headerlink" href="#how-to-get-quac" title="Permalink to this headline">¶</a></h2>
-<p>Download it from our <a class="reference external" href="https://github.com/reidpr/quac">Github project</a>. See
-also the <a class="reference internal" href="getting_started.html"><em>Getting started</em></a> section.</p>
+<div class="section" id="reporting-bugs">
+<h2>Reporting bugs<a class="headerlink" href="#reporting-bugs" title="Permalink to this headline">¶</a></h2>
+<p>Use our <a class="reference external" href="https://github.com/reidpr/quac/issues">list of issues</a>. To maximize
+the chances of your bug being understood and fixed, you should read <a class="reference external" href="http://www.joelonsoftware.com/articles/fog0000000029.html">&#8220;Three
+parts to every good bug report&#8221;</a> (scroll down).</p>
 </div>
 <div class="section" id="if-you-find-quac-useful">
 <h2>If you find QUAC useful<a class="headerlink" href="#if-you-find-quac-useful" title="Permalink to this headline">¶</a></h2>
@@ -110,7 +129,8 @@ also the <a class="reference internal" href="getting_started.html"><em>Getting s
 uses, and/or star the project on GitHub. This type of feedback is very
 important for continued justification of the project to our sponsors.</p>
 <p>Note that for many uses of QUAC (especially research) you are ethically
-oblicated to cite it. For guidelines on how to do this, see <a class="reference internal" href="citing.html"><em>Citing QUAC</em></a>.</p>
+oblicated to cite it. For guidelines on how to do this, see the <em>Citing</em>
+section of the documentation.</p>
 </div>
 <div class="section" id="for-more-information">
 <h2>For more information<a class="headerlink" href="#for-more-information" title="Permalink to this headline">¶</a></h2>
@@ -122,55 +142,6 @@ to build it first.)</li>
 <li>Most scripts have pretty help which you can print using the <tt class="docutils literal"><span class="pre">--help</span></tt>
 option and/or look at in comments at the top of the script. Modules also
 usually have good docstrings.</li>
-</ul>
-</div>
-</div>
-<div class="section" id="table-of-contents">
-<h1>Table of contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">1. Getting started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#install-quac">1.1. Install QUAC</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#collect-some-tweets">1.2. Collect some tweets</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="dependencies.html">2. Dependencies</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="dependencies.html#debian-packages">2.1. Debian packages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dependencies.html#pypi-python-packages">2.2. PyPI Python packages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dependencies.html#other-python-packages">2.3. Other Python packages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dependencies.html#scipy">2.4. SciPy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dependencies.html#one-file-python-modules">2.5. One-file Python modules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dependencies.html#qgis">2.6. QGIS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dependencies.html#make">2.7. Make</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dependencies.html#os-x-notes">2.8. OS X notes</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="pipeline.html">3. Preprocessing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="pipeline.html#overview">3.1. Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pipeline.html#file-organization">3.2. File organization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pipeline.html#file-formats">3.3. File formats</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="map_reduce.html">4. Map-Reduce with QUACreduce</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#introduction">4.1. Introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#summary-of-api">4.2. Summary of API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#example">4.3. Example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#drawbacks">4.4. Drawbacks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#fixme">4.5. FIXME</a></li>
-<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#footnotes">4.6. Footnotes</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="config.html">5. Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="faq.html">6. FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="limitations.html">7. Limitations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="documentation.html">8. Documentation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="documentation.html#building-the-docs">8.1. Building the docs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="documentation.html#conventions">8.2. Conventions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="documentation.html#publishing-to-the-web">8.3. Publishing to the web</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="citing.html">9. Citing QUAC</a></li>
-<li class="toctree-l1"><a class="reference internal" href="credits.html">10. Credits</a></li>
 </ul>
 </div>
 </div>
@@ -215,9 +186,9 @@ U01-GM097658-01.</p>
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
-          <a href="getting_started.html" title="1. Getting started"
+          <a href="install.html" title="1. Installing QUAC"
              >next</a></li>
-        <li><a href="#">QUAC documentation for commit cdafde4</a> &raquo;</li> 
+        <li><a href="#">QUAC documentation for commit b9b6ab0</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
