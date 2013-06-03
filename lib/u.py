@@ -50,8 +50,8 @@ WGS84_SRID = 4326  # FIXME: redundantly defined in geo/srs.py
 #   import u
 #   c = u.c
 #   l = u.l
-c = ConfigParser.SafeConfigParser()  # config object; populated in configure()
-l = None                             # logging object; see EOF for default
+c = None  # config object; set after class def and populated in configure()
+l = None  # logging object; see EOF for default
 
 cpath = None  # path of configuration file on the command line
 
@@ -112,6 +112,7 @@ class Accumulator(object):
       self.sum_ += x
       self.count += 1
 
+
 class ArgumentParser(argparse.ArgumentParser):
    '''Add a few arguments common to all QUAC scripts. A group called
       "functionality" is available in .default_group; an additional group of
@@ -144,11 +145,23 @@ class ArgumentParser(argparse.ArgumentParser):
          help='be more verbose with log output')
       return super(ArgumentParser, self).parse_args()
 
+
+class MyConfigParser(ConfigParser.SafeConfigParser):
+
+   def getpath(self, key, rel_file=None):
+      '''Return absolutized version of path at key; if specified, the path is
+         relative to rel_file.'''
+      return abspath(self.get(key), rel_file)
+
+c = MyConfigParser()
+
+
 class defaultdict_recursive(collections.defaultdict):
    'defaultdict which autovivifies arbitrarily deeply.'
    # https://groups.google.com/forum/?fromgroups#!topic/comp.lang.python/lRnIhaJKZeo[1-25]
    def __init__(self):
       self.default_factory = type(self)
+
 
 class Deleted_To_Save_Memory(object):
    'Placeholder for objects removed to save memory, to make errors clearer.'
@@ -173,6 +186,35 @@ def abort(text, exc_info=False):
       log a traceback."""
    l.fatal(text, exc_info=exc_info)
    sys.exit(1)
+
+def abspath(path, rel_file=None):
+   '''Return an absolute version of (non-empty) path. Relative paths are
+      relative to the location of file rel_file (which need not actually
+      exist); if rel_file is None, then path must be absolute already. For
+      example:
+
+      >>> abspath('../lib', '/usr/bin/foo')
+      '/usr/lib'
+      >>> abspath('/usr/lib/../include', '/usr/bin/foo')
+      '/usr/include'
+      >>> abspath('/usr/lib/../include')
+      '/usr/include'
+      >>> abspath('../lib')
+      Traceback (most recent call last):
+        ...
+      ValueError: relative path ../lib requires referent
+      >>> abspath('')
+      Traceback (most recent call last):
+        ...
+      ValueError: empty path is invalid'''
+   if (len(path) == 0):
+      raise ValueError('empty path is invalid')
+   if (rel_file is None and path[0] != '/'):
+      raise ValueError('relative path %s requires referent' % (path))
+   if (path[0] == '/'):
+      return os.path.abspath(path)
+   else:
+      return os.path.abspath('%s/%s' % (os.path.dirname(rel_file), path))
 
 def class_by_name(name):
    '''Return a class given its fully qualified name.'''
@@ -240,7 +282,7 @@ def configure(config_path):
       config file given on the command line. Also adjust the load path as
       specified in the files."""
    global cpath
-   config_read(path_relative(__file__, "../misc/default.cfg"))  # 1. default.cfg
+   config_read(abspath("../misc/default.cfg", __file__))  # 1. default.cfg
    if (config_path is not None):
       # this need to be an absolute path in case we change directories later
       cpath = os.path.abspath(config_path)
@@ -456,28 +498,7 @@ def memory_use_log():
 def path_configured(path):
    if (cpath is None):
       raise No_Configuration_Read()
-   return path_relative(cpath, path)
-
-def path_relative(rel_file, path):
-   '''Return an absolute version of (non-empty) path,. Relative paths are
-      relative to the location of file rel_file (which need not actually
-      exist). For example:
-
-      >>> path_relative('/usr/bin/foo', '../lib')
-      '/usr/lib'
-      >>> path_relative('/usr/bin/foo', '/usr/lib/../include')
-      '/usr/include'
-      >>> path_relative('/usr/bin/foo', '')
-      Traceback (most recent call last):
-        ...
-      ValueError: empty path is invalid'''
-   assert (len(rel_file) > 0)
-   if (len(path) == 0):
-      raise ValueError('empty path is invalid')
-   if (path[0] == '/'):
-      return os.path.abspath(path)
-   else:
-      return os.path.abspath('%s/%s' % (os.path.dirname(rel_file), path))
+   return abspath(path, cpath)
 
 def parse_args(ap):
    '''Parse command line arguments and set a few globals based on the result.
