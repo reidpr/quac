@@ -47,7 +47,7 @@ x quacreduce --python foo --map bar --reduce baz job input.txt
 echo $?
 
 # clean up for subsequent tests
-rm -Rf job
+rm -Rf job job2
 
 # exit with success
 exit 0

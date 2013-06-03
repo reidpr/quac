@@ -22,6 +22,7 @@ import itertools
 import logging
 import numbers
 import os
+import os.path
 import cPickle as pickle
 import psutil
 import pytz
@@ -40,6 +41,7 @@ import testable
 
 PICKLE_SUFFIX = '.pkl.gz'
 WGS84_SRID = 4326  # FIXME: redundantly defined in geo/srs.py
+CONFIG_DEFAULT = os.path.expanduser('~/.quacrc')
 
 
 ### Globals ###
@@ -151,10 +153,16 @@ class ArgumentParser(argparse.ArgumentParser):
 
 class MyConfigParser(ConfigParser.SafeConfigParser):
 
-   def getpath(self, key, rel_file=None):
+   def getpath(self, section, key, rel_file=None):
       '''Return absolutized version of path at key; if specified, the path is
-         relative to rel_file.'''
-      return abspath(self.get(key), rel_file)
+         relative to rel_file, otherwise it's relative to the configuration
+         file.'''
+      if (rel_file is None):
+         rel_file = cpath
+      return abspath(self.get(section, key), rel_file)
+
+   def getlist(self, section, key):
+      return self.get(section, key).split()
 
 c = MyConfigParser()
 
@@ -411,10 +419,13 @@ def logging_init(tag, file_=None, stdout_force=False, level=None,
       # FIXME: this is a sloppy test for whether a config file was read and
       # path.log is available. We used to test whether c was None, but then
       # importers can't say "c = u.c".
-      file_c = path_configured(c.get('path', 'log'))
-      assert (file_ is None)
-      assert (not truncate)
-      file_ = file_c
+      if (c.get('path', 'log') == ''):
+         file_ = None
+      else:
+         file_c = path_configured(c.getpath('path', 'log'))
+         assert (file_ is None)
+         assert (not truncate)
+         file_ = file_c
    except (No_Configuration_Read, ConfigParser.NoSectionError):
       # path.log not configured, but that's OK
       pass
@@ -498,7 +509,6 @@ def memory_use():
 
 def memory_use_log():
    l.debug('virtual memory in use: %s' % (fmt_bytes(memory_use())))
-
 
 def path_configured(path):
    if (cpath is None):

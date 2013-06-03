@@ -61,4 +61,4 @@ x ls -R job
 
 ## Clean up for subsequent tests
 
-rm -Rf job
+rm -Rf job foo*.txt

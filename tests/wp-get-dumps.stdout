@@ -1,0 +1,26 @@
+$ (wp-get-dumps --notimes --config quacrc --url rsync://ftpmirror.your.org/wikimedia-dumps/)
+wpacc INFO     bandwidth limit is 10000 KB/s
+receiving incremental file list
+./
+aawiki/
+aawiki/latest/
+aawiki/latest/aawiki-latest-pagelinks.sql.gz
+aawiki/latest/aawiki-latest-stub-meta-history.xml.gz
+
+.:
+total 4.0K
+4.0K quacrc
+   0 wp-dumps
+
+./wp-dumps:
+total 0
+0 aawiki
+
+./wp-dumps/aawiki:
+total 0
+0 latest
+
+./wp-dumps/aawiki/latest:
+total 84K
+8.0K aawiki-latest-pagelinks.sql.gz
+ 76K aawiki-latest-stub-meta-history.xml.gz

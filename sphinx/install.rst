@@ -27,6 +27,8 @@ Summary
    installing everything necessary to make them pass, as this will make your
    life much easier going forward.)
 
+   Note that a working Internet connection is required to run the tests.
+
 .. note:: If you plan to :doc:`contribute to QUAC <contributing>`, you
           should fork the repository on Github and clone that fork instead.
 

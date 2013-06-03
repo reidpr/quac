@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Test that wp-get-dumps script works. To do so, we download dumps for one of
+# the smallest Wikipedias, Afar (http://aa.wikipedia.org).
+#
+# This is a little risky, as mirror could stop working, the dump content could
+# change, etc. But, we'll try it out. In this particular case, the wiki is
+# "locked" as of 6/3/2013 (because there's no actual content), so that should
+# help.
+#
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+. ./environment.sh
+
+cd $DATADIR
+
+mkdir wp-dumps
+cat > quacrc <<EOF
+[wkpd]
+dump_dir = wp-dumps
+bandwidth_limit = 10000
+projects = aawiki
+dumps = stub-meta-history.xml.gz pagelinks.sql.gz
+EOF
+
+# Do the mirror. The head pipe is to remove the statistics, which change; the
+# "updating Wikimedia dumps" line also changes b/c it contains $DESTDIR.
+y "wp-get-dumps --notimes --config quacrc --url rsync://ftpmirror.your.org/wikimedia-dumps/" | head -n -15 | fgrep -v 'updating Wikimedia dumps'
+
+ls -Rhs .
+
+
+# clean up for the next test
+rm -Rf quacrc wp-dumps
