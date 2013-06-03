@@ -57,8 +57,3 @@ y "cd job && make --quiet clean"
 x ls -R job
 y "cd job && make --quiet reallyclean"
 x ls -R job
-
-
-## Clean up for subsequent tests
-
-rm -Rf job foo*.txt

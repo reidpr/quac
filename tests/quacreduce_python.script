@@ -21,8 +21,3 @@ y "cat foo*.txt"
 y "quacreduce --python qr.wordcount.Job ./job foo*.txt"
 y "cd job && make --quiet"  # output contains temp dirs that vary between tests
 y "cat job/out/* | sort"
-
-
-## Clean up for subsequent tests
-
-rm -Rf job

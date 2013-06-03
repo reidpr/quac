@@ -28,7 +28,3 @@ EOF
 y "wp-get-dumps --notimes --config quacrc --url rsync://ftpmirror.your.org/wikimedia-dumps/" | head -n -15 | fgrep -v 'updating Wikimedia dumps'
 
 ls -Rhs .
-
-
-# clean up for the next test
-rm -Rf quacrc wp-dumps
