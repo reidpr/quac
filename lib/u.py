@@ -70,6 +70,9 @@ utf8_stdout = codecs.getwriter('utf8')(sys.stdout)
 # Should chatter be verbose? Set in parse_args().
 verbose = False
 
+# Should chatter include timestamps? Set in parse_args().
+log_timestamps = True
+
 
 ### Classes ###
 
@@ -130,10 +133,10 @@ class ArgumentParser(argparse.ArgumentParser):
          '-h', '--help',
          action='help',
          help='show this help message and exit')
-      #gr.add_argument(
-      #   '--notimes',
-      #   action='store_true',
-      #   help='omit timestamps from log messages (useful for testing)')
+      gr.add_argument(
+         '--notimes',
+         action='store_true',
+         help='omit timestamps from log messages (useful for testing)')
       gr.add_argument(
          '--unittest',
          nargs=0,
@@ -397,9 +400,11 @@ def logging_init(tag, file_=None, stdout_force=False, level=None,
 
    # add tag string to permit logcheck filtering, which applies the same
    # regexes to all files it's watching.
-   form = logging.Formatter(("%%(asctime)s %s %%(levelname)-8s %%(message)s"
-                             % (tag)),
-                            "%Y-%m-%d_%H:%M:%S")
+   if (log_timestamps):
+      fmt = '%%(asctime)s %s %%(levelname)-8s %%(message)s'
+   else:
+      fmt = '%s %%(levelname)-8s %%(message)s'
+   form = logging.Formatter((fmt % (tag)), '%Y-%m-%d_%H:%M:%S')
 
    # file logger
    try:
@@ -516,6 +521,11 @@ def parse_args(ap):
    try:
       global verbose
       verbose = args.verbose
+   except AttributeError:
+      pass
+   try:
+      global log_timestamps
+      log_timestamps = not args.notimes
    except AttributeError:
       pass
    return args
