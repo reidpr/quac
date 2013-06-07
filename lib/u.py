@@ -22,6 +22,7 @@ import itertools
 import logging
 import numbers
 import os
+import os.path
 import cPickle as pickle
 import psutil
 import pytz
@@ -40,6 +41,7 @@ import testable
 
 PICKLE_SUFFIX = '.pkl.gz'
 WGS84_SRID = 4326  # FIXME: redundantly defined in geo/srs.py
+CONFIG_DEFAULT = os.path.expanduser('~/.quacrc')
 
 
 ### Globals ###
@@ -50,8 +52,8 @@ WGS84_SRID = 4326  # FIXME: redundantly defined in geo/srs.py
 #   import u
 #   c = u.c
 #   l = u.l
-c = ConfigParser.SafeConfigParser()  # config object; populated in configure()
-l = None                             # logging object; see EOF for default
+c = None  # config object; set after class def and populated in configure()
+l = None  # logging object; see EOF for default
 
 cpath = None  # path of configuration file on the command line
 
@@ -69,6 +71,9 @@ utf8_stdout = codecs.getwriter('utf8')(sys.stdout)
 
 # Should chatter be verbose? Set in parse_args().
 verbose = False
+
+# Should chatter include timestamps? Set in parse_args().
+log_timestamps = True
 
 
 ### Classes ###
@@ -112,6 +117,7 @@ class Accumulator(object):
       self.sum_ += x
       self.count += 1
 
+
 class ArgumentParser(argparse.ArgumentParser):
    '''Add a few arguments common to all QUAC scripts. A group called
       "functionality" is available in .default_group; an additional group of
@@ -129,10 +135,10 @@ class ArgumentParser(argparse.ArgumentParser):
          '-h', '--help',
          action='help',
          help='show this help message and exit')
-      #gr.add_argument(
-      #   '--notimes',
-      #   action='store_true',
-      #   help='omit timestamps from log messages (useful for testing)')
+      gr.add_argument(
+         '--notimes',
+         action='store_true',
+         help='omit timestamps from log messages (useful for testing)')
       gr.add_argument(
          '--unittest',
          nargs=0,
@@ -144,11 +150,29 @@ class ArgumentParser(argparse.ArgumentParser):
          help='be more verbose with log output')
       return super(ArgumentParser, self).parse_args()
 
+
+class MyConfigParser(ConfigParser.SafeConfigParser):
+
+   def getpath(self, section, key, rel_file=None):
+      '''Return absolutized version of path at key; if specified, the path is
+         relative to rel_file, otherwise it's relative to the configuration
+         file.'''
+      if (rel_file is None):
+         rel_file = cpath
+      return abspath(self.get(section, key), rel_file)
+
+   def getlist(self, section, key):
+      return self.get(section, key).split()
+
+c = MyConfigParser()
+
+
 class defaultdict_recursive(collections.defaultdict):
    'defaultdict which autovivifies arbitrarily deeply.'
    # https://groups.google.com/forum/?fromgroups#!topic/comp.lang.python/lRnIhaJKZeo[1-25]
    def __init__(self):
       self.default_factory = type(self)
+
 
 class Deleted_To_Save_Memory(object):
    'Placeholder for objects removed to save memory, to make errors clearer.'
@@ -173,6 +197,35 @@ def abort(text, exc_info=False):
       log a traceback."""
    l.fatal(text, exc_info=exc_info)
    sys.exit(1)
+
+def abspath(path, rel_file=None):
+   '''Return an absolute version of (non-empty) path. Relative paths are
+      relative to the location of file rel_file (which need not actually
+      exist); if rel_file is None, then path must be absolute already. For
+      example:
+
+      >>> abspath('../lib', '/usr/bin/foo')
+      '/usr/lib'
+      >>> abspath('/usr/lib/../include', '/usr/bin/foo')
+      '/usr/include'
+      >>> abspath('/usr/lib/../include')
+      '/usr/include'
+      >>> abspath('../lib')
+      Traceback (most recent call last):
+        ...
+      ValueError: relative path ../lib requires referent
+      >>> abspath('')
+      Traceback (most recent call last):
+        ...
+      ValueError: empty path is invalid'''
+   if (len(path) == 0):
+      raise ValueError('empty path is invalid')
+   if (rel_file is None and path[0] != '/'):
+      raise ValueError('relative path %s requires referent' % (path))
+   if (path[0] == '/'):
+      return os.path.abspath(path)
+   else:
+      return os.path.abspath('%s/%s' % (os.path.dirname(rel_file), path))
 
 def class_by_name(name):
    '''Return a class given its fully qualified name.'''
@@ -240,7 +293,7 @@ def configure(config_path):
       config file given on the command line. Also adjust the load path as
       specified in the files."""
    global cpath
-   config_read(path_relative(__file__, "../misc/default.cfg"))  # 1. default.cfg
+   config_read(abspath("../misc/default.cfg", __file__))  # 1. default.cfg
    if (config_path is not None):
       # this need to be an absolute path in case we change directories later
       cpath = os.path.abspath(config_path)
@@ -355,19 +408,24 @@ def logging_init(tag, file_=None, stdout_force=False, level=None,
 
    # add tag string to permit logcheck filtering, which applies the same
    # regexes to all files it's watching.
-   form = logging.Formatter(("%%(asctime)s %s %%(levelname)-8s %%(message)s"
-                             % (tag)),
-                            "%Y-%m-%d_%H:%M:%S")
+   if (log_timestamps):
+      fmt = '%%(asctime)s %s %%(levelname)-8s %%(message)s'
+   else:
+      fmt = '%s %%(levelname)-8s %%(message)s'
+   form = logging.Formatter((fmt % (tag)), '%Y-%m-%d_%H:%M:%S')
 
    # file logger
    try:
       # FIXME: this is a sloppy test for whether a config file was read and
       # path.log is available. We used to test whether c was None, but then
       # importers can't say "c = u.c".
-      file_c = path_configured(c.get('path', 'log'))
-      assert (file_ is None)
-      assert (not truncate)
-      file_ = file_c
+      if (c.get('path', 'log') == ''):
+         file_ = None
+      else:
+         file_c = path_configured(c.getpath('path', 'log'))
+         assert (file_ is None)
+         assert (not truncate)
+         file_ = file_c
    except (No_Configuration_Read, ConfigParser.NoSectionError):
       # path.log not configured, but that's OK
       pass
@@ -452,32 +510,10 @@ def memory_use():
 def memory_use_log():
    l.debug('virtual memory in use: %s' % (fmt_bytes(memory_use())))
 
-
 def path_configured(path):
    if (cpath is None):
       raise No_Configuration_Read()
-   return path_relative(cpath, path)
-
-def path_relative(rel_file, path):
-   '''Return an absolute version of (non-empty) path,. Relative paths are
-      relative to the location of file rel_file (which need not actually
-      exist). For example:
-
-      >>> path_relative('/usr/bin/foo', '../lib')
-      '/usr/lib'
-      >>> path_relative('/usr/bin/foo', '/usr/lib/../include')
-      '/usr/include'
-      >>> path_relative('/usr/bin/foo', '')
-      Traceback (most recent call last):
-        ...
-      ValueError: empty path is invalid'''
-   assert (len(rel_file) > 0)
-   if (len(path) == 0):
-      raise ValueError('empty path is invalid')
-   if (path[0] == '/'):
-      return os.path.abspath(path)
-   else:
-      return os.path.abspath('%s/%s' % (os.path.dirname(rel_file), path))
+   return abspath(path, cpath)
 
 def parse_args(ap):
    '''Parse command line arguments and set a few globals based on the result.
@@ -495,6 +531,11 @@ def parse_args(ap):
    try:
       global verbose
       verbose = args.verbose
+   except AttributeError:
+      pass
+   try:
+      global log_timestamps
+      log_timestamps = not args.notimes
    except AttributeError:
       pass
    return args

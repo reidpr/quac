@@ -12,6 +12,17 @@ need to consult other sources to fill in some gaps.
    use their data.
 
 
+Wikipedia
+=========
+
+Use the scripts ``wp-get-dumps`` and ``wp-get-access-logs``. No authentication
+is needed, but you may wish to communicate with Wikimedia and/or mirror admins
+if you are planning a large download.
+
+These scripts use ``rsync``, so setting the environment variable
+``RSYNC_PROXY`` may be needed depending on your firewall.
+
+
 Twitter
 =======
 

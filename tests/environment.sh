@@ -9,6 +9,11 @@ export PATH=$(cd $(dirname $0)/../bin && pwd):$PATH
 # $PYTHONPATH is unset.
 export PYTHONPATH=$(cd $(dirname $0)/../lib && pwd)${PYTHONPATH:+:}$PYTHONPATH
 
+# Make a private directory for tests to work in. If tests need to share state,
+# they can set it up manually.
+mkdir $DATADIR/$TESTNAME
+export DATADIR=$DATADIR/$TESTNAME
+
 # stop test if any command fails
 set -e
 
