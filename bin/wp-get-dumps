@@ -31,10 +31,6 @@ c = u.c
 
 ap = u.ArgumentParser(description=__doc__, epilog=help_epilogue)
 gr = ap.add_argument_group('arguments')
-gr.add_argument("--url",
-                required=True,
-                help="Wikimedia mirror URL to copy (must end in /)",
-                metavar="URL")
 gr.add_argument("--config",
                 help="location of config file",
                 default=u.CONFIG_DEFAULT,
@@ -51,8 +47,9 @@ def main():
       for pattern in c.getlist('wkpd', 'dumps'):
          includes.append('/%s/latest/%s-latest-%s'
                          % (project, project, pattern))
-   rsync.byinclude(args.url, dump_dir, bwlimit, includes, args.verbose)
+   rsync.byinclude(mirror_url, dump_dir, bwlimit, includes, args.verbose)
    l.info('done')
+
 
 ### Bootstrap ###
 
@@ -60,17 +57,17 @@ try:
 
    args = u.parse_args(ap)
    u.configure(args.config)
-   u.logging_init('wpacc')
+   u.logging_init('wpdmp')
 
-   if (args.url[-1] != '/'):
-      u.abort('URL must end in slash')
    if (len(c.getlist('wkpd', 'projects')) == 0):
       u.abort('no projects specified in config')
    if (len(c.getlist('wkpd', 'dumps')) == 0):
       u.abort('no dump file patterns specified in config')
 
-   dump_dir = c.getpath('wkpd', 'dump_dir')
    bwlimit = c.getint('wkpd', 'bandwidth_limit')
+   mirror_url = c.get('wkpd', 'dump_url')
+
+   dump_dir = c.getpath('wkpd', 'dump_dir')
    if (not os.path.isdir(dump_dir)):
       u.abort('%s is not a directory or does not exist' % (dump_dir))
 

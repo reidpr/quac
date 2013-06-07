@@ -1,5 +1,5 @@
-$ (wp-get-dumps --notimes --config quacrc --url rsync://ftpmirror.your.org/wikimedia-dumps/)
-wpacc INFO     bandwidth limit is 10000 KB/s
+$ (wp-get-dumps --notimes --config quacrc | head -n -15 | fgrep -v 'updating Wikimedia dumps')
+wpdmp INFO     bandwidth limit is 10000 KB/s
 receiving incremental file list
 ./
 aawiki/

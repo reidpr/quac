@@ -25,6 +25,6 @@ EOF
 
 # Do the mirror. The head pipe is to remove the statistics, which change; the
 # "updating Wikimedia dumps" line also changes b/c it contains $DESTDIR.
-y "wp-get-dumps --notimes --config quacrc --url rsync://ftpmirror.your.org/wikimedia-dumps/" | head -n -15 | fgrep -v 'updating Wikimedia dumps'
+y "wp-get-dumps --notimes --config quacrc | head -n -15 | fgrep -v 'updating Wikimedia dumps'"
 
 ls -Rhs .
