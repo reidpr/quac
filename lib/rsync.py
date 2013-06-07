@@ -1,6 +1,7 @@
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
 import itertools
+import os.path
 import subprocess
 
 import testable
@@ -9,11 +10,27 @@ import u
 l = u.l
 
 
+def all(from_url, dest_dir, bwlimit, verbose=False):
+   return fetch(from_url, dest_dir, bwlimit, [], verbose)
+
 def byinclude(from_url, dest_dir, bwlimit, includes, verbose=False):
    '''Mirror from the specified URL, including only the patterns specified.
       rsync output, including error messages, goes to stdout. Return value is
       True if the rsync reported successful execution, False otherwise (in
       which case a warning is also logged).'''
+   dir_includes = set()
+   for i in includes:
+      dir_includes.update(leading_dirs(i))
+   more_args = list(include_args(dir_includes))
+   more_args += include_args(includes)  # include includes
+   more_args += ['--exclude', '*']      # exclude everything not included
+   return fetch(from_url, dest_dir, bwlimit, more_args, verbose)
+
+def fetch(from_url, dest_dir, bwlimit, more_args, verbose):
+   if (from_url is None or len(from_url) <= 1 or from_url[-1] != '/'):
+      raise ValueError('URL must end in slash, but "%s" does not' % (from_url))
+   assert (os.path.isdir(dest_dir))
+   assert (bwlimit > 0)
    rsync = [ 'rsync', from_url, dest_dir,
              '--verbose',     # print which files are being transferred
              '--archive',     # recurse, preserve most metadata
@@ -24,13 +41,7 @@ def byinclude(from_url, dest_dir, bwlimit, includes, verbose=False):
              '--bwlimit=%d' % (bwlimit) ]
    if (verbose):
       rsync += ['--progress']
-   # include directories containing includes
-   dir_includes = set()
-   for i in includes:
-      dir_includes.update(leading_dirs(i))
-   rsync += include_args(dir_includes)
-   rsync += include_args(includes)  # include includes
-   rsync += ['--exclude', '*']      # exclude everything not included
+   rsync += more_args
    l.debug('will call rsync with: %s' % (str(rsync)))
    retval = subprocess.call(rsync, stderr=subprocess.STDOUT)
    if (retval):
