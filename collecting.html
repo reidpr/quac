@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>2. Collecting data &mdash; QUAC documentation for commit b9b6ab0</title>
+    <title>2. Collecting data &mdash; QUAC documentation for commit bc316b8</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="QUAC documentation for commit b9b6ab0" href="index.html" />
+    <link rel="top" title="QUAC documentation for commit bc316b8" href="index.html" />
     <link rel="next" title="3. Preprocessing" href="pipeline.html" />
     <link rel="prev" title="1. Installing QUAC" href="install.html" /> 
   </head>
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="install.html" title="1. Installing QUAC"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit b9b6ab0</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit bc316b8</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -48,11 +48,12 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">2. Collecting data</a><ul>
-<li><a class="reference internal" href="#twitter">2.1. Twitter</a><ul>
-<li><a class="reference internal" href="#set-up-authentication">2.1.1. Set up authentication</a></li>
-<li><a class="reference internal" href="#run-the-collector">2.1.2. Run the collector</a></li>
-<li><a class="reference internal" href="#build-the-tsv-files">2.1.3. Build the TSV files</a></li>
-<li><a class="reference internal" href="#doing-it-seriously">2.1.4. Doing it seriously</a></li>
+<li><a class="reference internal" href="#wikipedia">2.1. Wikipedia</a></li>
+<li><a class="reference internal" href="#twitter">2.2. Twitter</a><ul>
+<li><a class="reference internal" href="#set-up-authentication">2.2.1. Set up authentication</a></li>
+<li><a class="reference internal" href="#run-the-collector">2.2.2. Run the collector</a></li>
+<li><a class="reference internal" href="#build-the-tsv-files">2.2.3. Build the TSV files</a></li>
+<li><a class="reference internal" href="#doing-it-seriously">2.2.4. Doing it seriously</a></li>
 </ul>
 </li>
 </ul>
@@ -97,12 +98,20 @@ need to consult other sources to fill in some gaps.</p>
 already collecting data, you should probably in fact <em>not</em> do this. Just
 use their data.</p>
 </div>
+<div class="section" id="wikipedia">
+<h2>2.1. Wikipedia<a class="headerlink" href="#wikipedia" title="Permalink to this headline">¶</a></h2>
+<p>Use the scripts <tt class="docutils literal"><span class="pre">wp-get-dumps</span></tt> and <tt class="docutils literal"><span class="pre">wp-get-access-logs</span></tt>. No authentication
+is needed, but you may wish to communicate with Wikimedia and/or mirror admins
+if you are planning a large download.</p>
+<p>These scripts use <tt class="docutils literal"><span class="pre">rsync</span></tt>, so setting the environment variable
+<tt class="docutils literal"><span class="pre">RSYNC_PROXY</span></tt> may be needed depending on your firewall.</p>
+</div>
 <div class="section" id="twitter">
-<h2>2.1. Twitter<a class="headerlink" href="#twitter" title="Permalink to this headline">¶</a></h2>
+<h2>2.2. Twitter<a class="headerlink" href="#twitter" title="Permalink to this headline">¶</a></h2>
 <p>These instructions will help you collect and archive tweets as they appear in
 the Streaming API. QUAC currently cannot acquire past tweets.</p>
 <div class="section" id="set-up-authentication">
-<h3>2.1.1. Set up authentication<a class="headerlink" href="#set-up-authentication" title="Permalink to this headline">¶</a></h3>
+<h3>2.2.1. Set up authentication<a class="headerlink" href="#set-up-authentication" title="Permalink to this headline">¶</a></h3>
 <p>You need both a user account and an application, as well as four different
 authentication parameters, to access the streaming API using OAuth.</p>
 <ol class="arabic simple">
@@ -122,7 +131,7 @@ reload it after the above step).<ul>
 </ol>
 </div>
 <div class="section" id="run-the-collector">
-<h3>2.1.2. Run the collector<a class="headerlink" href="#run-the-collector" title="Permalink to this headline">¶</a></h3>
+<h3>2.2.2. Run the collector<a class="headerlink" href="#run-the-collector" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic">
 <li><p class="first">Create directories to hold the collected tweets (e.g., <tt class="docutils literal"><span class="pre">tweets</span></tt>) and your
 configuration and logs (e.g., <tt class="docutils literal"><span class="pre">config</span></tt>).</p>
@@ -145,12 +154,12 @@ that it has appropriate permissions.</p>
 </ol>
 </div>
 <div class="section" id="build-the-tsv-files">
-<h3>2.1.3. Build the TSV files<a class="headerlink" href="#build-the-tsv-files" title="Permalink to this headline">¶</a></h3>
+<h3>2.2.3. Build the TSV files<a class="headerlink" href="#build-the-tsv-files" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python"><pre>/path/to/quac/misc/parse.sh 1 /path/to/tweets</pre>
 </div>
 </div>
 <div class="section" id="doing-it-seriously">
-<h3>2.1.4. Doing it seriously<a class="headerlink" href="#doing-it-seriously" title="Permalink to this headline">¶</a></h3>
+<h3>2.2.4. Doing it seriously<a class="headerlink" href="#doing-it-seriously" title="Permalink to this headline">¶</a></h3>
 <p>The above will get you a few tweets to play with. If you want to actually
 collect tweets in a serious and reliable way (i.e., without gaps):</p>
 <ol class="arabic">
@@ -181,7 +190,7 @@ watch the log files and e-mail you if something goes wrong.</p>
         <li class="right" >
           <a href="install.html" title="1. Installing QUAC"
              >previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit b9b6ab0</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit bc316b8</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
