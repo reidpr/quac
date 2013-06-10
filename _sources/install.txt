@@ -18,15 +18,6 @@ Summary
      cd quac
      make
 
-#. Prepare the test dataset. (Optional; see ``twtests/README`` for details on
-   how to get the data.)
-
-   ::
-
-     cd twtests/tweets
-     ./get-test-data /path/to/preprocessed/tweets
-     cd -
-
 #. Run the tests (this is actually pretty important, as it tells you whether
    you've installed all the dependencies correctly)::
 
