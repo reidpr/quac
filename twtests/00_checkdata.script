@@ -1,0 +1,12 @@
+#!/bin/bash
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+# Make sure the Twitter test data have been acquired correctly.
+
+. ./environment.sh
+
+# any non-matched keys?
+y "egrep '^[0-9]+$' tweets/*.geo.tsv | wc -l"
+
+# check MD5
+y "md5sum tweets/*.geo.tsv"

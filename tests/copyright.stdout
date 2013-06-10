@@ -8,3 +8,12 @@ lib/unicodedata2.py
 sphinx/Makefile
 sphinx/conf.py
 tests/README
+twtests/README
+twtests/tweets/2012-10-31.id
+twtests/tweets/2012-11-01.id
+twtests/tweets/2012-11-02.id
+twtests/tweets/2012-11-03.id
+twtests/tweets/2012-11-04.id
+twtests/tweets/2012-11-05.id
+twtests/tweets/2012-11-06.id
+twtests/tweets/2012-11-07.id

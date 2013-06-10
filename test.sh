@@ -183,5 +183,20 @@ cd $BASEDIR/tests
 # Can't specify cmdtests to test.sh, so do nothing if anything is specified.
 if [ "$to_test" == "" ]; then
     echo '*** testing cmdtests'
-    cmdtest .
+    cmdtest . || true
+fi
+
+
+## Test cmdtests that depend on Twitter data ##
+
+cd $BASEDIR/twtests
+
+# Can't specify cmdtests to test.sh, so do nothing if anything is specified.
+if [ "$to_test" == "" ]; then
+    if [ -e tweets/2012-10-31.geo.tsv ]; then
+        echo '*** testing cmdtests that depend on Twitter data'
+        cmdtest . || true
+    else
+        echo '*** skipping Twitter cmdtests (no data)'
+    fi
 fi

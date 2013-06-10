@@ -103,3 +103,6 @@ bin/hashsplit
 *.stderr-diff
 *.stdout-actual
 *.stdout-diff
+
+# test tweets
+*.geo.tsv
