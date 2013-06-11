@@ -13,4 +13,4 @@ class Job(base.Line_Input_Job, base.Line_Output_Job):
          yield (word, None)
 
    def reduce(self, word, nones):
-      yield u'%d %s' % (len(list(nones)), word)
+      yield u'%d %s' % (len(list(nones)) * self.params['factor'], word)

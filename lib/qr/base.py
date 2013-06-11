@@ -9,12 +9,13 @@
 
    To invoke a mapper or reducer:
 
-   1. Set up standard input and/or standard output pipes as appropriate.
-   2. Import the module.
-   3. Call :meth:`map_stdinout()` or :meth:`reduce_stdinout()`.
+     1. Set up standard input and/or standard output pipes as appropriate.
+     2. Import the module.
+     3. Create a Job object, passing a parameter dictionary if desired.
+     4. Call :meth:`map_stdinout()` or :meth:`reduce_stdinout()`.
 
-   Invocations are expected to set the module variable ``rid`` (reducer ID)
-   before invoking a reducer. Yes, this is kind of strage.
+   Note that this is awkward to do from the command line. If that becomes a
+   typical use case, we can introduce a wrapper script.
 
    Mappers and reducers are *not* thread-safe. Each should run in its own
    process.
@@ -47,11 +48,11 @@ import testable
 # OUTPUT_BUFSIZE in hashsplit.c.)
 OUTPUT_BUFSIZE = 524288
 
-
 class Job(object):
    __metaclass__ = ABCMeta
 
-   def __init__(self):
+   def __init__(self, params=None):
+      self.params = params if (params is not None) else dict()
       self.rid = None
       # Yes, you can quac() instead of map() ...
       self.quac = self.map
@@ -62,30 +63,12 @@ class Job(object):
    def reduce_output_filename(self):
       return ('out/%d' % (self.rid))
 
-   ## Class methods
-
-   @classmethod
-   def map_stdinout(class_):
-      '''Create a mapper, connect it to input and output, and run it.'''
-      job = class_()
-      job.map_open_input()
-      job.map_open_output()
-      for i in job.map_inputs():
-         for kv in job.map(i):
-            job.map_write(*kv)
-
-   @classmethod
-   def reduce_stdinout(class_, rid):
-      '''Create a reducer, connect it to input and output, and run it.'''
-      job = class_()
-      job.rid = rid
-      job.reduce_open_input()
-      job.reduce_open_output()
-      for kvals in job.reduce_inputs():
-         for item in job.reduce(*kvals):
-            job.reduce_write(item)
-
    ## Instance methods
+
+   def cleanup(self):
+      # We didn't have to flush() when map_stdinout() was a class method; not
+      # sure why we do now when it's an instance method.
+      self.outfp.flush()
 
    @abstractmethod
    def map(self, item):
@@ -104,6 +87,15 @@ class Job(object):
 
    def map_open_output(self):
       self.outfp = io.open(sys.stdout.fileno(), 'wb')
+
+   def map_stdinout(self):
+      '''Connect myself to input and output and run my mapper.'''
+      self.map_open_input()
+      self.map_open_output()
+      for i in self.map_inputs():
+         for kv in self.map(i):
+            self.map_write(*kv)
+      self.cleanup()
 
    def map_write(self, key, value):
       '''Write one key/value pair to the mapper output.'''
@@ -134,6 +126,16 @@ class Job(object):
    def reduce_open_output():
       self.outfp = io.open(self.reduce_output_filename, 'wb',
                            buffering=OUTPUT_BUFSIZE)
+
+   def reduce_stdinout(self, rid):
+      '''Connect myself to input and output, and run my reducer.'''
+      self.rid = rid
+      self.reduce_open_input()
+      self.reduce_open_output()
+      for kvals in self.reduce_inputs():
+         for item in self.reduce(*kvals):
+            self.reduce_write(item)
+      self.cleanup()
 
    @abstractmethod
    def reduce_write(self, item):

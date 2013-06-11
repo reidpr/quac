@@ -15,10 +15,15 @@ Notes:
   * --python is mutually exclusive with --map and --reduce (which must both be
     specified if one is).
 
-  * --sortdir need not be (and probably should not be) on the shared
-    filesystem; the point is to leverage node-local storage for sorting during
-    the partitioning phase. However, this storage must be available on the
-    same path for each node.
+  * --pyargs is a dictionary of parameters to pass to the Python job.
+    Key/value pairs are colon-separated, and pairs are space-separated. Values
+    are converted to ints or floats if possible (in that order); otherwise,
+    they are left as strings. E.g.: "--pyargs 'foo:bar baz:1 qux:1.0'".
+
+  * --sortdir probably should not, if possible, be on the shared filesystem;
+    the point is to leverage node-local storage for sorting during the
+    partitioning phase. However, this storage must be available on the same
+    path for each node.
 
   * Input files need not exist at quacreduce time; this gives you greater
     flexibility in when to build the job.
@@ -40,17 +45,17 @@ l = u.l
 ap = u.ArgumentParser(description=__doc__, epilog=help_epilogue)
 gr = ap.add_argument_group('operators')
 gr.add_argument('--map',
-                type=str,
                 metavar='CMD',
                 help='shell pipeline for map function')
 gr.add_argument('--reduce',
-                type=str,
                 metavar='CMD',
                 help='shell pipeline for reduce function')
 gr.add_argument('--python',
-                type=str,
                 metavar='CLASS',
                 help='Python class containing map-reduce implementation')
+gr.add_argument('--pyargs',
+                metavar='DICT',
+                help='Dictionary of parameters for Python job')
 gr = ap.add_argument_group('job logistics')
 gr.add_argument('jobdir',
                 metavar='JOBDIR',
@@ -142,8 +147,10 @@ def pythonify():
    assert (args.python)
    module = args.python.rpartition('.')[0]
    class_ = args.python
-   args.map = "python -c 'import %(module)s; %(class_)s.map_stdinout()'" % locals()
-   args.reduce = "python -c 'import %(module)s; %(class_)s.reduce_stdinout(%%(RID))'" % locals()
+   params = repr(u.str_to_dict(args.pyargs))
+   base = "python -c \"import %(module)s; j = %(class_)s(%(params)s); " % locals()
+   args.map = base + "j.map_stdinout()\""
+   args.reduce = base + "j.reduce_stdinout(%(RID))\""
 
 def slurm_dump():
    pass  # unimplemented, see issue #33

@@ -24,6 +24,7 @@ import numbers
 import os
 import os.path
 import cPickle as pickle
+from pprint import pformat
 import psutil
 import pytz
 import random
@@ -625,6 +626,40 @@ def stdout_silence():
    stdout_copy_fno = os.dup(sys.stdout.fileno())
    sys.stdout.flush()
    os.dup2(devnull.fileno(), 1)
+
+def str_to_dict(text):
+   '''Convert a whitespace- and colon- separated string to a dict, with values
+      as either ints, floats, or strs (whichever converts without exception
+      first. For example:
+
+      >>> pformat(str_to_dict('a:b c:1 d:1.0'))
+      "{'a': 'b', 'c': 1, 'd': 1.0}"
+      >>> pformat(str_to_dict('a:1 a:2'))
+      "{'a': 2}"
+      >>> pformat(str_to_dict(''))
+      '{}'
+      >>> pformat(str_to_dict(' '))
+      '{}'
+      >>> pformat(str_to_dict(None))
+      '{}'
+      >>> pformat(str_to_dict('a::b:c'))
+      "{'a': ':b:c'}"
+      >>> pformat(str_to_dict('a:1	\vb:1'))
+      "{'a': 1, 'b': 1}"'''
+   if (text is None):
+      return dict()
+   d = dict()
+   for kv in text.split():
+      (k, _, v) = kv.partition(':')
+      try:
+         v = int(v)
+      except ValueError:
+         try:
+            v = float(v)
+         except ValueError:
+            pass
+      d[k] = v
+   return d
 
 def StringIO():
    '''Return an in-memory buffer that you can put unicode into and get encoded

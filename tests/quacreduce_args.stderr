@@ -2,18 +2,18 @@
 $ quacreduce --map cat --reduce cat job foo/bar.txt baz/qux.txt
 0
 $ quacreduce --map cat --reduce cat job foo/bar.txt baz/bar.txt
-usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--partitions N]
-                  [--sortdir DIR] [--sortmem N] [--update] [-h] [--notimes]
-                  [--unittest] [--verbose]
+usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
+                  [--partitions N] [--sortdir DIR] [--sortmem N] [--update]
+                  [-h] [--notimes] [--unittest] [--verbose]
                   JOBDIR FILE [FILE ...]
 quacreduce: error: input file basenames must be unique
 2
 *** Fail if jobdir exists
 $ mkdir jobexists
 $ quacreduce --map cat --reduce cat jobexists foo/bar.txt
-usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--partitions N]
-                  [--sortdir DIR] [--sortmem N] [--update] [-h] [--notimes]
-                  [--unittest] [--verbose]
+usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
+                  [--partitions N] [--sortdir DIR] [--sortmem N] [--update]
+                  [-h] [--notimes] [--unittest] [--verbose]
                   JOBDIR FILE [FILE ...]
 quacreduce: error: job dir "jobexists" already exists
 2
@@ -23,44 +23,44 @@ $ quacreduce --map foo --reduce bar job2 input.txt
 0
 *** these should fail
 $ quacreduce job input.txt
-usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--partitions N]
-                  [--sortdir DIR] [--sortmem N] [--update] [-h] [--notimes]
-                  [--unittest] [--verbose]
+usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
+                  [--partitions N] [--sortdir DIR] [--sortmem N] [--update]
+                  [-h] [--notimes] [--unittest] [--verbose]
                   JOBDIR FILE [FILE ...]
 quacreduce: error: --python or --map and --reduce must be specified
 2
 $ quacreduce --map bar job input.txt
-usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--partitions N]
-                  [--sortdir DIR] [--sortmem N] [--update] [-h] [--notimes]
-                  [--unittest] [--verbose]
+usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
+                  [--partitions N] [--sortdir DIR] [--sortmem N] [--update]
+                  [-h] [--notimes] [--unittest] [--verbose]
                   JOBDIR FILE [FILE ...]
 quacreduce: error: --map and --reduce must both be specified if one is
 2
 $ quacreduce --reduce bar job input.txt
-usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--partitions N]
-                  [--sortdir DIR] [--sortmem N] [--update] [-h] [--notimes]
-                  [--unittest] [--verbose]
+usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
+                  [--partitions N] [--sortdir DIR] [--sortmem N] [--update]
+                  [-h] [--notimes] [--unittest] [--verbose]
                   JOBDIR FILE [FILE ...]
 quacreduce: error: --map and --reduce must both be specified if one is
 2
 $ quacreduce --python foo --map bar job input.txt
-usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--partitions N]
-                  [--sortdir DIR] [--sortmem N] [--update] [-h] [--notimes]
-                  [--unittest] [--verbose]
+usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
+                  [--partitions N] [--sortdir DIR] [--sortmem N] [--update]
+                  [-h] [--notimes] [--unittest] [--verbose]
                   JOBDIR FILE [FILE ...]
 quacreduce: error: --python cannot be specified with --map and/or --reduce
 2
 $ quacreduce --python foo --reduce bar job input.txt
-usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--partitions N]
-                  [--sortdir DIR] [--sortmem N] [--update] [-h] [--notimes]
-                  [--unittest] [--verbose]
+usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
+                  [--partitions N] [--sortdir DIR] [--sortmem N] [--update]
+                  [-h] [--notimes] [--unittest] [--verbose]
                   JOBDIR FILE [FILE ...]
 quacreduce: error: --python cannot be specified with --map and/or --reduce
 2
 $ quacreduce --python foo --map bar --reduce baz job input.txt
-usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--partitions N]
-                  [--sortdir DIR] [--sortmem N] [--update] [-h] [--notimes]
-                  [--unittest] [--verbose]
+usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
+                  [--partitions N] [--sortdir DIR] [--sortmem N] [--update]
+                  [-h] [--notimes] [--unittest] [--verbose]
                   JOBDIR FILE [FILE ...]
 quacreduce: error: --python cannot be specified with --map and/or --reduce
 2
