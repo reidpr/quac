@@ -591,8 +591,8 @@ def sl_union(len_, *slices):
    '''Given a sequence length and some slices, return the sequence of indexes
       which form the union of the given slices. For example:
 
-      >>> sorted(sl_union(10, slp('0'), slp('2:4'), slp('-2:')))
-      [0, 2, 3, 8, 9]
+      >>> pformat(sl_union(10, slp('0'), slp('2:4'), slp('-2:')))
+      'set([0, 2, 3, 8, 9])'
 
       Note that this function instantiates lists of length len_ (because
       xrange() iterators don't support slicing).'''
@@ -602,10 +602,10 @@ def sl_union(len_, *slices):
    return indexes
 
 def sl_union_fromtext(len_, slicetext):
-   '''e.g.:
+   """e.g.:
 
-      >>> sorted(sl_union_fromtext(10, '0,2:4,-2:'))
-      [0, 2, 3, 8, 9]'''
+      >>> pformat(sl_union_fromtext(10, '0,2:4,-2:'))
+      'set([0, 2, 3, 8, 9])'"""
    return sl_union(len_, *map(slp, slicetext.split(',')))
 
 def stdout_restore():
@@ -700,8 +700,8 @@ def zero_attrs(obj, attrs):
       ...   pass
       >>> a = A()
       >>> zero_attrs(a, ('a', 'b', 'c'))
-      >>> sorted(vars(a).items())
-      [('a', 0), ('b', 0), ('c', 0)]'''
+      >>> pformat(vars(a))
+      "{'a': 0, 'b': 0, 'c': 0}"'''
    for attr in attrs:
       setattr(obj, attr, 0)
 
@@ -786,19 +786,19 @@ TypeError: unhashable type: 'dict'
 >>> (a[slp('::-1')] == a[::-1]) and None
 
 # More unioned slices
->>> sorted(sl_union(10))  # no slices
-[]
->>> sorted(sl_union(0, slp('1')))  # empty list
-[]
->>> sorted(sl_union(10, slp('1:4')))  # one slice
-[1, 2, 3]
->>> sorted(sl_union(10, slp('1:4'), slp('3')))  # overlapping slices
-[1, 2, 3]
->>> sorted(sl_union(10, slp('10')))  # fully out of bounds
-[]
->>> sorted(sl_union(10, slp('9:11')))  # partly out of bounds
-[9]
->>> sorted(sl_union(10, slp('9'), slp('10')))  # one in, one out
-[9]
+>>> pformat(sl_union(10))  # no slices
+'set()'
+>>> pformat(sl_union(0, slp('1')))  # empty list
+'set()'
+>>> pformat(sl_union(10, slp('1:4')))  # one slice
+'set([1, 2, 3])'
+>>> pformat(sl_union(10, slp('1:4'), slp('3')))  # overlapping slices
+'set([1, 2, 3])'
+>>> pformat(sl_union(10, slp('10')))  # fully out of bounds
+'set()'
+>>> pformat(sl_union(10, slp('9:11')))  # partly out of bounds
+'set([9])'
+>>> pformat(sl_union(10, slp('9'), slp('10')))  # one in, one out
+'set([9])'
 
 ''')
