@@ -114,7 +114,7 @@ class Job(object):
 
    def map_write(self, key, value):
       '''Write one key/value pair to the mapper output.'''
-      self.outfp.write(str(key))
+      self.outfp.write(unicode(key).encode('utf8'))
       self.outfp.write('\t')
       self.outfp.write(encode(value))
       self.outfp.write('\n')
@@ -131,7 +131,7 @@ class Job(object):
          values.'''
       for grp in itertools.groupby((l.partition('\t') for l in self.infp),
                                    key=operator.itemgetter(0)):
-         key = grp[0]
+         key = grp[0].decode('utf8')
          values = (decode(i[2]) for i in grp[1])
          yield (key, values)
 
@@ -197,15 +197,12 @@ class KV_Pickle_Seq_Output_Job(Job):
       not a pickle containing a sequence. Note also that keys are not checked
       for uniqueness.'''
 
-   def reduce_open_output(self):
-      self.reduce_open_output_utf8()
-
    def reduce_write(self, item):
       assert (len(item) == 2)
-      self.outfp.write(unicode(item[0]))
-      self.outfp.write(u'\t')
-      self.outfp.write(unicode(encode(item[1])))
-      self.outfp.write(u'\n')
+      self.outfp.write(unicode(item[0]).encode('utf8'))
+      self.outfp.write('\t')
+      self.outfp.write(encode(item[1]))
+      self.outfp.write('\n')
 
 
 class Test_Job(Job):
