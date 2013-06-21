@@ -18,15 +18,6 @@ Summary
      cd quac
      make
 
-#. Prepare the test dataset. (Optional; see ``twtests/README`` for details on
-   how to get the data.)
-
-   ::
-
-     cd twtests/tweets
-     ./get-test-data /path/to/preprocessed/tweets
-     cd -
-
 #. Run the tests (this is actually pretty important, as it tells you whether
    you've installed all the dependencies correctly)::
 
@@ -37,6 +28,9 @@ Summary
    life much easier going forward.)
 
    Note that a working Internet connection is required to run the tests.
+
+   Some (optional) tests require test data which is not included with QUAC.
+   See ``twtests/README`` for details.
 
 .. note:: If you plan to :doc:`contribute to QUAC <contributing>`, you
           should fork the repository on Github and clone that fork instead.

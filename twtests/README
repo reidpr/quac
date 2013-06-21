@@ -1,10 +1,12 @@
-This directory contains tests that depend on a small data set of about 20,000
-geotagged tweets. If this data set is not present, the tests are skipped.
+This directory contains tests that depend on a small data set of about 25,000
+tweets. Unlike real data, most of the test tweets are geotagged (specifically,
+it seems that we included all tweets which were either geotagged or retweeted
+a geotagged tweet). If these data are not present, the tests are skipped.
 
-The .id files in tweets/ contain the IDs of the tweets in the data set; it is
-unfortunately your responsibility to acquire and preprocess these tweets. A
-patch implementing a script to do so (it would take less than two days to
-request them individually from the REST API) would be very welcome.
+The file tweets/ids.txt contains the IDs of the tweets in the data set; it is
+unfortunately your responsibility to acquire these tweets. A patch
+implementing a script to do so (it would take less than two days to request
+them individually from the REST API) would be very welcome.
 
 Note that we are flexible as to the specific tweets used, as long as the
 tweets appeared in the streaming API spritzer during a period we were
