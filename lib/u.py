@@ -14,6 +14,7 @@ import codecs
 import collections
 import ConfigParser
 from datetime import datetime, timedelta
+import glob
 import gzip
 import functools
 import inspect
@@ -316,6 +317,18 @@ def copyupdate(template, updates):
    r = template.copy()
    r.update(updates)
    return r
+
+def glob_maxnumeric(dir_):
+   '''Given a directory that has zero or more files named only with digits,
+      return the largest integer in those filenames. If there are no such
+      filenames, return None.'''
+   names = glob.glob('%s/*' % (dir_))
+   r = re.compile(r'(^|/)([0-9]+)$')
+   try:
+      return max(int(m.group(2)) for m in (r.search(i) for i in names) if m)
+   except ValueError:
+      # no matches
+      return None
 
 def groupn(iter_, n):
    '''Generator which returns iterables containing n-size chunks of iterable

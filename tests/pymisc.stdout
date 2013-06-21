@@ -1,0 +1,9 @@
+*** u.glob_maxnatural()
+$ touch a b
+None
+$ touch 0
+0
+$ touch 00
+0
+$ touch 1 9
+9
