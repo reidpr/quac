@@ -130,7 +130,7 @@ class ArgumentParser(argparse.ArgumentParser):
       super(ArgumentParser, self).__init__(**kw)
       self.default_group = self.add_argument_group('functionality')
 
-   def parse_args(self):
+   def parse_args(self, args):
       gr = self.add_argument_group('help, etc.')
       gr.add_argument(
          '-h', '--help',
@@ -149,7 +149,7 @@ class ArgumentParser(argparse.ArgumentParser):
          '--verbose',
          action='store_true',
          help='be more verbose with log output')
-      return super(ArgumentParser, self).parse_args()
+      return super(ArgumentParser, self).parse_args(args)
 
 
 class MyConfigParser(ConfigParser.SafeConfigParser):
@@ -516,10 +516,10 @@ def path_configured(path):
       raise No_Configuration_Read()
    return abspath(path, cpath)
 
-def parse_args(ap):
+def parse_args(ap, args=sys.argv[1:]):
    '''Parse command line arguments and set a few globals based on the result.
       Note that this function must be called before logging_init().'''
-   args = ap.parse_args()
+   args = ap.parse_args(args)
    try:
       multicore.init(args.cores)
    except AttributeError:
