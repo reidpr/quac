@@ -516,6 +516,35 @@ def path_configured(path):
       raise No_Configuration_Read()
    return abspath(path, cpath)
 
+def partition_sentinel(iter_, sentinel):
+   '''Partition an iterable at the first occurrence of a sentinel; return two
+      lists containing each partition. The sentinel is not included in either.
+      For example:
+
+      >>> partition_sentinel([1,2,3,4], 2)
+      ([1], [3, 4])
+      >>> partition_sentinel([1,2,3,4], 'not_in_list')
+      ([1, 2, 3, 4], [])
+      >>> partition_sentinel([], 2)
+      ([], [])
+      >>> partition_sentinel([1,2,3,4], 4)
+      ([1, 2, 3], [])
+      >>> partition_sentinel([1,2,3,4], 1)
+      ([], [2, 3, 4])
+      >>> partition_sentinel(8675309, 2)
+      Traceback (most recent call last):
+        ...
+      TypeError: 'int' object is not iterable'''
+   a = list()
+   iter2 = iter(iter_)
+   for i in iter2:
+      if (i == sentinel):
+         break
+      a.append(i)
+   b = list(iter2)
+   return (a, b)
+
+
 def parse_args(ap, args=sys.argv[1:]):
    '''Parse command line arguments and set a few globals based on the result.
       Note that this function must be called before logging_init().'''

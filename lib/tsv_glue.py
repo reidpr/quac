@@ -27,13 +27,13 @@ class Reader(object):
    '''Read rows are returned as lists. Empty strings are converted to None.
       Converting to numbers, etc., is the responsibility of the caller.'''
 
-   __slots__ = ('filename', 'fp')
+   __slots__ = ('fp')
 
-   def __init__(self, filename, buffering=-1):
-      '''Open a TSV file for reading and return the reader object. If the file
-         does not exist, raise an exception.'''
-      self.filename = filename
-      self.fp = io.open(self.filename, mode='rt', buffering=buffering,
+   def __init__(self, file_, buffering=-1):
+      '''Open a TSV file for reading and return the reader object; the file
+         can be either a filename or an open integer file descriptor. If it's
+         a filename which does not exist, raise an exception.'''
+      self.fp = io.open(file_, mode='rt', buffering=buffering,
                         encoding='utf8')
 
    def __iter__(self):

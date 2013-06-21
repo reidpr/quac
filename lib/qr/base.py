@@ -43,10 +43,25 @@ import operator
 import sys
 
 import testable
+import tsv_glue
+
 
 # We use a relatively large output buffer size of 512K; see also
 # OUTPUT_BUFSIZE in hashsplit.c.)
 OUTPUT_BUFSIZE = 524288
+
+
+### Helper functions ###
+
+def decode(text):
+   return pickle.loads(base64.b64decode(text))
+
+def encode(value):
+   return base64.b64encode(pickle.dumps(value, -1))
+
+
+
+### Classes ###
 
 class Job(object):
    __metaclass__ = ABCMeta
@@ -74,13 +89,13 @@ class Job(object):
    def map(self, item):
       '''FIXME generator yields key/value pairs'''
 
-   @abstractmethod
    def map_inputs(self):
       '''Generator which reads map input items from the mapper input (i.e.,
-         the open file ``self.infp``) and yields them as Python objects.
-         Typically, this will be implemented by a mixin (e.g.
-         :class:`Line_Input`).'''
-      pass
+         the open file ``self.infp``) and yields them as Python objects. The
+         default implementation assumes that :attr:`infp` is an iterator and
+         yields elements of that iterator.'''
+      for i in self.infp:
+         yield i
 
    def map_open_input(self):
       self.infp = io.open(sys.stdin.fileno(), 'rb')
@@ -101,7 +116,7 @@ class Job(object):
       '''Write one key/value pair to the mapper output.'''
       self.outfp.write(str(key))
       self.outfp.write('\t')
-      self.outfp.write(base64.b64encode(pickle.dumps(value, -1)))
+      self.outfp.write(encode(value))
       self.outfp.write('\n')
 
    @abstractmethod
@@ -117,15 +132,20 @@ class Job(object):
       for grp in itertools.groupby((l.partition('\t') for l in self.infp),
                                    key=operator.itemgetter(0)):
          key = grp[0]
-         values = (pickle.loads(base64.b64decode(i[2])) for i in grp[1])
+         values = (decode(i[2]) for i in grp[1])
          yield (key, values)
 
    def reduce_open_input(self):
       self.infp = io.open(sys.stdin.fileno(), 'rb')
 
-   def reduce_open_output():
+   def reduce_open_output(self):
       self.outfp = io.open(self.reduce_output_filename, 'wb',
                            buffering=OUTPUT_BUFSIZE)
+
+   def reduce_open_output_utf8(self):
+      self.outfp = io.open(self.reduce_output_filename, 'wt',
+                           encoding='utf8', buffering=OUTPUT_BUFSIZE)
+
 
    def reduce_stdinout(self, rid):
       '''Connect myself to input and output, and run my reducer.'''
@@ -147,15 +167,11 @@ class Job(object):
 
 class Line_Input_Job(Job):
 
-   'Mixin for line-oriented Unicode plain text map input.'
+   '''Mixin for line-oriented Unicode plain text map input;
+      :meth:`map_inputs()` yields Unicode objects.'''
 
    def map_open_input(self):
       self.infp = io.open(sys.stdin.fileno(), 'r', encoding='utf8')
-
-   def map_inputs(self):
-      'Yields unicode objects.'
-      for line in self.infp:
-         yield line
 
 
 class Line_Output_Job(Job):
@@ -163,13 +179,32 @@ class Line_Output_Job(Job):
    'Mixin for line-oriented Unicode plain text reduce output.'
 
    def reduce_open_output(self):
-      self.outfp = io.open(self.reduce_output_filename, 'w',
-                           encoding='utf8', buffering=OUTPUT_BUFSIZE)
+      self.reduce_open_output_utf8()
 
    def reduce_write(self, item):
       'Items to be unicode objects with no trailing newline.'
       assert (isinstance(item, unicode))
       self.outfp.write(item)
+      self.outfp.write(u'\n')
+
+
+class KV_Pickle_Seq_Output_Job(Job):
+
+   '''Mixin for output that is a sequence of Python objects. :meth:`reduce`
+      must yield (key, value) tuples. To the output stream is written: the
+      stringified key, a tab character, a pickled and base64-encoded version
+      of the value, and a newline. Note that this is a *sequence* of pickles,
+      not a pickle containing a sequence. Note also that keys are not checked
+      for uniqueness.'''
+
+   def reduce_open_output(self):
+      self.reduce_open_output_utf8()
+
+   def reduce_write(self, item):
+      assert (len(item) == 2)
+      self.outfp.write(unicode(item[0]))
+      self.outfp.write(u'\t')
+      self.outfp.write(unicode(encode(item[1])))
       self.outfp.write(u'\n')
 
 
@@ -179,6 +214,16 @@ class Test_Job(Job):
    def map_inputs(self): pass
    def reduce(self, key, values): pass
    def reduce_write(self, item): pass
+
+
+class TSV_Input_Job(Job):
+
+   '''Mixin for TSV UTF-8 text input. Uses our dirt-simple TSV parser (split
+      on tabs, nothing more). :meth:`map_inputs()` yields lists of Unicode
+      strings.'''
+
+   def map_open_input(self):
+      self.infp = tsv_glue.Reader(sys.stdin.fileno())
 
 
 testable.register(r'''
