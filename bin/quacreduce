@@ -131,7 +131,7 @@ reallyclean: clean
       cmd = args.reduce.replace('%(RID)', str(rid))
       fp.write('''
 %(reducedone)s: %(mapdones)s
-	sort -s -k1 -t'	' -S %(buf)s -T %(sortdir)s %(mapouts)s | %(cmd)s
+	LC_ALL=C sort -s -k1,1 -t'	' -S %(buf)s -T %(sortdir)s %(mapouts)s | %(cmd)s
 	touch %(reducedone)s
 ''' % { 'buf': args.sortmem,
         'cmd': cmd,
