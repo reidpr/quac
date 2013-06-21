@@ -4,7 +4,7 @@ $ (cat foo*.txt)
 foo bar baz
 foo foo
 bar
-$ (quacreduce --python qr.wordcount.Job --pyarg 'factor:2' ./job foo*.txt)
+$ (quacreduce --python qr.wordcount.Job --pyargs 'factor:2' ./job foo*.txt)
 $ (cd job && make --quiet)
 $ (cat job/out/* | sort)
 2 baz
