@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+
+'Print ngrams-build results.'
+
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+import io
+import sys
+
+import quacpath
+import qr.base
+import testable
+import time_
+import tsv_glue
+import u
+l = u.l
+
+
+ap = u.ArgumentParser(description=__doc__)
+gr = ap.default_group
+gr.add_argument('--detail',
+                action='store_true',
+                help='print TSV of time series in addition to metadata')
+gr.add_argument('--query',
+                metavar='NGRAM',
+                help='print this n-gram (otherwise print all)')
+gr.add_argument('inputdir',
+                metavar='DIR',
+                help='directory containing time series files')
+
+
+### Main ###
+
+def main():
+   file_max = u.glob_maxnumeric(args.inputdir)
+   if (file_max is None):
+      u.abort('no input files in %s' % (args.inputdir))
+   for i in xrange(file_max + 1):
+      fp = io.open('%s/%d' % (args.inputdir, i), 'rb')
+      for line in fp:
+         (k, _, v) = line.partition('\t')
+         k = k.decode('utf8')
+         v = qr.base.decode(v)
+         if (args.query is None or k == args.query):
+            if (args.detail):
+               tsv = tsv_glue.Writer(fp=sys.stdout)
+               for date in time_.dateseq(v['first_day'], v['last_day']):
+                  datestr = time_.iso8601_date(date)
+                  tsv.writerow([datestr, v['series'][datestr]])
+            else:
+               print >>u.utf8_stdout, (u'%s\t%d\t%s\t%s'
+                                       % (k, v['total'],
+                                          time_.iso8601_date(v['first_day']),
+                                          time_.iso8601_date(v['last_day'])))
+            if (k == args.query):
+               break
+
+
+### Bootstrap ###
+
+try:
+
+   args = u.parse_args(ap)
+   u.logging_init('ngsch')
+
+   if (__name__ == '__main__'):
+      main()
+
+except testable.Unittests_Only_Exception:
+   testable.register('')

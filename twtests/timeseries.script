@@ -1,0 +1,24 @@
+#!/bin/bash
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+# Compute keyword time series and related analyses.
+
+. ./environment.sh
+
+cd $DATADIR
+
+ngrams-build --notimes --min-occur 10 --clean $TWEETDIR/pre . -- --partitions 2 > /dev/null
+
+x ls -R .
+
+# "candy" should peak near Halloween. (Note that midnight UTC is 8pm EST, so a
+# lot of trick-or-treating related traffice will happen on November 1 UTC.)
+x ngrams-search --query candy .
+x ngrams-search --detail --query candy .
+
+# we include "a" because it's an n-gram that had trouble being sorted (see
+# commit 885d3d)
+x ngrams-search --query a .
+
+# "taco" has a gap on November 1, so we test it to make sure zero is inserted.
+x ngrams-search --detail --query taco .
