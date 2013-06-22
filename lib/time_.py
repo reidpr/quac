@@ -37,7 +37,7 @@ def dateseq_str(start, end):
       ['2013-03-25', '2013-03-26', '2013-03-27', '2013-03-28']'''
    start = iso8601_parse(start)
    end = iso8601_parse(end)
-   return [d.strftime('%Y-%m-%d') for d in dateseq(start, end)]
+   return [iso8601_date(d) for d in dateseq(start, end)]
 
 def dateseq(start, end):
    return rrule.rrule(rrule.DAILY, dtstart=start, until=end)
@@ -73,6 +73,9 @@ def twitter_timestamp_parse(text):
    # approximately 5x faster. (If assumption (b) fails, you'll get a
    # ValueError.)
    return utcify(datetime.strptime(text, '%a %b %d %H:%M:%S +0000 %Y'))
+
+def iso8601_date(d):
+   return d.strftime('%Y-%m-%d')
 
 def iso8601utc_parse(text):
    '''Parse a timestamp with seconds in ISO 8601 format, assuming it has a UTC
