@@ -94,13 +94,14 @@ class ArgumentParser(u.ArgumentParser):
                       metavar='DICT',
                       help='Dictionary of parameters for Python job')
       gr = self.add_argument_group('job logistics')
-      gr.add_argument('jobdir',
-                      metavar='JOBDIR',
-                      help='job directory (must not exist)')
       gr.add_argument('inputs',
                       metavar='FILE',
                       nargs='+',
                       help='input files (must have unique names)')
+      gr.add_argument('--jobdir',
+                      metavar='DIR',
+                      default='./qrjob',
+                      help='job directory (must not exist; default "./qrjob")')
       gr.add_argument('--partitions',
                       type=int,
                       metavar='N',

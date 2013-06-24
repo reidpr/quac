@@ -18,6 +18,6 @@ y "cat foo*.txt"
 
 ## Do map-reduce
 
-y "quacreduce --python qr.wordcount.Job --pyargs 'factor:2' ./job foo*.txt"
-y "cd job && make --quiet"  # output contains temp dirs that vary between tests
-y "cat job/out/* | sort"
+y "quacreduce --python qr.wordcount.Job --pyargs 'factor:2' foo*.txt"
+y "cd qrjob && make --quiet"  # output contains temp dirs that vary
+y "cat qrjob/out/* | sort"
