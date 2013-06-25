@@ -66,8 +66,8 @@ $ (wc -l pre/*.tsv)
    120 pre/2012-11-04.geo.tsv
     70 pre/2012-11-05.all.tsv
     59 pre/2012-11-05.geo.tsv
-   237 pre/summary.tsv
-  2419 total
+     9 pre/summary.tsv
+  2191 total
 $ (md5sum pre/*.tsv pre/metadata)
 3312dd29baf26a26b3ea3179fc4061e9  pre/2012-10-28.all.tsv
 a501143092df4f5a336b033536afa80d  pre/2012-10-28.geo.tsv
@@ -87,5 +87,5 @@ cc798427f480947e73a8cbb32e2d848f  pre/2012-11-02.all.tsv
 fa19db1a388588d5015db6e4f3376145  pre/2012-11-04.geo.tsv
 f039b45a9778f987ca9906bcec6233b0  pre/2012-11-05.all.tsv
 ca908e5f6ab22fa1cd17a7b51e45e231  pre/2012-11-05.geo.tsv
-c7e22c29d22efbbb4a5acc63aede7dc7  pre/summary.tsv
-f9fbbf1d9c6b3c2eda9aff0d60b43f59  pre/metadata
+ef397f1b339718a8c323bf13757cb5f8  pre/summary.tsv
+f26634b97649aed415c45a313f398af8  pre/metadata
