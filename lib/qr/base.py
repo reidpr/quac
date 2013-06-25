@@ -237,6 +237,6 @@ testable.register(r'''
 >>> buf.seek(0)
 >>> job.infp = buf
 >>> [(k, list(v)) for (k, v) in job.reduce_inputs()]
-[('1', [-1]), ('2', [-2, -3]), ('3', [-4, -5, -6])]
+[(u'1', [-1]), (u'2', [-2, -3]), (u'3', [-4, -5, -6])]
 
 ''')
