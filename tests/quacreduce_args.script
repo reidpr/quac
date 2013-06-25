@@ -21,7 +21,7 @@ echo $?
 
 echo '*** Fail if jobdir exists'
 x mkdir jobexists
-x quacreduce --map cat --reduce cat --jobdir jobexists foo/bar.txt
+x quacreduce --notimes --map cat --reduce cat --jobdir jobexists foo/bar.txt
 echo $?
 
 echo '*** Check that either --python xor --map and --reduce are specified'
@@ -33,7 +33,7 @@ x quacreduce --map foo --reduce bar --jobdir job2 input.txt
 echo $?
 
 echo '*** these should fail'
-x quacreduce input.txt
+x quacreduce --notimes input.txt
 echo $?
 x quacreduce --map bar input.txt
 echo $?

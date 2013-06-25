@@ -6,24 +6,22 @@ pickled n-gram time series with 1-day granularity.'''
 
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
-help_epilogue = '''
-Note that this is a relatively simple wrapper around quacreduce. All options
-after -- are passed unchanged to quacreduce.
-'''
-
-import glob
 import os
-import os.path
 import subprocess as sp
-import sys
 
 import quacpath
+import qr.scripting
 import u
 l = u.l
 
 
-ap = u.ArgumentParser(description=__doc__, epilog=help_epilogue)
-gr = ap.default_group
+help_epilogue = '''
+Note that input should be .all.tsv files.
+''' + qr.scripting.help_epilogue
+
+
+ap = qr.scripting.ArgumentParser(description=__doc__, epilog=help_epilogue)
+gr = ap.add_argument_group('n-gram stuff')
 gr.add_argument('-n',
                 type=int,
                 metavar='N',
@@ -34,56 +32,45 @@ gr.add_argument('--min-occur',
                 metavar='N',
                 default=10,
                 help='drop n-grams rarer than this (default 10 occurrences)')
+gr.add_argument('--run',
+                type=int,
+                help='run make with -j N after job setup')
 gr.add_argument('--clean',
                 action='store_true',
                 help='run "make clean" after job completion')
-gr.add_argument('inputdir',
-                metavar='INPUTDIR',
-                help='directory containing input files')
 gr.add_argument('outputdir',
                 metavar='OUTPUTDIR',
                 help='results and temporary job files (must exist)')
 
-(myargs, qrargs_cmdline) = u.partition_sentinel(sys.argv[1:], '--')
 
-# Use the quacreduce in the same directory as this script, not necessarily in
-# $PATH.
-quacreduce = os.path.dirname(os.path.realpath(__file__)) + '/quacreduce'
-
-args = u.parse_args(ap, myargs)
+args = qr.scripting.parse_args(ap)
+u.configure(None)
 u.logging_init('ngbld')
 
 l.info('starting')
 os.chdir(args.outputdir)
 
-if (os.path.exists('qrjob')):
-   u.abort('job dir already exists, but --update is unimplemented')
-
-l.debug('quacreduce = %s' % (quacreduce))
+# FIXME: these are lame hacks
+args.python = 'qr.ngramtime.Tweet_Job'
+args.pyargs = 'n:%d min_occur:%d' % (args.n, args.min_occur)
 
 try:
 
-   # quacreduce
-   qrargs = [quacreduce,
-             '--python', 'qr.ngramtime.Tweet_Job',
-             '--pyargs', 'n:%d min_occur:%d' % (args.n, args.min_occur),
-             './qrjob']
-   qrargs += glob.glob('%s/*.all.tsv' % (args.inputdir))
-   qrargs += qrargs_cmdline
-   l.debug('calling quacreduce with: %s' % (str(qrargs)))
-   sp.check_call(qrargs)
+   l.info('setting up job')
+   qr.scripting.setup(args)
+   if (args.run is not None):
+      l.info('running job')
+      qr.scripting.run(args, args.run)
+      if (args.clean):
+         l.info('cleaning up job')
+         qr.scripting.clean(args)
 
-   # make
-   sp.check_call('cd qrjob && make', shell=True)
+   l.info('creating output links')
+   for i in xrange(args.partitions):
+      os.symlink('qrjob/out/%d' % (i), str(i))
 
-   # build links
-   sp.check_call('ln -s qrjob/out/* .', shell=True)
-
-   # make clean?
-   if (args.clean):
-      sp.check_call('cd qrjob && make clean', shell=True)
+   l.info('done')
 
 except sp.CalledProcessError, x:
    u.abort('subprocess failed with return code %d' % (x.returncode))
 
-l.info('done')

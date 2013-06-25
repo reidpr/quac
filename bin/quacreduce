@@ -20,7 +20,7 @@ try:
 
    args = qr.scripting.parse_args(ap)
    u.configure(None)
-   u.logging_init('makrd')
+   u.logging_init('quacr')
 
    qr.scripting.setup(args)
 

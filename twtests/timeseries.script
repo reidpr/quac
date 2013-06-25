@@ -7,7 +7,7 @@
 
 cd $DATADIR
 
-ngrams-build --notimes --min-occur 10 --clean $TWEETDIR/pre . -- --partitions 2 > /dev/null
+ngrams-build --notimes --partitions 2 --min-occur 10 --run 4 --clean . $TWEETDIR/pre/*.all.tsv > /dev/null
 
 x ls -R .
 

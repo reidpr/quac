@@ -11,27 +11,17 @@ quacreduce: error: input file basenames must be unique
 2
 *** Fail if jobdir exists
 $ mkdir jobexists
-$ quacreduce --map cat --reduce cat --jobdir jobexists foo/bar.txt
-usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
-                  [--jobdir DIR] [--partitions N] [--sortdir DIR]
-                  [--sortmem N] [--update] [-h] [--notimes] [--unittest]
-                  [--verbose]
-                  FILE [FILE ...]
-quacreduce: error: job dir "jobexists" already exists
-2
+$ quacreduce --notimes --map cat --reduce cat --jobdir jobexists foo/bar.txt
+quacr FATAL    job dir "jobexists" already exists
+1
 *** Check that either --python xor --map and --reduce are specified
 *** these should succeed
 $ quacreduce --map foo --reduce bar --jobdir job2 input.txt
 0
 *** these should fail
-$ quacreduce input.txt
-usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
-                  [--jobdir DIR] [--partitions N] [--sortdir DIR]
-                  [--sortmem N] [--update] [-h] [--notimes] [--unittest]
-                  [--verbose]
-                  FILE [FILE ...]
-quacreduce: error: --python or --map and --reduce must be specified
-2
+$ quacreduce --notimes input.txt
+quacr FATAL    --python or --map and --reduce must be specified
+1
 $ quacreduce --map bar input.txt
 usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
                   [--jobdir DIR] [--partitions N] [--sortdir DIR]

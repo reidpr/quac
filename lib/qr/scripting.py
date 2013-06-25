@@ -31,6 +31,7 @@ Notes:
 '''
 
 import os
+import subprocess as sp
 
 import time_
 import u
@@ -40,7 +41,7 @@ l = u.l
 ### Job phases ###
 
 def clean(args):
-   assert False, 'unimplemented'
+   sp.check_call('cd %s && make clean' % (args.jobdir), shell=True)
 
 def parse_args(ap):
    # parse args
@@ -48,14 +49,10 @@ def parse_args(ap):
    # check arguments
    if (len(set(os.path.basename(i) for i in args.inputs)) != len(args.inputs)):
       ap.error('input file basenames must be unique')
-   if (not (args.python or args.map or args.reduce)):
-      ap.error('--python or --map and --reduce must be specified')
    if (args.python and (args.map or args.reduce)):
       ap.error('--python cannot be specified with --map and/or --reduce')
    if (args.map and not args.reduce or args.reduce and not args.map):
       ap.error('--map and --reduce must both be specified if one is')
-   if (os.path.exists(args.jobdir)):
-      ap.error('job dir "%s" already exists' % (args.jobdir))
    # absolutize input files
    args.inputs = [os.path.abspath(i) for i in args.inputs]
    # set sortdir if unset
@@ -64,10 +61,15 @@ def parse_args(ap):
    # done
    return args
 
-def run(args):
-   assert False, 'unimplemented'
+def run(args, job_ct):
+   sp.check_call('cd %s && make -j%d' % (args.jobdir, job_ct), shell=True)
 
 def setup(args):
+   if (not (args.python or args.map or args.reduce)):
+      u.abort('--python or --map and --reduce must be specified')
+   if (os.path.exists(args.jobdir)):
+      u.abort('job dir "%s" already exists' % (args.jobdir))
+
    directories_setup(args)
    if (args.python):
       pythonify(args)
@@ -124,12 +126,11 @@ class ArgumentParser(u.ArgumentParser):
 
 def directories_setup(args):
    os.mkdir(args.jobdir)
-   os.chdir(args.jobdir)
-   os.mkdir('out')
-   os.mkdir('tmp')
+   os.mkdir('%s/out' % (args.jobdir))
+   os.mkdir('%s/tmp' % (args.jobdir))
 
 def makefile_dump(args):
-   fp = open('Makefile', 'w')
+   fp = open('%s/Makefile' % (args.jobdir), 'w')
    fp.write('# This is a QUACreduce job, generated %s.\n\n'
             % (time_.nowstr_human()))
    # everything
