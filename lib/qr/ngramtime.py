@@ -19,6 +19,8 @@
 
 import collections
 
+import numpy as np
+
 from . import base
 import time_
 import tok.unicode_props
@@ -38,17 +40,25 @@ class Tweet_Job(base.TSV_Input_Job, base.KV_Pickle_Seq_Output_Job):
 
    def reduce(self, ngram, dates):
       cts = collections.Counter()
-      first_day = '9999-99-99'
+      first_day = '9999-00-99'
       last_day = '0000-00-00'
       for date in dates:
          first_day = min(first_day, date)
          last_day = max(last_day, date)
          cts[date] += 1
       total = sum(cts.itervalues())
-      ct_series = cts  # FIXME: convert to NumPy array
       if (total >= self.params['min_occur']):
+         first_day = time_.iso8601_parse(first_day)
+         last_day = time_.iso8601_parse(last_day)
+         assert (first_day <= last_day)
+         # use float32 for space efficiency at the expense of precision
+         ct_series = np.zeros(time_.days_diff(last_day, first_day) + 1,
+                              dtype=np.float32)
+         for (date, ct) in cts.iteritems():
+            date = time_.iso8601_parse(date)
+            ct_series[time_.days_diff(date, first_day)] = ct
          yield (ngram, { 'ngram': ngram,
-                         'first_day': time_.iso8601_parse(first_day),
-                         'last_day': time_.iso8601_parse(last_day),
+                         'first_day': first_day,
+                         'last_day': last_day,
                          'total': total,
                          'series': ct_series })

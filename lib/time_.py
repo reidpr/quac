@@ -6,7 +6,7 @@
 #
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
-from datetime import tzinfo, timedelta, datetime
+from datetime import date, datetime, timedelta, tzinfo
 import pytz
 import re
 import time as _time
@@ -51,6 +51,31 @@ def days_f(td):
       >>> days_f(td)
       2.5'''
    return td.total_seconds() / timedelta(days=1).total_seconds()
+
+def days_diff(a, b):
+   '''a and b are date or datetime objects that are an integer number of days
+      apart. Return a - b in days. E.g.:
+
+      >>> days_diff(datetime(2013, 6, 27), datetime(2013, 6, 20))
+      7
+      >>> days_diff(date(2013, 6, 27), date(2013, 6, 20))
+      7
+      >>> days_diff(date(2013, 6, 20), date(2013, 6, 27))
+      -7
+      >>> days_diff(date(2013, 6, 20), date(2013, 6, 20))
+      0
+      >>> days_diff(datetime(2013, 6, 27, 1), datetime(2013, 6, 20))
+      Traceback (most recent call last):
+        ...
+      ValueError: 2013-06-27 01:00:00 and 2013-06-20 00:00:00 day difference is not an integer
+      >>> days_diff(datetime(2013, 6, 27, microsecond=1), datetime(2013, 6, 20))
+      Traceback (most recent call last):
+        ...
+      ValueError: 2013-06-27 00:00:00.000001 and 2013-06-20 00:00:00 day difference is not an integer'''
+   diff = a - b
+   if (diff.seconds != 0 or diff.microseconds != 0):
+      raise ValueError('%s and %s day difference is not an integer' % (a, b))
+   return diff.days
 
 def ddfs_parse(text):
    '''Parse the time string as reported by DDFS. e.g.:

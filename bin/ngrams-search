@@ -47,9 +47,9 @@ def main():
          if (args.query is None or k == args.query):
             if (args.detail):
                tsv = tsv_glue.Writer(fp=sys.stdout)
-               for date in time_.dateseq(v['first_day'], v['last_day']):
-                  datestr = time_.iso8601_date(date)
-                  tsv.writerow([datestr, v['series'][datestr]])
+               dates = time_.dateseq(v['first_day'], v['last_day'])
+               for (date, ct) in zip(dates, v['series']):
+                  tsv.writerow([time_.iso8601_date(date), int(ct)])
             else:
                print >>u.utf8_stdout, (u'%s\t%d\t%s\t%s'
                                        % (k, v['total'],
