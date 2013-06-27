@@ -131,11 +131,16 @@ void split(FILE ** out, int output_ct)
    char * line = NULL;
    size_t linebuf_sz = 0;
    ssize_t read_sz;
-   char * tab;
+   char * end;
 
    while ((read_sz = getline(&line, &linebuf_sz, stdin)) != -1) {
-      tab = strchr(line, '\t');  // returns NULL if no tab
-      fputs(line, out[hash(line, tab) % output_ct]);
+      /* Set end to the first tab if one exists, else the trailing newline. If
+         no newline is present, this will ignore the last byte of the key, but
+         that is out of spec. */
+      end = strchr(line, '\t');
+      if (end == NULL)
+         end = (line + read_sz - 1);
+      fputs(line, out[hash(line, end) % output_ct]);
    }
 
    if (!feof(stdin))

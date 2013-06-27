@@ -34,7 +34,8 @@ The basic paradigm is that map and reduce operators produce and accept
 line-oriented input, with key and value separated by a single tab character.
 [3]_ All characters except tab, return, and newline are permitted in keys and
 values (though this is untested). Null values are permitted; in this case the
-separating tab may or may be omitted. [4]_
+separating tab may or may be omitted. [4]_ The last line of the stream must
+end in a newline.
 
 The ``quacreduce`` command implements this API by creating a makefile, which
 you then run with ``make`` (either directly or wrapped).
