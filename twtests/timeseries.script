@@ -7,7 +7,9 @@
 
 cd $DATADIR
 
-ngrams-build --notimes --partitions 2 --min-occur 10 --run 4 --clean . $TWEETDIR/pre/*.all.tsv > /dev/null
+# Build the time series. We use several partitions so that we can test that
+# hash-based time series lookup works.
+ngrams-build --notimes --partitions 10 --min-occur 10 --run 4 --clean . $TWEETDIR/pre/*.all.tsv > /dev/null
 
 x ls -R .
 

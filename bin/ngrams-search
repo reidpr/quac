@@ -32,10 +32,13 @@ gr.add_argument('inputdir',
 ### Main ###
 
 def main():
-   file_max = u.glob_maxnumeric(args.inputdir)
-   if (file_max is None):
+   try:
+      file_ct = u.glob_maxnumeric(args.inputdir) + 1
+   except TypeError:
       u.abort('no input files in %s' % (args.inputdir))
-   for i in xrange(file_max + 1):
+   for i in xrange(file_ct):
+      if (args.query is not None and u.djb2(args.query) % file_ct != i):
+         continue
       fp = io.open('%s/%d' % (args.inputdir, i), 'rb')
       for line in fp:
          (k, _, v) = line.partition('\t')
