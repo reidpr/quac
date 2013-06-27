@@ -79,16 +79,17 @@ void fatal(char * fmt, ...)
 }
 
 /* Bernstein's DJB2 hash algorithm (http://www.cse.yorku.ca/~oz/hash.html),
-   with the XOR variant since I'm not sure if using signed char matters. Note
-   that this implementation restores the multiplication for clarity, since
-   we're an I/O bound program on newer CPUs.
+   XOR variant. This implementation restores the multiplication for clarity,
+   since we're an I/O bound program on newer CPUs.
+
+   Note: This needs to match (exactly!) the DJB2 implementation in u.py.
 
    end is a pointer to the first character *not* to include in the hash, or
    NULL if all of str is to be included. */
 unsigned int hash (char * str, char * end)
 {
    unsigned int hash = 5381;
-   int c;
+   unsigned char c;
 
    while ((str != end) && (c = *str++))
       hash = hash * 33 ^ c;

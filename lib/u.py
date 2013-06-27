@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 '''
 Utility routines for the Twitter analysis package.
 
@@ -317,6 +319,36 @@ def copyupdate(template, updates):
    r = template.copy()
    r.update(updates)
    return r
+
+def djb2(bytes_):
+   u'''Bernstein's DJB2 hash (http://www.cse.yorku.ca/~oz/hash.html), XOR
+       variant. This is the same algorithm as hashsplit.c, and the results
+       should match. E.g. (see also tests/hashsplit):
+
+       >>> djb2('b')
+       177607
+       >>> djb2('b') % 240
+       7
+       >>> djb2('nullvaluenotab') % 240
+       19
+       >>> djb2(u'私の名前は中野です') % 240
+       19
+
+       Notes:
+
+         * The algorithm works on a byte sequence. Therefore, this function
+           operates on str (byte string) and unicode (converted to bytes by
+           encoding in UTF-8)'
+
+         * This function is not designed to be fast.'''
+   if (isinstance(bytes_, unicode)):
+      bytes_ = bytes_.encode('utf8')
+   assert (isinstance(bytes_, str))
+   hash_ = 5381
+   for b in bytes_:
+      # mod operation simulates 32-bit unsigned int overflow
+      hash_ = ((hash_ * 33) % 2**32) ^ ord(b)
+   return hash_
 
 def glob_maxnumeric(dir_):
    '''Given a directory that has zero or more files named only with digits,
