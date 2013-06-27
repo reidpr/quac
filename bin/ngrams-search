@@ -26,20 +26,21 @@ gr.add_argument('--query',
                 help='print this n-gram (otherwise print all)')
 gr.add_argument('inputdir',
                 metavar='DIR',
-                help='directory containing time series files')
+                help='quacreduce job directory containing time series files')
 
 
 ### Main ###
 
 def main():
+   inputdir = '%s/out' % (args.inputdir)
    try:
-      file_ct = u.glob_maxnumeric(args.inputdir) + 1
+      file_ct = u.glob_maxnumeric(inputdir) + 1
    except TypeError:
-      u.abort('no input files in %s' % (args.inputdir))
+      u.abort('no input files in %s' % (inputdir))
    for i in xrange(file_ct):
       if (args.query is not None and u.djb2(args.query) % file_ct != i):
          continue
-      fp = io.open('%s/%d' % (args.inputdir, i), 'rb')
+      fp = io.open('%s/%d' % (inputdir, i), 'rb')
       for line in fp:
          (k, _, v) = line.partition('\t')
          k = k.decode('utf8')

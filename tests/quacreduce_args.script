@@ -9,8 +9,8 @@
 cd $DATADIR
 
 set +e
-exec 1>&2  # send echo to stderr to make output more readable
-#set -x     # safe because we have no pipelines in this script
+exec 2>&1  # send stderr to stdout to make output more readable
+#set -x    # safe because we have no pipelines in this script
 
 
 echo '*** Check input files for unique names'
@@ -19,17 +19,12 @@ echo $?
 x quacreduce --map cat --reduce cat foo/bar.txt baz/bar.txt
 echo $?
 
-echo '*** Fail if jobdir exists'
-x mkdir jobexists
-x quacreduce --notimes --map cat --reduce cat --jobdir jobexists foo/bar.txt
-echo $?
-
 echo '*** Check that either --python xor --map and --reduce are specified'
 
 echo '*** these should succeed'
 #x quacreduce --python foo job1 input.txt
 #echo $?
-x quacreduce --map foo --reduce bar --jobdir job2 input.txt
+x quacreduce --map foo --reduce bar input.txt
 echo $?
 
 echo '*** these should fail'

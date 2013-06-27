@@ -5,8 +5,8 @@ foo bar baz
 foo foo
 bar
 $ (quacreduce --python qr.wordcount.Job --pyargs 'factor:2' foo*.txt)
-$ (cd qrjob && make --quiet)
-$ (cat qrjob/out/* | sort)
+$ make --quiet
+$ (cat out/* | sort)
 2 baz
 4 bar
 6 foo

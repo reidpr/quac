@@ -8,6 +8,13 @@
 help_epilogue = '''
 Notes:
 
+  * If JOBDIR already exists, any of its contents that get in the way of the
+    job will be clobbered, but everything else will be left alone. Note that
+    this can cause confusion in some cases; for example, if a run with
+    --partitions 4 is followed by a run with --partitions 2 in the same
+    directory, the output files from the two runs will be mixed (since the
+    second one produces fewer).
+
   * If --reduce includes the string "%RID", it is replaced with the reducer
     ID; this is important for coordinating output files if --partitions > 1.
 
@@ -67,8 +74,6 @@ def run(args, job_ct):
 def setup(args):
    if (not (args.python or args.map or args.reduce)):
       u.abort('--python or --map and --reduce must be specified')
-   if (os.path.exists(args.jobdir)):
-      u.abort('job dir "%s" already exists' % (args.jobdir))
 
    directories_setup(args)
    if (args.python):
@@ -102,8 +107,8 @@ class ArgumentParser(u.ArgumentParser):
                       help='input files (must have unique names)')
       gr.add_argument('--jobdir',
                       metavar='DIR',
-                      default='./qrjob',
-                      help='job directory (must not exist; default "./qrjob")')
+                      default='.',
+                      help='job directory (default .)')
       gr.add_argument('--partitions',
                       type=int,
                       metavar='N',
@@ -125,9 +130,9 @@ class ArgumentParser(u.ArgumentParser):
 ### Support functions ###
 
 def directories_setup(args):
-   os.mkdir(args.jobdir)
-   os.mkdir('%s/out' % (args.jobdir))
-   os.mkdir('%s/tmp' % (args.jobdir))
+   u.mkdir_f(args.jobdir)
+   u.mkdir_f('%s/out' % (args.jobdir))
+   u.mkdir_f('%s/tmp' % (args.jobdir))
 
 def makefile_dump(args):
    fp = open('%s/Makefile' % (args.jobdir), 'w')

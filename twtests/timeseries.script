@@ -9,9 +9,12 @@ cd $DATADIR
 
 # Build the time series. We use several partitions so that we can test that
 # hash-based time series lookup works.
-ngrams-build --notimes --partitions 10 --min-occur 10 --run 4 --clean . $TWEETDIR/pre/*.all.tsv > /dev/null
+ngrams-build --notimes --partitions 10 --min-occur 10 --run 4 --clean $TWEETDIR/pre/*.all.tsv > /dev/null
 
 x ls -R .
+
+# test that ngrams-search complains properly if input is incorrect
+y 'ngrams-search --notimes --query candy /nonexistent || true'
 
 # "candy" should peak near Halloween. (Note that midnight UTC is 8pm EST, so a
 # lot of trick-or-treating related traffice will happen on November 1 UTC.)

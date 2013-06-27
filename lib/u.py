@@ -556,6 +556,13 @@ def memory_use():
 def memory_use_log():
    l.debug('virtual memory in use: %s' % (fmt_bytes(memory_use())))
 
+def mkdir_f(path):
+   '''Ensure that directory path exists. That is, if path already exists and
+      is a directory, do nothing; otherwise, try to create directory path (and
+      raise appropriate OSError if that doesn't work.)'''
+   if (not os.path.isdir(path)):
+      os.mkdir(path)
+
 def path_configured(path):
    if (cpath is None):
       raise No_Configuration_Read()

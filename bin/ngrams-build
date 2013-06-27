@@ -16,7 +16,8 @@ l = u.l
 
 
 help_epilogue = '''
-Note that input should be .all.tsv files.
+Note that input should be .all.tsv files. Output is in numbered files in
+JOBDIR/out/.
 ''' + qr.scripting.help_epilogue
 
 
@@ -38,17 +39,12 @@ gr.add_argument('--run',
 gr.add_argument('--clean',
                 action='store_true',
                 help='run "make clean" after job completion')
-gr.add_argument('outputdir',
-                metavar='OUTPUTDIR',
-                help='results and temporary job files (must exist)')
-
 
 args = qr.scripting.parse_args(ap)
 u.configure(None)
 u.logging_init('ngbld')
 
 l.info('starting')
-os.chdir(args.outputdir)
 
 # FIXME: these are lame hacks
 args.python = 'qr.ngramtime.Tweet_Job'
@@ -64,10 +60,6 @@ try:
       if (args.clean):
          l.info('cleaning up job')
          qr.scripting.clean(args)
-
-   l.info('creating output links')
-   for i in xrange(args.partitions):
-      os.symlink('qrjob/out/%d' % (i), str(i))
 
    l.info('done')
 
