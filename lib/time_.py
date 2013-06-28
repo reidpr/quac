@@ -148,6 +148,11 @@ def utcify(dt):
    'Convert a native datetime object into aware one in UTC.'
    return dt.replace(tzinfo=pytz.utc)
 
+def utcnow():
+   'Return an "aware" datetime for right now in UTC.'
+   # http://stackoverflow.com/a/4530166/396038
+   return datetime.now(pytz.utc)
+
 
 ### The following are copied from the examples at
 ### http://docs.python.org/library/datetime.html#tzinfo-objects

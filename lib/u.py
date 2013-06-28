@@ -759,11 +759,6 @@ def StringIO():
       except that doesn't let you get the encoded bytes.'''
    return io.TextIOWrapper(io.BytesIO(), encoding='utf8')
 
-def utcnow():
-   'Return an "aware" datetime for right now in UTC.'
-   # http://stackoverflow.com/questions/4530069
-   return datetime.now(pytz.utc)
-
 def without_ext(filename, ext):
    """Return filename with extension ext (which may or may not begin with a
       dot, and which may contain multiple dots) stripped. Raise ValueError if
