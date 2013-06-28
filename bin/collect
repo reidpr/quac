@@ -70,6 +70,7 @@ import daemon
 import tweetstream as ts  # need my hacked version of tweetstream
 
 import quacpath
+import math
 import u
 
 
@@ -159,7 +160,7 @@ class Tweet_Collector(object):
       self.fp = None
       self.filebase = None
       self.s_per_heartbeat_conf = c.getint("coll", "seconds_per_heartbeat")
-      if (not u.is_power_2(self.s_per_heartbeat_conf)):
+      if (not math_.is_power_2(self.s_per_heartbeat_conf)):
          u.abort("seconds_per_heartbeat must be a power of 2; %d is not"
                  % (self.s_per_heartbeat_conf))
       self.tweets_since_heartbeat = None

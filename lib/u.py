@@ -23,7 +23,6 @@ import inspect
 import io
 import itertools
 import logging
-import numbers
 import os
 import os.path
 import cPickle as pickle
@@ -387,14 +386,6 @@ def groupn(iter_, n):
       if (len(chunk) == 0):
          return
       yield chunk
-
-def is_power_2(i):
-   """Return True if i is a positive power of two, false otherwise. This
-      relies on a common bit-twiddling trick; see
-      http://stackoverflow.com/questions/600293/how-to-check-if-a-number-is-a-power-of-2
-      among many other sources."""
-   assert (isinstance(i, numbers.Integral))
-   return (i > 0) and ((i & (i - 1)) == 0)
 
 def lock_acquire(name):
    '''Try to acquire the lock *name*. Only one process can have the lock at
