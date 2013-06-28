@@ -29,6 +29,36 @@ def as_utc(dt):
       equivalent UTC datetime.'''
    return dt.astimezone(pytz.utc)
 
+def dateify(x):
+   '''Try to convert x to a date and return the result. E.g.:
+
+      >>> dateify('2013-06-28')
+      datetime.date(2013, 6, 28)
+      >>> dateify(date(2013, 6, 28))
+      datetime.date(2013, 6, 28)
+      >>> dateify(datetime(2013, 6, 28))
+      datetime.date(2013, 6, 28)
+      >>> dateify(None)  # returns None
+      >>> dateify(1)
+      Traceback (most recent call last):
+        ...
+      ValueError: can't convert 1 to a date
+      >>> dateify('2013-06-31')
+      Traceback (most recent call last):
+        ...
+      ValueError: day is out of range for month
+      '''
+   if (isinstance(x, datetime)):
+      return x.date()
+   if (isinstance(x, date)):
+      return x
+   if (x is None):
+      return x
+   if (isinstance(x, basestring)):
+      return iso8601_parse(x).date()
+   raise ValueError("can't convert %s to a date" % (str(x)))
+
+
 def dateseq_str(start, end):
    '''Return a sequence of date strings from start to end (in ISO 8601
       format), inclusive. e.g.:
