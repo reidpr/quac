@@ -6,18 +6,22 @@ pickled n-gram time series with 1-day granularity.'''
 
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
+import glob
 import os
 import subprocess as sp
 
+import numpy as np
+
 import quacpath
+import qr.base
 import qr.scripting
 import u
 l = u.l
 
 
 help_epilogue = '''
-Note that input should be .all.tsv files. Output is in numbered files in
-JOBDIR/out/.
+Note that FILE must be the *directory* containing preprocessed tweets. Output
+is in JOBDIR/out/.
 ''' + qr.scripting.help_epilogue
 
 
@@ -44,16 +48,32 @@ args = qr.scripting.parse_args(ap)
 u.configure(None)
 u.logging_init('ngbld')
 
-l.info('starting')
-
-# FIXME: these are lame hacks
-args.python = 'qr.ngramtime.Tweet_Job'
-args.pyargs = 'n:%d min_occur:%d' % (args.n, args.min_occur)
+if (len(args.inputs) != 1):
+   ap.error('too many inputs')
 
 try:
 
-   l.info('setting up job')
+   l.info('starting')
+
+   l.info('loading metadata and setting up job')
+   # FIXME: these are lame hacks
+   args.python = 'qr.ngramtime.Tweet_Job'
+   args.pyargs = 'n:%d min_occur:%d' % (args.n, args.min_occur)
+   metadata = u.pickle_load('%s/metadata' % (args.inputs[0]))
+   args.inputs = glob.glob('%s/*.all.tsv' % (args.inputs[0]))
    qr.scripting.setup(args)
+
+   l.info('writing totals')
+   days = [v for (k, v) in sorted(metadata['days'].iteritems())]
+   cts = [i['count'] for i in days]
+   cts = np.array(cts, dtype=np.float32)
+   total = { 'ngram':      None,
+             'first_day':  min(metadata['days'].iterkeys()),
+             'last_day':   max(metadata['days'].iterkeys()),
+             'total':      sum(i['count'] for i in days),
+             'series':     cts }
+   u.pickle_dump('out/total', total)
+
    if (args.run is not None):
       l.info('running job')
       qr.scripting.run(args, args.run)

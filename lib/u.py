@@ -631,9 +631,20 @@ def pickle_dump(filename, obj):
 
 def pickle_load(filename):
    t = time.time()
-   if (not filename.endswith(PICKLE_SUFFIX)):
-      filename += PICKLE_SUFFIX
-   obj = pickle.load(gzip.open(filename))
+   if (os.path.exists(filename)):
+      # bare filename exists, try that
+      if (filename.endswith(PICKLE_SUFFIX)):
+         fp = gzip.open(filename)
+      else:
+         fp = io.open(filename, 'rb')
+   elif (os.path.exists(filename + PICKLE_SUFFIX)):
+      # filename plus suffix exists, try that
+      fp = gzip.open(filename + PICKLE_SUFFIX)
+   else:
+      # neither exists
+      raise IOError('neither %s nor %s exist'
+                    % (filename, filename + PICKLE_SUFFIX))
+   obj = pickle.load(fp)
    l.debug('unpickled %s in %s' % (filename, fmt_seconds(time.time() - t)))
    return obj
 

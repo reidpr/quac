@@ -6,7 +6,7 @@
 #
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
-from datetime import date, datetime, timedelta, tzinfo
+from datetime import date, datetime, time, timedelta, tzinfo
 import pytz
 import re
 import time as _time
@@ -60,6 +60,10 @@ def days_diff(a, b):
       7
       >>> days_diff(date(2013, 6, 27), date(2013, 6, 20))
       7
+      >>> days_diff(datetime(2013, 6, 27), date(2013, 6, 20))
+      7
+      >>> days_diff(date(2013, 6, 27), datetime(2013, 6, 20))
+      7
       >>> days_diff(date(2013, 6, 20), date(2013, 6, 27))
       -7
       >>> days_diff(date(2013, 6, 20), date(2013, 6, 20))
@@ -72,6 +76,10 @@ def days_diff(a, b):
       Traceback (most recent call last):
         ...
       ValueError: 2013-06-27 00:00:00.000001 and 2013-06-20 00:00:00 day difference is not an integer'''
+   if (not isinstance(a, datetime)):
+      a = datetime.combine(a, time())
+   if (not isinstance(b, datetime)):
+      b = datetime.combine(b, time())
    diff = a - b
    if (diff.seconds != 0 or diff.microseconds != 0):
       raise ValueError('%s and %s day difference is not an integer' % (a, b))

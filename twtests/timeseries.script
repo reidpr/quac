@@ -9,11 +9,11 @@ cd $DATADIR
 
 # Build the time series. We use several partitions so that we can test that
 # hash-based time series lookup works.
-ngrams-build --notimes --partitions 10 --min-occur 10 --run 4 --clean $TWEETDIR/pre/*.all.tsv > /dev/null
+ngrams-build --notimes --partitions 10 --min-occur 10 --run 4 --clean $TWEETDIR/pre/ > /dev/null
 
 x ls -R .
 
-# test that ngrams-search complains properly if input is incorrect
+# Test that ngrams-search complains properly if input is incorrect.
 y 'ngrams-search --notimes --query candy /nonexistent || true'
 
 # "candy" should peak near Halloween. (Note that midnight UTC is 8pm EST, so a
@@ -21,9 +21,10 @@ y 'ngrams-search --notimes --query candy /nonexistent || true'
 x ngrams-search --query candy .
 x ngrams-search --detail --query candy .
 
-# we include "a" because it's an n-gram that had trouble being sorted (see
+# We include "a" because it's an n-gram that had trouble being sorted (see
 # commit 885d3d)
 x ngrams-search --query a .
 
-# "taco" has a gap on November 1, so we test it to make sure zero is inserted.
+# Make sure zeros are inserted properly: "taco" has no data on October 28
+# (beginning), November 1 (middle), and November 4/5 (end).
 x ngrams-search --detail --query taco .
