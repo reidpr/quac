@@ -5,6 +5,7 @@ lib/disco/README
 lib/geo/__init__.py
 lib/qr/__init__.py
 lib/unicodedata2.py
+misc/tweet-volume.xls
 sphinx/Makefile
 sphinx/conf.py
 tests/README
