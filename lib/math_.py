@@ -34,10 +34,9 @@ def is_power_2(i):
 ### Vector similarity ###
 
 class Date_Vector(np.ndarray):
-   '''NumPy array of daily values that knows its start date and can
-      grow/shrink itself given target dates. For example:
+   '''NumPy array of daily values that knows its start date and a few related
+      operations. For example:
 
-      # create
       >>> a = Date_Vector('2013-06-02', np.arange(2, 7))
       >>> a
       Date_Vector([2, 3, 4, 5, 6])
@@ -45,42 +44,6 @@ class Date_Vector(np.ndarray):
       datetime.date(2013, 6, 2)
       >>> a.last_day
       datetime.date(2013, 6, 6)
-
-      # shrink
-      >>> b = a.shrink('2013-06-03', None)
-      >>> b
-      Date_Vector([3, 4, 5, 6])
-      >>> b.first_day
-      datetime.date(2013, 6, 3)
-      >>> b.last_day
-      datetime.date(2013, 6, 6)
-      >>> a.shrink(None, '2013-06-04')
-      Date_Vector([2, 3, 4])
-      >>> a.shrink('2013-06-03', '2013-06-04')
-      Date_Vector([3, 4])
-      >>> a.shrink(None, None)
-      Date_Vector([2, 3, 4, 5, 6])
-      >>> a.shrink('2013-06-06', None)
-      Date_Vector([6])
-      >>> a.shrink(None, '2013-06-02')
-      Date_Vector([2])
-      >>> b = a.shrink('2013-06-07', None)
-      >>> b
-      Date_Vector([], dtype=int64)
-      >>> b.first_day  # None
-      >>> b.last_day   # None
-      >>> a.shrink(None, '2013-06-01')
-      Date_Vector([], dtype=int64)
-
-      # some errors
-      >>> a.shrink('2013-06-01', None)
-      Traceback (most recent call last):
-        ...
-      ValueError: shrink() cannot grow
-      >>> a.shrink(None, '2013-06-07')
-      Traceback (most recent call last):
-        ...
-      ValueError: shrink() cannot grow
 
       Notes:
 
@@ -122,27 +85,95 @@ class Date_Vector(np.ndarray):
       else:
          return self._first_day + datetime.timedelta(days=(len(self) - 1))
 
-   def shrink(self, first_day, last_day):
-      '''Return a copy of myself with bounds first_day and last_day, which
-         must be equal to or smaller than the current bounds. If either is
-         None, pass through existing bound. Trim elements outside bounds. If
-         the new bounds cross, return an empty vector.'''
-      first_day = time_.dateify(first_day)
-      last_day = time_.dateify(last_day)
-      if (first_day is None):
-         first_day = self.first_day
-      if (last_day is None):
-         last_day = self.last_day
-      if (first_day < self.first_day or last_day > self.last_day):
-         raise ValueError('shrink() cannot grow')
-      if (max(first_day, self.first_day) > min(last_day, self.last_day)):
-         return Date_Vector(None, np.array([], dtype=self.dtype))
-      trim_start = time_.days_diff(first_day, self.first_day)
-      last_idx = time_.days_diff(last_day, self.first_day)
-      assert (trim_start >= 0)
-      assert (last_idx >= 0)
-      return Date_Vector(max(first_day, self.first_day),
-                         self[trim_start:last_idx + 1])
+   def resize(self, first_day, last_day):
+      '''Return a copy of myself with new bounds first_day and last_day; data
+         are either trimmed or extended with zeroes, as appropriate. If either
+         bound is None, use the existing bound. If the new bounds cross,
+         return None. The returned vector will share data with the source
+         vector if shrinking only.
+
+         For example:
+
+         >>> a = Date_Vector('2013-06-02', np.arange(2, 7))
+         >>> a
+         Date_Vector([2, 3, 4, 5, 6])
+
+         # shrink
+         >>> b = a.resize('2013-06-03', None)
+         >>> np.may_share_memory(a, b)
+         True
+         >>> b
+         Date_Vector([3, 4, 5, 6])
+         >>> (b.first_day, b.last_day)
+         (datetime.date(2013, 6, 3), datetime.date(2013, 6, 6))
+         >>> a.resize(None, '2013-06-04')
+         Date_Vector([2, 3, 4])
+         >>> a.resize('2013-06-03', '2013-06-04')
+         Date_Vector([3, 4])
+         >>> a.resize(None, None)
+         Date_Vector([2, 3, 4, 5, 6])
+         >>> a.resize('2013-06-06', None)
+         Date_Vector([6])
+         >>> a.resize(None, '2013-06-02')
+         Date_Vector([2])
+         >>> a.resize('2013-06-07', None)  # None
+         >>> a.resize(None, '2013-06-01')  # None
+
+         # grow
+         >>> b = a.resize('2013-06-01', '2013-06-07')
+         >>> b
+         Date_Vector([0, 2, 3, 4, 5, 6, 0])
+         >>> (b.first_day, b.last_day)
+         (datetime.date(2013, 6, 1), datetime.date(2013, 6, 7))
+         >>> np.may_share_memory(a, b)
+         False
+         >>> a.resize('2013-06-01', None)
+         Date_Vector([0, 2, 3, 4, 5, 6])
+         >>> a.resize(None, '2013-06-07')
+         Date_Vector([2, 3, 4, 5, 6, 0])
+
+         # grow and shrink
+         >>> b = a.resize('2013-06-01', '2013-06-05')
+         >>> b
+         Date_Vector([0, 2, 3, 4, 5])
+         >>> np.may_share_memory(a, b)
+         False
+         >>> a.resize('2013-06-03', '2013-06-07')
+         Date_Vector([3, 4, 5, 6, 0])
+
+         # no-op gives a copy, but it's shallow
+         >>> b = a.resize(None, None)
+         >>> b
+         Date_Vector([2, 3, 4, 5, 6])
+         >>> b is a
+         False
+         >>> np.may_share_memory(a, b)
+         True'''
+      # clean up new bounds
+      fd_new = time_.dateify(first_day) or self.first_day
+      ld_new = time_.dateify(last_day) or self.last_day
+      # if they're empty, return None
+      if (max(fd_new, self.first_day) > min(ld_new, self.last_day)):
+         return None
+      # how many elements to add and remove from the start?
+      delta_start = time_.days_diff(fd_new, self.first_day)
+      trim_start = max(0, delta_start)
+      add_start = max(0, -delta_start)
+      # how many elements to add and remove from the end?
+      delta_end = time_.days_diff(self.last_day, ld_new)
+      trim_end = max(0, delta_end)
+      add_end = max(0, -delta_end)
+      # Do it!
+      if (add_start == 0 and add_end == 0):
+         # If shrinking, don't use hstack(); this avoids copying data, which
+         # favors speed over memory. The caller can do a deep copy if this is
+         # a problem.
+         return Date_Vector(fd_new, self[trim_start:len(self) - trim_end])
+      else:
+         return Date_Vector(fd_new,
+                            np.hstack([np.zeros(add_start, dtype=self.dtype),
+                                       self[trim_start:len(self) - trim_end],
+                                       np.zeros(add_end, dtype=self.dtype)]))
 
 # def similarity(a, a_start, b, b_start,
 #                mask=None, mask_start=None, metric=cosine):
