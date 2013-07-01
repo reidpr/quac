@@ -85,6 +85,50 @@ class Date_Vector(np.ndarray):
       else:
          return self._first_day + datetime.timedelta(days=(len(self) - 1))
 
+   def bi_intersect(self, other):
+      '''Shrink myself and other so that our bounds match, and return the new
+         vectors in a tuple. E.g.:
+
+         >>> a = Date_Vector('2013-06-02', np.arange(2, 7))
+         >>> b = Date_Vector('2013-06-04', np.arange(14, 18))
+         >>> (c, d) = a.bi_intersect(b)
+         >>> (c.first_day == d.first_day and c.last_day == d.last_day)
+         True
+         >>> c
+         Date_Vector([4, 5, 6])
+         >>> d
+         Date_Vector([14, 15, 16])
+
+         If there is no intersection, return (None, None):
+
+         >>> c = Date_Vector('2013-06-07', np.zeros(1))
+         >>> a.bi_intersect(c)
+         (None, None)'''
+      fd_new = max(self.first_day, other.first_day)
+      ld_new = min(self.last_day, other.last_day)
+      self_new = self.resize(fd_new, ld_new)
+      other_new = other.resize(fd_new, ld_new)
+      return (self_new, other_new)
+
+   def bi_union(self, other):
+      '''Extend myself and other so that our bounds match, and return the new
+         vectors in a tuple. E.g.:
+
+         >>> a = Date_Vector('2013-06-02', np.arange(2, 7))
+         >>> b = Date_Vector('2013-06-04', np.arange(4, 8))
+         >>> (c, d) = a.bi_union(b)
+         >>> (c.first_day == d.first_day and c.last_day == d.last_day)
+         True
+         >>> c
+         Date_Vector([2, 3, 4, 5, 6, 0])
+         >>> d
+         Date_Vector([0, 0, 4, 5, 6, 7])'''
+      fd_new = min(self.first_day, other.first_day)
+      ld_new = max(self.last_day, other.last_day)
+      self_new = self.resize(fd_new, ld_new)
+      other_new = other.resize(fd_new, ld_new)
+      return (self_new, other_new)
+
    def resize(self, first_day, last_day):
       '''Return a copy of myself with new bounds first_day and last_day; data
          are either trimmed or extended with zeroes, as appropriate. If either
