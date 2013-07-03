@@ -57,9 +57,51 @@ class Date_Vector(np.ndarray):
       3. You can pass None for the first day, but nothing will work right
          until you set the first_day attribute.'''
 
-   # There is some weirdness here because NumPy arrays are weird. See
-   # <http://docs.scipy.org/doc/numpy/user/basics.subclassing.html>. We follow
-   # the "slightly more realistic example" pattern.
+   # The basic idea here is that we have a sequence of contiguous, uniformly
+   # sized time intervals, each with an associated scalar value. For example,
+   # a vector of with day intervals might something like this:
+   #
+   #   |     8      |     6      |     7      |     5      |
+   #   +------------+------------+------------+------------+
+   #   | 2013-06-02 | 2013-06-03 | 2013-06-04 | 2013-06-05 |
+   #
+   #   first_day = 2013-06-02
+   #   last_day  = 2012-06-05
+   #
+   # There are a couple of issues to keep in mind.
+   #
+   # First, is the ending bound (here, last_day) inclusive or exclusive? We've
+   # opted for inclusive.
+   #
+   # Second, when the interval is assumed to be one day -- which is currently
+   # the case -- then last_day really does contain an *interval*. Currently,
+   # we use datetime.date objects.
+   #
+   # This become more complicated when, as is expected, we extend to vectors
+   # with arbitrarily-sized (though still uniform) intervals. Then, we'll need
+   # first_interval and last_interval attributes that are datetime.datetime
+   # objects; i.e., these attributes now contain an *instant* rather than an
+   # interval (really they are a 1-microsecond interval, but that's close
+   # enough). So some decisions will have to be made.
+   #
+   # One way to do it would be to have first_interval and last_interval refer
+   # to the *beginning* of the relevant intervals (and this confuses the
+   # exclusive/inclusive issue slightly). For example, suppose we have
+   # intervals of one hour:
+   #
+   #   |   8    |   6   |   7   |   5   |
+   #   +--------+-------+-------+-------+
+   #   ^        ^       ^       ^
+   #   1:33 pm  2:33pm  3:33pm  4:33pm
+   #
+   #   first_interval = 2013-06-02T13:33:00.000000
+   #   last_interval =  2013-06-02T16:33:00.000000  (even though the vector
+   #                                                 really extends to 5:33pm
+   #                                                 minus epsilon)
+
+   # There is some weirdness in class creation because NumPy arrays are weird.
+   # See <http://docs.scipy.org/doc/numpy/user/basics.subclassing.html>. We
+   # follow the "slightly more realistic example" pattern.
 
    def __new__(class_, first_day, input_array):
       o = np.asarray(input_array).view(class_)
