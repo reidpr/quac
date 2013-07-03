@@ -126,6 +126,32 @@ class Date_Vector(np.ndarray):
       np.ndarray.__setstate__(self, super_state)
       (self._first_day, ) = my_state
 
+   @classmethod
+   def zeros(class_, first_day, last_day, **kwargs):
+      '''Create a Date_Vector with the given first_day and last_day containing
+         zeros. Keyword arguments are passed unchanged to :func:`np.zeros()`.
+         For example:
+
+         >>> a = Date_Vector.zeros('2013-06-02', '2013-06-06')
+         >>> a
+         Date_Vector([ 0.,  0.,  0.,  0.,  0.])
+         >>> a.dtype
+         dtype('float64')
+         >>> a.first_day
+         datetime.date(2013, 6, 2)
+         >>> a.last_day
+         datetime.date(2013, 6, 6)
+
+         >>> Date_Vector.zeros('2013-06-02', '2013-06-06', dtype=np.bool)
+         Date_Vector([False, False, False, False, False], dtype=bool)
+
+         If last_day is earlier than first_day, then return None:
+
+         >>> Date_Vector.zeros('2013-06-02', '2013-06-01') is None
+         True'''
+      o_tmp = class_(first_day, np.zeros(1, **kwargs))
+      return o_tmp.resize(first_day, last_day)
+
    @property
    def first_day(self):
       return self._first_day

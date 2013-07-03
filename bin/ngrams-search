@@ -51,6 +51,9 @@ def main():
       totals = u.pickle_load('%s/total.pkl.gz' % (inputdir))
    except Exception, x:
       u.abort('cannot read total file: %s' % (x))
+   tot_vec = totals['series']
+   dates = (time_.iso8601_date(date)
+            for date in time_.dateseq(tot_vec.first_day, tot_vec.last_day))
    for i in xrange(file_ct):
       if (args.query is not None and u.djb2(args.query) % file_ct != i):
          continue
@@ -59,30 +62,24 @@ def main():
          (k, _, v) = line.partition('\t')
          k = k.decode('utf8')
          v = qr.base.decode(v)
+         ngram_vec = v['series']
          if (args.query is None or k == args.query):
             if (args.detail):
                tsv = tsv_glue.Writer(fp=sys.stdout)
-               dates = (time_.iso8601_date(date)
-                        for date in time_.dateseq(totals['first_day'],
-                                                  totals['last_day']))
-               # make v['series'] range same as totals['series']
-               sz = time_.days_diff(v['first_day'], totals['first_day'])
-               assert (sz >= 0)
-               ez = time_.days_diff(totals['last_day'], v['last_day'])
-               assert (ez >= 0)
-               v['series'] = np.hstack((np.zeros(sz),
-                                        v['series'],
-                                        np.zeros(ez)))
+               (ngram_vec, _) = ngram_vec.bi_union(tot_vec)
+               assert (ngram_vec is not None)
+               assert (ngram_vec.first_day == tot_vec.first_day)
+               assert (ngram_vec.last_day == tot_vec.last_day)
                for row in zip(dates,
-                              v['series'].astype(np.int64),
-                              totals['series'].astype(np.int64),
-                              v['series'] / totals['series'] * 1e6):
+                              ngram_vec.astype(np.int64),
+                              tot_vec.astype(np.int64),
+                              ngram_vec / tot_vec * 1e6):
                  tsv.writerow(row)
             else:
+               fd = time_.iso8601_date(ngram_vec.first_day)
+               ld = time_.iso8601_date(ngram_vec.last_day)
                print >>u.utf8_stdout, (u'%s\t%d\t%s\t%s'
-                                       % (k, v['total'],
-                                          time_.iso8601_date(v['first_day']),
-                                          time_.iso8601_date(v['last_day'])))
+                                       % (k, v['total'], fd, ld))
             if (k == args.query):
                break
 

@@ -7,10 +7,8 @@
    the following structure::
 
      { 'ngram':      <the ngram as a unicode object>,
-       'first_day':  <first day of the series as a datetime.date object>,
-       'last_day':   <last day of the time series>,
        'total':      <total number of occurrences as an integer>,
-       'series':     <NumPy array containing the time series> }
+       'series':     <Date_Vector containing the time series> }
 
    Note that the n-gram is redundantly encoded (as the key and as part of the
    value). This is so that values can be independently used without retaining
@@ -22,6 +20,7 @@ import collections
 import numpy as np
 
 from . import base
+import math_
 import time_
 import tok.unicode_props
 
@@ -48,17 +47,15 @@ class Tweet_Job(base.TSV_Input_Job, base.KV_Pickle_Seq_Output_Job):
          cts[date] += 1
       total = sum(cts.itervalues())
       if (total >= self.params['min_occur']):
-         first_day = time_.iso8601_parse(first_day).date()
-         last_day = time_.iso8601_parse(last_day).date()
+         first_day = time_.dateify(first_day)
+         last_day = time_.dateify(last_day)
          assert (first_day <= last_day)
          # use float32 for space efficiency at the expense of precision
-         ct_series = np.zeros(time_.days_diff(last_day, first_day) + 1,
-                              dtype=np.float32)
+         ct_series = math_.Date_Vector.zeros(first_day, last_day,
+                                             dtype=np.float32)
          for (date, ct) in cts.iteritems():
-            date = time_.iso8601_parse(date).date()
+            date = time_.dateify(date)
             ct_series[time_.days_diff(date, first_day)] = ct
          yield (ngram, { 'ngram': ngram,
-                         'first_day': first_day,
-                         'last_day': last_day,
                          'total': total,
                          'series': ct_series })

@@ -15,6 +15,7 @@ import numpy as np
 import quacpath
 import qr.base
 import qr.scripting
+import math_
 import u
 l = u.l
 
@@ -64,13 +65,11 @@ try:
    qr.scripting.setup(args)
 
    l.info('writing totals')
-   days = [v for (k, v) in sorted(metadata['days'].iteritems())]
-   cts = [i['count'] for i in days]
-   cts = np.array(cts, dtype=np.float32)
+   cts = [v['count'] for (k, v) in sorted(metadata['days'].iteritems())]
+   cts = math_.Date_Vector(min(metadata['days'].iterkeys()),
+                           np.array(cts, dtype=np.float32))
    total = { 'ngram':      None,
-             'first_day':  min(metadata['days'].iterkeys()),
-             'last_day':   max(metadata['days'].iterkeys()),
-             'total':      sum(i['count'] for i in days),
+             'total':      sum(cts),
              'series':     cts }
    u.pickle_dump('out/total', total)
 
