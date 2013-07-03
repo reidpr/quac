@@ -113,6 +113,19 @@ class Date_Vector(np.ndarray):
          return
       self.first_day = getattr(o, 'first_day', None)
 
+   # Pickling also requires some hoops. This follows the example attached to
+   # <http://thread.gmane.org/gmane.comp.python.numeric.general/14809>.
+
+   def __reduce__(self):
+      state = list(np.ndarray.__reduce__(self))
+      state[2] = (state[2], (self._first_day, ))
+      return tuple(state)
+
+   def __setstate__(self, state):
+      (super_state, my_state) = state
+      np.ndarray.__setstate__(self, super_state)
+      (self._first_day, ) = my_state
+
    @property
    def first_day(self):
       return self._first_day
@@ -270,4 +283,17 @@ class Date_Vector(np.ndarray):
 #    assert (mask is not None), 'mask is None not implemented'
 
 
-testable.register('')
+testable.register('''
+
+# test that Date_Vector objects can be pickled
+>>> import cPickle as pickle
+>>> a = Date_Vector('2013-06-02', np.arange(2, 7))
+>>> b = pickle.loads(pickle.dumps(a))
+>>> np.array_equal(a, b)
+True
+>>> a.first_day == b.first_day
+True
+>>> b.last_day == b.last_day
+True
+
+''')
