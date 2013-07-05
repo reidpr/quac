@@ -133,6 +133,16 @@ class Date_Vector(np.ndarray):
          return
       self.first_day = getattr(o, 'first_day', None)
 
+   # Yet more weirdness to enable functions that return scalars to actually do
+   # so, rather than returning 0-rank arrays. See
+   # <http://stackoverflow.com/questions/16805987/>.
+
+   def __array_wrap__(self, o):
+      if (len(o.shape) == 0):
+         return o[()]
+      else:
+         return np.ndarray.__array_wrap__(self, o)
+
    # Pickling also requires some hoops. This follows the example attached to
    # <http://thread.gmane.org/gmane.comp.python.numeric.general/14809>.
 
@@ -346,5 +356,16 @@ True
 True
 >>> b.last_day == b.last_day
 True
+
+# do methods that should return scalars do so?
+>>> c = np.arange(2, 7)
+>>> c.sum()
+20
+>>> type(c.sum())
+<type 'numpy.int64'>
+>>> a.sum()
+20
+>>> type(a.sum())
+<type 'numpy.int64'>
 
 ''')
