@@ -39,7 +39,7 @@ class Date_Vector(np.ndarray):
 
       >>> a = Date_Vector('2013-06-02', np.arange(2, 7))
       >>> a
-      Date_Vector([2, 3, 4, 5, 6])
+      Date_Vector('2013-06-02', [2, 3, 4, 5, 6])
       >>> a.first_day
       datetime.date(2013, 6, 2)
       >>> a.last_day
@@ -126,24 +126,27 @@ class Date_Vector(np.ndarray):
       np.ndarray.__setstate__(self, super_state)
       (self._first_day, ) = my_state
 
+   def __repr__(self):
+      if (self._first_day is not None):
+         datestr = "'" + time_.iso8601_date(self.first_day) + "'"
+      else:
+         datestr = 'None'
+      return 'Date_Vector(%s, %s' % (datestr, np.ndarray.__repr__(self)[12:])
+
    @classmethod
    def zeros(class_, first_day, last_day, **kwargs):
       '''Create a Date_Vector with the given first_day and last_day containing
          zeros. Keyword arguments are passed unchanged to :func:`np.zeros()`.
          For example:
 
-         >>> a = Date_Vector.zeros('2013-06-02', '2013-06-06')
+         >>> a = Date_Vector.zeros('2013-06-02', '2013-06-05')
          >>> a
-         Date_Vector([ 0.,  0.,  0.,  0.,  0.])
+         Date_Vector('2013-06-02', [ 0.,  0.,  0.,  0.])
          >>> a.dtype
          dtype('float64')
-         >>> a.first_day
-         datetime.date(2013, 6, 2)
-         >>> a.last_day
-         datetime.date(2013, 6, 6)
 
-         >>> Date_Vector.zeros('2013-06-02', '2013-06-06', dtype=np.bool)
-         Date_Vector([False, False, False, False, False], dtype=bool)
+         >>> Date_Vector.zeros('2013-06-02', '2013-06-05', dtype=np.bool)
+         Date_Vector('2013-06-02', [False, False, False, False], dtype=bool)
 
          If last_day is earlier than first_day, then return None:
 
@@ -173,12 +176,10 @@ class Date_Vector(np.ndarray):
          >>> a = Date_Vector('2013-06-02', np.arange(2, 7))
          >>> b = Date_Vector('2013-06-04', np.arange(14, 18))
          >>> (c, d) = a.bi_intersect(b)
-         >>> (c.first_day == d.first_day and c.last_day == d.last_day)
-         True
          >>> c
-         Date_Vector([4, 5, 6])
+         Date_Vector('2013-06-04', [4, 5, 6])
          >>> d
-         Date_Vector([14, 15, 16])
+         Date_Vector('2013-06-04', [14, 15, 16])
 
          If there is no intersection, return (None, None):
 
@@ -198,12 +199,10 @@ class Date_Vector(np.ndarray):
          >>> a = Date_Vector('2013-06-02', np.arange(2, 7))
          >>> b = Date_Vector('2013-06-04', np.arange(4, 8))
          >>> (c, d) = a.bi_union(b)
-         >>> (c.first_day == d.first_day and c.last_day == d.last_day)
-         True
          >>> c
-         Date_Vector([2, 3, 4, 5, 6, 0])
+         Date_Vector('2013-06-02', [2, 3, 4, 5, 6, 0])
          >>> d
-         Date_Vector([0, 0, 4, 5, 6, 7])'''
+         Date_Vector('2013-06-02', [0, 0, 4, 5, 6, 7])'''
       fd_new = min(self.first_day, other.first_day)
       ld_new = max(self.last_day, other.last_day)
       self_new = self.resize(fd_new, ld_new)
@@ -211,68 +210,74 @@ class Date_Vector(np.ndarray):
       return (self_new, other_new)
 
    def resize(self, first_day, last_day):
-      '''Return a copy of myself with new bounds first_day and last_day; data
-         are either trimmed or extended with zeroes, as appropriate. If either
-         bound is None, use the existing bound. If the new bounds cross,
-         return None. The returned vector will share data with the source
-         vector if shrinking only.
-
-         For example:
+      '''Return a copy of myself with new bounds first_day and last_day.
 
          >>> a = Date_Vector('2013-06-02', np.arange(2, 7))
          >>> a
-         Date_Vector([2, 3, 4, 5, 6])
+         Date_Vector('2013-06-02', [2, 3, 4, 5, 6])
 
-         # shrink
-         >>> b = a.resize('2013-06-03', None)
-         >>> np.may_share_memory(a, b)
-         True
-         >>> b
-         Date_Vector([3, 4, 5, 6])
-         >>> (b.first_day, b.last_day)
-         (datetime.date(2013, 6, 3), datetime.date(2013, 6, 6))
+         Shrinking removes the newly extra elements (note that if either bound
+         is None, we use the existing bound):
+
+         >>> s = a.resize('2013-06-03', None)
+         >>> s
+         Date_Vector('2013-06-03', [3, 4, 5, 6])
          >>> a.resize(None, '2013-06-04')
-         Date_Vector([2, 3, 4])
+         Date_Vector('2013-06-02', [2, 3, 4])
          >>> a.resize('2013-06-03', '2013-06-04')
-         Date_Vector([3, 4])
-         >>> a.resize(None, None)
-         Date_Vector([2, 3, 4, 5, 6])
+         Date_Vector('2013-06-03', [3, 4])
          >>> a.resize('2013-06-06', None)
-         Date_Vector([6])
+         Date_Vector('2013-06-06', [6])
          >>> a.resize(None, '2013-06-02')
-         Date_Vector([2])
-         >>> a.resize('2013-06-07', None)  # None
-         >>> a.resize(None, '2013-06-01')  # None
+         Date_Vector('2013-06-02', [2])
 
-         # grow
-         >>> b = a.resize('2013-06-01', '2013-06-07')
-         >>> b
-         Date_Vector([0, 2, 3, 4, 5, 6, 0])
-         >>> (b.first_day, b.last_day)
-         (datetime.date(2013, 6, 1), datetime.date(2013, 6, 7))
-         >>> np.may_share_memory(a, b)
-         False
+         If the new bounds cross, return None:
+
+         >>> a.resize('2013-06-07', None) is None
+         True
+         >>> a.resize(None, '2013-06-01') is None
+         True
+
+         If shrinking, the result may (but is not guaranteed to) be a view of
+         the original vector:
+
+         >>> np.may_share_memory(a, s)
+         True
+
+         Growing adds new elements containing zero:
+
+         >>> g = a.resize('2013-06-01', '2013-06-07')
+         >>> g
+         Date_Vector('2013-06-01', [0, 2, 3, 4, 5, 6, 0])
          >>> a.resize('2013-06-01', None)
-         Date_Vector([0, 2, 3, 4, 5, 6])
+         Date_Vector('2013-06-01', [0, 2, 3, 4, 5, 6])
          >>> a.resize(None, '2013-06-07')
-         Date_Vector([2, 3, 4, 5, 6, 0])
+         Date_Vector('2013-06-02', [2, 3, 4, 5, 6, 0])
 
-         # grow and shrink
-         >>> b = a.resize('2013-06-01', '2013-06-05')
-         >>> b
-         Date_Vector([0, 2, 3, 4, 5])
-         >>> np.may_share_memory(a, b)
-         False
+         You can grow and shrink at the same time:
+
+         >>> gs = a.resize('2013-06-01', '2013-06-05')
+         >>> gs
+         Date_Vector('2013-06-01', [0, 2, 3, 4, 5])
          >>> a.resize('2013-06-03', '2013-06-07')
-         Date_Vector([3, 4, 5, 6, 0])
+         Date_Vector('2013-06-03', [3, 4, 5, 6, 0])
 
-         # no-op gives a copy, but it's shallow
-         >>> b = a.resize(None, None)
-         >>> b
-         Date_Vector([2, 3, 4, 5, 6])
-         >>> b is a
+         Grown vectors are not views:
+
+         >>> np.may_share_memory(a, g)
          False
-         >>> np.may_share_memory(a, b)
+         >>> np.may_share_memory(a, gs)
+         False
+
+         Finally, it's OK to do a no-op resize. In this case, the result is a
+         shallow copy.
+
+         >>> n = a.resize(None, None)
+         >>> n
+         Date_Vector('2013-06-02', [2, 3, 4, 5, 6])
+         >>> n is a
+         False
+         >>> np.may_share_memory(a, n)
          True'''
       # clean up new bounds
       fd_new = time_.dateify(first_day) or self.first_day
