@@ -2,6 +2,26 @@
 
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
+# A few implementation notes:
+#
+# Many Date_Vector operations are masked, i.e., there is a parallel boolean
+# vector saying which data are valid and which aren't. Therefore, it seems
+# logical to subclass numpy.ma.MaskedArray instead of numpy.ndarray. However,
+# we subclass the latter.
+#
+# The main reason for this is that many vectors share the same mask.
+# MaskedArray objects each carry around their own mask, and AFAICT full masks
+# are stored even if they're empty (i.e., no elements are excluded). This
+# redundant storage wastes space and adds a consistency problem.
+#
+# (MaskedArrays are also rather slow, but not enough that it matters for this
+# application IMO.)
+#
+# Finally, there is a "Not Available" API that is growing for NumPy. It was
+# apparently planned for 1.7 but was removed. It seems nice, so maybe
+# something to use in the future. (E.g., see
+# <http://www.compsci.wm.edu/SciClone/documentation/software/math/NumPy/html1.7/reference/arrays.maskna.html>.)
+
 import datetime
 import numbers
 
