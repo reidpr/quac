@@ -15,17 +15,21 @@
 # redundant storage wastes space and adds a consistency problem.
 #
 # (MaskedArrays are also rather slow, but not enough that it matters for this
-# application IMO.)
+# application IMO. In face, we use them in some of our computations.)
 #
 # Finally, there is a "Not Available" API that is growing for NumPy. It was
 # apparently planned for 1.7 but was removed. It seems nice, so maybe
 # something to use in the future. (E.g., see
 # <http://www.compsci.wm.edu/SciClone/documentation/software/math/NumPy/html1.7/reference/arrays.maskna.html>.)
 
+from __future__ import division
+
 import datetime
 import numbers
+import sys
 
 import numpy as np
+from numpy import ma
 
 import testable
 import time_
@@ -163,6 +167,64 @@ class Date_Vector(np.ndarray):
          datestr = 'None'
       return 'Date_Vector(%s, %s' % (datestr, np.ndarray.__repr__(self)[12:])
 
+   @staticmethod
+   def bi_union(*vectors):
+      '''Extend vectors so that their bounds match, and return the new vectors
+         in an iterable. E.g.:
+
+         >>> a = Date_Vector('2013-06-02', np.arange(2, 7))
+         >>> b = Date_Vector('2013-06-04', np.arange(4, 8))
+         >>> (c, d) = Date_Vector.bi_union(a, b)
+         >>> c
+         Date_Vector('2013-06-02', [2, 3, 4, 5, 6, 0])
+         >>> d
+         Date_Vector('2013-06-02', [0, 0, 4, 5, 6, 7])
+
+         If any vectors are None, pass through those Nones:
+
+         >>> tuple(Date_Vector.bi_union(None, a))
+         (None, Date_Vector('2013-06-02', [2, 3, 4, 5, 6]))
+         >>> tuple(Date_Vector.bi_union(None))
+         (None,)'''
+      v_nonnone = [v for v in vectors if v is not None]
+      if (len(v_nonnone) > 0):
+         fd_new = min(v.first_day for v in v_nonnone)
+         ld_new = max(v.last_day for v in v_nonnone)
+      return ((v.resize(fd_new, ld_new) if v is not None else None)
+              for v in vectors)
+
+   @staticmethod
+   def bi_intersect(*vectors):
+      '''Shrink vectors so that their bounds match, and return the new vectors
+         in an iterable. E.g.:
+
+         >>> a = Date_Vector('2013-06-02', np.arange(2, 7))
+         >>> b = Date_Vector('2013-06-04', np.arange(14, 18))
+         >>> (c, d) = Date_Vector.bi_intersect(a, b)
+         >>> c
+         Date_Vector('2013-06-04', [4, 5, 6])
+         >>> d
+         Date_Vector('2013-06-04', [14, 15, 16])
+
+         If there is no intersection, return an iterable of Nones:
+
+         >>> c = Date_Vector('2013-06-07', np.zeros(1))
+         >>> tuple(Date_Vector.bi_intersect(a, c))
+         (None, None)
+
+         If any vectors are None, pass through those Nones:
+
+         >>> tuple(Date_Vector.bi_intersect(None, a))
+         (None, Date_Vector('2013-06-02', [2, 3, 4, 5, 6]))
+         >>> tuple(Date_Vector.bi_intersect(None))
+         (None,)'''
+      v_nonnone = [v for v in vectors if v is not None]
+      if (len(v_nonnone) > 0):
+         fd_new = max(v.first_day for v in v_nonnone)
+         ld_new = min(v.last_day for v in v_nonnone)
+      return ((v.resize(fd_new, ld_new) if v is not None else None)
+              for v in vectors)
+
    @classmethod
    def zeros(class_, first_day, last_day, **kwargs):
       '''Create a Date_Vector with the given first_day and last_day containing
@@ -199,45 +261,9 @@ class Date_Vector(np.ndarray):
       else:
          return self._first_day + datetime.timedelta(days=(len(self) - 1))
 
-   def bi_intersect(self, other):
-      '''Shrink myself and other so that our bounds match, and return the new
-         vectors in a tuple. E.g.:
-
-         >>> a = Date_Vector('2013-06-02', np.arange(2, 7))
-         >>> b = Date_Vector('2013-06-04', np.arange(14, 18))
-         >>> (c, d) = a.bi_intersect(b)
-         >>> c
-         Date_Vector('2013-06-04', [4, 5, 6])
-         >>> d
-         Date_Vector('2013-06-04', [14, 15, 16])
-
-         If there is no intersection, return (None, None):
-
-         >>> c = Date_Vector('2013-06-07', np.zeros(1))
-         >>> a.bi_intersect(c)
-         (None, None)'''
-      fd_new = max(self.first_day, other.first_day)
-      ld_new = min(self.last_day, other.last_day)
-      self_new = self.resize(fd_new, ld_new)
-      other_new = other.resize(fd_new, ld_new)
-      return (self_new, other_new)
-
-   def bi_union(self, other):
-      '''Extend myself and other so that our bounds match, and return the new
-         vectors in a tuple. E.g.:
-
-         >>> a = Date_Vector('2013-06-02', np.arange(2, 7))
-         >>> b = Date_Vector('2013-06-04', np.arange(4, 8))
-         >>> (c, d) = a.bi_union(b)
-         >>> c
-         Date_Vector('2013-06-02', [2, 3, 4, 5, 6, 0])
-         >>> d
-         Date_Vector('2013-06-02', [0, 0, 4, 5, 6, 7])'''
-      fd_new = min(self.first_day, other.first_day)
-      ld_new = max(self.last_day, other.last_day)
-      self_new = self.resize(fd_new, ld_new)
-      other_new = other.resize(fd_new, ld_new)
-      return (self_new, other_new)
+   def bounds_eq(self, other):
+      'Return true if I have the same bounds as other.'
+      return (self.first_day == other.first_day and len(self) == len(other))
 
    def resize(self, first_day, last_day):
       '''Return a copy of myself with new bounds first_day and last_day.
@@ -335,13 +361,102 @@ class Date_Vector(np.ndarray):
                                        self[trim_start:len(self) - trim_end],
                                        np.zeros(add_end, dtype=self.dtype)]))
 
-# def similarity(a, a_start, b, b_start,
-#                mask=None, mask_start=None, metric=cosine):
-#    '''Return the similarity, in the range [0,1], of ``Date_Vector``\ s a and
-#       b. mask is a boolean validity Date_Vector; mask[i] is True if a[i] and
-#       b[i] are valid data, False otherwise. All three vectors are NumPy
-#       arrays. metric '''
-#    assert (mask is not None), 'mask is None not implemented'
+
+def pearson(a, b, a_mask=None, b_mask=None, min_data=3):
+   '''Given two Date_Vectors a and b, return their Pearson correlation.
+
+      >>> a = Date_Vector('2013-06-02', np.array((1,    2,    3,    5   )))
+      >>> b = Date_Vector('2013-06-02', np.array((0.11, 0.12, 0.13, 0.15)))
+      >>> pearson(a, b)
+      1.0
+
+      If a_mask and/or b_mask are non-None, they should be boolean
+      Date_Vectors that are True when the corresponding data element is valid
+      and False otherwise:
+
+      >>> c = Date_Vector('2013-06-02', np.array((0.11, 0.12, 9999, 0.15)))
+      >>> cm = Date_Vector('2013-06-02', np.array((True, True, False, True)))
+      >>> pearson(a, c)
+      0.097593...
+      >>> pearson(a, c, b_mask=cm)
+      1.0
+
+      a and a_mask, and b and b_mask, respectively, must have identical bounds
+      or ValueError is raised:
+
+      >>> m = Date_Vector('2013-06-02', np.array((True, True, True)))
+      >>> pearson(a, b, a_mask=m)
+      Traceback (most recent call last):
+        ...
+      ValueError: vector and mask must have the same bounds
+      >>> pearson(a, b, b_mask=m)
+      Traceback (most recent call last):
+        ...
+      ValueError: vector and mask must have the same bounds
+
+      The mask need not be boolean:
+
+      >>> m = Date_Vector('2013-06-02', np.array((0.1, 0.1, 0.1, 0.1)))
+      >>> pearson(a, b, a_mask=m)
+      1.0
+
+      a and b need not have any particular shared length or first_day. If they
+      share fewer than min_data valid data, due either to masking or bounds,
+      return 0 (i.e., if we don't have enough information to compute
+      correlation, assume there is none):
+
+      >>> bm = Date_Vector('2013-06-02', np.array((True, False, False, True)))
+      >>> pearson(a, b, b_mask=bm, min_data=2)
+      1.0
+      >>> pearson(a, b, b_mask=bm, min_data=3)
+      0.0
+      >>> d = Date_Vector('2013-06-04', np.array((0.11, 0.12, 0.13, 0.15)))
+      >>> pearson(a, d)
+      0.0
+
+      Similarly, if the variance of either a or b is zero, though the
+      correlation in this case is actually undefined, return 0:
+
+      >>> e = Date_Vector('2013-06-02', np.array((42, 42, 42, 42)))
+      >>> pearson(a, e)
+      0.0
+      >>> pearson(e, a)
+      0.0'''
+   # Implemented per <http://en.wikipedia.org/wiki/Pearson_correlation>.
+   def maskify(x, mask):
+      'Promote x to a MaskedArray if mask is not None.'
+      if (mask is None):
+         return x
+      else:
+         assert x.bounds_eq(mask)
+         assert (mask.dtype == np.bool)
+         # We invert the mask because MaskedArray has made the baffling choice
+         # that True mask elements correspond to *in*valid data. This is the
+         # opposite of every other mask I've seen...
+         return ma.array(x, mask=~mask)
+   # line up all the bounds and masks
+   if ((a_mask is not None and not a.bounds_eq(a_mask))
+       or (b_mask is not None and not b.bounds_eq(b_mask))):
+      raise ValueError('vector and mask must have the same bounds')
+   (a, b, a_mask, b_mask) = Date_Vector.bi_intersect(a, b, a_mask, b_mask)
+   ab_mask = Date_Vector(a.first_day, np.ones(len(a), dtype=np.bool))
+   if (a_mask is not None):
+      ab_mask *= a_mask
+   if (b_mask is not None):
+      ab_mask *= b_mask
+   if (len(a) < min_data or ab_mask.sum() < min_data):
+      return 0.0
+   # do some computin'
+   a = maskify(a, ab_mask)
+   b = maskify(b, ab_mask)
+   a_mean = a.mean()
+   b_mean = b.mean()
+   covar = np.sum(ab_mask * (a - a_mean) * (b - b_mean), dtype=np.float64)
+   a_stddev = np.sqrt(np.sum((a - a_mean)**2))
+   b_stddev = np.sqrt(np.sum((b - b_mean)**2))
+   if (a_stddev == 0 or b_stddev == 0):
+      return 0.0
+   return covar / (a_stddev * b_stddev)
 
 
 testable.register('''

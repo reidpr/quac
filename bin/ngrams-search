@@ -66,10 +66,8 @@ def main():
          if (args.query is None or k == args.query):
             if (args.detail):
                tsv = tsv_glue.Writer(fp=sys.stdout)
-               (ngram_vec, _) = ngram_vec.bi_union(tot_vec)
-               assert (ngram_vec is not None)
-               assert (ngram_vec.first_day == tot_vec.first_day)
-               assert (ngram_vec.last_day == tot_vec.last_day)
+               (ngram_vec, _) = ngram_vec.bi_union(ngram_vec, tot_vec)
+               assert (ngram_vec.bounds_eq(tot_vec))
                for row in zip(dates,
                               ngram_vec.astype(np.int64),
                               tot_vec.astype(np.int64),
