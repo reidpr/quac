@@ -354,7 +354,12 @@ testable.register('''
 True
 >>> a.first_day == b.first_day
 True
->>> b.last_day == b.last_day
+
+# make sure repr() objects really can be eval()'ed
+>>> b = eval(repr(a))
+>>> np.array_equal(a, b)
+True
+>>> a.first_day == b.first_day
 True
 
 # do methods that should return scalars do so?
