@@ -410,6 +410,28 @@ def groupn(iter_, n):
          return
       yield chunk
 
+def intfloatpass(v):
+   '''Try to convert v to an int or float, in that order; if either succeeds,
+      return the result, else return v unchanged. For example:
+
+      >>> intfloatpass('1')
+      1
+      >>> intfloatpass('1.0')
+      1.0
+      >>> intfloatpass('1foo')
+      '1foo'
+      >>> intfloatpass({})
+      {}'''
+   try:
+      return int(v)
+   except ValueError:
+      try:
+         return float(v)
+      except ValueError:
+         return v
+   except TypeError:
+      return v
+
 def lock_acquire(name):
    '''Try to acquire the lock *name*. Only one process can have the lock at
       once. Return immediately if the lock was acquired, otherwise raise
@@ -771,14 +793,7 @@ def str_to_dict(text):
    d = dict()
    for kv in text.split():
       (k, _, v) = kv.partition(':')
-      try:
-         v = int(v)
-      except ValueError:
-         try:
-            v = float(v)
-         except ValueError:
-            pass
-      d[k] = v
+      d[k] = intfloatpass(v)
    return d
 
 def StringIO():
