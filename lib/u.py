@@ -262,6 +262,29 @@ def call_kw(f, *args, **kwargs):
                        for (k,v) in kwargs.iteritems()
                        if k in valid_kwargs } )
 
+def calling_module(frame_ct):
+   '''Return the module object frame_ct levels up in the stack. For example:
+
+      >>> calling_module(0)
+      <module '__main__' from '.../lib/u.py'>
+
+      Note that what is frame_ct levels up must be a module, not a function or
+      something else. For example:
+
+      >>> calling_module(-1)  # calling_module() itself
+      Traceback (most recent call last):
+        ...
+      ValueError: stack level -1 is not a module
+      >>> calling_module(1)   # somewhere in doctest
+      Traceback (most recent call last):
+        ...
+      ValueError: stack level 1 is not a module'''
+   calling_frame = inspect.stack()[frame_ct+1][0]
+   try:
+      return sys.modules[calling_frame.f_locals['__name__']]
+   except KeyError:
+      raise ValueError('stack level %d is not a module' % (frame_ct))
+
 def chunker(seq, p):
    '''Split sequence seq into p more or less equal sized sublists. If p <
       len(seq), then return len(seq) sublists of length 1. E.g.:
@@ -553,6 +576,20 @@ def mkdir_f(path):
       raise appropriate OSError if that doesn't work.)'''
    if (not os.path.isdir(path)):
       os.mkdir(path)
+
+def module_dir(m=None):
+   """Return the directory containing the file defining module m. If m is None
+      (the default), return the directory containing the calling module. For
+      example:
+
+      >>> u_module = calling_module(0)
+      >>> module_dir(u_module)
+      '.../lib'
+      >>> module_dir()
+      '.../lib'"""
+   if (m is None):
+      m = calling_module(1)
+   return os.path.abspath(os.path.dirname(m.__file__))
 
 def path_configured(path):
    if (cpath is None):
