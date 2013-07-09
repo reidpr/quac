@@ -51,6 +51,7 @@ class Excel(object):
                duration = time_.days_diff(dates[i+1], dates[i])
             else:
                duration = 1
+            assert (duration > 0)
             v = values[i] / duration if values[i] is not None else None
             for j in xrange(out_i, out_i + duration):
                if (v is not None):
