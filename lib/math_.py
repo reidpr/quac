@@ -160,12 +160,17 @@ class Date_Vector(np.ndarray):
       np.ndarray.__setstate__(self, super_state)
       (self._first_day, ) = my_state
 
+   # other special methods
+
    def __repr__(self):
       if (self._first_day is not None):
          datestr = "'" + time_.iso8601_date(self.first_day) + "'"
       else:
          datestr = 'None'
       return 'Date_Vector(%s, %s' % (datestr, np.ndarray.__repr__(self)[12:])
+
+   def __str__(self):
+      return self.__repr__()
 
    @staticmethod
    def bi_union(*vectors):
@@ -262,8 +267,86 @@ class Date_Vector(np.ndarray):
          return self._first_day + datetime.timedelta(days=(len(self) - 1))
 
    def bounds_eq(self, other):
-      'Return true if I have the same bounds as other.'
+      'Return True if I have the same bounds as other.'
       return (self.first_day == other.first_day and len(self) == len(other))
+
+   def bounds_le(self, other):
+      '''Return True if I have the same or smaller bounds than other, False
+         otherwise. For example:
+
+         >>> a = Date_Vector('2013-06-02', np.arange(2, 7))
+         >>> b = Date_Vector('2013-06-02', np.arange(2, 6))
+         >>> c = Date_Vector('2013-06-03', np.arange(3, 7))
+         >>> a.bounds_le(a)
+         True
+         >>> a.bounds_le(b)
+         False
+         >>> b.bounds_le(a)
+         True
+         >>> a.bounds_le(c)
+         False
+         >>> c.bounds_le(a)
+         True'''
+      return (self.first_day >= other.first_day
+              and self.last_day <= other.last_day)
+
+   def date(self, i):
+      '''Return the date of index i. For example:
+
+         >>> a = Date_Vector('2013-06-02', np.arange(2, 7))
+         >>> a.date(0)
+         datetime.date(2013, 6, 2)
+         >>> a.date(5)
+         datetime.date(2013, 6, 7)'''
+      return self.first_day + datetime.timedelta(days=i)
+
+   def grow_to(self, other):
+      '''Return a copy of myself grown to match the bounds of the larger of
+         myself and other. For example:
+
+         >>> a = Date_Vector('2013-06-02', np.arange(2, 5))
+         >>> b = Date_Vector('2013-06-03', np.arange(3, 6))
+         >>> a.grow_to(b)
+         Date_Vector('2013-06-02', [2, 3, 4, 0])
+         >>> b.grow_to(a)
+         Date_Vector('2013-06-02', [0, 3, 4, 5])'''
+      return self.resize(min(self.first_day, other.first_day),
+                         max(self.last_day, other.last_day))
+
+   def shrink_to(self, other):
+      '''Return a copy of myself shrunk to match the bounds of the smaller of
+         myself and other. For example:
+
+         >>> a = Date_Vector('2013-06-02', np.arange(2, 5))
+         >>> b = Date_Vector('2013-06-03', np.arange(3, 6))
+         >>> a.shrink_to(b)
+         Date_Vector('2013-06-03', [3, 4])
+         >>> b.shrink_to(a)
+         Date_Vector('2013-06-03', [3, 4])
+
+         If there is no overlap, return None:
+
+         >>> a.shrink_to(Date_Vector.zeros('2013-06-05', '2013-06-05')) is None
+         True'''
+      return self.resize(max(self.first_day, other.first_day),
+                         min(self.last_day, other.last_day))
+
+   def normalize(self, other, parts_per=1):
+      '''Divide self by other over the range where the bounds intersect. E.g.:
+
+         >>> a = Date_Vector('2013-06-02', np.arange(2, 5))
+         >>> b = Date_Vector('2013-06-01', np.arange(1, 6)*2)
+         >>> a
+         Date_Vector('2013-06-02', [2, 3, 4])
+         >>> b
+         Date_Vector('2013-06-01', [ 2,  4,  6,  8, 10])
+         >>> a.normalize(b)
+         Date_Vector('2013-06-02', [ 0.5,  0.5,  0.5])
+         >>> a.normalize(b, parts_per=1e6)
+         Date_Vector('2013-06-02', [ 500000.,  500000.,  500000.])
+         '''
+      assert (self.bounds_le(other)), 'unimplemented'
+      return parts_per * (self / other.shrink_to(self))
 
    def resize(self, first_day, last_day):
       '''Return a copy of myself with new bounds first_day and last_day.
@@ -381,18 +464,17 @@ def pearson(a, b, a_mask=None, b_mask=None, min_data=3):
       >>> pearson(a, c, b_mask=cm)
       1.0
 
-      a and a_mask, and b and b_mask, respectively, must have identical bounds
-      or ValueError is raised:
+      Masks must be a superset of the corresponding vectors:
 
       >>> m = Date_Vector('2013-06-02', np.array((True, True, True)))
       >>> pearson(a, b, a_mask=m)
       Traceback (most recent call last):
         ...
-      ValueError: vector and mask must have the same bounds
+      ValueError: mask must have equal or greater bounds than vector
       >>> pearson(a, b, b_mask=m)
       Traceback (most recent call last):
         ...
-      ValueError: vector and mask must have the same bounds
+      ValueError: mask must have equal or greater bounds than vector
 
       The mask need not be boolean:
 
@@ -435,9 +517,9 @@ def pearson(a, b, a_mask=None, b_mask=None, min_data=3):
          # opposite of every other mask I've seen...
          return ma.array(x, mask=~mask)
    # line up all the bounds and masks
-   if ((a_mask is not None and not a.bounds_eq(a_mask))
-       or (b_mask is not None and not b.bounds_eq(b_mask))):
-      raise ValueError('vector and mask must have the same bounds')
+   if ((a_mask is not None and not a.bounds_le(a_mask))
+       or (b_mask is not None and not b.bounds_le(b_mask))):
+      raise ValueError('mask must have equal or greater bounds than vector')
    (a, b, a_mask, b_mask) = Date_Vector.bi_intersect(a, b, a_mask, b_mask)
    ab_mask = Date_Vector(a.first_day, np.ones(len(a), dtype=np.bool))
    if (a_mask is not None):

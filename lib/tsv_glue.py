@@ -69,12 +69,13 @@ class Writer(object):
    def close(self):
       self.fp.close()
 
+   def flush(self):
+      self.fp.flush()
+
    def writerow(self, row):
       def _unicodify(s):
          if s is None:
             return u''
-         elif isinstance(s, unicode):
-            return s
          else:
             return unicode(s)
       self.fp.write('\t'.join([_unicodify(i) for i in row]) + '\n')

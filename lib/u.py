@@ -800,6 +800,40 @@ def StringIO():
       except that doesn't let you get the encoded bytes.'''
    return io.TextIOWrapper(io.BytesIO(), encoding='utf8')
 
+def without_common_prefix(paths):
+   '''Return paths with common prefix removed. For example:
+
+      >>> without_common_prefix(['/a/b/c', '/a/b/doogiehauser'])
+      ['c', 'doogiehauser']
+
+      If paths has only one element, strip all directories:
+
+      >>> without_common_prefix(['/a/b'])
+      ['b']
+
+      If paths is empty, return the empty list:
+
+      >>> without_common_prefix([])
+      []
+
+      If one or more paths are equal to the common prefix, they will become
+      the empty string:
+
+      >>> without_common_prefix(['/a/b', '/a/b/c'])
+      ['', '/c']'''
+   if (len(paths) == 0):
+      return list()
+   elif (len(paths) == 1):
+      return [os.path.basename(paths[0])]
+   else:
+      strip_ct = 0
+      for cvec in zip(*paths):
+         if (len(set(cvec)) > 1):
+            break
+         strip_ct += 1
+      return [i[strip_ct:] for i in paths]
+
+
 def without_ext(filename, ext):
    """Return filename with extension ext (which may or may not begin with a
       dot, and which may contain multiple dots) stripped. Raise ValueError if

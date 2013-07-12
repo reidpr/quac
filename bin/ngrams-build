@@ -71,7 +71,7 @@ try:
    total = { 'ngram':      None,
              'total':      sum(cts),
              'series':     cts }
-   u.pickle_dump('out/total', total)
+   u.pickle_dump('%s/out/total' % (args.jobdir), total)
 
    if (args.run is not None):
       l.info('running job')

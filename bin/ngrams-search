@@ -6,12 +6,6 @@
 
 from __future__ import division
 
-help_epilogue = '''
-In addition to the map-reduce output, JOBDIR/out must contain an additional
-file called "total.pkl.gz", which contains a gzipped, pickled dict (with the
-same contents as the other time series) giving the total number of items
-(e.g., tweets) for each day.'''
-
 import io
 import sys
 
@@ -26,7 +20,7 @@ import u
 l = u.l
 
 
-ap = u.ArgumentParser(description=__doc__, epilog=help_epilogue)
+ap = u.ArgumentParser(description=__doc__)
 gr = ap.default_group
 gr.add_argument('--detail',
                 action='store_true',
@@ -36,19 +30,18 @@ gr.add_argument('--query',
                 help='print this n-gram (otherwise print all)')
 gr.add_argument('inputdir',
                 metavar='INPUTDIR',
-                help='quacreduce job directory containing time series files')
+                help='quacreduce output directory from ngrams-build')
 
 
 ### Main ###
 
 def main():
-   inputdir = '%s/out' % (args.inputdir)
    try:
-      file_ct = u.glob_maxnumeric(inputdir) + 1
+      file_ct = u.glob_maxnumeric(args.inputdir) + 1
    except TypeError:
-      u.abort('no input files in %s' % (inputdir))
+      u.abort('no input files in %s' % (args.inputdir))
    try:
-      totals = u.pickle_load('%s/total.pkl.gz' % (inputdir))
+      totals = u.pickle_load('%s/total.pkl.gz' % (args.inputdir))
    except Exception, x:
       u.abort('cannot read total file: %s' % (x))
    tot_vec = totals['series']
@@ -57,7 +50,7 @@ def main():
    for i in xrange(file_ct):
       if (args.query is not None and u.djb2(args.query) % file_ct != i):
          continue
-      fp = io.open('%s/%d' % (inputdir, i), 'rb')
+      fp = io.open('%s/%d' % (args.inputdir, i), 'rb')
       for line in fp:
          (k, _, v) = line.partition('\t')
          k = k.decode('utf8')
@@ -65,7 +58,7 @@ def main():
          ngram_vec = v['series']
          if (args.query is None or k == args.query):
             if (args.detail):
-               tsv = tsv_glue.Writer(fp=sys.stdout)
+               tsv = tsv_glue.Writer(sys.stdout.fileno())
                (ngram_vec, _) = ngram_vec.bi_union(ngram_vec, tot_vec)
                assert (ngram_vec.bounds_eq(tot_vec))
                for row in zip(dates,

@@ -1,0 +1,95 @@
+#!/usr/bin/env python
+
+'''
+Compute correlation of each n-gram time series with each input time series.
+For each input time series, output a TSV file with the most-correlated (either
+positively or negatively) n-grams.'''
+
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+from __future__ import division
+
+import glob
+import os.path
+import subprocess as sp
+
+import quacpath
+import qr.base
+import qr.scripting
+import u
+l = u.l
+
+
+help_epilogue = '''
+Note that the first input FILE must be an output directory from ngrams-build.
+Remaining FILEs are .xls input files.
+''' + qr.scripting.help_epilogue
+
+
+ap = qr.scripting.ArgumentParser(description=__doc__, epilog=help_epilogue)
+gr = ap.add_argument_group('correlation stuff')
+gr.add_argument('--min-similarity',
+                type=float,
+                metavar='X',
+                default=0.5,
+                help='report only n-grams with $|r|>=X$ (default 0.5)')
+gr.add_argument('--min-ppm',
+                type=float,
+                metavar='X',
+                default=1000,
+                help='ignore series with peak < X occurs per million tweets')
+gr.add_argument('--sample-rate',
+                type=float,
+                metavar='X',
+                default=0.01,
+                help='Twitter Streaming API sample rate')
+gr.add_argument('--run',
+                type=int,
+                help='run make with -j N after job setup')
+gr.add_argument('--clean',
+                action='store_true',
+                help='run "make clean" after job completion')
+
+args = qr.scripting.parse_args(ap)
+u.logging_init('ngcor')
+
+# check arguments
+if (len(args.inputs) < 2):
+   ap.error('not enough inputs')
+if (not os.path.isdir(args.inputs[0])):
+   ap.error('%s is not a directory' % (args.inputs[0]))
+xls_inputs = args.inputs[1:]
+for i in xls_inputs:
+   if (not os.path.isfile(i)):
+      ap.error('%s is not a file' % (i))
+total_file = args.inputs[0] + '/total'
+ts_inputs = glob.glob('%s/[0-9]*' % (args.inputs[0]))
+if (len(ts_inputs) < 1):
+   ap.error('%s contains no ngrams-build output files' % (args.inputs[0]))
+
+
+try:
+
+   l.info('starting')
+
+   l.info('setting up job')
+   args.inputs = ts_inputs
+   args.python = 'qr.ngramtime.Correlate_Job'
+   args.pyargs = qr.base.encode({ 'min_similarity': args.min_similarity,
+                                  'min_ppm': args.min_ppm,
+                                  'sample_rate': args.sample_rate,
+                                  'total_file': total_file,
+                                  'input_sss': xls_inputs })
+   qr.scripting.setup(args)
+
+   if (args.run is not None):
+      l.info('running job')
+      qr.scripting.run(args, args.run)
+      if (args.clean):
+         l.info('cleaning up job')
+         qr.scripting.clean(args)
+
+   l.info('done')
+
+except sp.CalledProcessError, x:
+   u.abort('subprocess failed with return code %d' % (x.returncode))

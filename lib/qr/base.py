@@ -67,7 +67,21 @@ class Job(object):
    __metaclass__ = ABCMeta
 
    def __init__(self, params=None):
-      self.params = params if (params is not None) else dict()
+      # Note: Intepreting params involves a strange hack, because the user can
+      # either pass a string-encoded dictionary or an arbitrary data structure
+      # that's been encode()ed (see above). By a quirk of the quacreduce
+      # transport scheme, the latter will arrive here as a single-element
+      # dictionary with the encoded string as the key and an empty string as
+      # the value (this works in part because base64 does not use the colon or
+      # space characters). Therefore, if we get a dictionary that looks like
+      # that, assume the real payload is in the (single) key.
+      if (params is None):
+         self.params = None
+      else:
+         if (len(params) == 1 and params.values()[0] == ''):
+            self.params = decode(params.keys()[0])
+         else:
+            self.params = params
       self.rid = None
       # Yes, you can quac() instead of map() ...
       self.quac = self.map
@@ -75,8 +89,13 @@ class Job(object):
    ## Instance properties
 
    @property
+   def outdir(self):
+      # FIXME: assumes cwd is jobdir... is that reasonable?
+      return ('out')
+
+   @property
    def reduce_output_filename(self):
-      return ('out/%d' % (self.rid))
+      return ('%s/%d' % (self.outdir, self.rid))
 
    ## Instance methods
 
@@ -88,6 +107,9 @@ class Job(object):
    @abstractmethod
    def map(self, item):
       '''FIXME generator yields key/value pairs'''
+
+   def map_init(self):
+      'Called before mapping begins.'
 
    def map_inputs(self):
       '''Generator which reads map input items from the mapper input (i.e.,
@@ -107,6 +129,7 @@ class Job(object):
       '''Connect myself to input and output and run my mapper.'''
       self.map_open_input()
       self.map_open_output()
+      self.map_init()
       for i in self.map_inputs():
          for kv in self.map(i):
             self.map_write(*kv)
@@ -123,6 +146,10 @@ class Job(object):
    def reduce(self, key, values):
       '''Generator which yields zero or more reduced items based upon the key
          and an iterator of one or more corresponding values.'''
+      pass
+
+   def reduce_init(self):
+      'Called before reducing begins.'
       pass
 
    def reduce_inputs(self):
@@ -152,6 +179,7 @@ class Job(object):
       self.rid = rid
       self.reduce_open_input()
       self.reduce_open_output()
+      self.reduce_init()
       for kvals in self.reduce_inputs():
          for item in self.reduce(*kvals):
             self.reduce_write(item)
@@ -188,14 +216,30 @@ class Line_Output_Job(Job):
       self.outfp.write(u'\n')
 
 
+class KV_Pickle_Seq_Input_Job(Job):
+
+   '''Mixin for input that is a sequence of Python objects. :meth:`map` must
+      accept (key, value) tuples.
+
+      The input stream is a sequence of lines with the following structure:
+      the stringified key, a tab character, a pickled and base64-encoded
+      version of the value, and a newline. (This is a *sequence* of pickles,
+      not a pickle containing a sequence.) Note that keys are not necessarily
+      unique.'''
+
+   def map_inputs(self):
+      for l in self.infp:
+         (key, _, value) = l.partition('\t')
+         key = key.decode('utf8')
+         value = decode(value)  # base64 ignores trailing newline
+         yield (key, value)
+
+
 class KV_Pickle_Seq_Output_Job(Job):
 
    '''Mixin for output that is a sequence of Python objects. :meth:`reduce`
-      must yield (key, value) tuples. To the output stream is written: the
-      stringified key, a tab character, a pickled and base64-encoded version
-      of the value, and a newline. Note that this is a *sequence* of pickles,
-      not a pickle containing a sequence. Note also that keys are not checked
-      for uniqueness.'''
+      must yield (key, value) tuples. See :class:`KV_Pickle_Seq_Input_Job` for
+      the output stream format.'''
 
    def reduce_write(self, item):
       assert (len(item) == 2)
@@ -221,6 +265,17 @@ class TSV_Input_Job(Job):
 
    def map_open_input(self):
       self.infp = tsv_glue.Reader(sys.stdin.fileno())
+
+class TSV_Output_Job(Job):
+
+   '''Mixin for TSV UTF-8 text output. :meth:`reduce_write()` expects a
+      sequence of stringifiable objects.'''
+
+   def reduce_open_output(self):
+      assert False, 'unimplemented'
+
+   def reduce_write(self, item):
+      self.outfp.writerow(item)
 
 
 testable.register(r'''

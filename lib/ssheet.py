@@ -22,9 +22,9 @@ class Excel(object):
 
       >>> e = Excel(file_=(u.module_dir() + '/../misc/halloween.xls'))
       >>> e.data
-      Date_Vector('2012-10-28', [ 0.05,  0.05,   nan,  1.  ,   nan,   nan,   nan,  0.  ])
+      Date_Vector('2012-10-28', [ 0.05,  0.05,   nan,  1.  ,   nan,  0.  ,  0.  ,  0.  ])
       >>> e.mask
-      Date_Vector('2012-10-28', [ True,  True, False,  True, False, False, False,  True], dtype=bool)
+      Date_Vector('2012-10-28', [ True,  True, False,  True, False,  True,  True,  True], dtype=bool)
       >>> pprint(e.properties)
       {u'incubation days': 2.0, u'pathogen': u'Halloween'}'''
 
