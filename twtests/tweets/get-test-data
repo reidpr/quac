@@ -1,0 +1,57 @@
+#!/bin/bash
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+# This script extracts a random sample of 5% of the geotagged tweets we have
+# for a certain time interval. Run it with the path to the appropriate raw
+# directory. Note that this script is a one-off and thus infrequently tested!
+
+# WARNING: This will only generate an identical test set for you if you have
+# exactly the same streaming API sample from this period that we do.
+
+set -e
+
+INFILES=$(ls $1/*/2012{10{28,29,30,31},11{01,02,03,04}}*.json.gz)
+#INFILES=$1/2012-10/20121031_21*.json.gz
+OUTFILE=raw/big/big.json.gz
+OUTFILE_SMALL=raw/small/small.json.gz
+
+if [ ! -d "$1" ]; then
+    echo "'$1' is not a directory" 1>&2
+    exit 1
+fi
+
+if [ ! -d "$1/2012-10" -o ! -d "$1/2012-11" ]; then
+    echo "'$1' does not contain 2012-10 and 2012-11 subdirectories"
+    exit 1
+fi
+
+mkdir -p raw pre geo raw/big raw/small
+
+echo 'sampling tweets; this can take several minutes ...'
+zcat -v $INFILES | fgrep '"geo":{' | perl -C0 -e 'srand(8675309); while (<>) { rint if (rand() < 0.05); }' | gzip -9 > $OUTFILE
+touch ${OUTFILE%%.*}.stats
+
+# FIXME: This seems to sometimes create a zero-length file? I haven't
+# investigated.
+echo 'creating small subsample ...'
+zcat -v $OUTFILE | perl -C0 -e 'srand(8675309); while (<>) { print if (rand() < 0.05); }' | gzip -9 > $OUTFILE_SMALL
+touch ${OUTFILE_SMALL%%.*}.stats
+
+echo 'extracting tweet IDs ...'
+
+zcat $OUTFILE | ../../bin/json-dump | egrep '^  "id":' | sed -r 's/  "id": ([0-9]+), /\1/' | sort -u > ids.txt
+
+echo 'running parse.sh ...'
+../../misc/parse.sh 1 .
+
+echo -n 'found this many tweets: '
+wc -l ids.txt
+
+echo    'expected md5sum: 6d59060b8a6efc4b85467982403fd968'
+echo -n 'actual md5sum:   '
+zcat $OUTFILE | md5sum
+
+echo    'expected md5sum: 3b3bad3ceebc6cd7d268b0553a5cd05b'
+echo -n 'actual md5sum:   '
+zcat $OUTFILE_SMALL | md5sum
+

@@ -18,7 +18,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument('file', metavar='METADATA_FILE')
 args = u.parse_args(ap)
 
-tsv = tsv_glue.Writer(fp=sys.stdout)  # FIXME: will puke if we send Unicode?
+tsv = tsv_glue.Writer(sys.stdout.fileno())
 
 for (day, md) in sorted(pickle_glue.File(args.file).data['days'].items()):
    tsv.writerow([str(day),

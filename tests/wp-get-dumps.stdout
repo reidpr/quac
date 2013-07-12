@@ -1,4 +1,4 @@
-$ (wp-get-dumps --notimes --config quacrc | head -n -15 | fgrep -v 'updating Wikimedia dumps')
+$ (wp-get-dumps --notimes --config quacrc 2>&1 | head -n -15 | fgrep -v 'updating Wikimedia dumps')
 wpdmp INFO     bandwidth limit is 10000 KB/s
 receiving incremental file list
 ./
@@ -7,6 +7,7 @@ aawiki/latest/
 aawiki/latest/aawiki-latest-pagelinks.sql.gz
 aawiki/latest/aawiki-latest-stub-meta-history.xml.gz
 
+$ ls -Rhs .
 .:
 total 4.0K
 4.0K quacrc

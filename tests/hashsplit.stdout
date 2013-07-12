@@ -61,6 +61,7 @@ a	20
 a	21
 nullvaluewithtab	
 nullvaluenotab
+私の名前は中野です
 $ (hashsplit 2 out < in.txt)
 $ cat out.0
 a	1
@@ -87,3 +88,11 @@ $ cat out.1
 b	2
 b	5
 nullvaluenotab
+私の名前は中野です
+$ (hashsplit 240 out < in.txt)
+$ cat out.7
+b	2
+b	5
+$ cat out.19
+nullvaluenotab
+私の名前は中野です

@@ -40,21 +40,13 @@ DEP_FILE_EXTENSION = '.json.d'
 
 ### Setup ###
 
-ap = argparse.ArgumentParser(description=__doc__,
-                             epilog=help_epilogue,
-                             formatter_class=argparse.RawTextHelpFormatter)
-ap.add_argument('--limit',
+ap = u.ArgumentParser(description=__doc__, epilog=help_epilogue)
+gr = ap.default_group
+gr.add_argument('--limit',
                 type=int,
                 help='stop after parsing N objects',
                 metavar='N')
-ap.add_argument('--unittest',
-                nargs=0,
-                action=testable.Raise_Unittest_Exception,
-                help='run unit tests instead of real stuff')
-ap.add_argument('--verbose',
-                action='store_true',
-                help='be more verbose with log output')
-ap.add_argument('file',
+gr.add_argument('file',
                 metavar='FILE',
                 help='.stats for raw tweet file to parse')
 
@@ -72,7 +64,7 @@ def main():
       u.abort('bad .stats file: %s' % (x))
    global l
    l = u.logging_init('parse', file_=filename_base + '.log', truncate=True,
-                      stdout_force=True)
+                      stderr_force=True)
    l.info('starting')
    try:
       json_fp = gzip.open(filename_json)

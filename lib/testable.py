@@ -45,6 +45,9 @@ import doctest
 import inspect
 import sys
 
+# Note: Circular imports don't work, so no modules that import testable can be
+# used here. Importantly, that includes u.
+
 
 # Set to true if do_script_tests() was called and the answer was, don't run
 # the tests.

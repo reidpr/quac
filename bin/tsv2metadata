@@ -35,6 +35,13 @@ ap.add_argument('tsv_files',
                 nargs='+',
                 help='.tsv files to add to metadata')
 
+### Globals ###
+
+# maximum and minimum dates seen so far
+date_max = datetime.date(1, 1, 1)
+date_min = datetime.date(9999, 1, 1)
+
+
 ### Main ###
 
 def main():
@@ -85,7 +92,11 @@ def metadata_pkl_open(filename):
 
 def metadata_init(md, date):
    'Initialize metadata for all dates from the given date to present.'
-   for dt in time_.dateseq(date, datetime.datetime.utcnow()):
+   global date_min
+   global date_max
+   date_min = min(date_min, date)
+   date_max = max(date_max, date)
+   for dt in time_.dateseq(date_min, date_max):
       md.setdefault(dt.date(), { 'count': None,
                                  'count_geotag': None,
                                  'min_id': None,

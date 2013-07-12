@@ -35,13 +35,13 @@ echo '4.2.5 Prepare the job'
 quacreduce --map 'tr "[:blank:]" "\n"' \
            --reduce 'uniq -c > out/%(RID)' \
            --partitions 2 \
-           ./job foo*.txt
+           foo*.txt
 
 echo '4.2.6 Run the job with make'
-x ls -R job
-y "cd job && make --quiet"  # output contains temp dirs that vary between tests
-x ls -R job
-y "cat job/out/* | sort"
+x ls -R .
+x make --quiet  # output contains temp dirs that vary
+x ls -R .
+y "cat out/* | sort"
 
 #echo '4.2.8 Add more input data'
 #echo 'qux' > foo3.txt
@@ -53,7 +53,7 @@ y "cat job/out/* | sort"
 ## Test cleanup
 
 echo '*** Test cleanup'
-y "cd job && make --quiet clean"
-x ls -R job
-y "cd job && make --quiet reallyclean"
-x ls -R job
+y 'make --quiet clean'
+x ls -R .
+y 'make --quiet reallyclean'
+x ls -R .

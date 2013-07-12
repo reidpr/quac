@@ -27,11 +27,13 @@ echo $?
 
 
 # Check failure on can't open output file(s)
+
 y "hashsplit 2 /does/not/exist < /dev/null"
 echo $?
 
+
 # Check that it works (note that we repeat "a" several times to make sure
-# we're hashing just the key and not the whole line)
+# we're hashing just the key and not the whole line), including with UTF-8.
 
 cat > in.txt <<EOF
 a	1
@@ -57,6 +59,7 @@ a	20
 a	21
 nullvaluewithtab	
 nullvaluenotab
+私の名前は中野です
 EOF
 
 x cat in.txt
@@ -64,6 +67,15 @@ y "hashsplit 2 out < in.txt"
 x cat out.0
 x cat out.1
 
-
-# exit with success
-exit 0
+# Now split with much wider degree. This is mainly used to test that other
+# hash functions are consistent. The value 240 is from the default open files
+# limit of 256 (ulimit -n) on OS X Mountain Lion.
+#
+# Note that both "nullvaluenotab" and the Japanese text hash mod 240 is 19. I
+# am pretty well convinced this is a coincidence. I ran /usr/share/dict/words
+# through hashsplit and ended up with approximately 17% maximum variation in
+# the size of 100 buckets, which seems reasonable. The actual hash values of
+# the two strings differ.
+y "hashsplit 240 out < in.txt"
+x cat out.7
+x cat out.19

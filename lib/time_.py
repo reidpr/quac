@@ -6,7 +6,7 @@
 #
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
-from datetime import tzinfo, timedelta, datetime
+from datetime import date, datetime, time, timedelta, tzinfo
 import pytz
 import re
 import time as _time
@@ -29,6 +29,36 @@ def as_utc(dt):
       equivalent UTC datetime.'''
    return dt.astimezone(pytz.utc)
 
+def dateify(x):
+   '''Try to convert x to a date and return the result. E.g.:
+
+      >>> dateify('2013-06-28')
+      datetime.date(2013, 6, 28)
+      >>> dateify(date(2013, 6, 28))
+      datetime.date(2013, 6, 28)
+      >>> dateify(datetime(2013, 6, 28))
+      datetime.date(2013, 6, 28)
+      >>> dateify(None)  # returns None
+      >>> dateify(1)
+      Traceback (most recent call last):
+        ...
+      ValueError: can't convert 1 to a date
+      >>> dateify('2013-06-31')
+      Traceback (most recent call last):
+        ...
+      ValueError: day is out of range for month
+      '''
+   if (isinstance(x, datetime)):
+      return x.date()
+   if (isinstance(x, date)):
+      return x
+   if (x is None):
+      return x
+   if (isinstance(x, basestring)):
+      return iso8601_parse(x).date()
+   raise ValueError("can't convert %s to a date" % (str(x)))
+
+
 def dateseq_str(start, end):
    '''Return a sequence of date strings from start to end (in ISO 8601
       format), inclusive. e.g.:
@@ -37,7 +67,7 @@ def dateseq_str(start, end):
       ['2013-03-25', '2013-03-26', '2013-03-27', '2013-03-28']'''
    start = iso8601_parse(start)
    end = iso8601_parse(end)
-   return [d.strftime('%Y-%m-%d') for d in dateseq(start, end)]
+   return [iso8601_date(d) for d in dateseq(start, end)]
 
 def dateseq(start, end):
    return rrule.rrule(rrule.DAILY, dtstart=start, until=end)
@@ -51,6 +81,39 @@ def days_f(td):
       >>> days_f(td)
       2.5'''
    return td.total_seconds() / timedelta(days=1).total_seconds()
+
+def days_diff(a, b):
+   '''a and b are date or datetime objects that are an integer number of days
+      apart. Return a - b in days. E.g.:
+
+      >>> days_diff(datetime(2013, 6, 27), datetime(2013, 6, 20))
+      7
+      >>> days_diff(date(2013, 6, 27), date(2013, 6, 20))
+      7
+      >>> days_diff(datetime(2013, 6, 27), date(2013, 6, 20))
+      7
+      >>> days_diff(date(2013, 6, 27), datetime(2013, 6, 20))
+      7
+      >>> days_diff(date(2013, 6, 20), date(2013, 6, 27))
+      -7
+      >>> days_diff(date(2013, 6, 20), date(2013, 6, 20))
+      0
+      >>> days_diff(datetime(2013, 6, 27, 1), datetime(2013, 6, 20))
+      Traceback (most recent call last):
+        ...
+      ValueError: 2013-06-27 01:00:00 and 2013-06-20 00:00:00 day difference is not an integer
+      >>> days_diff(datetime(2013, 6, 27, microsecond=1), datetime(2013, 6, 20))
+      Traceback (most recent call last):
+        ...
+      ValueError: 2013-06-27 00:00:00.000001 and 2013-06-20 00:00:00 day difference is not an integer'''
+   if (not isinstance(a, datetime)):
+      a = datetime.combine(a, time())
+   if (not isinstance(b, datetime)):
+      b = datetime.combine(b, time())
+   diff = a - b
+   if (diff.seconds != 0 or diff.microseconds != 0):
+      raise ValueError('%s and %s day difference is not an integer' % (a, b))
+   return diff.days
 
 def ddfs_parse(text):
    '''Parse the time string as reported by DDFS. e.g.:
@@ -73,6 +136,9 @@ def twitter_timestamp_parse(text):
    # approximately 5x faster. (If assumption (b) fails, you'll get a
    # ValueError.)
    return utcify(datetime.strptime(text, '%a %b %d %H:%M:%S +0000 %Y'))
+
+def iso8601_date(d):
+   return d.strftime('%Y-%m-%d')
 
 def iso8601utc_parse(text):
    '''Parse a timestamp with seconds in ISO 8601 format, assuming it has a UTC
@@ -111,6 +177,11 @@ def nowstr_human():
 def utcify(dt):
    'Convert a native datetime object into aware one in UTC.'
    return dt.replace(tzinfo=pytz.utc)
+
+def utcnow():
+   'Return an "aware" datetime for right now in UTC.'
+   # http://stackoverflow.com/a/4530166/396038
+   return datetime.now(pytz.utc)
 
 
 ### The following are copied from the examples at

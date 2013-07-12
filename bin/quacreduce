@@ -6,178 +6,23 @@ Set up a map-reduce job that can be executed with Make. See section
 
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
-help_epilogue = '''
-Notes:
-
-  * If --reduce includes the string "%RID", it is replaced with the reducer
-    ID; this is important for coordinating output files if --partitions > 1.
-
-  * --python is mutually exclusive with --map and --reduce (which must both be
-    specified if one is).
-
-  * --sortdir need not be (and probably should not be) on the shared
-    filesystem; the point is to leverage node-local storage for sorting during
-    the partitioning phase. However, this storage must be available on the
-    same path for each node.
-
-  * Input files need not exist at quacreduce time; this gives you greater
-    flexibility in when to build the job.
-
-  * Beware shell quoting with --map and --reduce!
-'''
-
-import os
 
 import quacpath
+import qr.scripting
 import testable
-import time_
 import u
-l = u.l
 
 
-### Setup ###
-
-ap = u.ArgumentParser(description=__doc__, epilog=help_epilogue)
-gr = ap.add_argument_group('operators')
-gr.add_argument('--map',
-                type=str,
-                metavar='CMD',
-                help='shell pipeline for map function')
-gr.add_argument('--reduce',
-                type=str,
-                metavar='CMD',
-                help='shell pipeline for reduce function')
-gr.add_argument('--python',
-                type=str,
-                metavar='CLASS',
-                help='Python class containing map-reduce implementation')
-gr = ap.add_argument_group('job logistics')
-gr.add_argument('jobdir',
-                metavar='JOBDIR',
-                help='job directory (must not exist)')
-gr.add_argument('inputs',
-                metavar='FILE',
-                nargs='+',
-                help='input files (must have unique names)')
-gr.add_argument('--partitions',
-                type=int,
-                metavar='N',
-                default=1,
-                help='number of partitions to use (default 1)')
-gr.add_argument('--sortdir',
-                metavar='DIR',
-                help='directory for offline sort temp files (default JOBDIR)')
-gr.add_argument('--sortmem',
-                metavar='N',
-                default='64M',
-                help='sort memory to use (sort -S expression) (default 64M)')
-gr.add_argument('--update',
-                action='store_true',
-                help='add more input (not yet implemented; see issue #36)')
-
-
-### Main ###
-
-def main():
-   directories_setup()
-   if (args.python):
-      pythonify()
-   makefile_dump()
-   slurm_dump()
-
-
-### More functions ###
-
-def directories_setup():
-   os.mkdir(args.jobdir)
-   os.chdir(args.jobdir)
-   os.mkdir('out')
-   os.mkdir('tmp')
-
-def makefile_dump():
-   fp = open('Makefile', 'w')
-   fp.write('# This is a QUACreduce job, generated %s.\n\n'
-            % (time_.nowstr_human()))
-   # everything
-   fp.write('all: %s\n' % (' '.join('tmp/%d.reduced' % (i)
-                                    for i in xrange(args.partitions))))
-   # cleanup
-   fp.write('''
-.PHONY: clean reallyclean
-clean:
-	rm -Rf tmp/*
-reallyclean: clean
-	rm -Rf out/*
-''')
-   # mappers
-   for filename in args.inputs:
-      fp.write('''
-%(mapdone)s: %(input)s
-	%(map_cmd)s < %(input)s | hashsplit %(nparts)d tmp/%(ibase)s
-	touch %(mapdone)s
-''' % { 'ibase': os.path.basename(filename),
-        'input': filename,
-        'map_cmd': args.map,
-        'mapdone': 'tmp/%s.mapped' % (os.path.basename(filename)),
-        'nparts': args.partitions })
-   # reducers
-   for rid in xrange(args.partitions):
-      input_bases = [os.path.basename(i) for i in args.inputs]
-      cmd = args.reduce.replace('%(RID)', str(rid))
-      fp.write('''
-%(reducedone)s: %(mapdones)s
-	sort -s -k1 -t'	' -S %(buf)s -T %(sortdir)s %(mapouts)s | %(cmd)s
-	touch %(reducedone)s
-''' % { 'buf': args.sortmem,
-        'cmd': cmd,
-        'mapdones': ' '.join('tmp/%s.mapped' % (i) for i in input_bases),
-        'mapouts': ' '.join('tmp/%s.%d' % (i, rid) for i in input_bases),
-        'rid': rid,
-        'reducedone': 'tmp/%d.reduced' % (rid),
-        'sortdir': args.sortdir })
-   fp.close()
-
-def pythonify():
-   'Adjust args.map and args.reduce to call the appropriate Python methods.'
-   assert (args.python)
-   module = args.python.rpartition('.')[0]
-   class_ = args.python
-   args.map = "python -c 'import %(module)s; %(class_)s.map_stdinout()'" % locals()
-   args.reduce = "python -c 'import %(module)s; %(class_)s.reduce_stdinout(%%(RID))'" % locals()
-
-def slurm_dump():
-   pass  # unimplemented, see issue #33
-
-
-### Bootstrap ###
+ap = qr.scripting.ArgumentParser(description=__doc__,
+                                 epilog=qr.scripting.help_epilogue)
 
 try:
 
-   args = u.parse_args(ap)
+   args = qr.scripting.parse_args(ap)
    u.configure(None)
-   u.logging_init('makrd')
+   u.logging_init('quacr')
 
-   # check arguments
-   if (len(set(os.path.basename(i) for i in args.inputs)) != len(args.inputs)):
-      ap.error('input file basenames must be unique')
-   if (not (args.python or args.map or args.reduce)):
-      ap.error('--python or --map and --reduce must be specified')
-   if (args.python and (args.map or args.reduce)):
-      ap.error('--python cannot be specified with --map and/or --reduce')
-   if (args.map and not args.reduce or args.reduce and not args.map):
-      ap.error('--map and --reduce must both be specified if one is')
-   if (os.path.exists(args.jobdir)):
-      ap.error('job dir "%s" already exists' % (args.jobdir))
-
-   # absolutize input files
-   args.inputs = [os.path.abspath(i) for i in args.inputs]
-
-   # set sortdir if unset
-   if (args.sortdir is None):
-      args.sortdir = 'tmp'
-
-   if (__name__ == '__main__'):
-      main()
+   qr.scripting.setup(args)
 
 except testable.Unittests_Only_Exception:
    testable.register('')

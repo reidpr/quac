@@ -13,6 +13,7 @@ Table of contents
    collecting
    pipeline
    map_reduce
+   timeseries
    config
    faq
    limitations

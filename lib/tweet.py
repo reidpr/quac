@@ -2,7 +2,9 @@
 #
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
-from datetime import datetime
+from __future__ import division
+
+from datetime import date, datetime
 import dateutil.parser
 import HTMLParser
 import json
@@ -29,6 +31,58 @@ class Unknown_Object_Error(ValueError):
       return 'unknown object parsed'
 
 
+def expected_count(date_, sample_rate):
+   '''Return the expected number of tweets on date with sample_rate. This very
+      gross number comes from piecewise linear fits in tweet-volume.xls. (You
+      should be suspicious of it.) For example (these tests match the
+      spreadsheet):
+
+      >>> expected_count(date(2010,  1,  1), 0.01)
+      1234982.878...
+      >>> expected_count(date(2011,  1,  1), 0.01)
+      896212.305...
+      >>> expected_count(date(2012,  4,  1), 0.01)
+      2686752.038...
+      >>> expected_count(date(2013,  4,  1), 0.01)
+      4303487.866...
+      >>> expected_count(date(2009,  9, 23), 0.01)
+      Traceback (most recent call last):
+        ...
+      ValueError: extrapolating to 2009-09-23 is too scary
+      >>> expected_count(date(2009,  9, 24), 0.01)
+      Traceback (most recent call last):
+        ...
+      ValueError: extrapolating to 2009-09-24 is too scary
+      >>> expected_count(date(2014,  1,  1), 0.01)
+      Traceback (most recent call last):
+        ...
+      ValueError: extrapolating to 2014-01-01 is too scary'''
+   # inclusive until date, slope, intercept
+   segments = [[date(2009,  9, 24), None,             None],
+               [date(2010,  7, 15), 5958.04409994402, -238153271.013031],
+               [date(2011,  9, 30), 3002.77308306347, -120848219.574606],
+               [date(2012, 12, 31), 6193.68213841385, -251254215.636034],
+               [date(2013, 12, 31), 1975.28122757559, -77404020.1121891]]
+   for s in segments:
+      if (date_ > s[0]):
+         # date_ is later than this segment; proceed to next
+         continue
+      if (s[1] is None):
+         # date_ is earlier than any segments we have; give up
+         break
+      # Note that we use an epoch one day earlier than the true epoch of the
+      # spreadsheet, as early Excel erroneously assumed 1900 was a leap year,
+      # and this bug has propagated to every later version and every Excel
+      # clone. #fail
+      return ((s[1] * (date_ - date(1899, 12, 30)).days + s[2])
+              * 100 * sample_rate)
+   # If you get this error, you could try updating tweet-volume.xls and the
+   # table above. Alternately, it is worth trying an entirely different
+   # approach, such as a rolling average (but keep in mind that simply running
+   # the code must not depend on a large database of tweets, and no extensive
+   # calculations should be done at import time).
+   raise ValueError("extrapolating to %s is too scary" % (date_))
+
 def from_json(text):
    if (re.search(r'^\s*$', text)):
       raise Nothing_To_Parse_Error()
@@ -43,6 +97,25 @@ def from_json(text):
       return Tweet.from_json(j)
    else:
       raise Unknown_Object_Error()
+
+def is_enough(date_, count, sample_rate=0.01):
+   '''Return True if count is "enough" tweets for date_, False otherwise. We
+      consider there to be enough tweets for useful calculation on a given day
+      if there are at least half the expected number. E.g.:
+
+      >>> is_enough(date(2010, 1, 1), 617491)
+      False
+      >>> is_enough(date(2010, 1, 1), 617492)
+      True
+
+      You can also specify a sampling rate:
+
+      >>> is_enough(date(2010, 1, 1), 61749, sample_rate=0.001)
+      False
+      >>> is_enough(date(2010, 1, 1), 61750, sample_rate=0.001)
+      True'''
+   # If you change the factor, you may want to also update tweet-volume.xls.
+   return (count >= expected_count(date_, sample_rate) * 0.5)
 
 def text_clean(t):
    '''We do three things to clean up text from the Twitter API:

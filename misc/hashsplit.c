@@ -79,16 +79,17 @@ void fatal(char * fmt, ...)
 }
 
 /* Bernstein's DJB2 hash algorithm (http://www.cse.yorku.ca/~oz/hash.html),
-   with the XOR variant since I'm not sure if using signed char matters. Note
-   that this implementation restores the multiplication for clarity, since
-   we're an I/O bound program on newer CPUs.
+   XOR variant. This implementation restores the multiplication for clarity,
+   since we're an I/O bound program on newer CPUs.
+
+   Note: This needs to match (exactly!) the DJB2 implementation in u.py.
 
    end is a pointer to the first character *not* to include in the hash, or
    NULL if all of str is to be included. */
 unsigned int hash (char * str, char * end)
 {
    unsigned int hash = 5381;
-   int c;
+   unsigned char c;
 
    while ((str != end) && (c = *str++))
       hash = hash * 33 ^ c;
@@ -131,11 +132,16 @@ void split(FILE ** out, int output_ct)
    char * line = NULL;
    size_t linebuf_sz = 0;
    ssize_t read_sz;
-   char * tab;
+   char * end;
 
    while ((read_sz = getline(&line, &linebuf_sz, stdin)) != -1) {
-      tab = strchr(line, '\t');  // returns NULL if no tab
-      fputs(line, out[hash(line, tab) % output_ct]);
+      /* Set end to the first tab if one exists, else the trailing newline. If
+         no newline is present, this will ignore the last byte of the key, but
+         that is out of spec. */
+      end = strchr(line, '\t');
+      if (end == NULL)
+         end = (line + read_sz - 1);
+      fputs(line, out[hash(line, end) % output_ct]);
    }
 
    if (!feof(stdin))

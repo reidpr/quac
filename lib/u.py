@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 '''
 Utility routines for the Twitter analysis package.
 
@@ -14,16 +16,17 @@ import codecs
 import collections
 import ConfigParser
 from datetime import datetime, timedelta
+import glob
 import gzip
 import functools
 import inspect
 import io
 import itertools
 import logging
-import numbers
 import os
 import os.path
 import cPickle as pickle
+from pprint import pformat
 import psutil
 import pytz
 import random
@@ -129,7 +132,7 @@ class ArgumentParser(argparse.ArgumentParser):
       super(ArgumentParser, self).__init__(**kw)
       self.default_group = self.add_argument_group('functionality')
 
-   def parse_args(self):
+   def parse_args(self, args):
       gr = self.add_argument_group('help, etc.')
       gr.add_argument(
          '-h', '--help',
@@ -148,7 +151,7 @@ class ArgumentParser(argparse.ArgumentParser):
          '--verbose',
          action='store_true',
          help='be more verbose with log output')
-      return super(ArgumentParser, self).parse_args()
+      return super(ArgumentParser, self).parse_args(args)
 
 
 class MyConfigParser(ConfigParser.SafeConfigParser):
@@ -259,6 +262,29 @@ def call_kw(f, *args, **kwargs):
                        for (k,v) in kwargs.iteritems()
                        if k in valid_kwargs } )
 
+def calling_module(frame_ct):
+   '''Return the module object frame_ct levels up in the stack. For example:
+
+      >>> calling_module(0)
+      <module '__main__' from '.../lib/u.py'>
+
+      Note that what is frame_ct levels up must be a module, not a function or
+      something else. For example:
+
+      >>> calling_module(-1)  # calling_module() itself
+      Traceback (most recent call last):
+        ...
+      ValueError: stack level -1 is not a module
+      >>> calling_module(1)   # somewhere in doctest
+      Traceback (most recent call last):
+        ...
+      ValueError: stack level 1 is not a module'''
+   calling_frame = inspect.stack()[frame_ct+1][0]
+   try:
+      return sys.modules[calling_frame.f_locals['__name__']]
+   except KeyError:
+      raise ValueError('stack level %d is not a module' % (frame_ct))
+
 def chunker(seq, p):
    '''Split sequence seq into p more or less equal sized sublists. If p <
       len(seq), then return len(seq) sublists of length 1. E.g.:
@@ -316,6 +342,48 @@ def copyupdate(template, updates):
    r.update(updates)
    return r
 
+def djb2(bytes_):
+   u'''Bernstein's DJB2 hash (http://www.cse.yorku.ca/~oz/hash.html), XOR
+       variant. This is the same algorithm as hashsplit.c, and the results
+       should match. E.g. (see also tests/hashsplit):
+
+       >>> djb2('b')
+       177607
+       >>> djb2('b') % 240
+       7
+       >>> djb2('nullvaluenotab') % 240
+       19
+       >>> djb2(u'私の名前は中野です') % 240
+       19
+
+       Notes:
+
+         * The algorithm works on a byte sequence. Therefore, this function
+           operates on str (byte string) and unicode (converted to bytes by
+           encoding in UTF-8)'
+
+         * This function is not designed to be fast.'''
+   if (isinstance(bytes_, unicode)):
+      bytes_ = bytes_.encode('utf8')
+   assert (isinstance(bytes_, str))
+   hash_ = 5381
+   for b in bytes_:
+      # mod operation simulates 32-bit unsigned int overflow
+      hash_ = ((hash_ * 33) % 2**32) ^ ord(b)
+   return hash_
+
+def glob_maxnumeric(dir_):
+   '''Given a directory that has zero or more files named only with digits,
+      return the largest integer in those filenames. If there are no such
+      filenames, return None.'''
+   names = glob.glob('%s/*' % (dir_))
+   r = re.compile(r'(^|/)([0-9]+)$')
+   try:
+      return max(int(m.group(2)) for m in (r.search(i) for i in names) if m)
+   except ValueError:
+      # no matches
+      return None
+
 def groupn(iter_, n):
    '''Generator which returns iterables containing n-size chunks of iterable
       iter_; the final chunk may have size less than n (but not 0). Patterned
@@ -342,13 +410,27 @@ def groupn(iter_, n):
          return
       yield chunk
 
-def is_power_2(i):
-   """Return True if i is a positive power of two, false otherwise. This
-      relies on a common bit-twiddling trick; see
-      http://stackoverflow.com/questions/600293/how-to-check-if-a-number-is-a-power-of-2
-      among many other sources."""
-   assert (isinstance(i, numbers.Integral))
-   return (i > 0) and ((i & (i - 1)) == 0)
+def intfloatpass(v):
+   '''Try to convert v to an int or float, in that order; if either succeeds,
+      return the result, else return v unchanged. For example:
+
+      >>> intfloatpass('1')
+      1
+      >>> intfloatpass('1.0')
+      1.0
+      >>> intfloatpass('1foo')
+      '1foo'
+      >>> intfloatpass({})
+      {}'''
+   try:
+      return int(v)
+   except ValueError:
+      try:
+         return float(v)
+      except ValueError:
+         return v
+   except TypeError:
+      return v
 
 def lock_acquire(name):
    '''Try to acquire the lock *name*. Only one process can have the lock at
@@ -367,18 +449,18 @@ def lock_release(name):
       processes and delete unrelated directories.) See also lock_acquire().'''
    os.rmdir(name + '.lock')
 
-def logging_init(tag, file_=None, stdout_force=False, level=None,
+def logging_init(tag, file_=None, stderr_force=False, level=None,
                  verbose_=False, truncate=False):
    '''Set up logging and return the logger object. The basic setup is that we
-      log to at least one two different files and stdout:
+      log to one of two different files and/or stderr:
 
       1. If file_ is given, log there. Otherwise, log to the file in config
          variable path.log. If both are given, abort with an error; if
          neither, don't log to a file.
 
-      2. If sys.stdout is a TTY or stdout is True, then log to standard out
-         regardless of file logging. Otherwise, log to standard out if there
-         is no file log.
+      2. If sys.stderr is a TTY or stderr_force is True, then log to standard
+         error regardless of file logging. Otherwise, log to standard error if
+         there is no file log.
 
       3. The default log level is INFO. If level is given, use that level
          regardless of the following. If global variable verbose is set
@@ -387,8 +469,6 @@ def logging_init(tag, file_=None, stdout_force=False, level=None,
 
       4. If truncate is given, then truncate the log file before using it.
          (Note this is only allowed for log_file_base.)
-
-      Warning: This setup makes it difficult to use scripts as pipes.
 
       This function can be called more than once. Last call wins. Note that
       truncations happens on each call!'''
@@ -439,13 +519,13 @@ def logging_init(tag, file_=None, stdout_force=False, level=None,
 
    # console logger
    #
-   # FIXME: We test that sys.stdout has isatty() because under Disco,
-   # sys.stdout is a MessageWriter object which does not have the method.
-   # Bug reported: https://github.com/discoproject/disco/issues/351
-   if (stdout_force
-       or (hasattr(sys.stdout, 'isatty') and sys.stdout.isatty())
+   # FIXME: We test that sys.stderr has isatty() because under Disco,
+   # sys.stderr is a MessageWriter object which does not have the method. Bug
+   # reported: https://github.com/discoproject/disco/issues/351
+   if (stderr_force
+       or (hasattr(sys.stderr, 'isatty') and sys.stderr.isatty())
        or file_ is None):
-      clog = logging.StreamHandler(sys.stdout)
+      clog = logging.StreamHandler(sys.stderr)
       clog.setLevel(level)
       clog.setFormatter(form)
       l.addHandler(clog)
@@ -510,15 +590,65 @@ def memory_use():
 def memory_use_log():
    l.debug('virtual memory in use: %s' % (fmt_bytes(memory_use())))
 
+def mkdir_f(path):
+   '''Ensure that directory path exists. That is, if path already exists and
+      is a directory, do nothing; otherwise, try to create directory path (and
+      raise appropriate OSError if that doesn't work.)'''
+   if (not os.path.isdir(path)):
+      os.mkdir(path)
+
+def module_dir(m=None):
+   """Return the directory containing the file defining module m. If m is None
+      (the default), return the directory containing the calling module. For
+      example:
+
+      >>> u_module = calling_module(0)
+      >>> module_dir(u_module)
+      '.../lib'
+      >>> module_dir()
+      '.../lib'"""
+   if (m is None):
+      m = calling_module(1)
+   return os.path.abspath(os.path.dirname(m.__file__))
+
 def path_configured(path):
    if (cpath is None):
       raise No_Configuration_Read()
    return abspath(path, cpath)
 
-def parse_args(ap):
+def partition_sentinel(iter_, sentinel):
+   '''Partition an iterable at the first occurrence of a sentinel; return two
+      lists containing each partition. The sentinel is not included in either.
+      For example:
+
+      >>> partition_sentinel([1,2,3,4], 2)
+      ([1], [3, 4])
+      >>> partition_sentinel([1,2,3,4], 'not_in_list')
+      ([1, 2, 3, 4], [])
+      >>> partition_sentinel([], 2)
+      ([], [])
+      >>> partition_sentinel([1,2,3,4], 4)
+      ([1, 2, 3], [])
+      >>> partition_sentinel([1,2,3,4], 1)
+      ([], [2, 3, 4])
+      >>> partition_sentinel(8675309, 2)
+      Traceback (most recent call last):
+        ...
+      TypeError: 'int' object is not iterable'''
+   a = list()
+   iter2 = iter(iter_)
+   for i in iter2:
+      if (i == sentinel):
+         break
+      a.append(i)
+   b = list(iter2)
+   return (a, b)
+
+
+def parse_args(ap, args=sys.argv[1:]):
    '''Parse command line arguments and set a few globals based on the result.
       Note that this function must be called before logging_init().'''
-   args = ap.parse_args()
+   args = ap.parse_args(args)
    try:
       multicore.init(args.cores)
    except AttributeError:
@@ -549,9 +679,20 @@ def pickle_dump(filename, obj):
 
 def pickle_load(filename):
    t = time.time()
-   if (not filename.endswith(PICKLE_SUFFIX)):
-      filename += PICKLE_SUFFIX
-   obj = pickle.load(gzip.open(filename))
+   if (os.path.exists(filename)):
+      # bare filename exists, try that
+      if (filename.endswith(PICKLE_SUFFIX)):
+         fp = gzip.open(filename)
+      else:
+         fp = io.open(filename, 'rb')
+   elif (os.path.exists(filename + PICKLE_SUFFIX)):
+      # filename plus suffix exists, try that
+      fp = gzip.open(filename + PICKLE_SUFFIX)
+   else:
+      # neither exists
+      raise IOError('neither %s nor %s exist'
+                    % (filename, filename + PICKLE_SUFFIX))
+   obj = pickle.load(fp)
    l.debug('unpickled %s in %s' % (filename, fmt_seconds(time.time() - t)))
    return obj
 
@@ -590,8 +731,8 @@ def sl_union(len_, *slices):
    '''Given a sequence length and some slices, return the sequence of indexes
       which form the union of the given slices. For example:
 
-      >>> sorted(sl_union(10, slp('0'), slp('2:4'), slp('-2:')))
-      [0, 2, 3, 8, 9]
+      >>> pformat(sl_union(10, slp('0'), slp('2:4'), slp('-2:')))
+      'set([0, 2, 3, 8, 9])'
 
       Note that this function instantiates lists of length len_ (because
       xrange() iterators don't support slicing).'''
@@ -601,10 +742,10 @@ def sl_union(len_, *slices):
    return indexes
 
 def sl_union_fromtext(len_, slicetext):
-   '''e.g.:
+   """e.g.:
 
-      >>> sorted(sl_union_fromtext(10, '0,2:4,-2:'))
-      [0, 2, 3, 8, 9]'''
+      >>> pformat(sl_union_fromtext(10, '0,2:4,-2:'))
+      'set([0, 2, 3, 8, 9])'"""
    return sl_union(len_, *map(slp, slicetext.split(',')))
 
 def stdout_restore():
@@ -626,21 +767,77 @@ def stdout_silence():
    sys.stdout.flush()
    os.dup2(devnull.fileno(), 1)
 
+def str_to_dict(text):
+   '''Convert a whitespace- and colon- separated string to a dict, with values
+      as either ints, floats, or strs (whichever converts without exception
+      first. For example:
+
+      >>> pformat(str_to_dict('a:b c:1 d:1.0'))
+      "{'a': 'b', 'c': 1, 'd': 1.0}"
+      >>> pformat(str_to_dict('a:1 a:2'))
+      "{'a': 2}"
+      >>> pformat(str_to_dict(''))
+      '{}'
+      >>> pformat(str_to_dict(' '))
+      '{}'
+      >>> pformat(str_to_dict(None))
+      '{}'
+      >>> pformat(str_to_dict('a::b:c'))
+      "{'a': ':b:c'}"
+      >>> pformat(str_to_dict('a:1	\vb:1'))
+      "{'a': 1, 'b': 1}"'''
+   if (text is None):
+      return dict()
+   d = dict()
+   for kv in text.split():
+      (k, _, v) = kv.partition(':')
+      d[k] = intfloatpass(v)
+   return d
+
 def StringIO():
    '''Return an in-memory buffer that you can put unicode into and get encoded
       bytes out of (with the buffer attribute). It's much like io.StringIO,
       except that doesn't let you get the encoded bytes.'''
    return io.TextIOWrapper(io.BytesIO(), encoding='utf8')
 
-def utcnow():
-   'Return an "aware" datetime for right now in UTC.'
-   # http://stackoverflow.com/questions/4530069
-   return datetime.now(pytz.utc)
+def without_common_prefix(paths):
+   '''Return paths with common prefix removed. For example:
+
+      >>> without_common_prefix(['/a/b/c', '/a/b/doogiehauser'])
+      ['c', 'doogiehauser']
+
+      If paths has only one element, strip all directories:
+
+      >>> without_common_prefix(['/a/b'])
+      ['b']
+
+      If paths is empty, return the empty list:
+
+      >>> without_common_prefix([])
+      []
+
+      If one or more paths are equal to the common prefix, they will become
+      the empty string:
+
+      >>> without_common_prefix(['/a/b', '/a/b/c'])
+      ['', '/c']'''
+   if (len(paths) == 0):
+      return list()
+   elif (len(paths) == 1):
+      return [os.path.basename(paths[0])]
+   else:
+      strip_ct = 0
+      for cvec in zip(*paths):
+         if (len(set(cvec)) > 1):
+            break
+         strip_ct += 1
+      return [i[strip_ct:] for i in paths]
+
 
 def without_ext(filename, ext):
    """Return filename with extension ext (which may or may not begin with a
       dot, and which may contain multiple dots) stripped. Raise ValueError if
-      the the file doesn't have that extension. For example:
+      the file doesn't have that extension. For example:
 
       >>> without_ext('foo.tar.gz', '.tar.gz')
       'foo'
@@ -665,8 +862,8 @@ def zero_attrs(obj, attrs):
       ...   pass
       >>> a = A()
       >>> zero_attrs(a, ('a', 'b', 'c'))
-      >>> sorted(vars(a).items())
-      [('a', 0), ('b', 0), ('c', 0)]'''
+      >>> pformat(vars(a))
+      "{'a': 0, 'b': 0, 'c': 0}"'''
    for attr in attrs:
       setattr(obj, attr, 0)
 
@@ -751,19 +948,19 @@ TypeError: unhashable type: 'dict'
 >>> (a[slp('::-1')] == a[::-1]) and None
 
 # More unioned slices
->>> sorted(sl_union(10))  # no slices
-[]
->>> sorted(sl_union(0, slp('1')))  # empty list
-[]
->>> sorted(sl_union(10, slp('1:4')))  # one slice
-[1, 2, 3]
->>> sorted(sl_union(10, slp('1:4'), slp('3')))  # overlapping slices
-[1, 2, 3]
->>> sorted(sl_union(10, slp('10')))  # fully out of bounds
-[]
->>> sorted(sl_union(10, slp('9:11')))  # partly out of bounds
-[9]
->>> sorted(sl_union(10, slp('9'), slp('10')))  # one in, one out
-[9]
+>>> pformat(sl_union(10))  # no slices
+'set()'
+>>> pformat(sl_union(0, slp('1')))  # empty list
+'set()'
+>>> pformat(sl_union(10, slp('1:4')))  # one slice
+'set([1, 2, 3])'
+>>> pformat(sl_union(10, slp('1:4'), slp('3')))  # overlapping slices
+'set([1, 2, 3])'
+>>> pformat(sl_union(10, slp('10')))  # fully out of bounds
+'set()'
+>>> pformat(sl_union(10, slp('9:11')))  # partly out of bounds
+'set([9])'
+>>> pformat(sl_union(10, slp('9'), slp('10')))  # one in, one out
+'set([9])'
 
 ''')

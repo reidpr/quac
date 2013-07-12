@@ -1,0 +1,87 @@
+#!/usr/bin/env python
+
+'''
+Transform .all.tsv tweet files in a directory into a set of files containing
+pickled n-gram time series with 1-day granularity.'''
+
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+import glob
+import os
+import subprocess as sp
+
+import numpy as np
+
+import quacpath
+import qr.base
+import qr.scripting
+import math_
+import u
+l = u.l
+
+
+help_epilogue = '''
+Note that FILE must be the *directory* containing preprocessed tweets. Output
+is in JOBDIR/out/.
+''' + qr.scripting.help_epilogue
+
+
+ap = qr.scripting.ArgumentParser(description=__doc__, epilog=help_epilogue)
+gr = ap.add_argument_group('n-gram stuff')
+gr.add_argument('-n',
+                type=int,
+                metavar='N',
+                default=2,
+                help='n-gram size (default 2)')
+gr.add_argument('--min-occur',
+                type=int,
+                metavar='N',
+                default=10,
+                help='drop n-grams rarer than this (default 10 occurrences)')
+gr.add_argument('--run',
+                type=int,
+                help='run make with -j N after job setup')
+gr.add_argument('--clean',
+                action='store_true',
+                help='run "make clean" after job completion')
+
+args = qr.scripting.parse_args(ap)
+u.configure(None)
+u.logging_init('ngbld')
+
+if (len(args.inputs) != 1):
+   ap.error('too many inputs')
+
+try:
+
+   l.info('starting')
+
+   l.info('loading metadata and setting up job')
+   args.python = 'qr.ngramtime.Tweet_Job' # kind of a hack?
+   args.pyargs = qr.base.encode({ 'n': args.n,
+                                  'min_occur': args.min_occur })
+   metadata = u.pickle_load('%s/metadata' % (args.inputs[0]))
+   args.inputs = glob.glob('%s/*.all.tsv' % (args.inputs[0]))
+   qr.scripting.setup(args)
+
+   l.info('writing totals')
+   cts = [v['count'] for (k, v) in sorted(metadata['days'].iteritems())]
+   cts = math_.Date_Vector(min(metadata['days'].iterkeys()),
+                           np.array(cts, dtype=np.float32))
+   total = { 'ngram':      None,
+             'total':      sum(cts),
+             'series':     cts }
+   u.pickle_dump('%s/out/total' % (args.jobdir), total)
+
+   if (args.run is not None):
+      l.info('running job')
+      qr.scripting.run(args, args.run)
+      if (args.clean):
+         l.info('cleaning up job')
+         qr.scripting.clean(args)
+
+   l.info('done')
+
+except sp.CalledProcessError, x:
+   u.abort('subprocess failed with return code %d' % (x.returncode))
+

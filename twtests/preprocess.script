@@ -1,0 +1,24 @@
+#!/bin/bash
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+# Make sure the Twitter preprocessing works.
+
+. ./environment.sh
+
+cd $DATADIR
+exec 2>&1
+
+parsesh=$TWEETDIR/../../misc/parse.sh
+
+mkdir raw pre geo raw/foo
+ln -s $TWEETDIR/raw/small/small.json.gz raw/foo
+touch raw/foo/small.stats
+touch -d19700101 raw/foo/small.json.d  # suppress "No such file or directory"
+
+# output is variable, so ignore it
+$parsesh 1 . > /dev/null 2>&1
+
+x ls -R .
+
+y 'wc -l pre/*.tsv'
+y 'md5sum pre/*.tsv pre/metadata'

@@ -1,0 +1,91 @@
+$ ls -R .
+.:
+geo
+pre
+raw
+
+./geo:
+
+./pre:
+2012-10-28.all.tsv
+2012-10-28.geo.tsv
+2012-10-29.all.tsv
+2012-10-29.geo.tsv
+2012-10-30.all.tsv
+2012-10-30.geo.tsv
+2012-10-31.all.tsv
+2012-10-31.geo.tsv
+2012-11-01.all.tsv
+2012-11-01.geo.tsv
+2012-11-02.all.tsv
+2012-11-02.geo.tsv
+2012-11-03.all.tsv
+2012-11-03.geo.tsv
+2012-11-04.all.tsv
+2012-11-04.geo.tsv
+2012-11-05.all.tsv
+2012-11-05.geo.tsv
+gaps.gp.pdf
+geotag_rate.gp.pdf
+metadata
+summary.tsv
+tweet_ct.gp.pdf
+
+./raw:
+foo
+
+./raw/foo:
+small.2012-10-28.raw.tsv
+small.2012-10-29.raw.tsv
+small.2012-10-30.raw.tsv
+small.2012-10-31.raw.tsv
+small.2012-11-01.raw.tsv
+small.2012-11-02.raw.tsv
+small.2012-11-03.raw.tsv
+small.2012-11-04.raw.tsv
+small.2012-11-05.raw.tsv
+small.json.d
+small.json.gz
+small.stats
+$ (wc -l pre/*.tsv)
+   102 pre/2012-10-28.all.tsv
+    89 pre/2012-10-28.geo.tsv
+   158 pre/2012-10-29.all.tsv
+   134 pre/2012-10-29.geo.tsv
+   157 pre/2012-10-30.all.tsv
+   135 pre/2012-10-30.geo.tsv
+   119 pre/2012-10-31.all.tsv
+   108 pre/2012-10-31.geo.tsv
+   144 pre/2012-11-01.all.tsv
+   135 pre/2012-11-01.geo.tsv
+   128 pre/2012-11-02.all.tsv
+   114 pre/2012-11-02.geo.tsv
+   142 pre/2012-11-03.all.tsv
+   123 pre/2012-11-03.geo.tsv
+   145 pre/2012-11-04.all.tsv
+   120 pre/2012-11-04.geo.tsv
+    70 pre/2012-11-05.all.tsv
+    59 pre/2012-11-05.geo.tsv
+     9 pre/summary.tsv
+  2191 total
+$ (md5sum pre/*.tsv pre/metadata)
+3312dd29baf26a26b3ea3179fc4061e9  pre/2012-10-28.all.tsv
+a501143092df4f5a336b033536afa80d  pre/2012-10-28.geo.tsv
+ddbc477e4fee73b54bb5a2ed381a69af  pre/2012-10-29.all.tsv
+3c2eb0f3519a804bd9083037b152b67d  pre/2012-10-29.geo.tsv
+3e7d8c61658fa8e034ffe7e7b03cddf8  pre/2012-10-30.all.tsv
+6fbdbf3f308478413b0ef750a7e58fe4  pre/2012-10-30.geo.tsv
+4c1079e41e12fa0aaa5af0ef80110dcc  pre/2012-10-31.all.tsv
+026e711b5da13bef904a8045ba1853ff  pre/2012-10-31.geo.tsv
+4ad9a548eb489fefa2878a4263a78a36  pre/2012-11-01.all.tsv
+1e538e2d70eb5f9dd3b296def31c71c5  pre/2012-11-01.geo.tsv
+cc798427f480947e73a8cbb32e2d848f  pre/2012-11-02.all.tsv
+3e02474b6957eaf4ec058ffb593f4b41  pre/2012-11-02.geo.tsv
+546a7c5c3da7b7bf60af50590cda3935  pre/2012-11-03.all.tsv
+2193eee8a20eea87f4e09d0328b7c6ed  pre/2012-11-03.geo.tsv
+40aeea0f090259cc9e5bd146afeaddc1  pre/2012-11-04.all.tsv
+fa19db1a388588d5015db6e4f3376145  pre/2012-11-04.geo.tsv
+f039b45a9778f987ca9906bcec6233b0  pre/2012-11-05.all.tsv
+ca908e5f6ab22fa1cd17a7b51e45e231  pre/2012-11-05.geo.tsv
+ef397f1b339718a8c323bf13757cb5f8  pre/summary.tsv
+f26634b97649aed415c45a313f398af8  pre/metadata

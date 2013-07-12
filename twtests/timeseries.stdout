@@ -1,0 +1,136 @@
+$ ngrams-build ...
+ngbld INFO     starting
+ngbld INFO     loading metadata and setting up job
+ngbld INFO     writing totals
+ngbld INFO     running job
+ngbld INFO     cleaning up job
+ngbld INFO     done
+$ ls -R series
+series:
+Makefile
+out
+tmp
+
+series/out:
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+total.pkl.gz
+
+series/tmp:
+$ (ngrams-search --notimes --query candy /nonexistent || true)
+ngsch FATAL    no input files in /nonexistent
+$ ngrams-search --query candy series/out
+candy	32	2012-10-28	2012-11-04
+$ ngrams-search --detail --query candy series/out
+2012-10-28	2	2302	868.81
+2012-10-29	2	3086	648.088
+2012-10-30	1	3055	327.332
+2012-10-31	9	2950	3050.85
+2012-11-01	10	2887	3463.8
+2012-11-02	2	3078	649.773
+2012-11-03	4	3014	1327.14
+2012-11-04	2	3209	623.247
+2012-11-05	0	1185	0.0
+$ ngrams-search --query sandy series/out
+sandy	119	2012-10-28	2012-11-04
+$ ngrams-search --detail --query sandy series/out
+2012-10-28	8	2302	3475.24
+2012-10-29	45	3086	14582.0
+2012-10-30	42	3055	13748.0
+2012-10-31	8	2950	2711.86
+2012-11-01	4	2887	1385.52
+2012-11-02	5	3078	1624.43
+2012-11-03	4	3014	1327.14
+2012-11-04	3	3209	934.871
+2012-11-05	0	1185	0.0
+$ ngrams-search --query a series/out
+a	3222	2012-10-28	2012-11-05
+$ ngrams-search --detail --query taco series/out
+2012-10-28	0	2302	0.0
+2012-10-29	2	3086	648.088
+2012-10-30	9	3055	2945.99
+2012-10-31	3	2950	1016.95
+2012-11-01	0	2887	0.0
+2012-11-02	1	3078	324.886
+2012-11-03	1	3014	331.785
+2012-11-04	0	3209	0.0
+2012-11-05	0	1185	0.0
+$ (ngrams-correlate --notimes /nonexistent halloween.xls || true)
+usage: ngrams-correlate [--min-similarity X] [--min-ppm X] [--sample-rate X]
+                        [--run RUN] [--clean] [--map CMD] [--reduce CMD]
+                        [--python CLASS] [--pyargs DICT] [--jobdir DIR]
+                        [--partitions N] [--sortdir DIR] [--sortmem N]
+                        [--update] [-h] [--notimes] [--unittest] [--verbose]
+                        FILE [FILE ...]
+ngrams-correlate: error: /nonexistent is not a directory
+$ (ngrams-correlate --notimes /bin/sh halloween.xls || true)
+usage: ngrams-correlate [--min-similarity X] [--min-ppm X] [--sample-rate X]
+                        [--run RUN] [--clean] [--map CMD] [--reduce CMD]
+                        [--python CLASS] [--pyargs DICT] [--jobdir DIR]
+                        [--partitions N] [--sortdir DIR] [--sortmem N]
+                        [--update] [-h] [--notimes] [--unittest] [--verbose]
+                        FILE [FILE ...]
+ngrams-correlate: error: /bin/sh is not a directory
+$ (ngrams-correlate --notimes /bin /etc || true)
+usage: ngrams-correlate [--min-similarity X] [--min-ppm X] [--sample-rate X]
+                        [--run RUN] [--clean] [--map CMD] [--reduce CMD]
+                        [--python CLASS] [--pyargs DICT] [--jobdir DIR]
+                        [--partitions N] [--sortdir DIR] [--sortmem N]
+                        [--update] [-h] [--notimes] [--unittest] [--verbose]
+                        FILE [FILE ...]
+ngrams-correlate: error: /etc is not a file
+$ (ngrams-correlate --notimes series /nonexistent.xls || true)
+usage: ngrams-correlate [--min-similarity X] [--min-ppm X] [--sample-rate X]
+                        [--run RUN] [--clean] [--map CMD] [--reduce CMD]
+                        [--python CLASS] [--pyargs DICT] [--jobdir DIR]
+                        [--partitions N] [--sortdir DIR] [--sortmem N]
+                        [--update] [-h] [--notimes] [--unittest] [--verbose]
+                        FILE [FILE ...]
+ngrams-correlate: error: /nonexistent.xls is not a file
+$ ngrams-correlate ...
+ngcor INFO     starting
+ngcor INFO     setting up job
+ngcor INFO     running job
+ngcor INFO     cleaning up job
+ngcor INFO     done
+$ ls -R corr
+corr:
+Makefile
+out
+tmp
+
+corr/out:
+halloween:halloween.tsv
+halloween:s%40ndy.tsv
+
+corr/tmp:
+$ head -10 corr/out/halloween:halloween.tsv
+happyhalloween	0.998131075392	2078.28	0.0
+happy halloween	0.996925606519	10847.5	0.0
+trick or	0.995727657015	3728.81	0.0
+thingsaboutme	0.993012003619	4067.8	0.0
+trick	0.990344975957	3728.81	0.0
+nba	0.9881173924	4582.65	0.0
+or treating	0.9881173924	2372.88	0.0
+treating	0.986329162782	2372.88	0.0
+halloween	0.984747458302	28135.6	623.247
+happy	0.983947838105	15593.2	5063.29
+$ head -10 corr/out/halloween:s%40ndy.tsv
+super	0.99810059828	3600.65	1558.12
+sandy	0.99518702064	14582.0	934.871
+hurricane	0.993076652371	8425.15	0.0
+bonito	0.987933152078	2531.65	0.0
+car	0.985450405022	2945.99	1303.21
+storm	0.982598080446	2172.02	311.624
+nba nba	0.980498061745	3273.32	0.0
+nationaltextyourexday	0.980498001965	2291.33	0.0
+day	0.980068437556	13748.0	7962.84
+us	0.978356546112	6804.93	2531.65

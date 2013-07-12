@@ -7,26 +7,25 @@ Introduction
 ============
 
 `Map-reduce <http://en.wikipedia.org/wiki/MapReduce>`_ is a neat and easy to
-use parallel programming paradigm. [1]_ However, its implementations have some
-issues:
+use parallel programming paradigm. [1]_ QUACreduce is a simple map-reduce
+framework designed for situations where a unified, fast POSIX filesystem is
+available (e.g., HPC clusters with `Panasas
+<http://www.panasas.com/products/panfs>`_). It has the following features:
 
-- Industrial strength map-reduce frameworks (e.g., `Hadoop
-  <http://en.wikipedia.org/wiki/Apache_Hadoop>`_, `Disco
-  <http://discoproject.org/>`_) are difficult to install and use.
+* Easy to install and use. No daemons or persistent workers are required, nor
+  any firewall changes, nor root access.
 
-- Frameworks tend to assume node-local storage. However, traditional HPC
-  clusters tend to have a fast parallel filesystem like `Panasas
-  <http://www.panasas.com/products/panfs>`_; node-local storage, if present,
-  typically does not persist between jobs. [2]_
+* Takes advantage of node-local storage, if available, which need not persist
+  between jobs. [2]_
 
-- Map-reduce jobs cannot be run incrementally; if new input data are added,
-  the entire job must be re-run.
+* Map-reduce jobs can be run incrementally; if new input data are added, only
+  computations which actually depend on the new data are redone.
 
-QUACreduce is a simple wrapper included with QUAC that solves these
-problems: it is designed for a fast filesystem shared by all nodes and can
-take advantage of nonpersistent node-local storage. It runs on top of ``make``
-for incremental processing and works on both a single node as well as in a
-SLURM allocation.
+* Data API is compatible with Hadoop Streaming.
+
+QUACreduce runs on top of ``make`` for incremental processing and works on
+both a single node as well as in a SLURM allocation.
+
 
 Summary of API
 ==============
@@ -35,7 +34,8 @@ The basic paradigm is that map and reduce operators produce and accept
 line-oriented input, with key and value separated by a single tab character.
 [3]_ All characters except tab, return, and newline are permitted in keys and
 values (though this is untested). Null values are permitted; in this case the
-separating tab may or may be omitted. [4]_
+separating tab may or may be omitted. [4]_ The last line of the stream must
+end in a newline.
 
 The ``quacreduce`` command implements this API by creating a makefile, which
 you then run with ``make`` (either directly or wrapped).
@@ -289,9 +289,10 @@ Footnotes
 .. [1] I know that it's usually spelled MapReduce, but I think InterCapping is
        stupid.
 
-.. [2] This is because (a) it's difficult to ensure that a new job is assigned
-       exactly the same set of nodes as a previous job and/or (b) node-local
-       storage is explicitly wiped between jobs.
+.. [2] Use of node-local storage in HPC clusters for distributed filesystems
+       like HDFS tends to be infeasible because (a) it's difficult to ensure
+       that a new job is assigned exactly the same set of nodes as a previous
+       job and/or (b) node-local storage is explicitly wiped between jobs.
 
 .. [3] This is the same as Hadoop Streaming; the goal is to make QUACreduce
        components with non-null values work without modification in that
