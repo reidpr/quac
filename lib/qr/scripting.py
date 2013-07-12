@@ -21,10 +21,14 @@ Notes:
   * --python is mutually exclusive with --map and --reduce (which must both be
     specified if one is).
 
-  * --pyargs is a dictionary of parameters to pass to the Python job.
-    Key/value pairs are colon-separated, and pairs are space-separated. Values
-    are converted to ints or floats if possible (in that order); otherwise,
-    they are left as strings. E.g.: "--pyargs 'foo:bar baz:1 qux:1.0'".
+  * --pyargs is parameter(s) to pass to the Python job. It can be either:
+
+    * A string representing a dictionary, with a space-separated list of
+      colon-separated key/value pairs. Values are converted to ints or floats
+      if possible (in that order); otherwise, they are left as strings. E.g.:
+      "--pyargs 'foo:bar baz:1 qux:1.0'".
+
+    * A Python object serialized with :func:`qr.base.encode()`.
 
   * --sortdir probably should not, if possible, be on the shared filesystem;
     the point is to leverage node-local storage for sorting during the
@@ -103,7 +107,7 @@ class ArgumentParser(u.ArgumentParser):
                       help='Python class containing map-reduce implementation')
       gr.add_argument('--pyargs',
                       metavar='DICT',
-                      help='Dictionary of parameters for Python job')
+                      help='Parameters for Python job')
       gr = self.add_argument_group('job logistics')
       gr.add_argument('inputs',
                       metavar='FILE',
@@ -192,6 +196,8 @@ def pythonify(args):
    assert (args.python)
    module = args.python.rpartition('.')[0]
    class_ = args.python
+   # Note: args.pyargs might not really be a string representation of a
+   # dictionary. See base.Job.__init__() for more on how this hack works.
    params = repr(u.str_to_dict(args.pyargs))
    base = "python -c \"import %(module)s; j = %(class_)s(%(params)s); " % locals()
    args.map = base + "j.map_stdinout()\""

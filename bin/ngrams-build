@@ -57,9 +57,9 @@ try:
    l.info('starting')
 
    l.info('loading metadata and setting up job')
-   # FIXME: these are lame hacks
-   args.python = 'qr.ngramtime.Tweet_Job'
-   args.pyargs = 'n:%d min_occur:%d' % (args.n, args.min_occur)
+   args.python = 'qr.ngramtime.Tweet_Job' # kind of a hack?
+   args.pyargs = qr.base.encode({ 'n': args.n,
+                                  'min_occur': args.min_occur })
    metadata = u.pickle_load('%s/metadata' % (args.inputs[0]))
    args.inputs = glob.glob('%s/*.all.tsv' % (args.inputs[0]))
    qr.scripting.setup(args)
