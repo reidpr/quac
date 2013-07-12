@@ -803,7 +803,7 @@ def StringIO():
 def without_ext(filename, ext):
    """Return filename with extension ext (which may or may not begin with a
       dot, and which may contain multiple dots) stripped. Raise ValueError if
-      the the file doesn't have that extension. For example:
+      the file doesn't have that extension. For example:
 
       >>> without_ext('foo.tar.gz', '.tar.gz')
       'foo'
