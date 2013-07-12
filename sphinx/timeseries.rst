@@ -32,15 +32,14 @@ the source code should not be considered a definitive specification.
   value of these cells are important; that is, you must use *both* the
   specified names as well as the specified column numbers.
 
-* Columns A (*date*) and B (the value column, named anything that doesn't
-  clash) contain the time series of interest.
+* Columns A (*date*) and following columns, until the header is blank, contain
+  the time series of interest.
 
   * The *date* column is a monotonically increasing list of dates. They do not
     have to be any regular interval.
 
-    * If the sequence has gaps, the value for a given date
-
-  * The value column is floating-point value corresponding to the given date.
+  * The value columns are floating-point value corresponding to the given
+    date. The can have any header names other than as otherwise specified.
 
     * Leave a cell blank to indicate no data for that date.
 
@@ -56,13 +55,12 @@ the source code should not be considered a definitive specification.
       interval. For example, if your dates are week starts, you'll need to add
       a dummy week to finish the sequence.
 
-* Columns D, E, and F are events. If an end date is omitted, it is assumed to
-  be the same as the start date. These columns are currently ignored.
+* The next three columns (*start*, *end*, *event*) are events. If an end date
+  is omitted, it is assumed to be the same as the start date. These columns
+  are currently ignored.
 
-* Columns H (*property*) and I (*pvalue*) are a set of key/value property
-  pairs. Properties other than the following are ignored.
-
-  * *incubation days*
+* The next two columns, after another gap (*property* and *value*), are a set
+  of key/value property pairs. These are also currently ignored.
 
 * Other columns, charts, and sheets beyond Sheet 1 are ignored.
 

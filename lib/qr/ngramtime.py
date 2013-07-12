@@ -48,10 +48,12 @@ class Correlate_Job(base.KV_Pickle_Seq_Input_Job, base.TSV_Output_Job):
       short_names = u.without_common_prefix(self.params['input_sss'])
       for (sn, ln) in zip(short_names, self.params['input_sss']):
          e = ssheet.Excel(file_=ln)
-         name = urllib.quote_plus(u.without_ext(sn, '.xls'))
-         self.targets.append({ 'name': name,
-                               'data': e.data,
-                               'mask': e.mask })
+         for (name, (data, mask)) in e.data.iteritems():
+            name = '%s:%s' % (urllib.quote_plus(u.without_ext(sn, '.xls')),
+                              urllib.quote_plus(name))
+            self.targets.append({ 'name': name,
+                                  'data': data,
+                                  'mask': mask })
 
    def map(self, kv):
       (_, ngram) = kv

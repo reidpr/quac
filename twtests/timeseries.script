@@ -31,6 +31,10 @@ y 'ngrams-search --notimes --query candy /nonexistent || true'
 x ngrams-search --query candy series/out
 x ngrams-search --detail --query candy series/out
 
+# "sandy" is the hurricane.
+x ngrams-search --query sandy series/out
+x ngrams-search --detail --query sandy series/out
+
 # We include "a" because it's an n-gram that had trouble being sorted (see
 # commit 885d3d)
 x ngrams-search --query a series/out
@@ -62,4 +66,5 @@ ngrams-correlate --notimes --min-similarity 0.7 --min-ppm 2000 --sample-rate 3.7
 
 # Results
 x ls -R corr
-x head -10 corr/out/halloween.tsv
+x head -10 corr/out/halloween:halloween.tsv
+x head -10 corr/out/halloween:s%40ndy.tsv
