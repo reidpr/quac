@@ -6,6 +6,7 @@
 . ./environment.sh
 
 cd $DATADIR
+exec 2>&1
 
 parsesh=$TWEETDIR/../../misc/parse.sh
 
@@ -14,8 +15,8 @@ ln -s $TWEETDIR/raw/small/small.json.gz raw/foo
 touch raw/foo/small.stats
 touch -d19700101 raw/foo/small.json.d  # suppress "No such file or directory"
 
-# standard output is variable, so ignore it
-$parsesh 1 . > /dev/null
+# output is variable, so ignore it
+$parsesh 1 . > /dev/null 2>&1
 
 x ls -R .
 

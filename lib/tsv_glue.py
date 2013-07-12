@@ -54,17 +54,17 @@ class Writer(object):
 
    __slots__ = ('filename', 'fp')
 
-   def __init__(self, filename=None, fp=None, buffering=-1, clobber=False):
-      '''Open a TSV file for writing and return the writer object, creating a
-         new file if one does not already exist. If clobber is True, overwrite
-         any existing contents, if False (the default), append.'''
-      self.filename = filename
+   def __init__(self, file_, fp=None, buffering=-1, clobber=False):
+      '''Open a TSV file for writing and return the writer object. file_ can
+         be either an open integer file descriptor or a filename. In the
+         latter case, create a new file if one does not already exist. If
+         clobber is True, overwrite any existing contents, if False (the
+         default), append.'''
+      if (isinstance(file_, basestring)):
+         self.filename = file_
       mode = 'wt' if clobber else 'at'
-      if (fp is not None):
-         self.fp = fp
-      else:
-         self.fp = io.open(self.filename, mode=mode, buffering=buffering,
-                           encoding='utf8')
+      self.fp = io.open(file_, mode=mode, buffering=buffering,
+                        encoding='utf8')
 
    def close(self):
       self.fp.close()
@@ -97,7 +97,7 @@ class Dict(collections.defaultdict):
 
    def __missing__(self, key):
       filename = self.filename_from_key(key)
-      self[key] = self.class_(filename=filename, buffering=self.buffering,
+      self[key] = self.class_(filename, buffering=self.buffering,
                               clobber=self.clobber)
       u.l.debug('lazy opened %s' % (filename))
       return self[key]

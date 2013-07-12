@@ -449,18 +449,18 @@ def lock_release(name):
       processes and delete unrelated directories.) See also lock_acquire().'''
    os.rmdir(name + '.lock')
 
-def logging_init(tag, file_=None, stdout_force=False, level=None,
+def logging_init(tag, file_=None, stderr_force=False, level=None,
                  verbose_=False, truncate=False):
    '''Set up logging and return the logger object. The basic setup is that we
-      log to at least one two different files and stdout:
+      log to one of two different files and/or stderr:
 
       1. If file_ is given, log there. Otherwise, log to the file in config
          variable path.log. If both are given, abort with an error; if
          neither, don't log to a file.
 
-      2. If sys.stdout is a TTY or stdout is True, then log to standard out
-         regardless of file logging. Otherwise, log to standard out if there
-         is no file log.
+      2. If sys.stderr is a TTY or stderr_force is True, then log to standard
+         error regardless of file logging. Otherwise, log to standard error if
+         there is no file log.
 
       3. The default log level is INFO. If level is given, use that level
          regardless of the following. If global variable verbose is set
@@ -469,8 +469,6 @@ def logging_init(tag, file_=None, stdout_force=False, level=None,
 
       4. If truncate is given, then truncate the log file before using it.
          (Note this is only allowed for log_file_base.)
-
-      Warning: This setup makes it difficult to use scripts as pipes.
 
       This function can be called more than once. Last call wins. Note that
       truncations happens on each call!'''
@@ -521,13 +519,13 @@ def logging_init(tag, file_=None, stdout_force=False, level=None,
 
    # console logger
    #
-   # FIXME: We test that sys.stdout has isatty() because under Disco,
-   # sys.stdout is a MessageWriter object which does not have the method.
-   # Bug reported: https://github.com/discoproject/disco/issues/351
-   if (stdout_force
-       or (hasattr(sys.stdout, 'isatty') and sys.stdout.isatty())
+   # FIXME: We test that sys.stderr has isatty() because under Disco,
+   # sys.stderr is a MessageWriter object which does not have the method. Bug
+   # reported: https://github.com/discoproject/disco/issues/351
+   if (stderr_force
+       or (hasattr(sys.stderr, 'isatty') and sys.stderr.isatty())
        or file_ is None):
-      clog = logging.StreamHandler(sys.stdout)
+      clog = logging.StreamHandler(sys.stderr)
       clog.setLevel(level)
       clog.setFormatter(form)
       l.addHandler(clog)
