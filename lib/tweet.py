@@ -31,28 +31,29 @@ class Unknown_Object_Error(ValueError):
       return 'unknown object parsed'
 
 
-def expected_count(date_):
-   '''Return the expected number of tweets on date. This very gross number
-      comes from piecewise linear fits in tweet-volume.xls. (You should be
-      suspicious of it.) For example (these tests match the spreadsheet):
+def expected_count(date_, sample_rate):
+   '''Return the expected number of tweets on date with sample_rate. This very
+      gross number comes from piecewise linear fits in tweet-volume.xls. (You
+      should be suspicious of it.) For example (these tests match the
+      spreadsheet):
 
-      >>> expected_count(date(2010,  1,  1))
+      >>> expected_count(date(2010,  1,  1), 0.01)
       1234982.878...
-      >>> expected_count(date(2011,  1,  1))
+      >>> expected_count(date(2011,  1,  1), 0.01)
       896212.305...
-      >>> expected_count(date(2012,  4,  1))
+      >>> expected_count(date(2012,  4,  1), 0.01)
       2686752.038...
-      >>> expected_count(date(2013,  4,  1))
+      >>> expected_count(date(2013,  4,  1), 0.01)
       4303487.866...
-      >>> expected_count(date(2009,  9, 23))
+      >>> expected_count(date(2009,  9, 23), 0.01)
       Traceback (most recent call last):
         ...
       ValueError: extrapolating to 2009-09-23 is too scary
-      >>> expected_count(date(2009,  9, 24))
+      >>> expected_count(date(2009,  9, 24), 0.01)
       Traceback (most recent call last):
         ...
       ValueError: extrapolating to 2009-09-24 is too scary
-      >>> expected_count(date(2014,  1,  1))
+      >>> expected_count(date(2014,  1,  1), 0.01)
       Traceback (most recent call last):
         ...
       ValueError: extrapolating to 2014-01-01 is too scary'''
@@ -73,7 +74,8 @@ def expected_count(date_):
       # spreadsheet, as early Excel erroneously assumed 1900 was a leap year,
       # and this bug has propagated to every later version and every Excel
       # clone. #fail
-      return s[1] * (date_ - date(1899, 12, 30)).days + s[2]
+      return ((s[1] * (date_ - date(1899, 12, 30)).days + s[2])
+              * 100 * sample_rate)
    # If you get this error, you could try updating tweet-volume.xls and the
    # table above. Alternately, it is worth trying an entirely different
    # approach, such as a rolling average (but keep in mind that simply running
@@ -96,7 +98,7 @@ def from_json(text):
    else:
       raise Unknown_Object_Error()
 
-def is_enough(date_, count):
+def is_enough(date_, count, sample_rate=0.01):
    '''Return True if count is "enough" tweets for date_, False otherwise. We
       consider there to be enough tweets for useful calculation on a given day
       if there are at least half the expected number. E.g.:
@@ -104,9 +106,16 @@ def is_enough(date_, count):
       >>> is_enough(date(2010, 1, 1), 617491)
       False
       >>> is_enough(date(2010, 1, 1), 617492)
+      True
+
+      You can also specify a sampling rate:
+
+      >>> is_enough(date(2010, 1, 1), 61749, sample_rate=0.001)
+      False
+      >>> is_enough(date(2010, 1, 1), 61750, sample_rate=0.001)
       True'''
    # If you change the factor, you may want to also update tweet-volume.xls.
-   return (count >= expected_count(date_) * 0.5)
+   return (count >= expected_count(date_, sample_rate) * 0.5)
 
 def text_clean(t):
    '''We do three things to clean up text from the Twitter API:
