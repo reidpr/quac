@@ -41,5 +41,8 @@ echo $?
 x quacreduce --python foo --map bar --reduce baz input.txt
 echo $?
 
-# exit with success
-exit 0
+echo '*** Check that job fails if the map or reduce commands fail'
+x quacreduce --notimes --map false --reduce true /dev/null
+y "make || true"
+x quacreduce --notimes --map true --reduce false /dev/null
+y "make || true"

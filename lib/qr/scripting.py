@@ -44,6 +44,10 @@ import time_
 import u
 l = u.l
 
+# This command returns false if the first command in the previous pipe failed.
+PIPEFAIL = 'if [ $${PIPESTATUS[0]} -ne 0 ]; then false; fi'
+
+
 
 ### Job phases ###
 
@@ -136,7 +140,11 @@ def directories_setup(args):
 
 def makefile_dump(args):
    fp = open('%s/Makefile' % (args.jobdir), 'w')
-   fp.write('# This is a QUACreduce job, generated %s.\n\n'
+   fp.write('''\
+# This is a QUACreduce job, generated %s.
+
+SHELL=/bin/bash\n
+'''
             % (time_.nowstr_human()))
    # everything
    fp.write('all: %s\n' % (' '.join('tmp/%d.reduced' % (i)
@@ -153,25 +161,27 @@ reallyclean: clean
    for filename in args.inputs:
       fp.write('''
 %(mapdone)s: %(input)s
-	%(map_cmd)s < %(input)s | hashsplit %(nparts)d tmp/%(ibase)s
+	%(map_cmd)s < %(input)s | hashsplit %(nparts)d tmp/%(ibase)s && %(pipefail)s
 	touch %(mapdone)s
 ''' % { 'ibase': os.path.basename(filename),
         'input': filename,
         'map_cmd': args.map,
         'mapdone': 'tmp/%s.mapped' % (os.path.basename(filename)),
-        'nparts': args.partitions })
+        'nparts': args.partitions,
+        'pipefail': PIPEFAIL })
    # reducers
    for rid in xrange(args.partitions):
       input_bases = [os.path.basename(i) for i in args.inputs]
       cmd = args.reduce.replace('%(RID)', str(rid))
       fp.write('''
 %(reducedone)s: %(mapdones)s
-	LC_ALL=C sort -s -k1,1 -t'	' -S %(buf)s -T %(sortdir)s %(mapouts)s | %(cmd)s
+	LC_ALL=C sort -s -k1,1 -t'	' -S %(buf)s -T %(sortdir)s %(mapouts)s | %(cmd)s && %(pipefail)s
 	touch %(reducedone)s
 ''' % { 'buf': args.sortmem,
         'cmd': cmd,
         'mapdones': ' '.join('tmp/%s.mapped' % (i) for i in input_bases),
         'mapouts': ' '.join('tmp/%s.%d' % (i, rid) for i in input_bases),
+        'pipefail': PIPEFAIL,
         'rid': rid,
         'reducedone': 'tmp/%d.reduced' % (rid),
         'sortdir': args.sortdir })
