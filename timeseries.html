@@ -1,0 +1,182 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>5. Time series analysis &mdash; QUAC documentation for commit c70f389</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="QUAC documentation for commit c70f389" href="index.html" />
+    <link rel="next" title="6. Configuration" href="config.html" />
+    <link rel="prev" title="4. Map-Reduce with QUACreduce" href="map_reduce.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="config.html" title="6. Configuration"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="map_reduce.html" title="4. Map-Reduce with QUACreduce"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">QUAC documentation for commit c70f389</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">5. Time series analysis</a><ul>
+<li><a class="reference internal" href="#input-file-format">5.1. Input file format</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="map_reduce.html"
+                        title="previous chapter">4. Map-Reduce with QUACreduce</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="config.html"
+                        title="next chapter">6. Configuration</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="time-series-analysis">
+<h1>5. Time series analysis<a class="headerlink" href="#time-series-analysis" title="Permalink to this headline">¶</a></h1>
+<p>QUAC can do some neat things with time series; see the scripts:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">ngrams-build</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">ngrams-search</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">ngrams-correlate</span></tt></li>
+</ul>
+<div class="section" id="input-file-format">
+<h2>5.1. Input file format<a class="headerlink" href="#input-file-format" title="Permalink to this headline">¶</a></h2>
+<p><tt class="docutils literal"><span class="pre">ngrams-correlate</span></tt> requires one or more time series as input. These are
+stored in Excel spreadsheets (yes, a proprietary format, but readily
+accessible). Only the <tt class="docutils literal"><span class="pre">.xls</span></tt> format (Excel 95 or 2000/XP/2003) is supported.
+<a class="footnote-reference" href="#id2" id="id1">[1]</a></p>
+<p>While the examples are framed in terms of disease outbreaks, any time series
+will work.</p>
+<p>The format of data within the spreadsheet is not rigorously specified, but
+below are some notes. Look at <tt class="docutils literal"><span class="pre">misc/halloween.xls</span></tt> for an example. Note that
+the source code should not be considered a definitive specification.</p>
+<ul>
+<li><p class="first">Filenames are significant, as they are used to report results. No spaces,
+tabs, or special characters should be included, to simplify interpretation
+of output.</p>
+</li>
+<li><p class="first">The first and second row of the sheet gives column headings. The order and
+value of these cells are important; that is, you must use <em>both</em> the
+specified names as well as the specified column numbers.</p>
+</li>
+<li><p class="first">Columns A (<em>date</em>) and following columns, until the header is blank, contain
+the time series of interest.</p>
+<ul>
+<li><p class="first">The <em>date</em> column is a monotonically increasing list of dates. They do not
+have to be any regular interval.</p>
+</li>
+<li><p class="first">The value columns are floating-point value corresponding to the given
+date. The can have any header names other than as otherwise specified.</p>
+<ul>
+<li><p class="first">Leave a cell blank to indicate no data for that date.</p>
+</li>
+<li><p class="first">If the date sequence has gaps, each date preceding a gap is assumed to
+begin an interval extending to (but not including) the next date in the
+list. The value for a given date is assumed to be the <em>total</em> value for
+all dates in the interval, and all dates in the interval are assumed to
+contribute equally. For example, if you specify (2012-10-28, 3) and
+(2012-10-30, 42), the sequence as interpreted is ((10-28, 1), (10-29,
+1), (10-30, 1), (10-30, 42)).</p>
+<p>Note that the last date in the sequence will not be extended into an
+interval. For example, if your dates are week starts, you&#8217;ll need to add
+a dummy week to finish the sequence.</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p class="first">The next three columns (<em>start</em>, <em>end</em>, <em>event</em>) are events. If an end date
+is omitted, it is assumed to be the same as the start date. These columns
+are currently ignored.</p>
+</li>
+<li><p class="first">The next two columns, after another gap (<em>property</em> and <em>value</em>), are a set
+of key/value property pairs. These are also currently ignored.</p>
+</li>
+<li><p class="first">Other columns, charts, and sheets beyond Sheet 1 are ignored.</p>
+</li>
+<li><p class="first">If the data represent a multi-wave disease outbreak, each time series file
+should include only one wave.</p>
+</li>
+</ul>
+<hr class="docutils" />
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>You may get lucky and have <tt class="docutils literal"><span class="pre">.xlsx</span></tt> work, but don&#8217;t count on it.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="config.html" title="6. Configuration"
+             >next</a></li>
+        <li class="right" >
+          <a href="map_reduce.html" title="4. Map-Reduce with QUACreduce"
+             >previous</a> |</li>
+        <li><a href="index.html">QUAC documentation for commit c70f389</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012-2013, Los Alamos National Security, LLC and others.
+    </div>
+  </body>
+</html>

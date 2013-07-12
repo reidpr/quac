@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>4. Map-Reduce with QUACreduce &mdash; QUAC documentation for commit a3b4b16</title>
+    <title>4. Map-Reduce with QUACreduce &mdash; QUAC documentation for commit c70f389</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,8 +26,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="QUAC documentation for commit a3b4b16" href="index.html" />
-    <link rel="next" title="5. Configuration" href="config.html" />
+    <link rel="top" title="QUAC documentation for commit c70f389" href="index.html" />
+    <link rel="next" title="5. Time series analysis" href="timeseries.html" />
     <link rel="prev" title="3. Preprocessing" href="pipeline.html" /> 
   </head>
   <body>
@@ -35,12 +35,12 @@
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
-          <a href="config.html" title="5. Configuration"
+          <a href="timeseries.html" title="5. Time series analysis"
              accesskey="N">next</a></li>
         <li class="right" >
           <a href="pipeline.html" title="3. Preprocessing"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit a3b4b16</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit c70f389</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -73,8 +73,8 @@
   <p class="topless"><a href="pipeline.html"
                         title="previous chapter">3. Preprocessing</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="config.html"
-                        title="next chapter">5. Configuration</a></p>
+  <p class="topless"><a href="timeseries.html"
+                        title="next chapter">5. Time series analysis</a></p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -101,21 +101,20 @@
 <div class="section" id="introduction">
 <h2>4.1. Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="http://en.wikipedia.org/wiki/MapReduce">Map-reduce</a> is a neat and easy to
-use parallel programming paradigm. <a class="footnote-reference" href="#id5" id="id1">[1]</a> However, its implementations have some
-issues:</p>
+use parallel programming paradigm. <a class="footnote-reference" href="#id5" id="id1">[1]</a> QUACreduce is a simple map-reduce
+framework designed for situations where a unified, fast POSIX filesystem is
+available (e.g., HPC clusters with <a class="reference external" href="http://www.panasas.com/products/panfs">Panasas</a>). It has the following features:</p>
 <ul class="simple">
-<li>Industrial strength map-reduce frameworks (e.g., <a class="reference external" href="http://en.wikipedia.org/wiki/Apache_Hadoop">Hadoop</a>, <a class="reference external" href="http://discoproject.org/">Disco</a>) are difficult to install and use.</li>
-<li>Frameworks tend to assume node-local storage. However, traditional HPC
-clusters tend to have a fast parallel filesystem like <a class="reference external" href="http://www.panasas.com/products/panfs">Panasas</a>; node-local storage, if present,
-typically does not persist between jobs. <a class="footnote-reference" href="#id6" id="id2">[2]</a></li>
-<li>Map-reduce jobs cannot be run incrementally; if new input data are added,
-the entire job must be re-run.</li>
+<li>Easy to install and use. No daemons or persistent workers are required, nor
+any firewall changes, nor root access.</li>
+<li>Takes advantage of node-local storage, if available, which need not persist
+between jobs. <a class="footnote-reference" href="#id6" id="id2">[2]</a></li>
+<li>Map-reduce jobs can be run incrementally; if new input data are added, only
+computations which actually depend on the new data are redone.</li>
+<li>Data API is compatible with Hadoop Streaming.</li>
 </ul>
-<p>QUACreduce is a simple wrapper included with QUAC that solves these
-problems: it is designed for a fast filesystem shared by all nodes and can
-take advantage of nonpersistent node-local storage. It runs on top of <tt class="docutils literal"><span class="pre">make</span></tt>
-for incremental processing and works on both a single node as well as in a
-SLURM allocation.</p>
+<p>QUACreduce runs on top of <tt class="docutils literal"><span class="pre">make</span></tt> for incremental processing and works on
+both a single node as well as in a SLURM allocation.</p>
 </div>
 <div class="section" id="summary-of-api">
 <h2>4.2. Summary of API<a class="headerlink" href="#summary-of-api" title="Permalink to this headline">¶</a></h2>
@@ -123,7 +122,8 @@ SLURM allocation.</p>
 line-oriented input, with key and value separated by a single tab character.
 <a class="footnote-reference" href="#id7" id="id3">[3]</a> All characters except tab, return, and newline are permitted in keys and
 values (though this is untested). Null values are permitted; in this case the
-separating tab may or may be omitted. <a class="footnote-reference" href="#id8" id="id4">[4]</a></p>
+separating tab may or may be omitted. <a class="footnote-reference" href="#id8" id="id4">[4]</a> The last line of the stream must
+end in a newline.</p>
 <p>The <tt class="docutils literal"><span class="pre">quacreduce</span></tt> command implements this API by creating a makefile, which
 you then run with <tt class="docutils literal"><span class="pre">make</span></tt> (either directly or wrapped).</p>
 <p>QUACreduce also has a Python API which we do not cover here.</p>
@@ -344,9 +344,10 @@ stupid.</td></tr>
 <table class="docutils footnote" frame="void" id="id6" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>This is because (a) it&#8217;s difficult to ensure that a new job is assigned
-exactly the same set of nodes as a previous job and/or (b) node-local
-storage is explicitly wiped between jobs.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Use of node-local storage in HPC clusters for distributed filesystems
+like HDFS tends to be infeasible because (a) it&#8217;s difficult to ensure
+that a new job is assigned exactly the same set of nodes as a previous
+job and/or (b) node-local storage is explicitly wiped between jobs.</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="id7" rules="none">
@@ -377,12 +378,12 @@ permitted but a null value isn&#8217;t.</td></tr>
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
-          <a href="config.html" title="5. Configuration"
+          <a href="timeseries.html" title="5. Time series analysis"
              >next</a></li>
         <li class="right" >
           <a href="pipeline.html" title="3. Preprocessing"
              >previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit a3b4b16</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit c70f389</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

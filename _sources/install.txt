@@ -29,6 +29,9 @@ Summary
 
    Note that a working Internet connection is required to run the tests.
 
+   Some (optional) tests require test data which is not included with QUAC.
+   See ``twtests/README`` for details.
+
 .. note:: If you plan to :doc:`contribute to QUAC <contributing>`, you
           should fork the repository on Github and clone that fork instead.
 
