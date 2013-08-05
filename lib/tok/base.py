@@ -9,6 +9,7 @@
 from abc import ABCMeta, abstractmethod
 import itertools
 import operator
+from pprint import pprint
 
 import testable
 
@@ -49,7 +50,7 @@ class Tzer(object):
          return a sequence of (key, token) pairs. For example:
 
          >>> t = Whitespace(1)
-         >>> sorted(t.tokenize_all({ 'a': 'b c', \
+         >>> pprint(t.tokenize_all({ 'a': 'b c', \
                                      'd': 'e f g!' }))
          [('a', 'b'), ('a', 'c'), ('d', 'e'), ('d', 'f'), ('d', 'g!')]'''
       result = []

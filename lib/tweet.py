@@ -8,6 +8,7 @@ from datetime import date, datetime
 import dateutil.parser
 import HTMLParser
 import json
+from pprint import pprint
 import re
 
 from django.contrib.gis import geos
@@ -342,10 +343,10 @@ class Tweet(object):
 
          >>> import tok.base
          >>> tzer = tok.base.Whitespace(1)
-         >>> sorted(T_TW_SIMPLE.tokenize(tzer, ['tx', 'tz'], False))
-         ['tx a', 'tx b', 'tz g']
-         >>> sorted(T_TW_SIMPLE.tokenize(tzer, ['tx', 'tz'], True))
-         ['a', 'b', 'g']'''
+         >>> pprint(T_TW_SIMPLE.tokenize(tzer, ['tx', 'tz'], False))
+         ['tz g', 'tx a', 'tx b']
+         >>> pprint(T_TW_SIMPLE.tokenize(tzer, ['tx', 'tz'], True))
+         ['g', 'a', 'b']'''
       raw = tker.tokenize_all({ f: getattr(self, f) for f in fields })
       self.tokens = []
       for (field, token) in raw:

@@ -8,6 +8,7 @@ from __future__ import division
 from collections import Counter, OrderedDict
 import operator
 import math
+from pprint import pprint
 import sys
 import time
 
@@ -338,10 +339,10 @@ def model_error(errattr, tokenpts, g):
 def scale(token_weights):
    '''Scale weights to be positive, if needed, by exp(x - max(token_weights))
 
-      >>> sorted(scale({'a':-1,'b':1}).iteritems())
-      [('a', 0.135...), ('b', 1.0)]
-      >>> sorted(scale({'a':10,'b':5}).iteritems())
-      [('a', 10), ('b', 5)]'''
+      >>> pprint(scale({'a':-1,'b':1}))
+      {'a': 0.135..., 'b': 1.0}
+      >>> pprint(scale({'a':10,'b':5}))
+      {'a': 10, 'b': 5}'''
    if any(v < 0 for v in token_weights.itervalues()):
       max_v = max(token_weights.itervalues())
       return {t:math.exp(v - max_v)
@@ -353,10 +354,10 @@ def inverse(token_weights):
    '''Make small values big and big values small. All will be positive in the
       end, in range (1,+Infty).
 
-      >>> sorted(inverse({'a':-1,'b':1}).iteritems())
-      [('a', 3.0), ('b', 1.0)]
-      >>> sorted(inverse({'a':-100,'b':100}).iteritems())
-      [('a', 201.0), ('b', 1.0)]'''
+      >>> pprint(inverse({'a':-1,'b':1}))
+      {'a': 3.0, 'b': 1.0}
+      >>> pprint(inverse({'a':-100,'b':100}))
+      {'a': 201.0, 'b': 1.0}'''
    if any(v < 0 for v in token_weights.itervalues()):
       max_v = max(token_weights.itervalues())
       return {t:max_v + 1. - v
@@ -429,8 +430,8 @@ class Geo_GMM(base.Location_Estimate, sklearn.mixture.GMM):
          ...                            { 'foo':2, 'bar':3, 'baz':1e-6 }, 0.95)
          >>> combined.weights_
          array([ 0.4,  0.3,  0.3])
-         >>> sorted(combined.explanation.items())
-         [('bar', 0.6), ('foo', 0.4)]
+         >>> pprint(combined.explanation)
+         {'bar': 0.6, 'foo': 0.4}
          >>> combined.n_points
          4
          >>> [combined.sample(5) for i in xrange(100)] and None

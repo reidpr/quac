@@ -5,6 +5,7 @@
 import datetime
 import io
 import os.path
+from pprint import pprint
 
 import mr_path
 mr_path.fix_pythonpath()
@@ -58,7 +59,7 @@ class Job(disco.core.Job):
          >>> j = Job(object())
          >>> j.name = 'doctest_foo'
          >>> j.add_out_tags('doctest_bar', ':baz')
-         >>> sorted(j.out_tags)
+         >>> pprint(j.out_tags)
          ['doctest_bar', 'doctest_foo:baz']'''
       for tag in tags:
          if (tag[0] == ':'):

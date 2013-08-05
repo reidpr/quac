@@ -26,7 +26,7 @@ import logging
 import os
 import os.path
 import cPickle as pickle
-from pprint import pformat
+from pprint import pprint
 import psutil
 import pytz
 import random
@@ -731,8 +731,8 @@ def sl_union(len_, *slices):
    '''Given a sequence length and some slices, return the sequence of indexes
       which form the union of the given slices. For example:
 
-      >>> pformat(sl_union(10, slp('0'), slp('2:4'), slp('-2:')))
-      'set([0, 2, 3, 8, 9])'
+      >>> pprint(sl_union(10, slp('0'), slp('2:4'), slp('-2:')))
+      set([0, 2, 3, 8, 9])
 
       Note that this function instantiates lists of length len_ (because
       xrange() iterators don't support slicing).'''
@@ -744,8 +744,8 @@ def sl_union(len_, *slices):
 def sl_union_fromtext(len_, slicetext):
    """e.g.:
 
-      >>> pformat(sl_union_fromtext(10, '0,2:4,-2:'))
-      'set([0, 2, 3, 8, 9])'"""
+      >>> pprint(sl_union_fromtext(10, '0,2:4,-2:'))
+      set([0, 2, 3, 8, 9])"""
    return sl_union(len_, *map(slp, slicetext.split(',')))
 
 def stdout_restore():
@@ -772,20 +772,20 @@ def str_to_dict(text):
       as either ints, floats, or strs (whichever converts without exception
       first. For example:
 
-      >>> pformat(str_to_dict('a:b c:1 d:1.0'))
-      "{'a': 'b', 'c': 1, 'd': 1.0}"
-      >>> pformat(str_to_dict('a:1 a:2'))
-      "{'a': 2}"
-      >>> pformat(str_to_dict(''))
-      '{}'
-      >>> pformat(str_to_dict(' '))
-      '{}'
-      >>> pformat(str_to_dict(None))
-      '{}'
-      >>> pformat(str_to_dict('a::b:c'))
-      "{'a': ':b:c'}"
-      >>> pformat(str_to_dict('a:1	\vb:1'))
-      "{'a': 1, 'b': 1}"'''
+      >>> pprint(str_to_dict('a:b c:1 d:1.0'))
+      {'a': 'b', 'c': 1, 'd': 1.0}
+      >>> pprint(str_to_dict('a:1 a:2'))
+      {'a': 2}
+      >>> pprint(str_to_dict(''))
+      {}
+      >>> pprint(str_to_dict(' '))
+      {}
+      >>> pprint(str_to_dict(None))
+      {}
+      >>> pprint(str_to_dict('a::b:c'))
+      {'a': ':b:c'}
+      >>> pprint(str_to_dict('a:1	\vb:1'))
+      {'a': 1, 'b': 1}'''
    if (text is None):
       return dict()
    d = dict()
@@ -862,8 +862,8 @@ def zero_attrs(obj, attrs):
       ...   pass
       >>> a = A()
       >>> zero_attrs(a, ('a', 'b', 'c'))
-      >>> pformat(vars(a))
-      "{'a': 0, 'b': 0, 'c': 0}"'''
+      >>> pprint(vars(a))
+      {'a': 0, 'b': 0, 'c': 0}'''
    for attr in attrs:
       setattr(obj, attr, 0)
 
@@ -948,19 +948,19 @@ TypeError: unhashable type: 'dict'
 >>> (a[slp('::-1')] == a[::-1]) and None
 
 # More unioned slices
->>> pformat(sl_union(10))  # no slices
-'set()'
->>> pformat(sl_union(0, slp('1')))  # empty list
-'set()'
->>> pformat(sl_union(10, slp('1:4')))  # one slice
-'set([1, 2, 3])'
->>> pformat(sl_union(10, slp('1:4'), slp('3')))  # overlapping slices
-'set([1, 2, 3])'
->>> pformat(sl_union(10, slp('10')))  # fully out of bounds
-'set()'
->>> pformat(sl_union(10, slp('9:11')))  # partly out of bounds
-'set([9])'
->>> pformat(sl_union(10, slp('9'), slp('10')))  # one in, one out
-'set([9])'
+>>> pprint(sl_union(10))  # no slices
+set()
+>>> pprint(sl_union(0, slp('1')))  # empty list
+set()
+>>> pprint(sl_union(10, slp('1:4')))  # one slice
+set([1, 2, 3])
+>>> pprint(sl_union(10, slp('1:4'), slp('3')))  # overlapping slices
+set([1, 2, 3])
+>>> pprint(sl_union(10, slp('10')))  # fully out of bounds
+set()
+>>> pprint(sl_union(10, slp('9:11')))  # partly out of bounds
+set([9])
+>>> pprint(sl_union(10, slp('9'), slp('10')))  # one in, one out
+set([9])
 
 ''')

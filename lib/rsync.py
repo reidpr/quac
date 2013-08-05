@@ -2,6 +2,7 @@
 
 import itertools
 import os.path
+from pprint import pprint
 import subprocess
 
 import testable
@@ -66,10 +67,10 @@ def leading_dirs(path):
    '''Return a set containing each directory in absolute path path, except for
       the root directory. For example:
 
-      >>> sorted(leading_dirs('/a/b/c'))
-      ['/a', '/a/b']
-      >>> sorted(leading_dirs('/a'))
-      []
+      >>> pprint(leading_dirs('/a/b/c'))
+      set(['/a', '/a/b'])
+      >>> pprint(leading_dirs('/a'))
+      set()
       >>> leading_dirs('')
       Traceback (most recent call last):
         ...
