@@ -20,12 +20,19 @@ as well as `planned future releases
 List of releases
 ================
 
+v0.3 (August 5, 2013)
+---------------------
+
+* Basic time series computation and correlation.
+* Acquire Wikipedia access logs and dumps.
+* `Details <https://github.com/reidpr/quac/issues?direction=asc&milestone=2&sort=created&state=closed>`__
+
 v0.2 (May 30, 2013)
 -------------------
 
 * Single-node implementation of QUACreduce.
 * Various documentation and code organization cleanups.
-* `Details <https://github.com/reidpr/quac/issues?direction=asc&milestone=1&sort=created&state=closed>`_
+* `Details <https://github.com/reidpr/quac/issues?direction=asc&milestone=1&sort=created&state=closed>`__
 
 v0.1 (April 26, 2013)
 ---------------------
