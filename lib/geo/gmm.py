@@ -571,6 +571,23 @@ class Geo_GMM(base.Location_Estimate, sklearn.mixture.GMM):
       # returns proportion of samples contained in pg
       return sum(pg.contains(p[0]) for p in self.samples) / len(self.samples)
 
+   def likelihood_polygons(self, polygons, threshold=0.001):
+      '''
+      Return (index, probability) tuples for the likelihood of each polygon,
+      trimmed by threshold.
+      >>> Token.parms_init({'component_sz_min':1})
+      >>> mp = geos.MultiPoint(geos.Point(1,1), geos.Point(10,10), srid=4326)
+      >>> m = Geo_GMM.from_fit(mp, 2, 'foo')
+      >>> combined = Geo_GMM.combine([m], {'foo':1 }, 0.95)
+      >>> big =  geos.Polygon.from_bbox((0.9,0.9,1.1,1.1))
+      >>> small =  geos.Polygon.from_bbox((0.95,0.95,1.05,1.05))
+      >>> tiny =  geos.Polygon.from_bbox((2,2,2,2))
+      >>> print combined.likelihood_polygons([big, small])
+      [(0, 0.501), (1, 0.392)]
+      '''
+      scores = [(i, self.likelihood_polygon(p)) for (i,p) in enumerate(polygons)]
+      return [(i, s) for (i,s) in scores if s >= threshold]
+
    def dump_geoimage(self, basename, width_px):
       # FIXME: This method is a mess and needs to be cleaned & split into
       # several other methods.
