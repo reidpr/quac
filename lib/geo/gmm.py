@@ -554,38 +554,31 @@ class Geo_GMM(base.Location_Estimate, sklearn.mixture.GMM):
       return self.score_pt(pt) > self.pred_region_threshold
 
    def likelihood_polygon(self,pg):
-      '''
-      >>> Token.parms_init({'component_sz_min':1})
-      >>> mp = geos.MultiPoint(geos.Point(1,1), geos.Point(10,10), srid=4326)
-      >>> m = Geo_GMM.from_fit(mp, 2, 'foo')
-      >>> combined = Geo_GMM.combine([m], {'foo':1 }, 0.95)
-      >>> ll_big = combined.likelihood_polygon(
-      ...                         geos.Polygon.from_bbox((0.9,0.9,1.1,1.1)))
-      >>> print ll_big
-      0.501
-      >>> ll_small = combined.likelihood_polygon(
-      ...                         geos.Polygon.from_bbox((0.95,0.95,1.05,1.05)))
-      >>> print ll_small
-      0.399
-      '''
+      '''>>> Token.parms_init({'component_sz_min':1})
+         >>> mp = geos.MultiPoint(geos.Point(1,1), geos.Point(10,10), srid=4326)
+         >>> m = Geo_GMM.from_fit(mp, 2, 'foo')
+         >>> c = Geo_GMM.combine([m], {'foo':1 }, 0.95)
+         >>> c.likelihood_polygon(geos.Polygon.from_bbox((0.9,0.9,1.1,1.1)))
+         0.501
+         >>> c.likelihood_polygon(geos.Polygon.from_bbox((0.95,0.95,1.05,1.05)))
+         0.399'''
       # returns proportion of samples contained in pg
       return sum(pg.contains(p[0]) for p in self.samples) / len(self.samples)
 
    def likelihood_polygons(self, polygons, threshold=0.001):
-      '''
-      Return (index, probability) tuples for the likelihood of each polygon,
-      trimmed by threshold.
-      >>> Token.parms_init({'component_sz_min':1})
-      >>> mp = geos.MultiPoint(geos.Point(1,1), geos.Point(10,10), srid=4326)
-      >>> m = Geo_GMM.from_fit(mp, 2, 'foo')
-      >>> combined = Geo_GMM.combine([m], {'foo':1 }, 0.95)
-      >>> big =  geos.Polygon.from_bbox((0.9,0.9,1.1,1.1))
-      >>> small =  geos.Polygon.from_bbox((0.95,0.95,1.05,1.05))
-      >>> tiny =  geos.Polygon.from_bbox((2,2,2,2))
-      >>> print combined.likelihood_polygons([big, small])
-      [(0, 0.501), (1, 0.392)]
-      '''
-      scores = [(i, self.likelihood_polygon(p)) for (i,p) in enumerate(polygons)]
+      '''Return (index, probability) tuples for the likelihood of each
+         polygon, trimmed by threshold.
+
+         >>> Token.parms_init({'component_sz_min':1})
+         >>> mp = geos.MultiPoint(geos.Point(1,1), geos.Point(10,10), srid=4326)
+         >>> m = Geo_GMM.from_fit(mp, 2, 'foo')
+         >>> combined = Geo_GMM.combine([m], {'foo':1 }, 0.95)
+         >>> big = geos.Polygon.from_bbox((0.9,0.9,1.1,1.1))
+         >>> small = geos.Polygon.from_bbox((0.95,0.95,1.05,1.05))
+         >>> combined.likelihood_polygons([big, small])
+         [(0, 0.501), (1, 0.392)]'''
+      scores = [(i, self.likelihood_polygon(p))
+                for (i,p) in enumerate(polygons)]
       return [(i, s) for (i,s) in scores if s >= threshold]
 
    def dump_geoimage(self, basename, width_px):
