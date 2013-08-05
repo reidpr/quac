@@ -178,23 +178,21 @@ done
 
 ## Test cmdtests ##
 
-cd $BASEDIR/tests
+cd $BASEDIR/tests/standalone
 
 # Can't specify cmdtests to test.sh, so do nothing if anything is specified.
 if [ "$to_test" == "" ]; then
-    echo '*** testing cmdtests'
+    echo '*** testing cmdtests (standalone)'
     cmdtest . || true
 fi
 
 
-## Test cmdtests that depend on Twitter data ##
-
-cd $BASEDIR/twtests
+cd $BASEDIR/tests/twitter
 
 # Can't specify cmdtests to test.sh, so do nothing if anything is specified.
 if [ "$to_test" == "" ]; then
     if [ -e tweets/raw/big/big.json.gz ]; then
-        echo '*** testing cmdtests that depend on Twitter data'
+        echo '*** testing cmdtests (Twitter)'
         cmdtest . || true
     else
         echo '*** skipping Twitter cmdtests (no data)'
