@@ -55,8 +55,11 @@ def score(x, clf):
    return abs(clf.predict_proba([x])[0][0]-0.5)
 
 
+def distinct_labels(lab_tweets):
+    return len(set([i[1] for i in lab_tweets]))
+
 def select_tweets(clf, unl_tweets, lab_tweets, n=1):
-   if (len(lab_tweets) == 0):
+   if (distinct_labels(lab_tweets) < 2):
        return range(n)
    scores = np.array([score(tw.text, clf) for tw in unl_tweets])
    sorted_indices = np.argsort(scores)[:n]
@@ -69,6 +72,9 @@ def train(lab_tweets, classifier=None):
       l.info('retraining...')
       x = [i[0].text for i in lab_tweets]
       y = [i[1] for i in lab_tweets]
+      if (distinct_labels(lab_tweets) < 2):
+          l.info('\tcannot train with only one label')
+          return classifier
       classifier.fit(x, y)
       l.info('training f1=%g' % metrics.f1_score(y, classifier.predict(x)))
       #print classifier.named_steps['classifier'].coef_
