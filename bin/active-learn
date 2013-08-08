@@ -1,0 +1,122 @@
+#!/usr/bin/env python
+
+'Interactively label tweets for classification.'
+
+# FIXME: support multiple classifiers
+# FIXME: support multiple selection functions
+# FIXME: save classifier/labels to disk
+# FIXME: tokenize only once
+
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+import numpy as np
+
+from sklearn import linear_model
+from sklearn import metrics
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import Pipeline
+from termcolor import colored
+
+import tweet
+import testable
+import u
+
+l = u.l
+
+### Setup ###
+
+ap = u.ArgumentParser(description=__doc__)
+gr = ap.add_argument_group('arguments')
+gr.add_argument("--batch-size",
+                 metavar='N',
+                type=int,
+                default=2,
+                help="number of tweets to label between training",
+                )
+gr.add_argument('tsv_files',
+                metavar='TSV',
+                nargs='+',
+                help='.tsv files to add to metadata')
+
+
+### Main ###
+
+def main():
+   l.info('beginning active learning')
+   tweets = read_tsvs(args.tsv_files)
+   l.info('read %d tweets', len(tweets))
+   do_loop(tweets, [])
+   l.info('done')
+
+
+def score(x, clf):
+   'Distance from decision plane'
+   return abs(clf.predict_proba([x])[0][0]-0.5)
+
+
+def select_tweets(clf, unl_tweets, lab_tweets, n=1):
+   if (len(lab_tweets) == 0):
+       return range(n)
+   scores = np.array([score(tw.text, clf) for tw in unl_tweets])
+   sorted_indices = np.argsort(scores)[:n]
+   l.info('best scores=%s' % scores[sorted_indices])
+   return sorted_indices
+
+
+def train(lab_tweets, classifier=None):
+   if (len(lab_tweets) > 0):
+      l.info('retraining...')
+      x = [i[0].text for i in lab_tweets]
+      y = [i[1] for i in lab_tweets]
+      classifier.fit(x, y)
+      l.info('training f1=%g' % metrics.f1_score(y, classifier.predict(x)))
+      #print classifier.named_steps['classifier'].coef_
+   return classifier
+
+
+def do_loop(unl_tweets, lab_tweets):
+   classifier = Pipeline([('vect', CountVectorizer(min_df=0)),
+                          ('classifier', linear_model.LogisticRegression())])
+   #                       ('classifier', MultinomialNB())])
+   while (len(unl_tweets) > 0):
+      classifier = train(lab_tweets, classifier)
+      next_tweets = select_tweets(classifier, unl_tweets, lab_tweets,
+                                   args.batch_size)
+      for idx in next_tweets:
+         tw = unl_tweets.pop(idx)
+         print colored(tw.text, 'green')
+         key = None
+         while (key not in ['b', 'q', '0', '1']):
+            key = raw_input(colored('[(b)ack (q)uit] 0/1? ', 'blue'))
+         if (key is 'q'):
+            return classifier
+         elif (key is '0' or key is '1'):
+            lab_tweets.append((tw, int(key)))
+            l.info('%d labeled / %d unlabeled' % (len(lab_tweets),
+                                                  len(unl_tweets)))
+         elif (key is 'b'):
+             # FIXME:
+             l.warn('(b)ack not yet implemented')
+   return classifier
+
+def read_tsvs(filenames):
+   tweets = []
+   for filename in filenames:
+      reader = tweet.Reader(filename)
+      tweets.extend([tw for tw in reader])
+   return tweets
+
+
+### Bootstrap ###
+
+try:
+
+   args = u.parse_args(ap)
+   u.logging_init('actlrn')
+
+   if (__name__ == '__main__'):
+      main()
+
+except testable.Unittests_Only_Exception:
+   testable.register('')
