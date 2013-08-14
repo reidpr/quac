@@ -1,0 +1,18 @@
+$ (ssh -o BatchMode=yes localhost echo a)
+a
+* SSH ControlMaster test:
+b
+b
+2
+1
+1
+2
+c
+1
+1
+1
+2
+d
+0
+0
+0

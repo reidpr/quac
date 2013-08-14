@@ -27,7 +27,12 @@ Summary
    installing everything necessary to make them pass, as this will make your
    life much easier going forward.)
 
-   Note that a working Internet connection is required to run the tests.
+   Note that the following are required to pass all the tests:
+
+   * A working Internet connection.
+
+   * Ability to SSH to ``localhost`` with no password or passphrase prompt
+     (i.e., you need to set up and SSH key pair and ``ssh-agent``).
 
    Some (optional) tests require test data which is not included with QUAC.
    See ``twtests/README`` for details.
