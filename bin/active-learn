@@ -34,6 +34,12 @@ gr.add_argument("--batch-size",
                 default=2,
                 help="number of tweets to label between training",
                 )
+gr.add_argument("--limit",
+                 metavar='N',
+                type=int,
+                default=1000,
+                help="limit analysis to this many tweets",
+                )
 gr.add_argument('tsv_files',
                 metavar='TSV',
                 nargs='+',
@@ -108,9 +114,14 @@ def do_loop(unl_tweets, lab_tweets):
 
 def read_tsvs(filenames):
    tweets = []
+   ct = 0
    for filename in filenames:
       reader = tweet.Reader(filename)
-      tweets.extend([tw for tw in reader])
+      for tw in reader:
+          tweets.append(tw)
+          ct += 1
+          if ct > args.limit:
+              return tweets
    return tweets
 
 
