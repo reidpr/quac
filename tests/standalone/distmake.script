@@ -6,14 +6,15 @@
 
 . ./environment.sh
 
+cd $DATADIR
+
 # BatchMode=yes means don't try to ask the user for authentication
 # information, just fail instead. That is, SSH keys must be set up and a
 # running SSH agent is required.
 ssh="ssh -o BatchMode=yes"
 
-# Can we ssh to localhost without a password? If not, give up without running
-# the rest of the script.
-y "ssh -o BatchMode=yes localhost echo a"
+# Can we ssh to localhost without a password?
+y "sshrot echo a"
 
 echo '* SSH ControlMaster test:'
 #

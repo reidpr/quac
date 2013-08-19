@@ -1,0 +1,59 @@
+#!/usr/bin/env python
+
+'''
+Run the given command on another host via ssh, "intelligently" selecting the
+other host. The rules are:
+
+1. If $SLURM_NODELIST exists, use the hosts listed there. Otherwise, use
+   localhost.
+
+2. Rotate jobs among those hosts.
+
+Note that sshrot doesn't do anything to limit the number of jobs on any given
+host.
+
+This script drops state files in the current directory. Because they are
+needed for subsequent invocations, and sshrot doesn't know how many of these
+there will be, the files must be cleaned up manually when you are done.
+
+If the state file names a host that is not in the node list, then we silently
+start over from the beginning of the host list.
+'''
+
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+# N.B. lockf() is pretty horrible, as is the BSD flock() alternative, but they
+# are good enough for here. See the man pages for the two C functions.
+
+import fcntl
+import io
+import os
+import sys
+
+import quacpath
+import u
+
+nodes = ['localhost']
+statef = io.open('sshrot.state', 'a+b')
+
+# Need exclusive access to the state file, so lock before proceeding. This
+# will block until we can have the lock.
+fcntl.lockf(statef.fileno(), fcntl.LOCK_EX)
+
+# read state
+try:
+   lastnode = u.pickle_load(statef)
+   curnode = nodes[(nodes.index(lastnode) + 1) % len(nodes)]
+except EOFError, ValueError:
+   curnode = nodes[0]
+
+# write state
+u.pickle_dump(statef, curnode)
+
+# we wrote the state we wanted, so release the lock
+statef.close()
+
+print sys.argv[1:]
+os.execvp('ssh', ['ssh', '-o', 'BatchMode=yes', curnode] + sys.argv[1:])
+
+# scontrol show hostname $SLURM_NODELIST

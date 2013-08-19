@@ -1,4 +1,4 @@
-$ (ssh -o BatchMode=yes localhost echo a)
+$ (sshrot echo a)
 a
 * SSH ControlMaster test:
 b

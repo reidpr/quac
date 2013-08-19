@@ -670,28 +670,39 @@ def parse_args(ap, args=sys.argv[1:]):
       pass
    return args
 
-def pickle_dump(filename, obj):
+def pickle_dump(file_, obj):
    t = time.time()
-   if (not filename.endswith(PICKLE_SUFFIX)):
-      filename += PICKLE_SUFFIX
-   pickle.dump(obj, gzip.open(filename, 'wb'), pickle.HIGHEST_PROTOCOL)
+   if (isinstance(file_, basestring)):
+      filename = file_
+      if (not filename.endswith(PICKLE_SUFFIX)):
+         filename += PICKLE_SUFFIX
+      fp = gzip.open(filename, 'wb')
+   else:
+      filename = '???'
+      fp = file_
+   pickle.dump(obj, fp, pickle.HIGHEST_PROTOCOL)
    l.debug('pickled %s in %s' % (filename, fmt_seconds(time.time() - t)))
 
-def pickle_load(filename):
+def pickle_load(file_):
    t = time.time()
-   if (os.path.exists(filename)):
-      # bare filename exists, try that
-      if (filename.endswith(PICKLE_SUFFIX)):
-         fp = gzip.open(filename)
+   if (isinstance(file_, basestring)):
+      filename = file_
+      if (os.path.exists(filename)):
+         # bare filename exists, try that
+         if (filename.endswith(PICKLE_SUFFIX)):
+            fp = gzip.open(filename)
+         else:
+            fp = io.open(filename, 'rb')
+      elif (os.path.exists(filename + PICKLE_SUFFIX)):
+         # filename plus suffix exists, try that
+         fp = gzip.open(filename + PICKLE_SUFFIX)
       else:
-         fp = io.open(filename, 'rb')
-   elif (os.path.exists(filename + PICKLE_SUFFIX)):
-      # filename plus suffix exists, try that
-      fp = gzip.open(filename + PICKLE_SUFFIX)
+         # neither exists
+         raise IOError('neither %s nor %s exist'
+                       % (filename, filename + PICKLE_SUFFIX))
    else:
-      # neither exists
-      raise IOError('neither %s nor %s exist'
-                    % (filename, filename + PICKLE_SUFFIX))
+      filename = '???'
+      fp = file_
    obj = pickle.load(fp)
    l.debug('unpickled %s in %s' % (filename, fmt_seconds(time.time() - t)))
    return obj
