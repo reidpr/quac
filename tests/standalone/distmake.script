@@ -8,6 +8,7 @@
 
 cd $DATADIR
 set -e
+exec 2>&1
 
 # Can we ssh to localhost without a password? That's a prerequisite for all
 # the fancy stuff below...
@@ -59,5 +60,19 @@ ps -C ssh -o command | fgrep -c "ssh: ./sshsock.localhost [mux]" || true
 ls $DATADIR | fgrep -c 'sshsock.localhost' || true
 netstat | egrep -c 'localhost:ssh.+ESTABLISHED$' || true
 
-# Make sure we can exceed MaxStartups (=10:30:100) simultaneous SSH
-# connections.
+
+echo '* SSH scale test'
+# Start several simultaneous connections
+sshrot 'sleep 1 && echo e' &
+sleep 0.1
+for i in {2..10}; do
+    sshrot 'sleep 1 && echo e' &
+done
+sleep 0.4
+# Did multiplexing work?
+ps -C ssh -o command | egrep -c 'ControlPath=\./sshsock\..* localhost'
+ps -C ssh -o command | fgrep -c 'ssh: ./sshsock.localhost [mux]'
+ls $DATADIR | fgrep -c 'sshsock.localhost'
+netstat | egrep -c 'localhost:ssh.+ESTABLISHED$'
+# Wait for output
+sleep 1.0

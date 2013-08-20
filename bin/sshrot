@@ -18,6 +18,20 @@ The script uses a couple of unusual ssh arguments:
 * ControlMaster=auto, which tries to multiplex multiple SSH connections over
   one TCP connection, conserving the latter resource.
 
+  There is a race condition in setting up multiple simultaneous connections
+  with ControlMaster=auto. Each will conclude that they are the master and try
+  to create the control socket, but one will get there first and the others
+  will fail with "ControlSocket [...] already exists, disabling multiplexing".
+  This is a known bug, supposedly fixed a long time ago
+  (https://bugzilla.mindrot.org/show_bug.cgi?id=1349), but it sure fails for
+  me on Ubuntu 13.04.
+
+  This warning doesn't actually prevent the connection, it just wastes a TCP
+  connection and prints noise on stderr.
+
+  The workaround is to pause approximately 1/20-1/10 second between the first
+  and second invocations.
+
 Note that sshrot doesn't do anything to limit the number of jobs on any given
 host.
 
@@ -69,17 +83,6 @@ u.pickle_dump(statef, curnode)
 
 # we wrote the state we wanted, so release the lock
 statef.close()
-
-# Note: there is a race condition in setting up two simultaneous connections
-# with ControlMaster=auto. Both will conclude that they are the master and try
-# to create the socket, but one will get there first and the other will fail
-# with "ControlSocket [...] already exists, disabling multiplexing". This is a
-# known bug, supposedly fixed a long time ago
-# (https://bugzilla.mindrot.org/show_bug.cgi?id=1349), but it sure fails for
-# me on Ubuntu 13.04.
-#
-# This warning doesn't actually prevent the connection, it just wastes a TCP
-# connection and prints noise on stderr.
 
 os.execvp('ssh', ['ssh',
                   '-o', 'BatchMode=yes',
