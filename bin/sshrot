@@ -9,15 +9,31 @@ other host. The rules are:
 
 2. Rotate jobs among those hosts.
 
+The script uses a couple of unusual ssh arguments:
+
+* BatchMode=yes, which means don't try to ask the user for authentication
+  information, just fail instead. For example, SSH keys and a running SSH
+  agent will work.
+
+* ControlMaster=auto, which tries to multiplex multiple SSH connections over
+  one TCP connection, conserving the latter resource.
+
 Note that sshrot doesn't do anything to limit the number of jobs on any given
 host.
 
 This script drops state files in the current directory. Because they are
 needed for subsequent invocations, and sshrot doesn't know how many of these
-there will be, the files must be cleaned up manually when you are done.
+there will be, some of the files must be cleaned up manually when you are
+done.
 
 If the state file names a host that is not in the node list, then we silently
 start over from the beginning of the host list.
+
+Warning: SSH daemons are configures with a limit on the number of sessions
+that can be multiplexed over one TCP connection; it is MaxSessions and it
+defaults to 10. This script doesn't do anything to try to avoid that. (We
+can't simply track the number of connections per host in the state file,
+because we don't know when they end.)
 '''
 
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
@@ -33,6 +49,7 @@ import sys
 import quacpath
 import u
 
+# scontrol show hostname $SLURM_NODELIST
 nodes = ['localhost']
 statef = io.open('sshrot.state', 'a+b')
 
@@ -53,7 +70,21 @@ u.pickle_dump(statef, curnode)
 # we wrote the state we wanted, so release the lock
 statef.close()
 
-print sys.argv[1:]
-os.execvp('ssh', ['ssh', '-o', 'BatchMode=yes', curnode] + sys.argv[1:])
+# Note: there is a race condition in setting up two simultaneous connections
+# with ControlMaster=auto. Both will conclude that they are the master and try
+# to create the socket, but one will get there first and the other will fail
+# with "ControlSocket [...] already exists, disabling multiplexing". This is a
+# known bug, supposedly fixed a long time ago
+# (https://bugzilla.mindrot.org/show_bug.cgi?id=1349), but it sure fails for
+# me on Ubuntu 13.04.
+#
+# This warning doesn't actually prevent the connection, it just wastes a TCP
+# connection and prints noise on stderr.
 
-# scontrol show hostname $SLURM_NODELIST
+os.execvp('ssh', ['ssh',
+                  '-o', 'BatchMode=yes',
+                  '-o', 'ControlMaster=auto',
+                  '-o', 'ControlPath=./sshsock.%n',
+                  '-o', 'ControlPersist=1s',
+                  curnode] + sys.argv[1:])
+

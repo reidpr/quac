@@ -7,14 +7,13 @@
 . ./environment.sh
 
 cd $DATADIR
+set -e
 
-# BatchMode=yes means don't try to ask the user for authentication
-# information, just fail instead. That is, SSH keys must be set up and a
-# running SSH agent is required.
-ssh="ssh -o BatchMode=yes"
-
-# Can we ssh to localhost without a password?
+# Can we ssh to localhost without a password? That's a prerequisite for all
+# the fancy stuff below...
 y "sshrot echo a"
+# Wait for socket to be cleaned up
+sleep 1.5
 
 echo '* SSH ControlMaster test:'
 #
@@ -23,57 +22,42 @@ echo '* SSH ControlMaster test:'
 #    a. First one sets up a master control socket. This ssh stays open for one
 #       second and the socket stays around for one second after the last
 #       client closes.
-#
-ssh_sockargs="-o ControlMaster=auto \
-                -o ControlPath=$DATADIR/%n \
-                -o ControlPersist=1s"
-ssh -o BatchMode=yes $ssh_sockargs localhost 'echo b && sleep 1 && echo c' &
-#    b. Second should attach to the existing socket; it stays up for 2 seconds.
-#
-#       There is a race condition in setting up the connections with
-#       ControlMaster=auto. Both will conclude that they are the master and
-#       try to create the socket, but one will get there first and the other
-#       will fail with "ControlSocket [...] already exists, disabling
-#       multiplexing". This is a known bug, supposedly fixed a long time ago
-#       (https://bugzilla.mindrot.org/show_bug.cgi?id=1349), but it sure fails
-#       for me on Ubuntu 13.04. Hence the sleep.
-#
-#       Note that this doesn't actually prevent the connection, it just wastes
-#       a TCP connection and prints a warning.
+sshrot 'echo b && sleep 1 && echo c' &
+#    b. Second should attach to the existing socket; it stays up for 2
+#       seconds. Sleep avoids race condition (see comments in sshrot).
 sleep 0.1
-ssh -o BatchMode=yes $ssh_sockargs localhost 'echo b && sleep 2 && echo d' &
+sshrot 'echo b && sleep 2 && echo d' &
 #    c. Wait a little for the output to appear.
-sleep 0.2
+sleep 0.3
 # 2. Verify that two regular SSH processes and one mux process exists.
 #
 #    FIXME: This ps command does not work on Mac. I suspect a portable
 #    alternative is possible, but I haven't figured it out yet.
-ps -C ssh -o command | egrep -c "ControlPath=$DATADIR.*localhost"
-ps -C ssh -o command | fgrep -c "ssh: $DATADIR/localhost [mux]"
+ps -C ssh -o command | egrep -c 'ControlPath=\./sshsock\..* localhost'
+ps -C ssh -o command | fgrep -c 'ssh: ./sshsock.localhost [mux]'
 # 3. Verify that control socket exists.
-ls $DATADIR/localhost | wc -l
+ls $DATADIR | fgrep -c 'sshsock.localhost'
 # 4. Verify that only one SSH TCP connection to localhost exists (we want 2
 #    lines because it will be listed twice)
 netstat | egrep -c 'localhost:ssh.+ESTABLISHED$'
 # 5. Wait until 1.5 seconds (the first ssh should be done)
-sleep 1.2
+y 'sleep 1.1'
 # 6. Verify that one regular SSH process and one mux process still exist.
-ps -C ssh -o command | egrep -c "ControlPath=$DATADIR.*localhost"
-ps -C ssh -o command | fgrep -c "ssh: $DATADIR/localhost [mux]"
+ps -C ssh -o command | egrep -c "ControlPath=\./sshsock\..* localhost"
+ps -C ssh -o command | fgrep -c "ssh: ./sshsock.localhost [mux]"
 # 7. Verify that control socket still exists.
-ls $DATADIR/localhost | wc -l
+ls $DATADIR | fgrep -c 'sshsock.localhost'
 # 8. Verify that one SSH TCP connection still exists.
 netstat | egrep -c 'localhost:ssh.+ESTABLISHED$'
 # 9. Wait until 2.5 seconds (both ssh should be done).
-sleep 1.0
+y 'sleep 1.0'
 # 10. Wait until 3.5 seconds (control socked should be timed out).
-sleep 1.0
+y 'sleep 1.0'
 # 10. Verify that SSH processes, control socket, and TCP connection are gone.
-ps -C ssh -o command | egrep -c "ControlPath=$DATADIR.*localhost" || true
-ps -C ssh -o command | fgrep -c "ssh: $DATADIR/localhost [mux]" || true
+ps -C ssh -o command | egrep -c "ControlPath=\./sshsock\..* localhost" || true
+ps -C ssh -o command | fgrep -c "ssh: ./sshsock.localhost [mux]" || true
+ls $DATADIR | fgrep -c 'sshsock.localhost' || true
 netstat | egrep -c 'localhost:ssh.+ESTABLISHED$' || true
 
 # Make sure we can exceed MaxStartups (=10:30:100) simultaneous SSH
 # connections.
-
-# MaxSessions may need to be expanded
