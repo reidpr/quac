@@ -147,7 +147,10 @@ def makefile_dump(args):
    fp.write('''\
 # This is a QUACreduce job, generated %s.
 
-SHELL=/bin/bash\n
+SHELL=/bin/bash
+.SHELLFLAGS=-ec
+.ONESHELL:
+
 '''
             % (time_.nowstr_human()))
    # everything
