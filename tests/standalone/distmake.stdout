@@ -39,3 +39,9 @@ e
 $ (pwd > pwd_local)
 $ (sshrot pwd > pwd_sshrot)
 $ (diff -u pwd_local pwd_sshrot)
+* QUACreduce over ssh test
+$ make -j3 --quiet
+$ (cat out/* | sort)
+      1 baz
+      2 bar
+      3 foo

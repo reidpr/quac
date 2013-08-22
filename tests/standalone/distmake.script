@@ -82,3 +82,15 @@ echo '* Same working directory test'
 y 'pwd > pwd_local'
 y 'sshrot pwd > pwd_sshrot'
 y 'diff -u pwd_local pwd_sshrot'
+
+
+echo '* QUACreduce over ssh test'
+echo -e 'foo bar baz\nfoo foo' > foo1.txt
+echo -e 'bar' > foo2.txt
+quacreduce --dist \
+           --map 'tr "[:blank:]" "\n"' \
+           --reduce 'uniq -c > out/%(RID)' \
+           --partitions 3 \
+           foo*.txt
+x make -j3 --quiet
+y 'cat out/* | sort'

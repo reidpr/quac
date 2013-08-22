@@ -1,19 +1,22 @@
 #!/usr/bin/env python
 
-'''
-Run the given command on another host via ssh, "intelligently" selecting the
-other host. The rules are:
+'Run a command on an intelligently-selected other host via ssh.'
+
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+help_epilogue = '''
+The rules for host selection are:
 
 1. If $SLURM_NODELIST exists, use the hosts listed there. Otherwise, use
    localhost.
 
-2. Rotate jobs among those hosts.
+2. Round-robin rotation of jobs among those hosts.
 
 The script uses a couple of unusual ssh arguments:
 
 * BatchMode=yes, which means don't try to ask the user for authentication
-  information, just fail instead. For example, SSH keys and a running SSH
-  agent will work.
+  information, just fail instead if they would have to supply anything. For
+  example, SSH keys and a running SSH agent will work.
 
 * ControlMaster=auto, which tries to multiplex multiple SSH connections over
   one TCP connection, conserving the latter resource.
@@ -51,9 +54,14 @@ Warnings/notes/quirks:
   know when they end.)
 
 * The remote command will be run in the current working directory. This means
-  that the CWD must exist on the remote host!'''
+  that the CWD must exist on the remote host!
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+* Options meant for the remote command may need to be protected from sshrot by
+  placing them after "--" (e.g., "sshrot -- echo -a") or within a single
+  command word (e.g., "sshrot 'echo -a'").
+
+* The remote command will be run using your login shell (i.e., be careful
+  putting sshrot in shell scripts and similar).'''
 
 # N.B. lockf() is pretty horrible, as is the BSD flock() alternative, but they
 # are good enough for here. See the man pages for the two C functions.
@@ -64,34 +72,70 @@ import os
 import sys
 
 import quacpath
+import testable
 import u
 
-# scontrol show hostname $SLURM_NODELIST
-nodes = ['localhost']
-statef = io.open('sshrot.state', 'a+b')
 
-# Need exclusive access to the state file, so lock before proceeding. This
-# will block until we can have the lock.
-fcntl.lockf(statef.fileno(), fcntl.LOCK_EX)
+### Setup ###
 
-# read state
+ap = u.ArgumentParser(description=__doc__, epilog=help_epilogue)
+gr = ap.default_group
+gr.add_argument('-c',
+                action='store_true',
+                help='ignored (for compatibility with shells)')
+gr.add_argument('-e',
+                action='store_true',
+                help='exit with error as soon as command component fails')
+gr.add_argument('cmds',
+                metavar='WORD',
+                nargs='+',
+                help='words of command line to run on remote host')
+
+
+### Main ###
+
+def main():
+
+   # scontrol show hostname $SLURM_NODELIST
+   nodes = ['localhost']
+   statef = io.open('sshrot.state', 'a+b')
+
+   # Need exclusive access to the state file, so lock before proceeding. This
+   # will block until we can have the lock.
+   fcntl.lockf(statef.fileno(), fcntl.LOCK_EX)
+
+   # read state
+   try:
+      lastnode = u.pickle_load(statef)
+      curnode = nodes[(nodes.index(lastnode) + 1) % len(nodes)]
+   except EOFError, ValueError:
+      curnode = nodes[0]
+
+   # write state
+   u.pickle_dump(statef, curnode)
+
+   # we wrote the state we wanted, so release the lock
+   statef.close()
+
+   # build and run command
+   cmd = ['ssh',
+          '-o', 'BatchMode=yes',
+          '-o', 'ControlMaster=auto',
+          '-o', 'ControlPath=./sshsock.%n',
+          '-o', 'ControlPersist=1s',
+          curnode,
+          'cd', os.getcwd(), ';']
+   if (args.e):
+      cmd += ['set', '-e', ';']
+   cmd += args.cmds
+   os.execvp('ssh', cmd)
+
+
+### Bootstrap ###
+
 try:
-   lastnode = u.pickle_load(statef)
-   curnode = nodes[(nodes.index(lastnode) + 1) % len(nodes)]
-except EOFError, ValueError:
-   curnode = nodes[0]
-
-# write state
-u.pickle_dump(statef, curnode)
-
-# we wrote the state we wanted, so release the lock
-statef.close()
-
-os.execvp('ssh', ['ssh',
-                  '-o', 'BatchMode=yes',
-                  '-o', 'ControlMaster=auto',
-                  '-o', 'ControlPath=./sshsock.%n',
-                  '-o', 'ControlPersist=1s',
-                  curnode,
-                  'cd', os.getcwd(), ';'] + sys.argv[1:])
-
+   args = u.parse_args(ap)
+   if (__name__ == '__main__'):
+      main()
+except testable.Unittests_Only_Exception:
+   testable.register('')

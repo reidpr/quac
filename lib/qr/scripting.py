@@ -113,6 +113,9 @@ class ArgumentParser(u.ArgumentParser):
                       metavar='FILE',
                       nargs='+',
                       help='input files (must have unique names)')
+      gr.add_argument('--dist',
+                      action='store_true',
+                      help='run distributed using sshrot')
       gr.add_argument('--jobdir',
                       metavar='DIR',
                       default='.',
@@ -144,15 +147,19 @@ def directories_setup(args):
 
 def makefile_dump(args):
    fp = open('%s/Makefile' % (args.jobdir), 'w')
+   if (args.dist):
+      shell = 'sshrot'
+   else:
+      shell = '/bin/bash'
    fp.write('''\
 # This is a QUACreduce job, generated %s.
 
-SHELL=/bin/bash
+SHELL=%s
 .SHELLFLAGS=-ec
 .ONESHELL:
 
 '''
-            % (time_.nowstr_human()))
+            % (time_.nowstr_human(), shell))
    # everything
    fp.write('all: %s\n' % (' '.join('tmp/%d.reduced' % (i)
                                     for i in xrange(args.partitions))))
