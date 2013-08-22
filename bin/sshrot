@@ -32,23 +32,26 @@ The script uses a couple of unusual ssh arguments:
   The workaround is to pause approximately 1/20-1/10 second between the first
   and second invocations.
 
-Note that sshrot doesn't do anything to limit the number of jobs on any given
-host.
+Warnings/notes/quirks:
 
-This script drops state files in the current directory. Because they are
-needed for subsequent invocations, and sshrot doesn't know how many of these
-there will be, some of the files must be cleaned up manually when you are
-done.
+* sshrot doesn't do anything to limit the number of jobs on any given host.
 
-If the state file names a host that is not in the node list, then we silently
-start over from the beginning of the host list.
+* This script drops state files in the current directory. Because they are
+  needed for subsequent invocations, and sshrot doesn't know how many of these
+  there will be, some of the files must be cleaned up manually when you are
+  done.
 
-Warning: SSH daemons are configures with a limit on the number of sessions
-that can be multiplexed over one TCP connection; it is MaxSessions and it
-defaults to 10. This script doesn't do anything to try to avoid that. (We
-can't simply track the number of connections per host in the state file,
-because we don't know when they end.)
-'''
+* If the state file names a host that is not in the node list, then we
+  silently start over from the beginning of the host list.
+
+* SSH daemons are configured with a limit on the number of sessions that can
+  be multiplexed over one TCP connection; it is MaxSessions and it defaults to
+  10. This script doesn't do anything to try to avoid that. (We can't simply
+  track the number of connections per host in the state file, because we don't
+  know when they end.)
+
+* The remote command will be run in the current working directory. This means
+  that the CWD must exist on the remote host!'''
 
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
@@ -89,5 +92,6 @@ os.execvp('ssh', ['ssh',
                   '-o', 'ControlMaster=auto',
                   '-o', 'ControlPath=./sshsock.%n',
                   '-o', 'ControlPersist=1s',
-                  curnode] + sys.argv[1:])
+                  curnode,
+                  'cd', os.getcwd(), ';'] + sys.argv[1:])
 

@@ -76,3 +76,9 @@ ls $DATADIR | fgrep -c 'sshsock.localhost'
 netstat | egrep -c 'localhost:ssh.+ESTABLISHED$'
 # Wait for output
 sleep 1.0
+
+
+echo '* Same working directory test'
+y 'pwd > pwd_local'
+y 'sshrot pwd > pwd_sshrot'
+y 'diff -u pwd_local pwd_sshrot'

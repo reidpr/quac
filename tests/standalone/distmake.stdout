@@ -35,3 +35,7 @@ e
 e
 e
 e
+* Same working directory test
+$ (pwd > pwd_local)
+$ (sshrot pwd > pwd_sshrot)
+$ (diff -u pwd_local pwd_sshrot)
