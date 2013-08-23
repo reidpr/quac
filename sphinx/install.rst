@@ -23,19 +23,12 @@ Summary
 
      ./test.sh
 
+   Some tests require additional data or resources; if they are not available,
+   then the tests are skipped.
+
    (While some parts of QUAC will work if some tests fail, we recommend
    installing everything necessary to make them pass, as this will make your
    life much easier going forward.)
-
-   Note that the following are required to pass all the tests:
-
-   * A working Internet connection.
-
-   * Ability to SSH to ``localhost`` with no password or passphrase prompt
-     (i.e., you need to set up and SSH key pair and ``ssh-agent``).
-
-   Some (optional) tests require test data which is not included with QUAC.
-   See ``twtests/README`` for details.
 
 .. note:: If you plan to :doc:`contribute to QUAC <contributing>`, you
           should fork the repository on Github and clone that fork instead.
