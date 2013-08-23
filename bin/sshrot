@@ -12,29 +12,6 @@ The rules for host selection are:
 
 2. Round-robin rotation of jobs among those hosts.
 
-The script uses a couple of unusual ssh arguments:
-
-* BatchMode=yes, which means don't try to ask the user for authentication
-  information, just fail instead if they would have to supply anything. For
-  example, SSH keys and a running SSH agent will work.
-
-* ControlMaster=auto, which tries to multiplex multiple SSH connections over
-  one TCP connection, conserving the latter resource.
-
-  There is a race condition in setting up multiple simultaneous connections
-  with ControlMaster=auto. Each will conclude that they are the master and try
-  to create the control socket, but one will get there first and the others
-  will fail with "ControlSocket [...] already exists, disabling multiplexing".
-  This is a known bug, supposedly fixed a long time ago
-  (https://bugzilla.mindrot.org/show_bug.cgi?id=1349), but it sure fails for
-  me on Ubuntu 13.04.
-
-  This warning doesn't actually prevent the connection, it just wastes a TCP
-  connection and prints noise on stderr.
-
-  The workaround is to pause approximately 1/20-1/10 second between the first
-  and second invocations.
-
 Warnings/notes/quirks:
 
 * --muxstart multiplexing sessions time out after 5 minutes.
@@ -49,21 +26,12 @@ Warnings/notes/quirks:
 * If the state file names a host that is not in the node list, then we
   silently start over from the beginning of the host list.
 
-* SSH daemons are configured with a limit on the number of sessions that can
-  be multiplexed over one TCP connection; it is MaxSessions and it defaults to
-  10. This script doesn't do anything to try to avoid that. (We can't simply
-  track the number of connections per host in the state file, because we don't
-  know when they end.)
-
 * The remote command will be run in the current working directory. This means
   that the CWD must exist on the remote host!
 
 * Options meant for the remote command may need to be protected from sshrot by
   placing them after "--" (e.g., "sshrot -- echo -a") or within a single
-  command word (e.g., "sshrot 'echo -a'").
-
-* The remote command will be run using your login shell (i.e., be careful
-  putting sshrot in shell scripts and similar).'''
+  command word (e.g., "sshrot 'echo -a'").'''
 
 # N.B. lockf() is pretty horrible, as is the BSD flock() alternative, but they
 # are good enough for here. See the man pages for the two C functions.
