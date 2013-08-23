@@ -37,12 +37,14 @@ The script uses a couple of unusual ssh arguments:
 
 Warnings/notes/quirks:
 
+* --muxstart multiplexing sessions time out after 5 minutes.
+
 * sshrot doesn't do anything to limit the number of jobs on any given host.
 
 * This script drops state files in the current directory. Because they are
   needed for subsequent invocations, and sshrot doesn't know how many of these
   there will be, some of the files must be cleaned up manually when you are
-  done.
+  done (unless you use --muxstop).
 
 * If the state file names a host that is not in the node list, then we
   silently start over from the beginning of the host list.
@@ -69,11 +71,15 @@ Warnings/notes/quirks:
 import fcntl
 import io
 import os
+import subprocess
 import sys
 
 import quacpath
 import testable
 import u
+
+STATEFILE = 'sshrot.state'
+SSH_BASE = ['ssh', '-o', 'BatchMode=yes', '-S', './sshsock.%n']
 
 
 ### Setup ###
@@ -86,9 +92,15 @@ gr.add_argument('-c',
 gr.add_argument('-e',
                 action='store_true',
                 help='exit with error as soon as command component fails')
+gr.add_argument('--muxstart',
+                action='store_true',
+                help='set up session sharing for all nodes')
+gr.add_argument('--muxstop',
+                action='store_true',
+                help='tear down session sharing')
 gr.add_argument('cmds',
                 metavar='WORD',
-                nargs='+',
+                nargs='*',
                 help='words of command line to run on remote host')
 
 
@@ -98,37 +110,44 @@ def main():
 
    # scontrol show hostname $SLURM_NODELIST
    nodes = ['localhost']
-   statef = io.open('sshrot.state', 'a+b')
+   statef = io.open(STATEFILE, 'a+b')
 
    # Need exclusive access to the state file, so lock before proceeding. This
-   # will block until we can have the lock.
+   # will block until we can have the lock. The lock is released either when
+   # we exit (--muxstart and --muxstop) or explicitly release it.
    fcntl.lockf(statef.fileno(), fcntl.LOCK_EX)
 
-   # read state
-   try:
-      lastnode = u.pickle_load(statef)
-      curnode = nodes[(nodes.index(lastnode) + 1) % len(nodes)]
-   except EOFError, ValueError:
-      curnode = nodes[0]
+   if (args.muxstart):
+      for node in nodes:
+         subprocess.check_call(SSH_BASE + ['-o', 'ControlMaster=yes',
+                                           '-o', 'ControlPersist=5m',
+                                           node, 'true'])
+   if (args.muxstop):
+      for node in nodes:
+         subprocess.check_call(SSH_BASE + ['-O', 'exit', node])
+      os.unlink(STATEFILE)
+   else:
+      # run a command
 
-   # write state
-   u.pickle_dump(statef, curnode)
+      # read state
+      try:
+         lastnode = u.pickle_load(statef)
+         curnode = nodes[(nodes.index(lastnode) + 1) % len(nodes)]
+      except EOFError, ValueError:
+         curnode = nodes[0]
 
-   # we wrote the state we wanted, so release the lock
-   statef.close()
+      # write state
+      u.pickle_dump(statef, curnode)
 
-   # build and run command
-   cmd = ['ssh',
-          '-o', 'BatchMode=yes',
-          '-o', 'ControlMaster=auto',
-          '-o', 'ControlPath=./sshsock.%n',
-          '-o', 'ControlPersist=1s',
-          curnode,
-          'cd', os.getcwd(), ';']
-   if (args.e):
-      cmd += ['set', '-e', ';']
-   cmd += args.cmds
-   os.execvp('ssh', cmd)
+      # we wrote the state we wanted, so release the lock
+      statef.close()
+
+      # build and run command
+      cmd = SSH_BASE + [curnode, 'cd', os.getcwd(), ';']
+      if (args.e):
+         cmd += ['set', '-e', ';']
+      cmd += args.cmds
+      os.execvp('ssh', cmd)
 
 
 ### Bootstrap ###
