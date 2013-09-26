@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# notes:
+#
+# - separate download and install scripts
+# - required Environment MOdules (i.e., module command) http://modules.sourceforge.net/
+# - does not require root
+# - will take a while to run
+# - option argument is number of parallel build processes
+# - installs in subdirectory
+# - will put the *installed* version of quac on the path; you must override this if you want to develop elsewhere
+# - no support for keeping dependencies up to date
+# - does not always install auxiliary stuff like documentation
+
+set -e
+
+QUACBASE=$(cd $(dirname $0)/.. && pwd)
+MYPREFIX=$QUACBASE/deps
+MYSRC=$MYPREFIX/src
+MAKEJ=${3:1}
+
+module use --append $QUACBASE/misc
+module load quac-module
+
+mkdir -p $MYPREFIX
+mkdir -p $MYSRC
+
+function install_git {
+    cd $MYSRC
+    tar xzf git-*.tar.gz
+    cd git-*
+    make configure
+    ./configure --prefix=$MYPREFIX
+    make -j$MAKEJ
+    make install
+}
+
+function install_pip {
+    cd $MYSRC
+    tar xzf pip-*.tar.gz
+    cd pip-*
+    python setup.py install
+}
+
+function install_python {
+    cd $MYSRC
+    tar xjf Python-*.tar.bz2
+    cd Python-*
+    ./configure --enable-shared --enable-unicode=ucs4 --prefix=$MYPREFIX
+    make -j$MAKEJ OPT=-O3
+    make install
+}
+
+function install_setuptools {
+    cd $MYSRC
+    tar xzf setuptools-*.tar.gz
+    cd setuptools-*
+    python setup.py install
+}
+
+echo Starting...
+#install_git
+#install_python
+#install_setuptools
+#install_pip
+

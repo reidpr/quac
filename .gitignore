@@ -93,6 +93,7 @@ nosetests.xml
 *.cfg
 *.log
 
+deps
 doc
 sphinx/_build
 
