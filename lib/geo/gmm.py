@@ -759,7 +759,7 @@ class Geo_GMM(base.Location_Estimate, sklearn.mixture.GMM):
    def populate_samples(self, sample_ct):
       sraw = [geos.Point(tuple(i), srid=self.srid)
               for i in self.sample(sample_ct, u.rand_np)]
-      evals = self.eval([i.coords for i in sraw])
+      evals = self.score_samples([i.coords for i in sraw])
       logprobs = evals[0]
       component_is = [np.argmax(i) for i in evals[1]]
       self.samples = zip(sraw, logprobs, component_is)
