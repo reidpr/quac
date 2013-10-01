@@ -182,7 +182,7 @@ done
 if [ "$to_test" == "" ]; then
     for subdir in $BASEDIR/tests/*; do
         if [ -d $subdir ]; then
-            echo -n '***' tweets/`basename $subdir`': '
+            echo -n '***' tests/`basename $subdir`': '
             if (cd $subdir && ./ready.sh); then
                 echo testing
                 (cd $subdir && cmdtest . || true)
