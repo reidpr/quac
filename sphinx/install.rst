@@ -3,16 +3,18 @@
 Installing QUAC
 ***************
 
-QUAC can be installed on most UNIX-based systems.
+QUAC can be installed on most UNIX-based systems, though installation is
+easiest on OS X and Debian/Ubuntu. Patches to increase portability are very
+welcome.
 
 Summary
 =======
 
-#. Install the dependencies below.
-
 #. Download the code using Git::
 
      git clone https://github.com/reidpr/quac.git
+
+#. Install the dependencies using system-specific instructions below.
 
 #. Build executables and the documentation::
 
@@ -31,25 +33,40 @@ Summary
    installing everything necessary to make them pass, as this will make your
    life much easier going forward.)
 
-.. note:: If you plan to :doc:`contribute to QUAC <contributing>`, you
-          should fork the repository on Github and clone that fork instead.
+.. note:: If you plan to :doc:`contribute to QUAC <contributing>`, you should
+          do two things differently. First, fork the repository on Github and
+          clone your own fork instead. Second, the ``git`` wrapper `hub
+          <https://github.com/defunkt/hub>`_ is recommended.
 
-Installing dependencies on Debian/Ubuntu
-========================================
+
+Installing dependencies
+=======================
+
+Most dependencies are available through (a) either the Debian/Ubuntu (Linux)
+or Homebrew (OS X) package repositories and (b) PyPI Python package
+repository. Your life will be a lot easier if you use one of the options in
+(a), but if they is unavailable for some reason (e.g., you do not have root
+and can't persuade your admins to install), there is a fall back method of
+compiling the core dependencies yourself.
+
+Note that there are some things, such as QGIS and profilers, which are not
+strictly dependencies but can come in handy. These things are not installed by
+all the methods below.
+
+If you are on a current UNIX system and QUAC does not pass its tests after
+dependency installation using the instructions below, that is a bug. Please
+report it!
+
+
+Debian/Ubuntu
+-------------
 
 `FIXME: This section is incomplete and out of date. Please improve it.`
 
-`FIXME: Turn these lists into a chart with .deb, pip, and source distribution
-columns.`
-
-You need Git to install QUAC and run the tests. The wrapper `hub
-<https://github.com/defunkt/hub>`_ is also recommended if you are going to
-hack on QUAC at all.
-
 Debian packages
----------------
+~~~~~~~~~~~~~~~
 
-Install these guys first.
+Install these first.
 
 * ``gdal-bin``
 * ``gfortran``
@@ -77,7 +94,7 @@ Install these guys first.
 * ``runsnakerun`` (optional, for profiling)
 
 PyPI Python packages
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 Install with ``pip install foo``.
 
@@ -96,13 +113,13 @@ Install with ``pip install foo``.
 * ``pyproj`` is an interface to the PROJ.4 library.
 
 Other Python packages
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 * A `custom version <https://bitbucket.org/reidpr/tweetstream-reidpr>`_ of
   ``tweetstream`` Twitter library (hacked by Reid)
 
 SciPy
------
+~~~~~
 
 QUAC needs SciPy version 0.11 or better.
 
@@ -120,7 +137,7 @@ probably not terribly important for us) optimized ATLAS. You can do that by
 building it from source; directions are in ``README.Debian``.
 
 One-file Python modules
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 Download the modules (they are single ``.py`` files) and place them somewhere
 in your Python path (e.g., ``/usr/local/lib/python2.7/dist-packages``).
@@ -129,7 +146,7 @@ in your Python path (e.g., ``/usr/local/lib/python2.7/dist-packages``).
   tokenization library for Japanese.
 
 QGIS
-----
+~~~~
 
 `QGIS <http://www.qgis.org/>`_ is an open source GIS system. While Ubuntu
 comes with QGIS, it is a little crusty. However, the QGIS project provides
@@ -146,10 +163,10 @@ more (``grass642`` is). The workaround is to build the ``.deb`` from source as
 explained in this bug report: http://hub.qgis.org/issues/6438
 
 
-Installation on OS X
-====================
+OS X
+----
 
-`FIXME: these are out of date`
+`FIXME: section is pretty much useless`
 
 * SpatialLite
 
@@ -166,117 +183,64 @@ Installation on OS X
   - EDIT db_glu.py with path to libspatialite  (e.g., if you installed from brew, /usr/local/lib/libspatialite.dylib )
 
 
-Installation using self-compile
-===============================
+Self-compile
+------------
 
-`FIXME: Convert into script (pair: download and install). In this case,
-probably don't need Stow.`
+This method should only be used if one of the others does not work.
+Essentially, it re-implements the most basic functionality of a package
+manager, and it does so rather poorly and without regard to what you already
+have installed.
 
-This assumes that:
+It does not require root, and it will take a little while to run, since it has
+to download and compile a fair amount of stuff. There are separate scripts to
+download and install, in case you want to QUAC on a system that doesn't have
+good access to the Internet.
 
-* You do not have root access, and you have an environment variable
-  ``$MYPREFIX`` which is the root of your install directory.
+Prerequisites:
 
-* Your system has some basic dependencies such as GNU Make 3.81, ``gcc``, and
-  a Fortran compiler.
+* Some basic dependencies such as GNU Make 3.81 and C/C++/Fortran compilers.
+  Exactly what is currently unknown, but it "Works For Me™".
 
-Basic recipe for compiling C programs and libraries
----------------------------------------------------
+* The `Environment Modules <http://modules.sourceforge.net/>`_ package. You
+  probably have this if your system has a ``module`` command. This isn't
+  strictly needed, as you can get the same effect by editing your shell init
+  files appropriately.
 
-.. code-block:: sh
+The below assumes that you have unpacked QUAC into ``$QUACBASE``.
 
-   wget http://foo.com/foo-1.0.tar.gz
-   tar xjf foo-1.0.tar.gz
-   pushd foo-1.0
-   ./configure --enable-python --prefix=$MYPREFIX
-   make
-   make test    # optional
-   make install DESTDIR=$MYPREFIX/stow/foo-1.0
-   cd $MYPREFIX/stow/foo-1.0
-   mv .$MYPREFIX/* .
-   rm -Rv home  # assumes home directories are in /home
-   cd ..
-   stow -Sv foo-1.0
-   popd
-
-Bootstrap ``stow``
-------------------
-
-It is highly recommended that you install everything with GNU Stow, as this
-lets you easily upgrade or remove packages you compiled. Here is a basic
-recipe to compile Stow and then stow it with itself:
+First, install the dependencies:
 
 .. code-block:: sh
 
-   wget http://ftp.gnu.org/gnu/stow/stow-2.2.0.tar.bz2
-   tar xjf stow-2.2.0.tar.bz2
-   pushd stow-2.2.0
-   ./configure --prefix=$MYPREFIX
-   make
-   make install DESTDIR=$MYPREFIX/stow/stow-2.2.0
-   cd $MYPREFIX/stow/stow-2.2.0
-   mv .$MYPREFIX/* .
-   rm -Rv home     # assumes home directories are in /home
-   cd ..
-   PERL5LIB=stow-2.2.0/share/perl5 stow-2.2.0/bin/stow -Sv stow-2.2.0
-   stow --version  # test it
-   which stow      # using correct stow?
-   popd
+   mkdir $QUACBASE/deps
+   cd $QUACBASE/deps
+   ../misc/manual-download  # creates $QUACBASE/deps/src
+   ../misc/manual-install
 
-Install Python
---------------
+Optional:
 
-Python is not too hard to compile using the recipe above. Use:
+* ``manual-install`` takes an argument which is the number of processes to use
+  while compiling (``make -j``).
+
+* You can run ``manual-download`` anywhere and move the resulting ``src``
+  directory into ``$QUACBASE/deps`` manually.
+
+Second, configure your environment. Add following to your ``.bashrc``.
 
 .. code-block:: sh
 
-   wget http://www.python.org/ftp/python/2.7.5/Python-2.7.5.tar.bz2
-   unset PYTHONHOME
-   ./configure --enable-shared --enable-unicode=ucs4 --prefix=$MYPREFIX
-   make OPT=-O3
-   export PYTHONHOME=$MYPREFIX
-   python-config --prefix  # should be just $MYPREFIX, without stow directory
+   module use --append $QUACBASE/misc
+   module load quac-module
 
-.. warning:: Python does some `sneaky following of symlinks
-             <http://www.velocityreviews.com/forums/t331589-is-there-any-way-to-make-python-play-well-with-stow.html>`_
-             to figure out what it should report in things like
-             ``python-config --prefix``. By setting ``PYTHONHOME`` to
-             ``$MYPREFIX/lib/python2.7`` in your ``.bashrc``, you override
-             this, but note that you must *unset* ``PYTHONHOME`` during Python
-             builds.
-
-Bootstrap ``pip``
------------------
-
-See:
-
-* http://www.pip-installer.org/en/latest/installing.html
-* http://cournape.wordpress.com/2008/07/05/using-stow-with-setuptools/
-
-Notes:
-
-* Many packages include an identical ``site.py``, which ``stow`` will flag as
-  a conflict. It seems to not really matter which one is used. I installed the
-  one from ``distribute``.
-
-* You can install from a pre-downloaded ``.tar.gz`` by specifying a file name
-  instead of a package name.
-
-Steps:
-
-#. Install `setuptools <https://pypi.python.org/pypi/setuptools>`_:
-
-.. code-block:: sh
-
-   wget https://pypi.python.org/packages/source/s/setuptools/setuptools-1.1.4.tar.gz
-   tar xzf setuptools-1.1.4.tar.gz
-   pushd setuptools-1.1.4
-   python setup.py install --single-version-externally-managed --record=$MYPREFIX/stow/setuptools-1.1.4/install.log --prefix $MYPREFIX/stow/setuptools-1.1.4
-   cd $MYPREFIX/stow
-   stow -Sv --ignore='install\.log' setuptools-1.1.4
-   popd
-
-#. Install `pip <http://pypi.python.org/pypi/pip>`_ in the same way.
+Note that in addition to making all the dependencies available, this module
+adds the QUAC libraries and binaries themselves to your various paths. Be
+aware of this if you have multiple QUAC working directories. (For example,
+suppose a colleague has installed QUAC and its dependencies in location
+:math:`A`, and you've loaded ``quac-module`` from :math:`A` because you don't
+want to duplicate the tedious installation. You have your own QUAC working
+directory at :math:`B` so you can hack on it. If you simply type
+``quacreduce``, you will get the one in :math:`A` even if you are working in
+:math:`B`, unless you take measures to prevent this.)
 
 
-..  LocalWords:  MYPREFIX Rv setuptools Sv
+..  LocalWords:  MYPREFIX Rv setuptools Sv defunkt QUACBASE deps src

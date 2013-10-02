@@ -2,21 +2,6 @@
 
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
-# notes:
-#
-# - this installation method is a last resort
-# - separate download and install scripts
-# - required
-#   - Environment MOdules (i.e., module command) http://modules.sourceforge.net/
-#   - C, Fortran compilers, some other stuff that I don't quite know (it Works For Me (tm))
-# - does not require root
-# - will take a while to run
-# - option argument is number of parallel build processes
-# - installs in subdirectory
-# - will put the *installed* version of quac on the path; you must override this if you want to develop elsewhere
-# - no support for keeping dependencies up to date
-# - does not always install auxiliary stuff like documentation
-
 set -e
 
 QUACBASE=$(cd $(dirname $0)/.. && pwd)
