@@ -39,6 +39,8 @@ def fetch(from_url, dest_dir, bwlimit, more_args, verbose):
              '--stats',       # more statistics after transfer
              '-h', '-h',      # human-readable numbers, with powers of 2
              '--partial',     # keep partial tranfers for faster restart
+             '--partial-dir', '.rsync-tmp',
+                              # don't overwrite good files w/ partial transfers
              '--bwlimit=%d' % (bwlimit) ]
    if (verbose):
       rsync += ['--progress']
