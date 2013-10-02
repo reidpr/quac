@@ -19,7 +19,7 @@ export DATADIR=$DATADIR/$TESTNAME
 
 # Use a known locale so that things sort consistently. I think this may also
 # affect Unicode stuff?
-export LC_ALL=en_US
+export LC_ALL=en_US.UTF-8
 
 # stop test if any command fails
 set -e
