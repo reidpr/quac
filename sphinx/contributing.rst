@@ -107,7 +107,7 @@ Cutting a release
 #. Run the tests (they should pass).
 #. ``make doc-web``
 #. Tag the appropriate commit, e.g.: :samp:`git tag -a v0.{foo}`
-#. Push.
+#. Push with ``--tags``.
 
 
 Code style
