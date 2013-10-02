@@ -7,8 +7,9 @@
 help_epilogue = '''
 The rules for host selection are:
 
-1. If $SLURM_NODELIST exists, use the hosts listed there. Otherwise, use
-   localhost.
+1. If $SLURM_NODELIST exists, use the hosts listed there. Otherwise, use the
+   network name of the current host. (We don't use localhost because this can
+   cause trouble on clusters with shared home directories.)
 
 2. Round-robin rotation of jobs among those hosts.
 
@@ -39,6 +40,7 @@ Warnings/notes/quirks:
 import fcntl
 import io
 import os
+import platform
 import subprocess
 import sys
 
@@ -77,7 +79,7 @@ gr.add_argument('cmds',
 def main():
 
    # scontrol show hostname $SLURM_NODELIST
-   nodes = ['localhost']
+   nodes = [platform.node()]
    statef = io.open(STATEFILE, 'a+b')
 
    # Need exclusive access to the state file, so lock before proceeding. This

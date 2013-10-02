@@ -9,13 +9,13 @@ b
 2
 1
 1
-2
+1
 $ sleep 1.2
 c
 1
 1
 1
-2
+1
 $ sleep 1.0
 d
 $ sshrot --muxstop
@@ -39,7 +39,7 @@ $ sleep 0.5
 10
 1
 1
-2
+1
 $ sleep 1.0
 e
 e

@@ -10,13 +10,35 @@ cd $DATADIR
 set -e
 exec 2>&1
 
+# Decide how to call netstat. The problem is that Red Hat and everyone else
+# chose incompatible options for not truncating hostnames.
+if (netstat --help 2>&1 | fgrep -q -- --wide); then
+    WIDE=--wide
+else
+    WIDE=--notrim
+fi
+
+# Funtion to print, on four lines, the number of:
+# 1. regular ssh processes to localhost
+# 2. mux processes
+# 3. control sockets
+# 4. TCP connections
+sshinfo () {
+    # FIXME: This ps command does not work on Mac. I suspect a portable
+    # alternative is possible, but I haven't figured it out yet.
+    ps -C ssh -o command | egrep -c -- '-S \./sshsock\..* '$HOSTNAME || true
+    ps -C ssh -o command | fgrep -c 'ssh: ./sshsock.'$HOSTNAME' [mux]' || true
+    ls $DATADIR | fgrep -c 'sshsock.'$HOSTNAME || true
+    netstat $WIDE | egrep -c 'localhost:.+'$HOSTNAME'.*:ssh +ESTABLISHED' || true
+}
+
 # Can we ssh to localhost without a password? That's a prerequisite for all
 # the fancy stuff below...
 y "sshrot echo a"
 
-# SSH multiplexing test
+## SSH multiplexing test ##
 #
-# 1. Set up two simultaneous ssh connections.
+# Set up two simultaneous ssh connections.
 #
 #    a. Set up multiplexing.
 x sshrot --muxstart
@@ -25,38 +47,21 @@ y "sshrot 'echo b && sleep 1 && echo c' &"
 y "sshrot 'echo b && sleep 2 && echo d' &"
 #    c. Wait a little for the output to appear.
 x sleep 0.3
-# 2. Verify that two regular SSH processes and one mux process exist.
-#
-#    FIXME: This ps command does not work on Mac. I suspect a portable
-#    alternative is possible, but I haven't figured it out yet.
-ps -C ssh -o command | egrep -c -- '-S \./sshsock\..* localhost'
-ps -C ssh -o command | fgrep -c 'ssh: ./sshsock.localhost [mux]'
-# 3. Verify that control socket exists.
-ls $DATADIR | fgrep -c 'sshsock.localhost'
-# 4. Verify that only one SSH TCP connection to localhost exists (we want 2
-#    lines because it will be listed twice)
-netstat | egrep -c 'localhost:ssh.+ESTABLISHED$'
-# 5. Wait until 1.5 seconds (the first ssh should be done)
+# Verify that we have: two regular SSH processes, one mux process, a control
+# socket, and one TCP connection.
+sshinfo
+# Wait until 1.5 seconds (the first ssh should be done)
 x sleep 1.2
-# 6. Verify that one regular SSH process and one mux process still exist.
-ps -C ssh -o command | egrep -c -- '-S \./sshsock\..* localhost'
-ps -C ssh -o command | fgrep -c "ssh: ./sshsock.localhost [mux]"
-# 7. Verify that control socket still exists.
-ls $DATADIR | fgrep -c 'sshsock.localhost'
-# 8. Verify that one SSH TCP connection still exists.
-netstat | egrep -c 'localhost:ssh.+ESTABLISHED$'
-# 9. Wait until 2.5 seconds (both ssh should be done).
+# Verify that we are down to one regular SSH process.
+sshinfo
+# Wait until 2.5 seconds (both ssh should be done).
 x sleep 1.0
-# 10. Stop multiplexing.
+# Stop multiplexing.
 x sshrot --muxstop
-# 11. Verify that SSH processes, control socket, and TCP connection are gone.
-ps -C ssh -o command | egrep -c -- '-S \./sshsock\..* localhost' || true
-ps -C ssh -o command | fgrep -c "ssh: ./sshsock.localhost [mux]" || true
-ls $DATADIR | fgrep -c 'sshsock.localhost' || true
-netstat | egrep -c 'localhost:ssh.+ESTABLISHED$' || true
+# Verify that SSH processes, control socket, and TCP connection are gone.
+sshinfo
 
-
-# SSH scale test
+## SSH scale test ##
 #
 # Start several simultaneous connections
 x sshrot --muxstart
@@ -65,10 +70,7 @@ for i in {1..10}; do
 done
 x sleep 0.5
 # Did multiplexing work?
-ps -C ssh -o command | egrep -c -- '-S \./sshsock\..* localhost'
-ps -C ssh -o command | fgrep -c "ssh: ./sshsock.localhost [mux]" || true
-ls $DATADIR | fgrep -c 'sshsock.localhost' || true
-netstat | egrep -c 'localhost:ssh.+ESTABLISHED$' || true
+sshinfo
 # Wait for output
 x sleep 1.0
 # Done
