@@ -1,29 +1,29 @@
 $ (sshrot echo a)
 a
 $ sshrot --muxstart
-$ (sshrot 'echo b && sleep 1 && echo c' &)
-$ (sshrot 'echo b && sleep 2 && echo d' &)
-$ sleep 0.3
+$ (sshrot 'echo b && sleep 2 && echo c' &)
+$ (sshrot 'echo b && sleep 3 && echo d' &)
+$ sleep 1.5
 b
 b
-2
-1
-1
-1
-$ sleep 1.2
-c
-1
-1
-1
-1
+ssh clients:      2
+ssh masters:      1
+control sockets:  1
+TCP connections:  1
 $ sleep 1.0
+c
+ssh clients:      1
+ssh masters:      1
+control sockets:  1
+TCP connections:  1
+$ sleep 1.5
 d
 $ sshrot --muxstop
 Exit request sent.
-0
-0
-0
-0
+ssh clients:      0
+ssh masters:      0
+control sockets:  0
+TCP connections:  0
 $ sshrot --muxstart
 $ (sshrot 'sleep 1 && echo e' &)
 $ (sshrot 'sleep 1 && echo e' &)
@@ -34,14 +34,12 @@ $ (sshrot 'sleep 1 && echo e' &)
 $ (sshrot 'sleep 1 && echo e' &)
 $ (sshrot 'sleep 1 && echo e' &)
 $ (sshrot 'sleep 1 && echo e' &)
-$ (sshrot 'sleep 1 && echo e' &)
 $ sleep 0.5
-10
-1
-1
-1
+ssh clients:      9
+ssh masters:      1
+control sockets:  1
+TCP connections:  1
 $ sleep 1.0
-e
 e
 e
 e

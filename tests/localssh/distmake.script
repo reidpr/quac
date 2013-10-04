@@ -18,18 +18,19 @@ else
     WIDE=--notrim
 fi
 
-# Funtion to print, on four lines, the number of:
-# 1. regular ssh processes to localhost
-# 2. mux processes
-# 3. control sockets
-# 4. TCP connections
+# Print info about current SSH state (4 lines).
+# See commit c5009e for the most recent -o ControlPersist=5m version.
 sshinfo () {
     # FIXME: This ps command does not work on Mac. I suspect a portable
     # alternative is possible, but I haven't figured it out yet.
-    ps -C ssh -o command | egrep -c -- '-S \./sshsock\..* '$HOSTNAME || true
-    ps -C ssh -o command | fgrep -c 'ssh: ./sshsock.'$HOSTNAME' [mux]' || true
+    echo -n 'ssh clients:      '
+    ps -C ssh -o command | fgrep -v 'sleep 86400' | egrep -c -- '-S \./sshsock\..* '$HOSTNAME || true
+    echo -n 'ssh masters:      '
+    ps -C ssh -o command | egrep -c -- '-S \./sshsock\..* '$HOSTNAME' sleep 86400' || true
+    echo -n 'control sockets:  '
     ls $DATADIR | fgrep -c 'sshsock.'$HOSTNAME || true
-    netstat $WIDE | egrep -c 'localhost:.+'$HOSTNAME'.*:ssh +ESTABLISHED' || true
+    echo -n 'TCP connections:  '
+    netstat $WIDE | egrep -c '(localhost|'$HOSTNAME'):.+'$HOSTNAME'.*:ssh +ESTABLISHED' || true
 }
 
 # Can we ssh to localhost without a password? That's a prerequisite for all
@@ -38,24 +39,26 @@ y "sshrot echo a"
 
 ## SSH multiplexing test ##
 #
-# Set up two simultaneous ssh connections.
+# Set up two simultaneous ssh connections. Note that this test depends on
+# rather finicky timing (starting up an ssh connection can take significantly
+# varying amounts of time).
 #
 #    a. Set up multiplexing.
 x sshrot --muxstart
 #    b. Set up "real" connections.
-y "sshrot 'echo b && sleep 1 && echo c' &"
-y "sshrot 'echo b && sleep 2 && echo d' &"
+y "sshrot 'echo b && sleep 2 && echo c' &"
+y "sshrot 'echo b && sleep 3 && echo d' &"
 #    c. Wait a little for the output to appear.
-x sleep 0.3
-# Verify that we have: two regular SSH processes, one mux process, a control
+x sleep 1.5
+# Verify that we have: two regular SSH processes, one mux process, one control
 # socket, and one TCP connection.
 sshinfo
-# Wait until 1.5 seconds (the first ssh should be done)
-x sleep 1.2
+# Wait until 2.5 seconds (the first ssh should be done)
+x sleep 1.0
 # Verify that we are down to one regular SSH process.
 sshinfo
-# Wait until 2.5 seconds (both ssh should be done).
-x sleep 1.0
+# Wait until 4.0 seconds (both ssh should be done).
+x sleep 1.5
 # Stop multiplexing.
 x sshrot --muxstop
 # Verify that SSH processes, control socket, and TCP connection are gone.
@@ -65,7 +68,7 @@ sshinfo
 #
 # Start several simultaneous connections
 x sshrot --muxstart
-for i in {1..10}; do
+for i in {1..9}; do
     y "sshrot 'sleep 1 && echo e' &"
 done
 x sleep 0.5
