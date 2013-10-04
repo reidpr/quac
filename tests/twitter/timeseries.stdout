@@ -66,33 +66,37 @@ $ ngrams-search --detail --query taco series/out
 $ (ngrams-correlate --notimes /nonexistent halloween.xls || true)
 usage: ngrams-correlate [--min-similarity X] [--min-ppm X] [--sample-rate X]
                         [--run RUN] [--clean] [--map CMD] [--reduce CMD]
-                        [--python CLASS] [--pyargs DICT] [--jobdir DIR]
-                        [--partitions N] [--sortdir DIR] [--sortmem N]
-                        [--update] [-h] [--notimes] [--unittest] [--verbose]
+                        [--python CLASS] [--pyargs DICT] [--dist]
+                        [--jobdir DIR] [--partitions N] [--sortdir DIR]
+                        [--sortmem N] [--update] [-h] [--notimes] [--unittest]
+                        [--verbose]
                         FILE [FILE ...]
 ngrams-correlate: error: /nonexistent is not a directory
 $ (ngrams-correlate --notimes /bin/sh halloween.xls || true)
 usage: ngrams-correlate [--min-similarity X] [--min-ppm X] [--sample-rate X]
                         [--run RUN] [--clean] [--map CMD] [--reduce CMD]
-                        [--python CLASS] [--pyargs DICT] [--jobdir DIR]
-                        [--partitions N] [--sortdir DIR] [--sortmem N]
-                        [--update] [-h] [--notimes] [--unittest] [--verbose]
+                        [--python CLASS] [--pyargs DICT] [--dist]
+                        [--jobdir DIR] [--partitions N] [--sortdir DIR]
+                        [--sortmem N] [--update] [-h] [--notimes] [--unittest]
+                        [--verbose]
                         FILE [FILE ...]
 ngrams-correlate: error: /bin/sh is not a directory
 $ (ngrams-correlate --notimes /bin /etc || true)
 usage: ngrams-correlate [--min-similarity X] [--min-ppm X] [--sample-rate X]
                         [--run RUN] [--clean] [--map CMD] [--reduce CMD]
-                        [--python CLASS] [--pyargs DICT] [--jobdir DIR]
-                        [--partitions N] [--sortdir DIR] [--sortmem N]
-                        [--update] [-h] [--notimes] [--unittest] [--verbose]
+                        [--python CLASS] [--pyargs DICT] [--dist]
+                        [--jobdir DIR] [--partitions N] [--sortdir DIR]
+                        [--sortmem N] [--update] [-h] [--notimes] [--unittest]
+                        [--verbose]
                         FILE [FILE ...]
 ngrams-correlate: error: /etc is not a file
 $ (ngrams-correlate --notimes series /nonexistent.xls || true)
 usage: ngrams-correlate [--min-similarity X] [--min-ppm X] [--sample-rate X]
                         [--run RUN] [--clean] [--map CMD] [--reduce CMD]
-                        [--python CLASS] [--pyargs DICT] [--jobdir DIR]
-                        [--partitions N] [--sortdir DIR] [--sortmem N]
-                        [--update] [-h] [--notimes] [--unittest] [--verbose]
+                        [--python CLASS] [--pyargs DICT] [--dist]
+                        [--jobdir DIR] [--partitions N] [--sortdir DIR]
+                        [--sortmem N] [--update] [-h] [--notimes] [--unittest]
+                        [--verbose]
                         FILE [FILE ...]
 ngrams-correlate: error: /nonexistent.xls is not a file
 $ ngrams-correlate ...

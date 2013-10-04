@@ -3,7 +3,7 @@ $ quacreduce --map cat --reduce cat foo/bar.txt baz/qux.txt
 0
 $ quacreduce --map cat --reduce cat foo/bar.txt baz/bar.txt
 usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
-                  [--jobdir DIR] [--partitions N] [--sortdir DIR]
+                  [--dist] [--jobdir DIR] [--partitions N] [--sortdir DIR]
                   [--sortmem N] [--update] [-h] [--notimes] [--unittest]
                   [--verbose]
                   FILE [FILE ...]
@@ -19,7 +19,7 @@ quacr FATAL    --python or --map and --reduce must be specified
 1
 $ quacreduce --map bar input.txt
 usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
-                  [--jobdir DIR] [--partitions N] [--sortdir DIR]
+                  [--dist] [--jobdir DIR] [--partitions N] [--sortdir DIR]
                   [--sortmem N] [--update] [-h] [--notimes] [--unittest]
                   [--verbose]
                   FILE [FILE ...]
@@ -27,7 +27,7 @@ quacreduce: error: --map and --reduce must both be specified if one is
 2
 $ quacreduce --reduce bar input.txt
 usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
-                  [--jobdir DIR] [--partitions N] [--sortdir DIR]
+                  [--dist] [--jobdir DIR] [--partitions N] [--sortdir DIR]
                   [--sortmem N] [--update] [-h] [--notimes] [--unittest]
                   [--verbose]
                   FILE [FILE ...]
@@ -35,7 +35,7 @@ quacreduce: error: --map and --reduce must both be specified if one is
 2
 $ quacreduce --python foo --map bar input.txt
 usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
-                  [--jobdir DIR] [--partitions N] [--sortdir DIR]
+                  [--dist] [--jobdir DIR] [--partitions N] [--sortdir DIR]
                   [--sortmem N] [--update] [-h] [--notimes] [--unittest]
                   [--verbose]
                   FILE [FILE ...]
@@ -43,7 +43,7 @@ quacreduce: error: --python cannot be specified with --map and/or --reduce
 2
 $ quacreduce --python foo --reduce bar input.txt
 usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
-                  [--jobdir DIR] [--partitions N] [--sortdir DIR]
+                  [--dist] [--jobdir DIR] [--partitions N] [--sortdir DIR]
                   [--sortmem N] [--update] [-h] [--notimes] [--unittest]
                   [--verbose]
                   FILE [FILE ...]
@@ -51,7 +51,7 @@ quacreduce: error: --python cannot be specified with --map and/or --reduce
 2
 $ quacreduce --python foo --map bar --reduce baz input.txt
 usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
-                  [--jobdir DIR] [--partitions N] [--sortdir DIR]
+                  [--dist] [--jobdir DIR] [--partitions N] [--sortdir DIR]
                   [--sortmem N] [--update] [-h] [--notimes] [--unittest]
                   [--verbose]
                   FILE [FILE ...]

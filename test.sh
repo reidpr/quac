@@ -43,6 +43,11 @@ set -e
 
 BASEDIR=$(cd $(dirname $0); pwd)
 
+# Use a temporary directory in the QUAC working directory, because it's
+# guaranteed to be available on all test nodes, while things like /tmp are
+# not.
+export TMPDIR=$BASEDIR/tests
+
 while getopts "ai" opt; do
     case $opt in
         a)
@@ -178,23 +183,17 @@ done
 
 ## Test cmdtests ##
 
-cd $BASEDIR/tests/standalone
-
 # Can't specify cmdtests to test.sh, so do nothing if anything is specified.
 if [ "$to_test" == "" ]; then
-    echo '*** testing cmdtests (standalone)'
-    cmdtest . || true
-fi
-
-
-cd $BASEDIR/tests/twitter
-
-# Can't specify cmdtests to test.sh, so do nothing if anything is specified.
-if [ "$to_test" == "" ]; then
-    if [ -e tweets/raw/big/big.json.gz ]; then
-        echo '*** testing cmdtests (Twitter)'
-        cmdtest . || true
-    else
-        echo '*** skipping Twitter cmdtests (no data)'
-    fi
+    for subdir in $BASEDIR/tests/*; do
+        if [ -d $subdir ]; then
+            echo -n '***' tests/`basename $subdir`': '
+            if (cd $subdir && ./ready.sh); then
+                echo testing
+                (cd $subdir && cmdtest . || true)
+            else
+                echo skipped
+            fi
+        fi
+    done
 fi

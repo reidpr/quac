@@ -1,0 +1,17 @@
+#%Module1.0
+
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+set quacbase [file normalize [file dirname $ModulesCurrentModulefile]/..]
+set prefix $quacbase/deps
+
+# Dependencies
+prepend-path PATH $prefix/bin
+prepend-path LIBRARY_PATH $prefix/lib
+prepend-path LD_RUN_PATH $prefix/lib
+prepend-path CPATH $prefix/include
+setenv GDAL_DATA $prefix/share/gdal
+
+# QUAC itself
+prepend-path PATH $quacbase/bin
+prepend-path PYTHONPATH $quacbase/lib

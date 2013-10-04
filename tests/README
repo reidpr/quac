@@ -2,9 +2,16 @@ These directories contain tests which use the "cmdtest" framework. These are
 shell scripts (which might be quite involved); standard output and error are
 tested against expected values. "man cmdtest" for the details.
 
+Each subdirectory contains a script "ready.sh". This should return
+successfully if preconditions for tests in that directory are satisfied,
+unsuccessfully otherwise. Some subdirectories contain READMEs with more detail
+on what is needed and how to get it.
+
 What's here:
 
   standalone ... tests that require no extra data
+  internet ..... need relatively unfettered Internet access
+  localssh ..... need passwordless SSH to localhost
   twitter ...... need a small Twitter dataset
 
 Tests that require external data which are not present are skipped. These test

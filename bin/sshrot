@@ -1,0 +1,149 @@
+#!/usr/bin/env python
+
+'Run a command on an intelligently-selected other host via ssh.'
+
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+help_epilogue = '''
+The rules for host selection are:
+
+1. If $SLURM_NODELIST exists, use the hosts listed there. Otherwise, use the
+   network name of the current host. (We don't use localhost because this can
+   cause trouble on clusters with shared home directories.)
+
+2. Round-robin rotation of jobs among those hosts.
+
+Warnings/notes/quirks:
+
+* --muxstart does have some security considerations. Until --muxstop (or you
+  kill the ssh masters manually), you, or someone successfully posing as you,
+  can ssh to the hosts involved without invoking the usual ssh authentication
+  mechanisms. In the case of sshrot, this isn't normally much of a problem
+  because you can ssh without entering a password or passphrase to these hosts
+  anyway. However, this can change (e.g., your key times out in ssh-agent), so
+  you should be aware of this persistence. Currently, the master times out 24
+  hours after --muxstart.
+
+* sshrot doesn't do anything to limit the number of jobs on any given host.
+
+* This script drops state files in the current directory. Because they are
+  needed for subsequent invocations, and sshrot doesn't know how many of these
+  there will be, some of the files must be cleaned up manually when you are
+  done (unless you use --muxstop).
+
+* If the state file names a host that is not in the node list, then we
+  silently start over from the beginning of the host list.
+
+* The remote command will be run in the current working directory. This means
+  that the CWD must exist on the remote host.
+
+* Options meant for the remote command may need to be protected from sshrot by
+  placing them after "--" (e.g., "sshrot -- echo -a") or within a single
+  command word (e.g., "sshrot 'echo -a'").'''
+
+# N.B. lockf() is pretty horrible, as is the BSD flock() alternative, but they
+# are good enough for here. See the man pages for the two C functions.
+
+import fcntl
+import io
+import os
+import platform
+import subprocess
+import sys
+
+import hostlist
+
+import quacpath
+import testable
+import u
+
+STATEFILE = 'sshrot.state'
+SSH_BASE = ['ssh', '-o', 'BatchMode=yes', '-S', './sshsock.%h']
+
+
+### Setup ###
+
+ap = u.ArgumentParser(description=__doc__, epilog=help_epilogue)
+gr = ap.default_group
+gr.add_argument('-c',
+                action='store_true',
+                help='ignored (for compatibility with shells)')
+gr.add_argument('-e',
+                action='store_true',
+                help='exit with error as soon as command component fails')
+gr.add_argument('--muxstart',
+                action='store_true',
+                help='set up session sharing for all nodes')
+gr.add_argument('--muxstop',
+                action='store_true',
+                help='tear down session sharing')
+gr.add_argument('cmds',
+                metavar='WORD',
+                nargs='*',
+                help='words of command line to run on remote host')
+
+
+### Main ###
+
+def main():
+
+   try:
+      nodes = hostlist.expand_hostlist(os.environ['SLURM_NODELIST'])
+   except KeyError:
+      nodes = [platform.node()]
+   statef = io.open(STATEFILE, 'a+b')
+
+   # Need exclusive access to the state file, so lock before proceeding. This
+   # will block until we can have the lock. The lock is released either when
+   # we exit (--muxstart and --muxstop) or explicitly release it.
+   fcntl.lockf(statef.fileno(), fcntl.LOCK_EX)
+
+   if (args.muxstart):
+      for node in nodes:
+         # When we start the SSH master, we need it to persist in order for us
+         # to re-use the multiplexed connection. The right way to do this is
+         # with "-o ControlPersist=5m -N", which sets the master to exit after
+         # 5 minutes of no activity (either master or client) and run no
+         # command. However, this is not supported until OpenSSH 5.6, and we
+         # need to support 5.3. The workaround is to run sleep for a generous
+         # time period (jobs should complete within this time) and add -f to
+         # run in the background (so sshrot returns immediately).
+         subprocess.check_call(SSH_BASE + ['-Mf', node, 'sleep 86400'])
+   elif (args.muxstop):
+      for node in nodes:
+         subprocess.check_call(SSH_BASE + ['-O', 'exit', node])
+      os.unlink(STATEFILE)
+   else:
+      # run a command
+
+      # read state
+      try:
+         statef.seek(0)
+         lastnode = u.pickle_load(statef)
+         curnode = nodes[(nodes.index(lastnode) + 1) % len(nodes)]
+      except (EOFError, ValueError) as x:
+         curnode = nodes[0]
+
+      # write state
+      statef.truncate(0)
+      u.pickle_dump(statef, curnode)
+
+      # we wrote the state we wanted, so release the lock
+      statef.close()
+
+      # build and run command
+      cmd = SSH_BASE + [curnode, 'cd', os.getcwd(), ';']
+      if (args.e):
+         cmd += ['set', '-e', ';']
+      cmd += args.cmds
+      os.execvp('ssh', cmd)
+
+
+### Bootstrap ###
+
+try:
+   args = u.parse_args(ap)
+   if (__name__ == '__main__'):
+      main()
+except testable.Unittests_Only_Exception:
+   testable.register('')

@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Test that distributed make over ssh works in a SLURM allocation.
+
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+. ./environment.sh
+
+cd $DATADIR
+exec 2>&1
+
+## SSH multiplexing test ##
+x sshrot --muxstart
+# Verify one master to each node.
+sshinfo $SLURM_NODE_A
+sshinfo $SLURM_NODE_B
+# Run three tasks.
+y "sshrot 'echo a && sleep 1 && echo b' &"
+y "sshrot 'echo a && sleep 1 && echo b' &"
+y "sshrot 'echo a && sleep 1 && echo b' &"
+# Wait for output.
+x sleep 0.75
+# Verify two connections to node A, one to node B.
+sshinfo $SLURM_NODE_A
+sshinfo $SLURM_NODE_B
+# Wait for output.
+x sleep 1.25
+# Stop multiplexing.
+x sshrot --muxstop
+# Verify that everything is gone.
+sshinfo $SLURM_NODE_A
+sshinfo $SLURM_NODE_B
+
+## SSH scale test ##
+x sshrot --muxstart
+for i in {1..18}; do
+    # Note: I don't actually want all 18 sshrot invocations in the output log,
+    # but if I remove the y wrapper, then the ssh invocations show up in ps
+    # output as sshrot instead of ssh, breaking sshinfo function. ???
+    y "sshrot 'sleep 1.5 && echo c' &"
+done
+x sleep 0.5
+sshinfo $SLURM_NODE_A
+sshinfo $SLURM_NODE_B
+x sleep 2.0
+x sshrot --muxstop
+
+# QUACreduce to multiple nodes test
+x sshrot --muxstart
+echo -e 'foo bar baz\nfoo foo' > foo1.txt
+echo -e 'bar' > foo2.txt
+quacreduce --dist \
+           --map 'tr "[:blank:]" "\n"' \
+           --reduce 'uniq -c > out/%(RID)' \
+           --partitions 3 \
+           foo*.txt
+x make -j2 --quiet
+y 'cat out/* | sort'
+x sshrot --muxstop

@@ -1,0 +1,64 @@
+$ (sshrot echo a)
+a
+$ sshrot --muxstart
+$ (sshrot 'echo b && sleep 2 && echo c' &)
+$ (sshrot 'echo b && sleep 3 && echo d' &)
+$ sleep 1.5
+b
+b
+ssh clients:      2
+ssh masters:      1
+control sockets:  1
+TCP connections:  1
+$ sleep 1.0
+c
+ssh clients:      1
+ssh masters:      1
+control sockets:  1
+TCP connections:  1
+$ sleep 1.5
+d
+$ sshrot --muxstop
+Exit request sent.
+ssh clients:      0
+ssh masters:      0
+control sockets:  0
+TCP connections:  0
+$ sshrot --muxstart
+$ (sshrot 'sleep 1 && echo e' &)
+$ (sshrot 'sleep 1 && echo e' &)
+$ (sshrot 'sleep 1 && echo e' &)
+$ (sshrot 'sleep 1 && echo e' &)
+$ (sshrot 'sleep 1 && echo e' &)
+$ (sshrot 'sleep 1 && echo e' &)
+$ (sshrot 'sleep 1 && echo e' &)
+$ (sshrot 'sleep 1 && echo e' &)
+$ (sshrot 'sleep 1 && echo e' &)
+$ sleep 0.5
+ssh clients:      9
+ssh masters:      1
+control sockets:  1
+TCP connections:  1
+$ sleep 1.0
+e
+e
+e
+e
+e
+e
+e
+e
+e
+$ sshrot --muxstop
+Exit request sent.
+$ (python -c 'import os; print os.getcwd()' > pwd_local)
+$ (sshrot pwd > pwd_sshrot)
+$ (diff -u pwd_local pwd_sshrot)
+$ sshrot --muxstart
+$ make -j3 --quiet
+$ (cat out/* | sort)
+      1 baz
+      2 bar
+      3 foo
+$ sshrot --muxstop
+Exit request sent.

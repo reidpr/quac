@@ -1,0 +1,98 @@
+$ sshrot --muxstart
+ssh clients:      0
+ssh masters:      1
+control sockets:  1
+TCP connections:  1
+ssh clients:      0
+ssh masters:      1
+control sockets:  1
+TCP connections:  1
+$ (sshrot 'echo a && sleep 1 && echo b' &)
+$ (sshrot 'echo a && sleep 1 && echo b' &)
+$ (sshrot 'echo a && sleep 1 && echo b' &)
+$ sleep 0.75
+a
+a
+a
+ssh clients:      2
+ssh masters:      1
+control sockets:  1
+TCP connections:  1
+ssh clients:      1
+ssh masters:      1
+control sockets:  1
+TCP connections:  1
+$ sleep 1.25
+b
+b
+b
+$ sshrot --muxstop
+Exit request sent.
+Exit request sent.
+ssh clients:      0
+ssh masters:      0
+control sockets:  0
+TCP connections:  0
+ssh clients:      0
+ssh masters:      0
+control sockets:  0
+TCP connections:  0
+$ sshrot --muxstart
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ (sshrot 'sleep 1.5 && echo c' &)
+$ sleep 0.5
+ssh clients:      9
+ssh masters:      1
+control sockets:  1
+TCP connections:  1
+ssh clients:      9
+ssh masters:      1
+control sockets:  1
+TCP connections:  1
+$ sleep 2.0
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+c
+$ sshrot --muxstop
+Exit request sent.
+Exit request sent.
+$ sshrot --muxstart
+$ make -j2 --quiet
+$ (cat out/* | sort)
+      1 baz
+      2 bar
+      3 foo
+$ sshrot --muxstop
+Exit request sent.
+Exit request sent.

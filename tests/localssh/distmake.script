@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Test that distributed make over ssh works.
+
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+. ./environment.sh
+
+cd $DATADIR
+exec 2>&1
+
+# Can we ssh to localhost without a password? That's a prerequisite for all
+# the fancy stuff below...
+y "sshrot echo a"
+
+## SSH multiplexing test ##
+#
+# Set up two simultaneous ssh connections. Note that this test depends on
+# rather finicky timing (starting up an ssh connection can take significantly
+# varying amounts of time).
+#
+#    a. Set up multiplexing.
+x sshrot --muxstart
+#    b. Set up "real" connections.
+y "sshrot 'echo b && sleep 2 && echo c' &"
+y "sshrot 'echo b && sleep 3 && echo d' &"
+#    c. Wait a little for the output to appear.
+x sleep 1.5
+# Verify that we have: two regular SSH processes, one mux process, one control
+# socket, and one TCP connection.
+sshinfol
+# Wait until 2.5 seconds (the first ssh should be done)
+x sleep 1.0
+# Verify that we are down to one regular SSH process.
+sshinfol
+# Wait until 4.0 seconds (both ssh should be done).
+x sleep 1.5
+# Stop multiplexing.
+x sshrot --muxstop
+# Verify that SSH processes, control socket, and TCP connection are gone.
+sshinfol
+
+## SSH scale test ##
+#
+# Start several simultaneous connections
+x sshrot --muxstart
+for i in {1..9}; do
+    y "sshrot 'sleep 1 && echo e' &"
+done
+x sleep 0.5
+# Did multiplexing work?
+sshinfol
+# Wait for output
+x sleep 1.0
+# Done
+x sshrot --muxstop
+
+# Same working directory test. Note that Python's os.getcwd() can give
+# different results than pwd if symlinks are involved (though we use pwd under
+# sshrot as it's already passed through os.getcwd() at that point).
+y "python -c 'import os; print os.getcwd()' > pwd_local"
+y 'sshrot pwd > pwd_sshrot'
+y 'diff -u pwd_local pwd_sshrot'
+
+# QUACreduce over ssh test
+x sshrot --muxstart
+echo -e 'foo bar baz\nfoo foo' > foo1.txt
+echo -e 'bar' > foo2.txt
+quacreduce --dist \
+           --map 'tr "[:blank:]" "\n"' \
+           --reduce 'uniq -c > out/%(RID)' \
+           --partitions 3 \
+           foo*.txt
+x make -j3 --quiet
+y 'cat out/* | sort'
+x sshrot --muxstop
