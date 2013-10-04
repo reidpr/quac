@@ -114,6 +114,7 @@ pip install httplib2-*.tar.gz
 pip install oauth2-*.tar.gz
 pip install psutil-*.tar.gz
 pip install pyproj-*.tar.gz
+pip install python-hostlist-*.tar.gz
 pip install pytz-*.tar.bz2
 pip install reidpr-tweetstream-reidpr-*.zip
 pip install scikit-learn-*.tar.gz

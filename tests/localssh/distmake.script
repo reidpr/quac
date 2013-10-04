@@ -1,37 +1,13 @@
 #!/bin/bash
 
 # Test that distributed make over ssh works.
-#
+
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
 . ./environment.sh
 
 cd $DATADIR
-set -e
 exec 2>&1
-
-# Decide how to call netstat. The problem is that Red Hat and everyone else
-# chose incompatible options for not truncating hostnames.
-if (netstat --help 2>&1 | fgrep -q -- --wide); then
-    WIDE=--wide
-else
-    WIDE=--notrim
-fi
-
-# Print info about current SSH state (4 lines).
-# See commit c5009e for the most recent -o ControlPersist=5m version.
-sshinfo () {
-    # FIXME: This ps command does not work on Mac. I suspect a portable
-    # alternative is possible, but I haven't figured it out yet.
-    echo -n 'ssh clients:      '
-    ps -C ssh -o command | fgrep -v 'sleep 86400' | egrep -c -- '-S \./sshsock\..* '$HOSTNAME || true
-    echo -n 'ssh masters:      '
-    ps -C ssh -o command | egrep -c -- '-S \./sshsock\..* '$HOSTNAME' sleep 86400' || true
-    echo -n 'control sockets:  '
-    ls $DATADIR | fgrep -c 'sshsock.'$HOSTNAME || true
-    echo -n 'TCP connections:  '
-    netstat $WIDE | egrep -c '(localhost|'$HOSTNAME'):.+'$HOSTNAME'.*:ssh +ESTABLISHED' || true
-}
 
 # Can we ssh to localhost without a password? That's a prerequisite for all
 # the fancy stuff below...
@@ -52,17 +28,17 @@ y "sshrot 'echo b && sleep 3 && echo d' &"
 x sleep 1.5
 # Verify that we have: two regular SSH processes, one mux process, one control
 # socket, and one TCP connection.
-sshinfo
+sshinfol
 # Wait until 2.5 seconds (the first ssh should be done)
 x sleep 1.0
 # Verify that we are down to one regular SSH process.
-sshinfo
+sshinfol
 # Wait until 4.0 seconds (both ssh should be done).
 x sleep 1.5
 # Stop multiplexing.
 x sshrot --muxstop
 # Verify that SSH processes, control socket, and TCP connection are gone.
-sshinfo
+sshinfol
 
 ## SSH scale test ##
 #
@@ -73,17 +49,18 @@ for i in {1..9}; do
 done
 x sleep 0.5
 # Did multiplexing work?
-sshinfo
+sshinfol
 # Wait for output
 x sleep 1.0
 # Done
 x sshrot --muxstop
 
-# Same working directory test
-y 'pwd > pwd_local'
+# Same working directory test. Note that Python's os.getcwd() can give
+# different results than pwd if symlinks are involved (though we use pwd under
+# sshrot as it's already passed through os.getcwd() at that point).
+y "python -c 'import os; print os.getcwd()' > pwd_local"
 y 'sshrot pwd > pwd_sshrot'
 y 'diff -u pwd_local pwd_sshrot'
-
 
 # QUACreduce over ssh test
 x sshrot --muxstart

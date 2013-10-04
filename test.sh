@@ -43,6 +43,11 @@ set -e
 
 BASEDIR=$(cd $(dirname $0); pwd)
 
+# Use a temporary directory in the QUAC working directory, because it's
+# guaranteed to be available on all test nodes, while things like /tmp are
+# not.
+export TMPDIR=$BASEDIR/tests
+
 while getopts "ai" opt; do
     case $opt in
         a)

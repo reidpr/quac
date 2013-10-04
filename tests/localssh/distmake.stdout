@@ -51,7 +51,7 @@ e
 e
 $ sshrot --muxstop
 Exit request sent.
-$ (pwd > pwd_local)
+$ (python -c 'import os; print os.getcwd()' > pwd_local)
 $ (sshrot pwd > pwd_sshrot)
 $ (diff -u pwd_local pwd_sshrot)
 $ sshrot --muxstart

@@ -35,3 +35,31 @@ y () {
     echo "$ ($1)"
     bash -c "$1"
 }
+
+# Decide how to call netstat. The problem is that Red Hat and everyone else
+# chose incompatible options for not truncating hostnames.
+if (netstat --help 2>&1 | fgrep -q -- --wide); then
+    WIDE=--wide
+else
+    WIDE=--notrim
+fi
+
+# Print info about current SSH state (4 lines). See commit c5009e for the most
+# recent -o ControlPersist=5m version (it was actually in
+# localssh/distmake.script then).
+sshinfo () {
+    # FIXME: This ps command does not work on Mac. I suspect a portable
+    # alternative is possible, but I haven't figured it out yet.
+    echo -n 'ssh clients:      '
+    ps -C ssh -o command | fgrep -v 'sleep 86400' | egrep -c -- '-S \./sshsock\..* '$1 || true
+    echo -n 'ssh masters:      '
+    ps -C ssh -o command | egrep -c -- '-S \./sshsock\..* '$1' sleep 86400' || true
+    echo -n 'control sockets:  '
+    ls $DATADIR | fgrep -c 'sshsock.'$1 || true
+    echo -n 'TCP connections:  '
+    netstat $WIDE | egrep -c '(localhost|'$HOSTNAME'):.+'$1'.*:ssh +ESTABLISHED' || true
+}
+
+sshinfol () {
+    sshinfo $HOSTNAME
+}
