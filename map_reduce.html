@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>4. Map-Reduce with QUACreduce &mdash; QUAC documentation for commit 394d7b5</title>
+    <title>4. Map-Reduce with QUACreduce &mdash; QUAC documentation for commit 93399de</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="QUAC documentation for commit 394d7b5" href="index.html" />
+    <link rel="top" title="QUAC documentation for commit 93399de" href="index.html" />
     <link rel="next" title="5. Time series analysis" href="timeseries.html" />
     <link rel="prev" title="3. Preprocessing" href="pipeline.html" /> 
   </head>
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="pipeline.html" title="3. Preprocessing"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 394d7b5</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit 93399de</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -57,14 +57,23 @@
 <li><a class="reference internal" href="#test-the-operators-together">4.3.4. Test the operators together</a></li>
 <li><a class="reference internal" href="#prepare-the-job">4.3.5. Prepare the job</a></li>
 <li><a class="reference internal" href="#run-the-job-with-make">4.3.6. Run the job with make</a></li>
-<li><a class="reference internal" href="#run-the-job-with-slurm">4.3.7. Run the job with SLURM</a></li>
-<li><a class="reference internal" href="#add-more-input-data">4.3.8. Add more input data</a></li>
-<li><a class="reference internal" href="#what-s-next">4.3.9. What&#8217;s next?</a></li>
+<li><a class="reference internal" href="#add-more-input-data">4.3.7. Add more input data</a></li>
+<li><a class="reference internal" href="#what-s-next">4.3.8. What&#8217;s next?</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#drawbacks">4.4. Drawbacks</a></li>
-<li><a class="reference internal" href="#fixme">4.5. FIXME</a></li>
-<li><a class="reference internal" href="#footnotes">4.6. Footnotes</a></li>
+<li><a class="reference internal" href="#distributed-quacreduce">4.4. Distributed QUACreduce</a><ul>
+<li><a class="reference internal" href="#ssh-gotchas-quirks">4.4.1. SSH gotchas &amp; quirks</a><ul>
+<li><a class="reference internal" href="#batch-mode">4.4.1.1. Batch mode</a></li>
+<li><a class="reference internal" href="#multiplexing">4.4.1.2. Multiplexing</a></li>
+<li><a class="reference internal" href="#miscellaneous">4.4.1.3. Miscellaneous</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id6">4.4.2. Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#drawbacks">4.5. Drawbacks</a></li>
+<li><a class="reference internal" href="#fixme">4.6. FIXME</a></li>
+<li><a class="reference internal" href="#footnotes">4.7. Footnotes</a></li>
 </ul>
 </li>
 </ul>
@@ -101,14 +110,14 @@
 <div class="section" id="introduction">
 <h2>4.1. Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="http://en.wikipedia.org/wiki/MapReduce">Map-reduce</a> is a neat and easy to
-use parallel programming paradigm. <a class="footnote-reference" href="#id5" id="id1">[1]</a> QUACreduce is a simple map-reduce
+use parallel programming paradigm. <a class="footnote-reference" href="#id7" id="id1">[1]</a> QUACreduce is a simple map-reduce
 framework designed for situations where a unified, fast POSIX filesystem is
 available (e.g., HPC clusters with <a class="reference external" href="http://www.panasas.com/products/panfs">Panasas</a>). It has the following features:</p>
 <ul class="simple">
 <li>Easy to install and use. No daemons or persistent workers are required, nor
 any firewall changes, nor root access.</li>
 <li>Takes advantage of node-local storage, if available, which need not persist
-between jobs. <a class="footnote-reference" href="#id6" id="id2">[2]</a></li>
+between jobs. <a class="footnote-reference" href="#id8" id="id2">[2]</a></li>
 <li>Map-reduce jobs can be run incrementally; if new input data are added, only
 computations which actually depend on the new data are redone.</li>
 <li>Data API is compatible with Hadoop Streaming.</li>
@@ -120,13 +129,14 @@ both a single node as well as in a SLURM allocation.</p>
 <h2>4.2. Summary of API<a class="headerlink" href="#summary-of-api" title="Permalink to this headline">¶</a></h2>
 <p>The basic paradigm is that map and reduce operators produce and accept
 line-oriented input, with key and value separated by a single tab character.
-<a class="footnote-reference" href="#id7" id="id3">[3]</a> All characters except tab, return, and newline are permitted in keys and
+<a class="footnote-reference" href="#id9" id="id3">[3]</a> All characters except tab, return, and newline are permitted in keys and
 values (though this is untested). Null values are permitted; in this case the
-separating tab may or may be omitted. <a class="footnote-reference" href="#id8" id="id4">[4]</a> The last line of the stream must
+separating tab may or may be omitted. <a class="footnote-reference" href="#id10" id="id4">[4]</a> The last line of the stream must
 end in a newline.</p>
 <p>The <tt class="docutils literal"><span class="pre">quacreduce</span></tt> command implements this API by creating a makefile, which
 you then run with <tt class="docutils literal"><span class="pre">make</span></tt> (either directly or wrapped).</p>
-<p>QUACreduce also has a Python API which we do not cover here.</p>
+<p>QUACreduce also has a Python API which we do not cover here (see
+<tt class="docutils literal"><span class="pre">lib/qr/wordcount.py</span></tt> and other examples in the same directory).</p>
 </div>
 <div class="section" id="example">
 <h2>4.3. Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
@@ -273,17 +283,8 @@ Makefile  out  slurm_job  tmp
 <p>Note that the output order has changed. In general, you must sort yourself
 if you care about this order.</p>
 </div>
-<div class="section" id="run-the-job-with-slurm">
-<h3>4.3.7. Run the job with SLURM<a class="headerlink" href="#run-the-job-with-slurm" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><pre>$ sbatch -N2 slurm_job -j4</pre>
-</div>
-<p>Note that the number of nodes requested from SLURM and <tt class="docutils literal"><span class="pre">-j</span></tt>, which is the
-total number of tasks <tt class="docutils literal"><span class="pre">make</span></tt> will run simultaneously, must be coordinated
-for good performance. The above might be appropriate for a cluster with two
-cores per node. Memory could be a limitation also, along with myriad others.</p>
-</div>
 <div class="section" id="add-more-input-data">
-<h3>4.3.8. Add more input data<a class="headerlink" href="#add-more-input-data" title="Permalink to this headline">¶</a></h3>
+<h3>4.3.7. Add more input data<a class="headerlink" href="#add-more-input-data" title="Permalink to this headline">¶</a></h3>
 <p>One of the neat things that QUACreduce can do is add additional data
 and then only re-run the parts of the job that are affected. For example:</p>
 <div class="highlight-python"><pre>$ echo 'qux' &gt; /tmp/foo3.txt
@@ -301,13 +302,81 @@ $ cat out/*
 for <tt class="docutils literal"><span class="pre">foo1.txt</span></tt> and <tt class="docutils literal"><span class="pre">foo2.txt</span></tt>.</p>
 </div>
 <div class="section" id="what-s-next">
-<h3>4.3.9. What&#8217;s next?<a class="headerlink" href="#what-s-next" title="Permalink to this headline">¶</a></h3>
-<p>For further help, say <tt class="docutils literal"><span class="pre">quacreduce</span> <span class="pre">--help</span></tt> or see <tt class="docutils literal"><span class="pre">makr/grep.py</span></tt> for a
-Python example.</p>
+<h3>4.3.8. What&#8217;s next?<a class="headerlink" href="#what-s-next" title="Permalink to this headline">¶</a></h3>
+<p>For further help, say <tt class="docutils literal"><span class="pre">quacreduce</span> <span class="pre">--help</span></tt>.</p>
+</div>
+</div>
+<div class="section" id="distributed-quacreduce">
+<h2>4.4. Distributed QUACreduce<a class="headerlink" href="#distributed-quacreduce" title="Permalink to this headline">¶</a></h2>
+<p>QUACreduce jobs can be distributed across multiple nodes. The basic paradigm
+is that the master node runs a Make job which farms tasks out to compute nodes
+(which can include the master) using SSH; this list is taken from resource
+manager environment variables (e.g., <tt class="docutils literal"><span class="pre">$SLURM_NODELIST</span></tt>). Each node must
+therefore have access to the job directory at the same path.</p>
+<div class="section" id="ssh-gotchas-quirks">
+<h3>4.4.1. SSH gotchas &amp; quirks<a class="headerlink" href="#ssh-gotchas-quirks" title="Permalink to this headline">¶</a></h3>
+<p>QUACreduce uses an SSH wrapper script called <tt class="docutils literal"><span class="pre">sshrot</span></tt> to distribute jobs
+(say <tt class="docutils literal"><span class="pre">sshrot</span> <span class="pre">--help</span></tt> for more details on using the script). There are a
+number of quirks you need to be aware of.</p>
+<div class="section" id="batch-mode">
+<h4>4.4.1.1. Batch mode<a class="headerlink" href="#batch-mode" title="Permalink to this headline">¶</a></h4>
+<p><tt class="docutils literal"><span class="pre">sshrot</span></tt> invokes <tt class="docutils literal"><span class="pre">ssh</span></tt> with <tt class="docutils literal"><span class="pre">-o</span> <span class="pre">BatchMode=yes</span></tt>, i.e., don&#8217;t try to ask
+the user for authentication information, just fail instead if they would have
+to supply anything. This means that you need something set up for
+non-interactive, passwordless login to the compute nodes (and <tt class="docutils literal"><span class="pre">localhost</span></tt> if
+you want to run the tests). For example, SSH keys and a running SSH agent will
+work.</p>
+</div>
+<div class="section" id="multiplexing">
+<h4>4.4.1.2. Multiplexing<a class="headerlink" href="#multiplexing" title="Permalink to this headline">¶</a></h4>
+<p>Optionally, you can use SSH multiplexing <a class="footnote-reference" href="#id11" id="id5">[5]</a> to put multiple SSH sessions in
+the same TCP connection, thereby conserving the latter resource. To do so, say
+<tt class="docutils literal"><span class="pre">sshrot</span> <span class="pre">--muxstart</span></tt> before your job and <tt class="docutils literal"><span class="pre">--muxstop</span></tt> afterwards.</p>
+<p>SSH daemons are configured with a limit on the number of sessions that can be
+multiplexed over one TCP connection; the option is <tt class="docutils literal"><span class="pre">MaxSessions</span></tt> and it
+defaults to 10. <tt class="docutils literal"><span class="pre">sshrot</span></tt> doesn&#8217;t do anything to try to avoid this limit. If
+you exceed <tt class="docutils literal"><span class="pre">MaxSessions</span></tt> per compute node, the job may still work, but you
+will no longer be conserving TCP sessions and you will get warnings. That is,
+if you have <span class="math">\(n\)</span> jobs per compute node, you will use <span class="math">\(\max(1, n-9)\)</span>
+TCP connections per node, not <span class="math">\(\lceil \frac{n}{10} \rceil\)</span>.</p>
+<p>(<tt class="docutils literal"><span class="pre">sshrot</span></tt> could track the number of connections in its state file and start
+a new multiplexed session when needed, but this would require knowing when
+each session ends, which is nontrivial and complicates the API.)</p>
+<p>In principle, <tt class="docutils literal"><span class="pre">sshrot</span></tt> should be able to use opportunistic multiplexing
+(<tt class="docutils literal"><span class="pre">ControlMaster=auto</span></tt>) and thus avoid the need for <tt class="docutils literal"><span class="pre">--muxstop</span></tt> and
+<tt class="docutils literal"><span class="pre">--muxstop</span></tt>, but this has multiple bugs:</p>
+<ol class="arabic simple">
+<li>Frequent <tt class="docutils literal"><span class="pre">muxclient:</span> <span class="pre">master</span> <span class="pre">hello</span> <span class="pre">exchange</span> <span class="pre">failed</span></tt> errors.</li>
+<li>Race condition. If you create multiple <tt class="docutils literal"><span class="pre">ControlMaster=auto</span></tt> sessions
+simultaneously, each will conclude that they are the master and try to
+create the control socket, but one will get there first and the others will
+fail with &#8220;ControlSocket [...] already exists, disabling multiplexing&#8221;.
+This is a <a class="reference external" href="https://bugzilla.mindrot.org/show_bug.cgi?id=1349">known bug</a>,
+supposedly fixed a long time ago, but it sure fails for me on Ubuntu 13.04.</li>
+</ol>
+<p>Neither of these cause the connection to fail, but you get noise on stderr and
+TCP connections are no longer conserved. Therefore, we don&#8217;t do it.</p>
+</div>
+<div class="section" id="miscellaneous">
+<h4>4.4.1.3. Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this headline">¶</a></h4>
+<p><tt class="docutils literal"><span class="pre">sshrot</span></tt> may not work as expected if your login shell is not <tt class="docutils literal"><span class="pre">bash</span></tt>. And
+simply invoking your desired shell as part of the command may not work because
+shell quoting rules are really complicated.</p>
+</div>
+</div>
+<div class="section" id="id6">
+<h3>4.4.2. Example<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<p><cite>FIXME</cite></p>
+<div class="highlight-python"><pre>$ sbatch -N2 slurm_job -j4</pre>
+</div>
+<p>Note that the number of nodes requested from SLURM and <tt class="docutils literal"><span class="pre">-j</span></tt>, which is the
+total number of tasks <tt class="docutils literal"><span class="pre">make</span></tt> will run simultaneously, must be coordinated
+for good performance. The above might be appropriate for a cluster with two
+cores per node. Memory could be a limitation also, along with myriad others.</p>
 </div>
 </div>
 <div class="section" id="drawbacks">
-<h2>4.4. Drawbacks<a class="headerlink" href="#drawbacks" title="Permalink to this headline">¶</a></h2>
+<h2>4.5. Drawbacks<a class="headerlink" href="#drawbacks" title="Permalink to this headline">¶</a></h2>
 <p>QUACreduce is pretty simple and has a number of limitations. If these are
 a problem, perhaps you are better off with something else. Some of these could
 be fixed, and others are more fundamental.</p>
@@ -326,22 +395,22 @@ parallel.</li>
 </ul>
 </div>
 <div class="section" id="fixme">
-<h2>4.5. FIXME<a class="headerlink" href="#fixme" title="Permalink to this headline">¶</a></h2>
+<h2>4.6. FIXME<a class="headerlink" href="#fixme" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>sort tmpdir</li>
 <li>parallel sorts</li>
 </ul>
 </div>
 <div class="section" id="footnotes">
-<h2>4.6. Footnotes<a class="headerlink" href="#footnotes" title="Permalink to this headline">¶</a></h2>
-<table class="docutils footnote" frame="void" id="id5" rules="none">
+<h2>4.7. Footnotes<a class="headerlink" href="#footnotes" title="Permalink to this headline">¶</a></h2>
+<table class="docutils footnote" frame="void" id="id7" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>I know that it&#8217;s usually spelled MapReduce, but I think InterCapping is
 stupid.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id6" rules="none">
+<table class="docutils footnote" frame="void" id="id8" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Use of node-local storage in HPC clusters for distributed filesystems
@@ -350,7 +419,7 @@ that a new job is assigned exactly the same set of nodes as a previous
 job and/or (b) node-local storage is explicitly wiped between jobs.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id7" rules="none">
+<table class="docutils footnote" frame="void" id="id9" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>This is the same as Hadoop Streaming; the goal is to make QUACreduce
@@ -358,11 +427,18 @@ components with non-null values work without modification in that
 framework, though this is untested.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id8" rules="none">
+<table class="docutils footnote" frame="void" id="id10" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td>Note that this contrasts with Hadoop Streaming, where a null key is
 permitted but a null value isn&#8217;t.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id11" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[5]</a></td><td>See the options <tt class="docutils literal"><span class="pre">ControlMaster</span></tt>, <tt class="docutils literal"><span class="pre">ControlPath</span></tt>, and
+<tt class="docutils literal"><span class="pre">ControlPersist</span></tt> in the <a class="reference external" href="http://www.openbsd.org/cgi-bin/man.cgi?query=ssh_config">ssh_config man page</a>.</td></tr>
 </tbody>
 </table>
 </div>
@@ -383,7 +459,7 @@ permitted but a null value isn&#8217;t.</td></tr>
         <li class="right" >
           <a href="pipeline.html" title="3. Preprocessing"
              >previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 394d7b5</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit 93399de</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

@@ -40,7 +40,8 @@ end in a newline.
 The ``quacreduce`` command implements this API by creating a makefile, which
 you then run with ``make`` (either directly or wrapped).
 
-QUACreduce also has a Python API which we do not cover here.
+QUACreduce also has a Python API which we do not cover here (see
+``lib/qr/wordcount.py`` and other examples in the same directory).
 
 Example
 =======
@@ -213,18 +214,6 @@ Your output is available with::
 Note that the output order has changed. In general, you must sort yourself
 if you care about this order.
 
-Run the job with SLURM
-----------------------
-
-::
-
-  $ sbatch -N2 slurm_job -j4
-
-Note that the number of nodes requested from SLURM and ``-j``, which is the
-total number of tasks ``make`` will run simultaneously, must be coordinated
-for good performance. The above might be appropriate for a cluster with two
-cores per node. Memory could be a limitation also, along with myriad others.
-
 Add more input data
 -------------------
 
@@ -248,8 +237,93 @@ for ``foo1.txt`` and ``foo2.txt``.
 What's next?
 ------------
 
-For further help, say ``quacreduce --help`` or see ``makr/grep.py`` for a
-Python example.
+For further help, say ``quacreduce --help``.
+
+
+Distributed QUACreduce
+======================
+
+QUACreduce jobs can be distributed across multiple nodes. The basic paradigm
+is that the master node runs a Make job which farms tasks out to compute nodes
+(which can include the master) using SSH; this list is taken from resource
+manager environment variables (e.g., ``$SLURM_NODELIST``). Each node must
+therefore have access to the job directory at the same path.
+
+
+SSH gotchas & quirks
+--------------------
+
+QUACreduce uses an SSH wrapper script called ``sshrot`` to distribute jobs
+(say ``sshrot --help`` for more details on using the script). There are a
+number of quirks you need to be aware of.
+
+Batch mode
+~~~~~~~~~~
+
+``sshrot`` invokes ``ssh`` with ``-o BatchMode=yes``, i.e., don't try to ask
+the user for authentication information, just fail instead if they would have
+to supply anything. This means that you need something set up for
+non-interactive, passwordless login to the compute nodes (and ``localhost`` if
+you want to run the tests). For example, SSH keys and a running SSH agent will
+work.
+
+Multiplexing
+~~~~~~~~~~~~
+
+Optionally, you can use SSH multiplexing [5]_ to put multiple SSH sessions in
+the same TCP connection, thereby conserving the latter resource. To do so, say
+``sshrot --muxstart`` before your job and ``--muxstop`` afterwards.
+
+SSH daemons are configured with a limit on the number of sessions that can be
+multiplexed over one TCP connection; the option is ``MaxSessions`` and it
+defaults to 10. ``sshrot`` doesn't do anything to try to avoid this limit. If
+you exceed ``MaxSessions`` per compute node, the job may still work, but you
+will no longer be conserving TCP sessions and you will get warnings. That is,
+if you have :math:`n` jobs per compute node, you will use :math:`\max(1, n-9)`
+TCP connections per node, not :math:`\lceil \frac{n}{10} \rceil`.
+
+(``sshrot`` could track the number of connections in its state file and start
+a new multiplexed session when needed, but this would require knowing when
+each session ends, which is nontrivial and complicates the API.)
+
+In principle, ``sshrot`` should be able to use opportunistic multiplexing
+(``ControlMaster=auto``) and thus avoid the need for ``--muxstop`` and
+``--muxstop``, but this has multiple bugs:
+
+1. Frequent ``muxclient: master hello exchange failed`` errors.
+
+2. Race condition. If you create multiple ``ControlMaster=auto`` sessions
+   simultaneously, each will conclude that they are the master and try to
+   create the control socket, but one will get there first and the others will
+   fail with "ControlSocket [...] already exists, disabling multiplexing".
+   This is a `known bug <https://bugzilla.mindrot.org/show_bug.cgi?id=1349>`_,
+   supposedly fixed a long time ago, but it sure fails for me on Ubuntu 13.04.
+
+Neither of these cause the connection to fail, but you get noise on stderr and
+TCP connections are no longer conserved. Therefore, we don't do it.
+
+
+Miscellaneous
+~~~~~~~~~~~~~
+
+``sshrot`` may not work as expected if your login shell is not ``bash``. And
+simply invoking your desired shell as part of the command may not work because
+shell quoting rules are really complicated.
+
+
+Example
+-------
+
+`FIXME`
+
+::
+
+  $ sbatch -N2 slurm_job -j4
+
+Note that the number of nodes requested from SLURM and ``-j``, which is the
+total number of tasks ``make`` will run simultaneously, must be coordinated
+for good performance. The above might be appropriate for a cluster with two
+cores per node. Memory could be a limitation also, along with myriad others.
 
 
 Drawbacks
@@ -300,3 +374,7 @@ Footnotes
 
 .. [4] Note that this contrasts with Hadoop Streaming, where a null key is
        permitted but a null value isn't.
+
+.. [5] See the options ``ControlMaster``, ``ControlPath``, and
+       ``ControlPersist`` in the `ssh_config man page
+       <http://www.openbsd.org/cgi-bin/man.cgi?query=ssh_config>`_.

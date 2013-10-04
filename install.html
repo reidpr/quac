@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>1. Installing QUAC &mdash; QUAC documentation for commit 394d7b5</title>
+    <title>1. Installing QUAC &mdash; QUAC documentation for commit 93399de</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="QUAC documentation for commit 394d7b5" href="index.html" />
+    <link rel="top" title="QUAC documentation for commit 93399de" href="index.html" />
     <link rel="next" title="2. Collecting data" href="collecting.html" />
     <link rel="prev" title="Table of contents" href="index.html" /> 
   </head>
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="index.html" title="Table of contents"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 394d7b5</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit 93399de</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -49,15 +49,18 @@
   <ul>
 <li><a class="reference internal" href="#">1. Installing QUAC</a><ul>
 <li><a class="reference internal" href="#summary">1.1. Summary</a></li>
-<li><a class="reference internal" href="#dependencies">1.2. Dependencies</a><ul>
-<li><a class="reference internal" href="#debian-packages">1.2.1. Debian packages</a></li>
-<li><a class="reference internal" href="#pypi-python-packages">1.2.2. PyPI Python packages</a></li>
-<li><a class="reference internal" href="#other-python-packages">1.2.3. Other Python packages</a></li>
-<li><a class="reference internal" href="#scipy">1.2.4. SciPy</a></li>
-<li><a class="reference internal" href="#one-file-python-modules">1.2.5. One-file Python modules</a></li>
-<li><a class="reference internal" href="#qgis">1.2.6. QGIS</a></li>
-<li><a class="reference internal" href="#make">1.2.7. Make</a></li>
-<li><a class="reference internal" href="#os-x-notes">1.2.8. OS X notes</a></li>
+<li><a class="reference internal" href="#installing-dependencies">1.2. Installing dependencies</a><ul>
+<li><a class="reference internal" href="#debian-ubuntu">1.2.1. Debian/Ubuntu</a><ul>
+<li><a class="reference internal" href="#debian-packages">1.2.1.1. Debian packages</a></li>
+<li><a class="reference internal" href="#pypi-python-packages">1.2.1.2. PyPI Python packages</a></li>
+<li><a class="reference internal" href="#other-python-packages">1.2.1.3. Other Python packages</a></li>
+<li><a class="reference internal" href="#scipy">1.2.1.4. SciPy</a></li>
+<li><a class="reference internal" href="#one-file-python-modules">1.2.1.5. One-file Python modules</a></li>
+<li><a class="reference internal" href="#qgis">1.2.1.6. QGIS</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#os-x">1.2.2. OS X</a></li>
+<li><a class="reference internal" href="#self-compile">1.2.3. Self-compile</a></li>
 </ul>
 </li>
 </ul>
@@ -93,14 +96,17 @@
             
   <div class="section" id="installing-quac">
 <h1>1. Installing QUAC<a class="headerlink" href="#installing-quac" title="Permalink to this headline">¶</a></h1>
+<p>QUAC can be installed on most UNIX-based systems, though installation is
+easiest on OS X and Debian/Ubuntu. Patches to increase portability are very
+welcome.</p>
 <div class="section" id="summary">
 <h2>1.1. Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
-<li><p class="first">Install the dependencies below.</p>
-</li>
 <li><p class="first">Download the code using Git:</p>
 <div class="highlight-python"><pre>git clone https://github.com/reidpr/quac.git</pre>
 </div>
+</li>
+<li><p class="first">Install the dependencies using system-specific instructions below.</p>
 </li>
 <li><p class="first">Build executables and the documentation:</p>
 <div class="highlight-python"><pre>cd quac
@@ -111,36 +117,40 @@ make</pre>
 you&#8217;ve installed all the dependencies correctly):</p>
 <div class="highlight-python"><pre>./test.sh</pre>
 </div>
+<p>Some tests require additional data or resources; if they are not available,
+then the tests are skipped.</p>
 <p>(While some parts of QUAC will work if some tests fail, we recommend
 installing everything necessary to make them pass, as this will make your
 life much easier going forward.)</p>
-<p>Note that a working Internet connection is required to run the tests.</p>
-<p>Some (optional) tests require test data which is not included with QUAC.
-See <tt class="docutils literal"><span class="pre">twtests/README</span></tt> for details.</p>
 </li>
 </ol>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">If you plan to <a class="reference internal" href="contributing.html"><em>contribute to QUAC</em></a>, you
-should fork the repository on Github and clone that fork instead.</p>
+<p class="last">If you plan to <a class="reference internal" href="contributing.html"><em>contribute to QUAC</em></a>, you should
+do two things differently. First, fork the repository on Github and
+clone your own fork instead. Second, the <tt class="docutils literal"><span class="pre">git</span></tt> wrapper <a class="reference external" href="https://github.com/defunkt/hub">hub</a> is recommended.</p>
 </div>
 </div>
-<div class="section" id="dependencies">
-<h2>1.2. Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
-<p>Installation of QUAC has been documented only on Ubuntu Linux (&#8220;Precise
-Pangolin&#8221;), though it also runs on Macs and a few Red Hat variants. Probably
-any UNIX would be fine.</p>
-<p>It requires Python 2.7 and some other stuff listed below. Note that depending
-on what you are doing, you might not need all the dependencies. Use your
-judgement.</p>
+<div class="section" id="installing-dependencies">
+<h2>1.2. Installing dependencies<a class="headerlink" href="#installing-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>Most dependencies are available through (a) either the Debian/Ubuntu (Linux)
+or Homebrew (OS X) package repositories and (b) PyPI Python package
+repository. Your life will be a lot easier if you use one of the options in
+(a), but if they is unavailable for some reason (e.g., you do not have root
+and can&#8217;t persuade your admins to install), there is a fall back method of
+compiling the core dependencies yourself.</p>
+<p>Note that there are some things, such as QGIS and profilers, which are not
+strictly dependencies but can come in handy. These things are not installed by
+all the methods below.</p>
+<p>If you are on a current UNIX system and QUAC does not pass its tests after
+dependency installation using the instructions below, that is a bug. Please
+report it!</p>
+<div class="section" id="debian-ubuntu">
+<h3>1.2.1. Debian/Ubuntu<a class="headerlink" href="#debian-ubuntu" title="Permalink to this headline">¶</a></h3>
 <p><cite>FIXME: This section is incomplete and out of date. Please improve it.</cite></p>
-<p><cite>FIXME: Turn these lists into a chart with .deb, pip, and source distribution
-columns.</cite></p>
-<p>You need Git to install QUAC and run the tests. The wrapper <a class="reference external" href="https://github.com/defunkt/hub">hub</a> is also recommended if you are going to
-hack on QUAC at all.</p>
 <div class="section" id="debian-packages">
-<h3>1.2.1. Debian packages<a class="headerlink" href="#debian-packages" title="Permalink to this headline">¶</a></h3>
-<p>Install these guys first.</p>
+<h4>1.2.1.1. Debian packages<a class="headerlink" href="#debian-packages" title="Permalink to this headline">¶</a></h4>
+<p>Install these first.</p>
 <ul class="simple">
 <li><tt class="docutils literal"><span class="pre">gdal-bin</span></tt></li>
 <li><tt class="docutils literal"><span class="pre">gfortran</span></tt></li>
@@ -168,7 +178,7 @@ hack on QUAC at all.</p>
 </ul>
 </div>
 <div class="section" id="pypi-python-packages">
-<h3>1.2.2. PyPI Python packages<a class="headerlink" href="#pypi-python-packages" title="Permalink to this headline">¶</a></h3>
+<h4>1.2.1.2. PyPI Python packages<a class="headerlink" href="#pypi-python-packages" title="Permalink to this headline">¶</a></h4>
 <p>Install with <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">foo</span></tt>.</p>
 <ul class="simple">
 <li><a class="reference external" href="https://pypi.python.org/pypi/isodate">isodate</a> parsing and formatting
@@ -183,14 +193,14 @@ machine learning library.</li>
 </ul>
 </div>
 <div class="section" id="other-python-packages">
-<h3>1.2.3. Other Python packages<a class="headerlink" href="#other-python-packages" title="Permalink to this headline">¶</a></h3>
+<h4>1.2.1.3. Other Python packages<a class="headerlink" href="#other-python-packages" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li>A <a class="reference external" href="https://bitbucket.org/reidpr/tweetstream-reidpr">custom version</a> of
 <tt class="docutils literal"><span class="pre">tweetstream</span></tt> Twitter library (hacked by Reid)</li>
 </ul>
 </div>
 <div class="section" id="scipy">
-<h3>1.2.4. SciPy<a class="headerlink" href="#scipy" title="Permalink to this headline">¶</a></h3>
+<h4>1.2.1.4. SciPy<a class="headerlink" href="#scipy" title="Permalink to this headline">¶</a></h4>
 <p>QUAC needs SciPy version 0.11 or better.</p>
 <p>Both Debian and Ubuntu only have 0.10, even in the bleeding-edge development
 releases (as of 2/20/2013). You can install it with <tt class="docutils literal"><span class="pre">pip</span></tt>. It&#8217;s worth
@@ -205,7 +215,7 @@ probably not terribly important for us) optimized ATLAS. You can do that by
 building it from source; directions are in <tt class="docutils literal"><span class="pre">README.Debian</span></tt>.</p>
 </div>
 <div class="section" id="one-file-python-modules">
-<h3>1.2.5. One-file Python modules<a class="headerlink" href="#one-file-python-modules" title="Permalink to this headline">¶</a></h3>
+<h4>1.2.1.5. One-file Python modules<a class="headerlink" href="#one-file-python-modules" title="Permalink to this headline">¶</a></h4>
 <p>Download the modules (they are single <tt class="docutils literal"><span class="pre">.py</span></tt> files) and place them somewhere
 in your Python path (e.g., <tt class="docutils literal"><span class="pre">/usr/local/lib/python2.7/dist-packages</span></tt>).</p>
 <ul class="simple">
@@ -214,7 +224,7 @@ tokenization library for Japanese.</li>
 </ul>
 </div>
 <div class="section" id="qgis">
-<h3>1.2.6. QGIS<a class="headerlink" href="#qgis" title="Permalink to this headline">¶</a></h3>
+<h4>1.2.1.6. QGIS<a class="headerlink" href="#qgis" title="Permalink to this headline">¶</a></h4>
 <p><a class="reference external" href="http://www.qgis.org/">QGIS</a> is an open source GIS system. While Ubuntu
 comes with QGIS, it is a little crusty. However, the QGIS project provides
 package repositories with new versions; see the <a class="reference external" href="http://hub.qgis.org/projects/quantum-gis/wiki/Download">download page</a>. You probably want
@@ -226,13 +236,10 @@ Debian Wheezy because it depends on <tt class="docutils literal"><span class="pr
 more (<tt class="docutils literal"><span class="pre">grass642</span></tt> is). The workaround is to build the <tt class="docutils literal"><span class="pre">.deb</span></tt> from source as
 explained in this bug report: <a class="reference external" href="http://hub.qgis.org/issues/6438">http://hub.qgis.org/issues/6438</a></p>
 </div>
-<div class="section" id="make">
-<h3>1.2.7. Make<a class="headerlink" href="#make" title="Permalink to this headline">¶</a></h3>
-<p>QUAC requires GNU Make 3.81 and <tt class="docutils literal"><span class="pre">gcc</span></tt>.</p>
 </div>
-<div class="section" id="os-x-notes">
-<h3>1.2.8. OS X notes<a class="headerlink" href="#os-x-notes" title="Permalink to this headline">¶</a></h3>
-<p><cite>FIXME: these are out of date</cite></p>
+<div class="section" id="os-x">
+<h3>1.2.2. OS X<a class="headerlink" href="#os-x" title="Permalink to this headline">¶</a></h3>
+<p><cite>FIXME: section is pretty much useless</cite></p>
 <ul class="simple">
 <li>SpatialLite<ul>
 <li>brew install libspatialite</li>
@@ -249,6 +256,55 @@ define=SQLITE_OMIT_LOAD_EXTENSION</li>
 </ul>
 </li>
 </ul>
+</div>
+<div class="section" id="self-compile">
+<h3>1.2.3. Self-compile<a class="headerlink" href="#self-compile" title="Permalink to this headline">¶</a></h3>
+<p>This method should only be used if one of the others does not work.
+Essentially, it re-implements the most basic functionality of a package
+manager, and it does so rather poorly and without regard to what you already
+have installed.</p>
+<p>It does not require root, and it will take a little while to run, since it has
+to download and compile a fair amount of stuff. There are separate scripts to
+download and install, in case you want to QUAC on a system that doesn&#8217;t have
+good access to the Internet.</p>
+<p>Prerequisites:</p>
+<ul class="simple">
+<li>Some basic dependencies such as GNU Make 3.81 and C/C++/Fortran compilers.
+Exactly what is currently unknown, but it &#8220;Works For Me™&#8221;.</li>
+<li>The <a class="reference external" href="http://modules.sourceforge.net/">Environment Modules</a> package. You
+probably have this if your system has a <tt class="docutils literal"><span class="pre">module</span></tt> command. This isn&#8217;t
+strictly needed, as you can get the same effect by editing your shell init
+files appropriately.</li>
+</ul>
+<p>The below assumes that you have unpacked QUAC into <tt class="docutils literal"><span class="pre">$QUACBASE</span></tt>.</p>
+<p>First, install the dependencies:</p>
+<div class="highlight-sh"><div class="highlight"><pre>mkdir <span class="nv">$QUACBASE</span>/deps
+<span class="nb">cd</span> <span class="nv">$QUACBASE</span>/deps
+../misc/manual-download  <span class="c"># creates $QUACBASE/deps/src</span>
+../misc/manual-install
+</pre></div>
+</div>
+<p>Optional:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">manual-install</span></tt> takes an argument which is the number of processes to use
+while compiling (<tt class="docutils literal"><span class="pre">make</span> <span class="pre">-j</span></tt>).</li>
+<li>You can run <tt class="docutils literal"><span class="pre">manual-download</span></tt> anywhere and move the resulting <tt class="docutils literal"><span class="pre">src</span></tt>
+directory into <tt class="docutils literal"><span class="pre">$QUACBASE/deps</span></tt> manually.</li>
+</ul>
+<p>Second, configure your environment. Add following to your <tt class="docutils literal"><span class="pre">.bashrc</span></tt>.</p>
+<div class="highlight-sh"><div class="highlight"><pre>module use --append <span class="nv">$QUACBASE</span>/misc
+module load quac-module
+</pre></div>
+</div>
+<p>Note that in addition to making all the dependencies available, this module
+adds the QUAC libraries and binaries themselves to your various paths. Be
+aware of this if you have multiple QUAC working directories. (For example,
+suppose a colleague has installed QUAC and its dependencies in location
+<span class="math">\(A\)</span>, and you&#8217;ve loaded <tt class="docutils literal"><span class="pre">quac-module</span></tt> from <span class="math">\(A\)</span> because you don&#8217;t
+want to duplicate the tedious installation. You have your own QUAC working
+directory at <span class="math">\(B\)</span> so you can hack on it. If you simply type
+<tt class="docutils literal"><span class="pre">quacreduce</span></tt>, you will get the one in <span class="math">\(A\)</span> even if you are working in
+<span class="math">\(B\)</span>, unless you take measures to prevent this.)</p>
 </div>
 </div>
 </div>
@@ -268,7 +324,7 @@ define=SQLITE_OMIT_LOAD_EXTENSION</li>
         <li class="right" >
           <a href="index.html" title="Table of contents"
              >previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 394d7b5</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit 93399de</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

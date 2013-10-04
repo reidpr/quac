@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>10. How to contribute &mdash; QUAC documentation for commit 394d7b5</title>
+    <title>10. How to contribute &mdash; QUAC documentation for commit 93399de</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="QUAC documentation for commit 394d7b5" href="index.html" />
+    <link rel="top" title="QUAC documentation for commit 93399de" href="index.html" />
     <link rel="next" title="11. Release notes" href="release_notes.html" />
     <link rel="prev" title="9. Citing QUAC" href="citing.html" /> 
   </head>
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="citing.html" title="9. Citing QUAC"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 394d7b5</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit 93399de</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -55,7 +55,10 @@
 <li><a class="reference internal" href="#cutting-a-release">10.1.4. Cutting a release</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#code-style">10.2. Code style</a></li>
+<li><a class="reference internal" href="#code-style">10.2. Code style</a><ul>
+<li><a class="reference internal" href="#docstrings">10.2.1. Docstrings</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#documentation">10.3. Documentation</a><ul>
 <li><a class="reference internal" href="#building-the-docs">10.3.1. Building the docs</a></li>
 <li><a class="reference internal" href="#conventions">10.3.2. Conventions</a></li>
@@ -197,7 +200,7 @@ branch directly.)</p>
 <li>Run the tests (they should pass).</li>
 <li><tt class="docutils literal"><span class="pre">make</span> <span class="pre">doc-web</span></tt></li>
 <li>Tag the appropriate commit, e.g.: <tt class="samp docutils literal"><span class="pre">git</span> <span class="pre">tag</span> <span class="pre">-a</span> <span class="pre">v0.</span><em><span class="pre">foo</span></em></tt></li>
-<li>Push.</li>
+<li>Push with <tt class="docutils literal"><span class="pre">--tags</span></tt>.</li>
 </ol>
 </div>
 </div>
@@ -212,6 +215,19 @@ PEP 8 style, except:</p>
 <p>Note that Reid is very picky about code style, so don&#8217;t feel singled out if he
 complains (or even updates this section based on your patch!). He tries to be
 nice about it.</p>
+<div class="section" id="docstrings">
+<h3>10.2.1. Docstrings<a class="headerlink" href="#docstrings" title="Permalink to this headline">¶</a></h3>
+<p>Example (note extra indent):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">whois</span><span class="p">(</span><span class="n">number</span><span class="p">):</span>
+   <span class="sd">&#39;&#39;&#39;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer ac</span>
+<span class="sd">      semper eros. Curabitur ullamcorper tortor et nibh lobortis, ut</span>
+<span class="sd">      ultrices sapien aliquet.</span>
+
+<span class="sd">      &gt;&gt;&gt; whois(8675309)</span>
+<span class="sd">      jenny&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="documentation">
 <h2>10.3. Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
@@ -282,7 +298,7 @@ the new version to be published.</p>
         <li class="right" >
           <a href="citing.html" title="9. Citing QUAC"
              >previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 394d7b5</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit 93399de</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

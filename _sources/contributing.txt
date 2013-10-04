@@ -107,7 +107,8 @@ Cutting a release
 #. Run the tests (they should pass).
 #. ``make doc-web``
 #. Tag the appropriate commit, e.g.: :samp:`git tag -a v0.{foo}`
-#. Push.
+#. Push with ``--tags``.
+
 
 Code style
 ==========
@@ -121,6 +122,19 @@ PEP 8 style, except:
 Note that Reid is very picky about code style, so don't feel singled out if he
 complains (or even updates this section based on your patch!). He tries to be
 nice about it.
+
+Docstrings
+----------
+
+Example (note extra indent)::
+
+   def whois(number):
+      '''Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer ac
+         semper eros. Curabitur ullamcorper tortor et nibh lobortis, ut
+         ultrices sapien aliquet.
+
+         >>> whois(8675309)
+         jenny'''
 
 
 Documentation
