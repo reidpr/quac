@@ -5,7 +5,7 @@ Release notes
 
 QUAC releases are more a planning tool than anything else; we try to keep the
 ``master`` branch stable. That is, there's no real point in favoring a release
-tag instead of whatever's on ``master``. All that gets you is an old version.
+tag instead of whatever is on ``master``. All that gets you is an old version.
 
 The future
 ==========
@@ -20,19 +20,28 @@ as well as `planned future releases
 List of releases
 ================
 
+Improvements in each release are below. Key changes are listed, while full
+details are available in GitHub.
+
+v0.4 (October 10, 2013)
+-----------------------
+
+* Multi-node implementation of QUACreduce.
+* `Full details <https://github.com/reidpr/quac/issues?direction=asc&milestone=4&sort=created&state=closed>`__
+
 v0.3 (August 5, 2013)
 ---------------------
 
 * Basic time series computation and correlation.
 * Acquire Wikipedia access logs and dumps.
-* `Details <https://github.com/reidpr/quac/issues?direction=asc&milestone=2&sort=created&state=closed>`__
+* `Full details <https://github.com/reidpr/quac/issues?direction=asc&milestone=2&sort=created&state=closed>`__
 
 v0.2 (May 30, 2013)
 -------------------
 
 * Single-node implementation of QUACreduce.
 * Various documentation and code organization cleanups.
-* `Details <https://github.com/reidpr/quac/issues?direction=asc&milestone=1&sort=created&state=closed>`__
+* `Full details <https://github.com/reidpr/quac/issues?direction=asc&milestone=1&sort=created&state=closed>`__
 
 v0.1 (April 26, 2013)
 ---------------------

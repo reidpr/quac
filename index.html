@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Table of contents &mdash; QUAC documentation for commit 93399de</title>
+    <title>Table of contents &mdash; QUAC documentation for commit 9bcb1e6</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="QUAC documentation for commit 93399de" href="#" />
+    <link rel="top" title="QUAC documentation for commit 9bcb1e6" href="#" />
     <link rel="next" title="1. Installing QUAC" href="install.html" /> 
   </head>
   <body>
@@ -36,7 +36,7 @@
         <li class="right" style="margin-right: 10px">
           <a href="install.html" title="1. Installing QUAC"
              accesskey="N">next</a></li>
-        <li><a href="#">QUAC documentation for commit 93399de</a> &raquo;</li> 
+        <li><a href="#">QUAC documentation for commit 9bcb1e6</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -104,16 +104,20 @@
 <p>QUAC (&#8220;Quantitative analysis of chatter&#8221; or any related acronym you like) is a
 package for acquiring and analyzing social internet content. Features:</p>
 <ul class="simple">
-<li>Reliably collect tweets from the Twitter Streaming API and convert them into
-an easy-to-parse, de-duplicated, well-ordered, and fast TSV format.</li>
+<li>Reliable data collection and conversion of raw data into into easy-to-parse,
+de-duplicated, and well-ordered formats. We support:<ul>
+<li>Tweets from the <a class="reference external" href="https://dev.twitter.com/docs/streaming-apis">Twitter Streaming API</a>.</li>
+<li>Wikipedia hourly aggregate <a class="reference external" href="http://dumps.wikimedia.org/other/pagecounts-raw/">pageview logs</a>.</li>
+<li>Wikipedia edit history and related <a class="reference external" href="http://meta.wikimedia.org/wiki/Data_dumps">XML dumps</a>.</li>
+</ul>
+</li>
 <li>Estimate the origin location of tweets with no geotag. (But see <a class="reference external" href="https://github.com/reidpr/quac/issues/15">issue #15</a>.)</li>
 <li>Careful preservation of Unicode throughout the processing pipeline.</li>
 <li>Various cleanup steps to deal with tweet quirks, including very rare ones
 (we&#8217;ve seen certain weirdnesses in only one of our 1.3+ billion tweets).
 That is, we deal with the special cases so you don&#8217;t have to.</li>
 <li>Parallel processing using various combinations of Make, <tt class="docutils literal"><span class="pre">joblib</span></tt>, and a
-simple map-reduce framework called QUACreduce which is included. (But see
-<a class="reference external" href="https://github.com/reidpr/quac/issues/33">issue #33</a>.)</li>
+simple map-reduce framework called QUACreduce which is included.</li>
 </ul>
 <p>QUAC is copyright © 2012-2013 Los Alamos National Security, LLC, and others.
 It is open source under the Apache license and was formerly known as Twepi
@@ -121,8 +125,14 @@ It is open source under the Apache license and was formerly known as Twepi
 <div class="section" id="reporting-bugs">
 <h2>Reporting bugs<a class="headerlink" href="#reporting-bugs" title="Permalink to this headline">¶</a></h2>
 <p>Use our <a class="reference external" href="https://github.com/reidpr/quac/issues">list of issues</a>. To maximize
-the chances of your bug being understood and fixed, you should read <a class="reference external" href="http://www.joelonsoftware.com/articles/fog0000000029.html">&#8220;Three
+the chances of your bug being understood and fixed, take a look at <a class="reference external" href="http://www.joelonsoftware.com/articles/fog0000000029.html">&#8220;Three
 parts to every good bug report&#8221;</a> (scroll down).</p>
+<p><strong>That said, note that unlike many open source projects, we make a point of
+being friendly to bug reporters, even newbies.</strong> Therefore, please don&#8217;t
+hesitate to report a bug, even if you&#8217;re inexperienced with QUAC or feel
+unsure. In almost all cases you will tell us something useful, even if the
+issue turns out not to be a bug per se, and we will support your efforts in
+this regard.</p>
 </div>
 <div class="section" id="if-you-find-quac-useful">
 <h2>If you find QUAC useful<a class="headerlink" href="#if-you-find-quac-useful" title="Permalink to this headline">¶</a></h2>
@@ -130,7 +140,7 @@ parts to every good bug report&#8221;</a> (scroll down).</p>
 uses, and/or star the project on GitHub. This type of feedback is very
 important for continued justification of the project to our sponsors.</p>
 <p>Note that for many uses of QUAC (especially research) you are ethically
-oblicated to cite it. For guidelines on how to do this, see the <em>Citing</em>
+obligated to cite it. For guidelines on how to do this, see the <em>Citing</em>
 section of the documentation.</p>
 </div>
 <div class="section" id="for-more-information">
@@ -192,7 +202,7 @@ license. Grep for &#8220;Cyclopath&#8221; to find the relevant files.</p>
         <li class="right" style="margin-right: 10px">
           <a href="install.html" title="1. Installing QUAC"
              >next</a></li>
-        <li><a href="#">QUAC documentation for commit 93399de</a> &raquo;</li> 
+        <li><a href="#">QUAC documentation for commit 9bcb1e6</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
