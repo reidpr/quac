@@ -17,8 +17,7 @@ package for acquiring and analyzing social internet content. Features:
   That is, we deal with the special cases so you don't have to.
 
 * Parallel processing using various combinations of Make, ``joblib``, and a
-  simple map-reduce framework called QUACreduce which is included. (But see
-  `issue #33 <https://github.com/reidpr/quac/issues/33>`_.)
+  simple map-reduce framework called QUACreduce which is included.
 
 QUAC is copyright © 2012-2013 Los Alamos National Security, LLC, and others.
 It is open source under the Apache license and was formerly known as Twepi
