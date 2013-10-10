@@ -39,7 +39,7 @@ uses, and/or star the project on GitHub. This type of feedback is very
 important for continued justification of the project to our sponsors.
 
 Note that for many uses of QUAC (especially research) you are ethically
-oblicated to cite it. For guidelines on how to do this, see the *Citing*
+obligated to cite it. For guidelines on how to do this, see the *Citing*
 section of the documentation.
 
 For more information
