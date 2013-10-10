@@ -28,4 +28,4 @@ EOF
 # "updating Wikimedia dumps" line also changes b/c it contains $DESTDIR.
 y "wp-get-dumps --notimes --config quacrc 2>&1 | head -n -15 | fgrep -v 'updating Wikimedia dumps'"
 
-x ls -Rhs .
+y "find . -type f -exec wc -c {} \;"
