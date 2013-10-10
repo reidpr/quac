@@ -27,9 +27,17 @@ Reporting bugs
 --------------
 
 Use our `list of issues <https://github.com/reidpr/quac/issues>`_. To maximize
-the chances of your bug being understood and fixed, you should read `"Three
+the chances of your bug being understood and fixed, take a look at `"Three
 parts to every good bug report"
 <http://www.joelonsoftware.com/articles/fog0000000029.html>`_ (scroll down).
+
+
+**That said, note that unlike many open source projects, we make a point of
+being friendly to bug reporters, even newbies.** Therefore, please don't
+hesitate to report a bug, even if you're inexperienced with QUAC or feel
+unsure. In almost all cases you will tell us something useful, even if the
+issue turns out not to be a bug per se, and we will support your efforts in
+this regard.
 
 If you find QUAC useful
 -----------------------
