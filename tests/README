@@ -21,9 +21,6 @@ to get them.
 
 A test script can assume that cwd is the directory containing it.
 
-../test.sh runs all tests here. To run just one, cd to the appropriate
-subdirectory and say "cmdtest -t foo ."
-
 You might be inclined to use "set -x" in your script to intermingle echoed
 commands and output. The problem here is that it's not consistent which
 command in a pipeline is printed first, so you'll get spurious failures. You
