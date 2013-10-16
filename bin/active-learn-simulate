@@ -54,15 +54,10 @@ def select():
 
 def main():
    args = u.parse_args(ap)
-   if args.unittest:
-      import doctest
-      print 'DOCTESTING!!!'
-      doctest.testmod()
-   else:
-      priors = [min(1., max(0., u.rand.gauss(args.mean, args.variance)))
-                for i in range(args.days)]
-      print 'priors=', priors
-      generate_examples(args.days * 100, 20, args.days, priors)
+   priors = [min(1., max(0., u.rand.gauss(args.mean, args.variance)))
+             for i in range(args.days)]
+   print 'priors=', priors
+   generate_examples(args.days * 100, 20, args.days, priors)
 
 ap = u.ArgumentParser(description=__doc__)
 gr = ap.add_argument_group('arguments')
@@ -101,3 +96,6 @@ try:
 
 except testable.Unittests_Only_Exception:
    testable.register('')
+   import doctest
+   doctest.testmod()
+   # --unittest # hack to get test.sh to run these doctests
