@@ -1,0 +1,103 @@
+#!/usr/bin/env python
+"""
+Simulate active learning using prior knowledge about the distribution of the
+positive class over time.
+"""
+import testable
+
+import numpy as np
+from sklearn import datasets
+
+import quacpath
+import u
+
+def sample_by_label(n, X, y, label, rand=12345):
+   """
+   >>> ind = sample_by_label(2, np.array([[1], [2], [3], [4]]), np.array([0, 1, 0, 1]), 0)
+   >>> [i == 0 or i == 2 for i in ind]
+   [True, False]
+   """
+   pool = [i for i in range(len(y)) if y[i] == label]
+   u.rand.shuffle(pool)
+   return list(np.array(pool)[:n])
+
+
+def generate_examples(nsamples, nfeatures, ndays,
+                      daily_positive_priors, rand=12345):
+   """
+   >>> data = generate_examples(4, 10, 2, [.5, 1])
+   >>> sum(data[0][1]) == 1
+   True
+   >>> sum(data[1][1]) == 2
+   True
+   """
+   X_all, y_all = datasets.make_classification(n_samples=nsamples,
+                                       n_features=nfeatures, random_state=rand)
+   samples_per_day = 1. * nsamples / ndays
+   data_by_day = []
+   for prior in daily_positive_priors:
+      npos = samples_per_day * prior
+      nneg = samples_per_day - npos
+      pos_ind = sample_by_label(npos, X_all, y_all, 1)
+      neg_ind = sample_by_label(nneg, X_all, y_all, 0)
+      data_by_day.append((X_all[pos_ind + neg_ind], y_all[pos_ind + neg_ind]))
+   return data_by_day
+
+
+def fit():
+   pass
+
+
+def select():
+   pass
+
+
+def main():
+   args = u.parse_args(ap)
+   if args.unittest:
+      import doctest
+      print 'DOCTESTING!!!'
+      doctest.testmod()
+   else:
+      priors = [min(1., max(0., u.rand.gauss(args.mean, args.variance)))
+                for i in range(args.days)]
+      print 'priors=', priors
+      generate_examples(args.days * 100, 20, args.days, priors)
+
+ap = u.ArgumentParser(description=__doc__)
+gr = ap.add_argument_group('arguments')
+gr.add_argument("--days",
+                metavar='N',
+                type=int,
+                default=50,
+                help="number of days",
+                )
+gr.add_argument("--iters",
+                metavar='N',
+                type=int,
+                default=100,
+                help="number of active learning iterations",
+                )
+gr.add_argument("--mean",
+                metavar='N',
+                   type=float,
+                default=.1,
+                   help="mean of positive examples by day",
+                )
+gr.add_argument("--variance",
+                metavar='N',
+                type=float,
+                default=.01,
+                help="variance of positive examples by day",
+                )
+
+
+try:
+   args = u.parse_args(ap)
+   u.configure(None)
+
+   if (__name__ == '__main__'):
+      main()
+
+except testable.Unittests_Only_Exception:
+   testable.register('')
