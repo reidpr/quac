@@ -20,9 +20,14 @@ Notes:
 
 * This script will download several terabytes of data. Be patient and be
   courteous.
+
+* --verify also takes a long time and gives no output if all's well. If you're
+    worried about progress, you can use lsof to see what file is currently
+    being checked.
 '''
 
 import os.path
+import subprocess
 
 import quacpath
 import rsync
@@ -37,19 +42,27 @@ c = u.c
 
 ap = u.ArgumentParser(description=__doc__, epilog=help_epilogue)
 gr = ap.add_argument_group('arguments')
-gr.add_argument("--config",
-                help="location of config file",
+gr.add_argument('--config',
+                help='location of config file',
                 default=u.CONFIG_DEFAULT,
-                metavar="FILE")
+                metavar='FILE')
+gr.add_argument('--verify',
+                action='store_true',
+                help='verify MD5sums of existing files instead of downloading')
 
 
 ### Main ###
 
 def main():
-   l.info('updating Wikimedia access logs in %s' % (log_dir))
-   l.info('bandwidth limit is %d KB/s' % (bwlimit))
-   # FIXME: awkward to specify --include * simply to override --exclude *.
-   rsync.all(mirror_url, log_dir, bwlimit, args.verbose)
+   l.info('Wikimedia access logs in %s' % (log_dir))
+   if (args.verify):
+      l.info('mode: verify')
+      subprocess.call('find %s -name md5sums.txt -exec sh -c "cd \$(dirname {}) && md5sum --check --quiet md5sums.txt || echo MD5 error in {}" \;' % (log_dir), shell=True)
+   else:
+      l.info('mode: update')
+      l.info('bandwidth limit is %d KB/s' % (bwlimit))
+      # FIXME: awkward to specify --include * simply to override --exclude *.
+      rsync.all(mirror_url, log_dir, bwlimit, args.verbose)
    l.info('done')
 
 
@@ -66,7 +79,7 @@ try:
 
    log_dir = c.getpath('wkpd', 'access_log_dir')
    if (not os.path.isdir(log_dir)):
-      u.abort('%s is not a directory or does not exist' % (dump_dir))
+      u.abort('%s is not a directory or does not exist' % (log_dir))
 
    if (__name__ == '__main__'):
       main()

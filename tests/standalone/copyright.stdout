@@ -10,5 +10,5 @@ misc/tweet-volume.xls
 sphinx/Makefile
 sphinx/conf.py
 tests/README
-twtests/README
-twtests/tweets/ids.txt
+tests/twitter/README
+tests/twitter/tweets/ids.txt

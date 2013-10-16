@@ -2,12 +2,15 @@
 
 # Set up environment for tests.
 
+# base QUAC directory
+export QUACBASE=$(cd $(dirname $0)/$(dirname $BASH_SOURCE)/.. && pwd)
+
 # test scripts in this checkout, not in $PATH
-export PATH=$(cd $(dirname $0)/../bin && pwd):$PATH
+export PATH=$QUACBASE/bin:$PATH
 
 # Same for Python modules; the oddness is so we don't have a trailing colon if
 # $PYTHONPATH is unset.
-export PYTHONPATH=$(cd $(dirname $0)/../lib && pwd)${PYTHONPATH:+:}$PYTHONPATH
+export PYTHONPATH=$QUACBASE/lib${PYTHONPATH:+:}$PYTHONPATH
 
 # Make a private directory for tests to work in. If tests need to share state,
 # they can set it up manually.

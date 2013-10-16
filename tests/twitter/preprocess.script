@@ -8,7 +8,7 @@
 cd $DATADIR
 exec 2>&1
 
-parsesh=$TWEETDIR/../../misc/parse.sh
+parsesh=$QUACBASE/misc/parse.sh
 
 mkdir raw pre geo raw/foo
 ln -s $TWEETDIR/raw/small/small.json.gz raw/foo

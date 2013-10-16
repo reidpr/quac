@@ -105,6 +105,6 @@ bin/hashsplit
 *.stdout-diff
 
 # test tweets
-twtests/tweets/raw
-twtests/tweets/pre
-twtests/tweets/geo
+tests/twitter/tweets/raw
+tests/twitter/tweets/pre
+tests/twitter/tweets/geo
