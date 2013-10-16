@@ -129,6 +129,20 @@ def random(unlabeled, clf):
    return x, y
 
 
+def uncertainty(unlabeled, clf):
+   # select non-empty day
+   dayi = u.rand.randint(0, len(unlabeled) - 1)
+   while len(unlabeled[dayi][0]) == 0:
+      dayi = u.rand.randint(0, len(unlabeled) - 1)
+
+   # select instance
+   scores = [abs(c[0] - 0.5)  for c in clf.predict_proba(unlabeled[dayi][0])]
+   instancei = np.argmin(scores)
+   x, y = pop_instance(unlabeled, dayi, instancei)
+   return x, y
+
+
+
 def active_learn(unlabeled, labeled, test_data, clf, strategy, iters):
    accuracies = []
    for iteri in range(iters):
@@ -149,7 +163,7 @@ def do_active_learn(strategy):
    for triali in range(args.trials):
       ndays = args.days + 1
       priors = [min(1., max(0., u.rand.gauss(args.mean, args.variance)))
-                for i in range(args.days)] + [.1]
+                for i in range(args.days)] + [.5]
       data = generate_examples(ndays * 100, 100, ndays, priors,
                                ninformative=2, nclusters_per_class=2)
       clf = linear_model.LogisticRegression()
@@ -168,7 +182,7 @@ def do_active_learn(strategy):
 
 
 def main():
-   strategies = ['random', 'balanced']
+   strategies = ['uncertainty', 'random', 'balanced']
    all_results = []
    for strategy in strategies:
       all_results.append(do_active_learn(strategy))
