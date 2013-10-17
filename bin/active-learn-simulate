@@ -130,6 +130,8 @@ def random(unlabeled, clf):
 
 
 def uncertainty(unlabeled, clf):
+   """ Select day at random, then select instance with least certain
+   classification (i.e., closest to 0.5) """
    # select non-empty day
    dayi = u.rand.randint(0, len(unlabeled) - 1)
    while len(unlabeled[dayi][0]) == 0:
@@ -163,7 +165,7 @@ def do_active_learn(strategy):
    for triali in range(args.trials):
       ndays = args.days + 1
       priors = [min(1., max(0., u.rand.gauss(args.mean, args.variance)))
-                for i in range(args.days)] + [.5]
+                for i in range(args.days)] + [.1]
       data = generate_examples(ndays * 100, 100, ndays, priors,
                                ninformative=2, nclusters_per_class=2)
       clf = linear_model.LogisticRegression()
