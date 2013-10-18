@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-Utility routines for the Twitter analysis package.
+Utility routines, classes, etc. A catch-all.
 
 BUGS / WARNINGS / FIXME:
 
@@ -171,7 +171,19 @@ c = MyConfigParser()
 
 
 class defaultdict_recursive(collections.defaultdict):
-   'defaultdict which autovivifies arbitrarily deeply.'
+   '''defaultdict which autovivifies arbitrarily deeply. For example:
+
+      >>> a = defaultdict_recursive()
+      >>> a[1][1] = 1
+      >>> a[1][2][3] = 2
+      >>> pprint(a.keys())
+      [1]
+      >>> pprint(a[1].keys())
+      [1, 2]
+      >>> a[1][1]
+      1
+      >>> a[1][2][3]
+      2'''
    # https://groups.google.com/forum/?fromgroups#!topic/comp.lang.python/lRnIhaJKZeo[1-25]
    def __init__(self):
       self.default_factory = type(self)
@@ -975,3 +987,6 @@ set([9])
 set([9])
 
 ''')
+
+
+#  LocalWords:  pformat pprint
