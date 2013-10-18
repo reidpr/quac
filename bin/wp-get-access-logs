@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 'Update local copy of Wikimedia access logs.'
 
@@ -26,13 +27,19 @@ Notes:
     being checked.
 '''
 
+from datetime import datetime
+import glob
+import io
 import os.path
 import subprocess
 
+import pickle_glue
 import quacpath
 import rsync
 import testable
+import time_
 import u
+import wikimedia
 
 l = u.l
 c = u.c
@@ -49,6 +56,9 @@ gr.add_argument('--config',
 gr.add_argument('--verify',
                 action='store_true',
                 help='verify MD5sums of existing files instead of downloading')
+gr.add_argument('--metadata',
+                action='store_true',
+                help='skip download; just rebuild metadata')
 
 
 ### Main ###
@@ -60,10 +70,51 @@ def main():
       subprocess.call('find %s -name md5sums.txt -exec sh -c "cd \$(dirname {}) && md5sum --check --quiet md5sums.txt || echo MD5 error in {}" \;' % (log_dir), shell=True)
    else:
       l.info('mode: update')
-      l.info('bandwidth limit is %d KB/s' % (bwlimit))
-      # FIXME: awkward to specify --include * simply to override --exclude *.
-      rsync.all(mirror_url, log_dir, bwlimit, args.verbose)
+      if (not args.metadata):
+         l.info('bandwidth limit is %d KB/s' % (bwlimit))
+         # FIXME: awkward to specify --include * simply to override --exclude *.
+         rsync.all(mirror_url, log_dir, bwlimit, args.verbose)
+      l.info('rebuilding metadata')
+      metadata_build()
    l.info('done')
+
+
+### Other functions ###
+
+def metadata_build():
+   mdfile = pickle_glue.File('%s/metadata' % (log_dir),
+                             writable=True, default=dict())
+   files = glob.glob('%s/20*/*/projectcounts-*' % (log_dir))
+   counts = u.defaultdict_recursive() # triples: project, timestamp, view count
+   for file_ in files:
+      read_file(file_, counts)
+   md = dict()
+   for (project, counts) in counts.iteritems():
+      date_min = min(ts.date() for ts in counts.iterkeys())
+      date_max = max(ts.date() for ts in counts.iterkeys())
+      md[project] = dict()
+      for dt in time_.dateseq(date_min, date_max):
+         md[project][dt.date()] = 0
+      for (ts, ct) in counts.iteritems():
+         md[project][ts.date()] += ct
+   mdfile.data['projects'] = md
+   mdfile.commit()
+
+def read_file(file_, counts):
+   # Use replacement for errors because some of the files have UTF-8
+   # encoding problems.
+   fp = io.open(file_, 'r', encoding='utf8', errors='replace')
+   ts = wikimedia.timestamp_parse(file_)
+   for (i, line) in enumerate(fp):
+      if (line.find(u'�') >= 0):
+         l.debug('invalid UTF-8 in %s, ignoring line %d' % (file_, i+1))
+         continue
+      row = line.split()
+      try:
+         counts[row[0]][ts] = int(row[2])
+      except IndexError:
+         l.warning('bad input line in %s, aborting file read' % (file_))
+         return
 
 
 ### Bootstrap ###
@@ -86,3 +137,6 @@ try:
 
 except testable.Unittests_Only_Exception:
    testable.register('')
+
+
+#  LocalWords:  projectcounts
