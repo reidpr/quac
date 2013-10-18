@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 
 '''
-Transform .all.tsv tweet files in a directory into a set of files containing
-pickled n-gram time series with 1-day granularity.'''
+Transform input files in a directory into a set of files containing pickled
+n-gram time series with 1-day granularity. Input can be Twitter .all.tsv files
+or Wikimedia pageview files; in the latter case, each article title becomes an
+n-gram.'''
 
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
 import glob
 import os
+import os.path
 import subprocess as sp
 
 import numpy as np
@@ -21,8 +24,8 @@ l = u.l
 
 
 help_epilogue = '''
-Note that FILE must be the *directory* containing preprocessed tweets. Output
-is in JOBDIR/out/.
+Note that FILE must be a *directory*: either containing preprocessed tweets or
+the root of the Wikimedia pageview log tree. Output is in JOBDIR/out/.
 ''' + qr.scripting.help_epilogue
 
 
@@ -32,7 +35,7 @@ gr.add_argument('-n',
                 type=int,
                 metavar='N',
                 default=2,
-                help='n-gram size (default 2)')
+                help='n-gram size (default 2) (ignored for Wikimedia)')
 gr.add_argument('--min-occur',
                 type=int,
                 metavar='N',
@@ -52,26 +55,26 @@ u.logging_init('ngbld')
 if (len(args.inputs) != 1):
    ap.error('too many inputs')
 
-try:
+
+### Main ###
+
+def main():
 
    l.info('starting')
 
-   l.info('loading metadata and setting up job')
-   args.python = 'qr.ngramtime.Tweet_Job' # kind of a hack?
-   args.pyargs = qr.base.encode({ 'n': args.n,
-                                  'min_occur': args.min_occur })
-   metadata = u.pickle_load('%s/metadata' % (args.inputs[0]))
-   args.inputs = glob.glob('%s/*.all.tsv' % (args.inputs[0]))
-   qr.scripting.setup(args)
+   if (os.path.exists('%s/tweet_ct.gp.pdf' % (args.inputs[0]))):
+      l.info('input appears to be tweets')
+      j = Tweet_Job()
+   else:
+      l.info('input appears to be Wikimedia pageview logs')
+      j = Wikimedia_Job()
 
+   l.info('loading metadata')
+   j.metadata_load()
+   l.info('setting up job')
+   j.setup()
    l.info('writing totals')
-   cts = [v['count'] for (k, v) in sorted(metadata['days'].iteritems())]
-   cts = math_.Date_Vector(min(metadata['days'].iterkeys()),
-                           np.array(cts, dtype=np.float32))
-   total = { 'ngram':      None,
-             'total':      sum(cts),
-             'series':     cts }
-   u.pickle_dump('%s/out/total' % (args.jobdir), total)
+   j.totals_write()
 
    if (args.run is not None):
       l.info('running job')
@@ -82,6 +85,47 @@ try:
 
    l.info('done')
 
-except sp.CalledProcessError, x:
-   u.abort('subprocess failed with return code %d' % (x.returncode))
 
+### Classes ###
+
+class Job(object):
+
+   def metadata_load(self):
+      self.metadata = u.pickle_load('%s/metadata' % (args.inputs[0]))
+
+   def setup(self):
+      self.args_munge()
+      qr.scripting.setup(args)
+
+   def totals_write(self):
+      total = self.totals_build()
+      u.pickle_dump('%s/out/total' % (args.jobdir), total)
+
+
+class Tweet_Job(Job):
+
+   def args_munge(self):
+      args.python = 'qr.ngramtime.Tweet_Job' # kind of a hack?
+      args.pyargs = qr.base.encode({ 'n': args.n,
+                                     'min_occur': args.min_occur })
+      args.inputs = glob.glob('%s/*.all.tsv' % (args.inputs[0]))
+
+   def totals_build(self):
+      cts = [v['count'] for (k, v) in sorted(self.metadata['days'].iteritems())]
+      cts = math_.Date_Vector(min(self.metadata['days'].iterkeys()),
+                              np.array(cts, dtype=np.float32))
+      return { 'ngram':      None,
+               'total':      sum(cts),
+               'series':     cts }
+
+
+### Bootstrap ###
+
+if (__name__ == '__main__'):
+   try:
+      main()
+   except sp.CalledProcessError, x:
+      u.abort('subprocess failed with return code %d' % (x.returncode))
+
+
+#  LocalWords:  gp ngram

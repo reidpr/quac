@@ -1,6 +1,8 @@
 $ ngrams-build ...
 ngbld INFO     starting
-ngbld INFO     loading metadata and setting up job
+ngbld INFO     input appears to be tweets
+ngbld INFO     loading metadata
+ngbld INFO     setting up job
 ngbld INFO     writing totals
 ngbld INFO     running job
 ngbld INFO     cleaning up job
