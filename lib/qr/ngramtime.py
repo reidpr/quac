@@ -136,48 +136,39 @@ class Tweet_Job(base.TSV_Input_Job, Build_Job):
 class Wikimedia_Job(Build_Job):
 
    def map(self, fields):
-      if (fields[2].find('%0A') >= 0 or fields[2].find('%09') >= 0):
-         # URL contains a newline or tab. It's invalid; skip it.
-         return
       date = fields[0]  # ISO 8601 date string
-      project = fields[1].decode('utf8')
-      try:
-         # Articles with non-ASCII titles are requested with URL-encoded 8-bit
-         # characters in some encoding. Unfortunately, this encoding is not
-         # always UTF-8. I believe it is selected by the browser.
-         #
-         # So, we try to decode as UTF-8, and if this fails, just leave it
-         # with no decoding at all, not even URL-decoding. Unfortunately, we
-         # can't just try encodings until one sticks, as most mismatches will
-         # not throw an error (c.f. "mojibake").
-         #
-         # This can cause article counts to be split. For example, the Russian
-         # article Люди Икс (i.e., the X-Men comic series) can be accessed at
-         # both of the following URLs:
-         #
-         #   (UTF-8)        http://ru.wikipedia.org/wiki/%D0%9B%D1%8E%D0%B4%D0%B8_%D0%98%D0%BA%D1%81
-         #   (Windows-1251) http://ru.wikipedia.org/wiki/%CB%FE%E4%E8_%C8%EA%F1
-         #
-         # Other encodings (e.g., ISO 8859-5: %BB%EE%D4%D8_%B8%DA%E1 and
-         # KOI8-R, %EC%C0%C4%C9_%E9%CB%D3) do not work.
-         #
-         # Sadly, I suspect that the solution is a table of encodings to try
-         # for each language. Perhaps we can duplicate Wikimedia's logic.
-         #
-         # Or, we could simply not decode the article URLs. This might also
-         # solve the newline/tab problem above. However, we'd still want to
-         # normalize %20 into _.
-         article = urllib.unquote(fields[2]).decode('utf8')
-      except UnicodeDecodeError:
-         article = fields[2]
+      project = fields[1]
+      # We don't decode the article name (which uses percent-encoding to
+      # encode bytes and then some encoding to encode high characters) because
+      # (a) it saves significant time and (b) there are apparently non-UTF-8
+      # encodings in use. I believe the latter is selected by the browser.
+      #
+      # An artifact of (b) is that article counts can be split. For example,
+      # the Russian article Люди Икс (i.e., the X-Men comic series) can be
+      # accessed at both of the following URLs:
+      #
+      #   (UTF-8)        http://ru.wikipedia.org/wiki/%D0%9B%D1%8E%D0%B4%D0%B8_%D0%98%D0%BA%D1%81
+      #   (Windows-1251) http://ru.wikipedia.org/wiki/%CB%FE%E4%E8_%C8%EA%F1
+      #
+      # Other encodings (e.g., ISO 8859-5: %BB%EE%D4%D8_%B8%DA%E1 and KOI8-R,
+      # %EC%C0%C4%C9_%E9%CB%D3) do not work. Figuring out this mess is
+      # something I'm not very interested in.
+      #
+      # We do, however, normalize spaces into underscores. I believe this may
+      # be incomplete (see issue #77).
+      article = fields[2].replace('%20', '_')
       count = int(fields[3])
-      # Normalize the URL; this needs more work (see issue #77).
-      article = article.replace(u' ', u'_')
-      yield (project + u' ' + article, (date, count))
+      #print >>sys.stderr, type(project + ' ' + article)
+      yield (project + ' ' + article, (date, count))
 
    def map_open_input(self):
       # Input is space-separated lines which are byte sequences, not UTF-8
       # encoded text. We can coerce tsv_glue.Reader to read this.
       self.infp = tsv_glue.Reader(sys.stdin.fileno(), separator=' ', mode='b')
 
-
+   def map_write(self, key, value):
+      'Treat key and value as a stream of bytes rather than Unicode objects.'
+      self.outfp.write(key)
+      self.outfp.write('\t')
+      self.outfp.write(base.encode(value))
+      self.outfp.write('\n')
