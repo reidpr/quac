@@ -37,8 +37,8 @@ class Build_Job(base.KV_Pickle_Seq_Output_Job):
 
    def reduce(self, ngram, datecounts):
       cts = collections.Counter()
-      first_day = time_.date_max
-      last_day = time_.date_min
+      first_day = '9999-00-99'
+      last_day = '0000-00-00'
       for (date, count) in datecounts:
          first_day = min(first_day, date)
          last_day = max(last_day, date)
@@ -139,7 +139,7 @@ class Wikimedia_Job(Build_Job):
       if (fields[2].find('%0A') >= 0 or fields[2].find('%09') >= 0):
          # URL contains a newline or tab. It's invalid; skip it.
          return
-      date = wikimedia.timestamp_parse(fields[0]).date()
+      date = fields[0]  # ISO 8601 date string
       project = fields[1].decode('utf8')
       try:
          # Articles with non-ASCII titles are requested with URL-encoded 8-bit
