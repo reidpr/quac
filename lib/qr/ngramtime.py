@@ -17,6 +17,7 @@
 
 
 import collections
+import datetime
 import sys
 import urllib
 
@@ -25,7 +26,6 @@ import numpy as np
 from . import base
 import math_
 import ssheet
-import time_
 import tok.unicode_props
 import tsv_glue
 import tweet
@@ -37,23 +37,22 @@ class Build_Job(base.KV_Pickle_Seq_Output_Job):
 
    def reduce(self, ngram, datecounts):
       cts = collections.Counter()
-      first_day = '9999-00-99'
-      last_day = '0000-00-00'
+      first_day = float('+inf')
+      last_day = float('-inf')
       for (date, count) in datecounts:
          first_day = min(first_day, date)
          last_day = max(last_day, date)
          cts[date] += count
       total = sum(cts.itervalues())
       if (total >= self.params['min_occur']):
-         first_day = time_.dateify(first_day)
-         last_day = time_.dateify(last_day)
          assert (first_day <= last_day)
          # use float32 for space efficiency at the expense of precision
-         ct_series = math_.Date_Vector.zeros(first_day, last_day,
+         first_dt = datetime.date.fromordinal(first_day)
+         last_dt = datetime.date.fromordinal(last_day)
+         ct_series = math_.Date_Vector.zeros(first_dt, last_dt,
                                              dtype=np.float32)
          for (date, ct) in cts.iteritems():
-            date = time_.dateify(date)
-            ct_series[time_.days_diff(date, first_day)] = ct
+            ct_series[date - first_day] = ct
          yield (ngram, { 'ngram': ngram,
                          'total': total,
                          'series': ct_series })
@@ -136,7 +135,7 @@ class Tweet_Job(base.TSV_Input_Job, Build_Job):
 class Wikimedia_Job(Build_Job):
 
    def map(self, fields):
-      date = fields[0]  # ISO 8601 date string
+      date = int(fields[0])  # Gregorian ordinal
       project = fields[1]
       # We don't decode the article name (which uses percent-encoding to
       # encode bytes and then some encoding to encode high characters) because

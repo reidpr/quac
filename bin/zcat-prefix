@@ -5,6 +5,12 @@
 # This script decompresses and cats the content of each .gz file in the given
 # directory, prefixing each line with the timestamp embedded in the file's
 # name.
+#
+# Note that this timestamp is very weird -- it is the "proleptic Gregorian
+# ordinal" of the date. That is, the 1-based day number starting at January 1
+# in the year 1. The ordinal of 2012-10-21 is 734,797. See
+# <http://docs.python.org/2/library/datetime.html#date-objects>.
+
 
 import glob
 import gzip
@@ -20,6 +26,6 @@ import wikimedia
 os.chdir(sys.argv[1])
 
 for fn in glob.glob('*.gz'):
-   timestamp = time_.iso8601_date(wikimedia.timestamp_parse(fn))
+   timestamp = wikimedia.timestamp_parse(fn).toordinal()
    for line in gzip.open(fn, 'rb'):
       print timestamp, line,
