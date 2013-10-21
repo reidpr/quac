@@ -1,0 +1,70 @@
+#!/bin/bash
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+# Compute Wikimedia time series and related analyses.
+
+. ./environment.sh
+
+cp $QUACBASE/misc/halloween.xls $DATADIR
+cd $DATADIR
+
+exec 2>&1
+
+
+## ngrams-build ##
+
+# We use several partitions to test that hash-based time series lookup works.
+echo "$ ngrams-build ..."
+ngrams-build --notimes --partitions 10 --min-occur 10 --run 2 --clean --jobdir series $QUACBASE/tests/standalone/wp-access > /dev/null
+
+x ls -R series
+
+exit
+
+## ngrams-search ##
+
+# Test that ngrams-search complains properly if input is incorrect.
+y 'ngrams-search --notimes --query candy /nonexistent || true'
+
+# "candy" should peak near Halloween. (Note that midnight UTC is 8pm EST, so a
+# lot of trick-or-treating related traffice will happen on November 1 UTC.)
+x ngrams-search --query candy series/out
+x ngrams-search --detail --query candy series/out
+
+# "sandy" is the hurricane.
+x ngrams-search --query sandy series/out
+x ngrams-search --detail --query sandy series/out
+
+# We include "a" because it's an n-gram that had trouble being sorted (see
+# commit 885d3d)
+x ngrams-search --query a series/out
+
+# Make sure zeros are inserted properly: "taco" has no data on October 28
+# (beginning), November 1 (middle), and November 4/5 (end).
+x ngrams-search --detail --query taco series/out
+
+
+## ngrams-correlate ##
+
+# Test that ngrams-correlate complains properly if input is incorrect.
+y "ngrams-correlate --notimes /nonexistent halloween.xls || true"
+y "ngrams-correlate --notimes /bin/sh halloween.xls || true"
+y "ngrams-correlate --notimes /bin /etc || true"
+y "ngrams-correlate --notimes series /nonexistent.xls || true"
+
+# Build the correlations. The sample rate is so tiny because:
+#
+#     0.01   spritzer 1%
+#   * 0.05   5% sample for testing
+#   * 0.015  1.5% of tweets are geotagged
+#   * 0.5    last day of test sample is incomplete
+#   -------
+#   = 3.75e-6
+#
+echo "$ ngrams-correlate ..."
+ngrams-correlate --notimes --min-similarity 0.7 --min-ppm 2000 --sample-rate 3.75e-6 --run 4 --clean --jobdir corr series/out halloween.xls > /dev/null
+
+# Results
+x ls -R corr
+x head -10 corr/out/halloween:halloween.tsv
+x head -10 corr/out/halloween:s%40ndy.tsv

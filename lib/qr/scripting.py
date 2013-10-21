@@ -49,7 +49,7 @@ import u
 l = u.l
 
 # This command returns false if the first command in the previous pipe failed.
-PIPEFAIL = 'if [ $${PIPESTATUS[0]} -ne 0 ]; then false; fi'
+PIPEFAIL = 'if [ $${PIPESTATUS[1]} -ne 0 ]; then false; fi'
 
 
 
@@ -116,6 +116,10 @@ class ArgumentParser(u.ArgumentParser):
       gr.add_argument('--dist',
                       action='store_true',
                       help='run distributed using sshrot')
+      gr.add_argument('--file-reader',
+                      metavar='CMD',
+                      default='cat',
+                      help='command to read input files (default cat)')
       gr.add_argument('--jobdir',
                       metavar='DIR',
                       default='.',
@@ -175,14 +179,15 @@ reallyclean: clean
    for filename in args.inputs:
       fp.write('''
 %(mapdone)s: %(input)s
-	%(map_cmd)s < %(input)s | hashsplit %(nparts)d tmp/%(ibase)s && %(pipefail)s
+	%(read_cmd)s %(input)s | %(map_cmd)s | hashsplit %(nparts)d tmp/%(ibase)s && %(pipefail)s
 	touch %(mapdone)s
 ''' % { 'ibase': os.path.basename(filename),
         'input': filename,
         'map_cmd': args.map,
         'mapdone': 'tmp/%s.mapped' % (os.path.basename(filename)),
         'nparts': args.partitions,
-        'pipefail': PIPEFAIL })
+        'pipefail': PIPEFAIL,
+        'read_cmd': args.file_reader })
    # reducers
    for rid in xrange(args.partitions):
       input_bases = [os.path.basename(i) for i in args.inputs]

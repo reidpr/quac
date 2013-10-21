@@ -27,14 +27,15 @@ class Reader(object):
    '''Read rows are returned as lists. Empty strings are converted to None.
       Converting to numbers, etc., is the responsibility of the caller.'''
 
-   __slots__ = ('fp')
+   __slots__ = ('fp', 'separator')
 
-   def __init__(self, file_, buffering=-1):
+   def __init__(self, file_, buffering=-1, separator='\t', mode='t'):
       '''Open a TSV file for reading and return the reader object; the file
          can be either a filename or an open integer file descriptor. If it's
          a filename which does not exist, raise an exception.'''
-      self.fp = io.open(file_, mode='rt', buffering=buffering,
-                        encoding='utf8')
+      self.separator = separator
+      mode = 'r' + mode
+      self.fp = io.open(file_, mode=mode, buffering=buffering)
 
    def __iter__(self):
       return self
@@ -47,7 +48,8 @@ class Reader(object):
       line = line.rstrip('\n')
       if (line == ''):
          raise StopIteration
-      return [(col if col != '' else None) for col in line.split('\t')]
+      return [(col if col != '' else None)
+              for col in line.split(self.separator)]
 
 
 class Writer(object):

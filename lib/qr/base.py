@@ -266,6 +266,7 @@ class TSV_Input_Job(Job):
    def map_open_input(self):
       self.infp = tsv_glue.Reader(sys.stdin.fileno())
 
+
 class TSV_Output_Job(Job):
 
    '''Mixin for TSV UTF-8 text output. :meth:`reduce_write()` expects a

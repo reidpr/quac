@@ -119,6 +119,25 @@ class Tweet_Job(Job):
                'series':     cts }
 
 
+class Wikimedia_Job(Job):
+
+   def args_munge(self):
+      args.python = 'qr.ngramtime.Wikimedia_Job'
+      args.pyargs = qr.base.encode({ 'min_occur': args.min_occur })
+      args.file_reader = 'zcat-prefix'
+      args.inputs = glob.glob('%s/20??/20??-??' % (args.inputs[0]))
+
+   def totals_build(self):
+      counts = dict()
+      for (project, pcounts) in self.metadata['projects'].iteritems():
+         pcounts = sorted(pcounts.iteritems())
+         series = math_.Date_Vector(pcounts[0][0],
+                                    np.array([c for (d,c) in pcounts],
+                                             dtype=np.float32))
+         counts[project] = { 'total': sum(series), 'series': series }
+      return counts
+
+
 ### Bootstrap ###
 
 if (__name__ == '__main__'):
@@ -128,4 +147,4 @@ if (__name__ == '__main__'):
       u.abort('subprocess failed with return code %d' % (x.returncode))
 
 
-#  LocalWords:  gp ngram
+#  LocalWords:  gp ngram ngramtime

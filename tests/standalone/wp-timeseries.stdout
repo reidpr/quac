@@ -1,0 +1,29 @@
+$ ngrams-build ...
+ngbld INFO     starting
+ngbld INFO     input appears to be Wikimedia pageview logs
+ngbld INFO     loading metadata
+ngbld INFO     setting up job
+ngbld INFO     writing totals
+ngbld INFO     running job
+ngbld INFO     cleaning up job
+ngbld INFO     done
+$ ls -R series
+series:
+Makefile
+out
+tmp
+
+series/out:
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+total.pkl.gz
+
+series/tmp:

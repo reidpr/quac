@@ -6,10 +6,10 @@
 #
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
-from datetime import date, datetime, time, timedelta, tzinfo
+import datetime
 import pytz
 import re
-import time as _time
+import time
 
 from dateutil import rrule
 import isodate
@@ -20,8 +20,11 @@ import testable
 # matches ISO 8601 datetimes with a space separator
 ISO8601_SPACE_SEP = re.compile(r'(\d\d\d\d-\d\d-\d\d)( )(.*)$')
 
-# the oldest datetime
-datetime_min = datetime(1, 1, 1)
+# datetime and time limits
+datetime_min = datetime.datetime(datetime.MINYEAR,  1,  1,  0,  0,  0)
+datetime_max = datetime.datetime(datetime.MAXYEAR, 12, 31, 23, 59, 59)
+date_min = datetime_min.date()
+date_max = datetime_max.date()
 
 
 def as_utc(dt):
@@ -34,9 +37,9 @@ def dateify(x):
 
       >>> dateify('2013-06-28')
       datetime.date(2013, 6, 28)
-      >>> dateify(date(2013, 6, 28))
+      >>> dateify(datetime.date(2013, 6, 28))
       datetime.date(2013, 6, 28)
-      >>> dateify(datetime(2013, 6, 28))
+      >>> dateify(datetime.datetime(2013, 6, 28))
       datetime.date(2013, 6, 28)
       >>> dateify(None)  # returns None
       >>> dateify(1)
@@ -48,9 +51,9 @@ def dateify(x):
         ...
       ValueError: day is out of range for month
       '''
-   if (isinstance(x, datetime)):
+   if (isinstance(x, datetime.datetime)):
       return x.date()
-   if (isinstance(x, date)):
+   if (isinstance(x, datetime.date)):
       return x
    if (x is None):
       return x
@@ -75,17 +78,18 @@ def dateseq(start, end):
 def days_f(td):
    '''Return the fractional number of days in timedelta td. E.g.:
 
-      >>> td = timedelta(days=2.5)
+      >>> td = datetime.timedelta(days=2.5)
       >>> td.days
       2
       >>> days_f(td)
       2.5'''
-   return td.total_seconds() / timedelta(days=1).total_seconds()
+   return td.total_seconds() / datetime.timedelta(days=1).total_seconds()
 
 def days_diff(a, b):
    '''a and b are date or datetime objects that are an integer number of days
       apart. Return a - b in days. E.g.:
 
+      >>> from datetime import datetime, date
       >>> days_diff(datetime(2013, 6, 27), datetime(2013, 6, 20))
       7
       >>> days_diff(date(2013, 6, 27), date(2013, 6, 20))
@@ -106,10 +110,10 @@ def days_diff(a, b):
       Traceback (most recent call last):
         ...
       ValueError: 2013-06-27 00:00:00.000001 and 2013-06-20 00:00:00 day difference is not an integer'''
-   if (not isinstance(a, datetime)):
-      a = datetime.combine(a, time())
-   if (not isinstance(b, datetime)):
-      b = datetime.combine(b, time())
+   if (not isinstance(a, datetime.datetime)):
+      a = datetime.datetime.combine(a, datetime.time())
+   if (not isinstance(b, datetime.datetime)):
+      b = datetime.datetime.combine(b, datetime.time())
    diff = a - b
    if (diff.seconds != 0 or diff.microseconds != 0):
       raise ValueError('%s and %s day difference is not an integer' % (a, b))
@@ -120,7 +124,7 @@ def ddfs_parse(text):
 
       >>> ddfs_parse('2013/03/20 15:58:22')
       datetime.datetime(2013, 3, 20, 15, 58, 22)'''
-   return datetime.strptime(text, '%Y/%m/%d %H:%M:%S')
+   return datetime.datetime.strptime(text, '%Y/%m/%d %H:%M:%S')
 
 def localify(dt):
    'Convert a native datetime object into aware one in local time.'
@@ -135,7 +139,7 @@ def twitter_timestamp_parse(text):
    # string is a constant "+0000"). Therefore, we use this technique, which is
    # approximately 5x faster. (If assumption (b) fails, you'll get a
    # ValueError.)
-   return utcify(datetime.strptime(text, '%a %b %d %H:%M:%S +0000 %Y'))
+   return utcify(datetime.datetime.strptime(text, '%a %b %d %H:%M:%S +0000 %Y'))
 
 def iso8601_date(d):
    return d.strftime('%Y-%m-%d')
@@ -151,7 +155,7 @@ def iso8601utc_parse(text):
    # This function is here because it's faster than relying on isodate, though
    # I haven't actually tested that.
    text = ISO8601_SPACE_SEP.sub(r'\1T\3', text)
-   return utcify(datetime.strptime(text, '%Y-%m-%dT%H:%M:%S+00:00'))
+   return utcify(datetime.datetime.strptime(text, '%Y-%m-%dT%H:%M:%S+00:00'))
 
 def iso8601_parse(text):
    '''Parse a date or datetime in ISO 8601 format and return a datetime
@@ -172,7 +176,7 @@ def iso8601_parse(text):
 def nowstr_human():
    '''Return a human-readable string representing the current time, including
       time zone.'''
-   return _time.strftime('%c %Z')
+   return time.strftime('%c %Z')
 
 def utcify(dt):
    'Convert a native datetime object into aware one in UTC.'
@@ -181,25 +185,25 @@ def utcify(dt):
 def utcnow():
    'Return an "aware" datetime for right now in UTC.'
    # http://stackoverflow.com/a/4530166/396038
-   return datetime.now(pytz.utc)
+   return datetime.datetime.now(pytz.utc)
 
 
 ### The following are copied from the examples at
 ### http://docs.python.org/library/datetime.html#tzinfo-objects
 
-ZERO = timedelta(0)
+ZERO = datetime.timedelta(0)
 
 # A class capturing the platform's idea of local time.
 
-STDOFFSET = timedelta(seconds = -_time.timezone)
-if _time.daylight:
-    DSTOFFSET = timedelta(seconds = -_time.altzone)
+STDOFFSET = datetime.timedelta(seconds = -time.timezone)
+if time.daylight:
+    DSTOFFSET = datetime.timedelta(seconds = -time.altzone)
 else:
     DSTOFFSET = STDOFFSET
 
 DSTDIFF = DSTOFFSET - STDOFFSET
 
-class LocalTimezone(tzinfo):
+class LocalTimezone(datetime.tzinfo):
 
     def utcoffset(self, dt):
         if self._isdst(dt):
@@ -214,14 +218,14 @@ class LocalTimezone(tzinfo):
             return ZERO
 
     def tzname(self, dt):
-        return _time.tzname[self._isdst(dt)]
+        return time.tzname[self._isdst(dt)]
 
     def _isdst(self, dt):
         tt = (dt.year, dt.month, dt.day,
               dt.hour, dt.minute, dt.second,
               dt.weekday(), 0, 0)
-        stamp = _time.mktime(tt)
-        tt = _time.localtime(stamp)
+        stamp = time.mktime(tt)
+        tt = time.localtime(stamp)
         return tt.tm_isdst > 0
 
 local_tz = LocalTimezone()

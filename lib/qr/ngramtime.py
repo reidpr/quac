@@ -1,4 +1,5 @@
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# -*- coding: utf-8 -*-
 
 '''For each input n-gram occurring more than min_occur number of times,
    compute a time series of occurrences per day.
@@ -29,6 +30,33 @@ import tok.unicode_props
 import tsv_glue
 import tweet
 import u
+import wikimedia
+
+
+class Build_Job(base.KV_Pickle_Seq_Output_Job):
+
+   def reduce(self, ngram, datecounts):
+      cts = collections.Counter()
+      first_day = time_.date_max
+      last_day = time_.date_min
+      for (date, count) in datecounts:
+         first_day = min(first_day, date)
+         last_day = max(last_day, date)
+         cts[date] += count
+      total = sum(cts.itervalues())
+      if (total >= self.params['min_occur']):
+         first_day = time_.dateify(first_day)
+         last_day = time_.dateify(last_day)
+         assert (first_day <= last_day)
+         # use float32 for space efficiency at the expense of precision
+         ct_series = math_.Date_Vector.zeros(first_day, last_day,
+                                             dtype=np.float32)
+         for (date, ct) in cts.iteritems():
+            date = time_.dateify(date)
+            ct_series[time_.days_diff(date, first_day)] = ct
+         yield (ngram, { 'ngram': ngram,
+                         'total': total,
+                         'series': ct_series })
 
 
 class Correlate_Job(base.KV_Pickle_Seq_Input_Job, base.TSV_Output_Job):
@@ -93,7 +121,7 @@ class Correlate_Job(base.KV_Pickle_Seq_Input_Job, base.TSV_Output_Job):
          yield m
 
 
-class Tweet_Job(base.TSV_Input_Job, base.KV_Pickle_Seq_Output_Job):
+class Tweet_Job(base.TSV_Input_Job, Build_Job):
 
    def __init__(self, params):
       base.Job.__init__(self, params)
@@ -103,27 +131,53 @@ class Tweet_Job(base.TSV_Input_Job, base.KV_Pickle_Seq_Output_Job):
       # WARNING: make sure field indices match any file format changes
       date = fields[1][:10]  # first 10 characters of ISO 8601 string is date
       for token in self.tzer.tokenize(fields[2]):  # tweet text
-         yield (token, date)
+         yield (token, (date, 1))
 
-   def reduce(self, ngram, dates):
-      cts = collections.Counter()
-      first_day = '9999-00-99'
-      last_day = '0000-00-00'
-      for date in dates:
-         first_day = min(first_day, date)
-         last_day = max(last_day, date)
-         cts[date] += 1
-      total = sum(cts.itervalues())
-      if (total >= self.params['min_occur']):
-         first_day = time_.dateify(first_day)
-         last_day = time_.dateify(last_day)
-         assert (first_day <= last_day)
-         # use float32 for space efficiency at the expense of precision
-         ct_series = math_.Date_Vector.zeros(first_day, last_day,
-                                             dtype=np.float32)
-         for (date, ct) in cts.iteritems():
-            date = time_.dateify(date)
-            ct_series[time_.days_diff(date, first_day)] = ct
-         yield (ngram, { 'ngram': ngram,
-                         'total': total,
-                         'series': ct_series })
+class Wikimedia_Job(Build_Job):
+
+   def map(self, fields):
+      if (fields[2].find('%0A') >= 0 or fields[2].find('%09') >= 0):
+         # URL contains a newline or tab. It's invalid; skip it.
+         return
+      date = wikimedia.timestamp_parse(fields[0]).date()
+      project = fields[1].decode('utf8')
+      try:
+         # Articles with non-ASCII titles are requested with URL-encoded 8-bit
+         # characters in some encoding. Unfortunately, this encoding is not
+         # always UTF-8. I believe it is selected by the browser.
+         #
+         # So, we try to decode as UTF-8, and if this fails, just leave it
+         # with no decoding at all, not even URL-decoding. Unfortunately, we
+         # can't just try encodings until one sticks, as most mismatches will
+         # not throw an error (c.f. "mojibake").
+         #
+         # This can cause article counts to be split. For example, the Russian
+         # article Люди Икс (i.e., the X-Men comic series) can be accessed at
+         # both of the following URLs:
+         #
+         #   (UTF-8)        http://ru.wikipedia.org/wiki/%D0%9B%D1%8E%D0%B4%D0%B8_%D0%98%D0%BA%D1%81
+         #   (Windows-1251) http://ru.wikipedia.org/wiki/%CB%FE%E4%E8_%C8%EA%F1
+         #
+         # Other encodings (e.g., ISO 8859-5: %BB%EE%D4%D8_%B8%DA%E1 and
+         # KOI8-R, %EC%C0%C4%C9_%E9%CB%D3) do not work.
+         #
+         # Sadly, I suspect that the solution is a table of encodings to try
+         # for each language. Perhaps we can duplicate Wikimedia's logic.
+         #
+         # Or, we could simply not decode the article URLs. This might also
+         # solve the newline/tab problem above. However, we'd still want to
+         # normalize %20 into _.
+         article = urllib.unquote(fields[2]).decode('utf8')
+      except UnicodeDecodeError:
+         article = fields[2]
+      count = int(fields[3])
+      # Normalize the URL; this needs more work (see issue #77).
+      article = article.replace(u' ', u'_')
+      yield (project + u' ' + article, (date, count))
+
+   def map_open_input(self):
+      # Input is space-separated lines which are byte sequences, not UTF-8
+      # encoded text. We can coerce tsv_glue.Reader to read this.
+      self.infp = tsv_glue.Reader(sys.stdin.fileno(), separator=' ', mode='b')
+
+
