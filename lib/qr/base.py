@@ -158,9 +158,13 @@ class Job(object):
          values.'''
       for grp in itertools.groupby((l.partition('\t') for l in self.infp),
                                    key=operator.itemgetter(0)):
-         key = grp[0].decode('utf8')
-         values = (decode(i[2]) for i in grp[1])
-         yield (key, values)
+         try:
+            key = grp[0].decode('utf8')
+            values = (decode(i[2]) for i in grp[1])
+            yield (key, values)
+         except UnicodeDecodeError:
+            # ignore unicode problems (they're bogus URLs for the most part)
+            continue
 
    def reduce_open_input(self):
       self.infp = io.open(sys.stdin.fileno(), 'rb')
