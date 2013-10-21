@@ -44,6 +44,7 @@ import sys
 
 import testable
 import tsv_glue
+import u
 
 
 # We use a relatively large output buffer size of 512K; see also

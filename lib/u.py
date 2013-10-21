@@ -15,6 +15,7 @@ import argparse
 import codecs
 import collections
 import ConfigParser
+import cProfile
 from datetime import datetime, timedelta
 import glob
 import gzip
@@ -168,6 +169,17 @@ class MyConfigParser(ConfigParser.SafeConfigParser):
       return self.get(section, key).split()
 
 c = MyConfigParser()
+
+
+class Profiler(object):
+
+   def __init__(self):
+      self.prof = cProfile.Profile()
+      self.prof.enable()
+
+   def stop(self, name):
+      self.prof.disable()
+      self.prof.dump_stats(name)
 
 
 class defaultdict_recursive(collections.defaultdict):
