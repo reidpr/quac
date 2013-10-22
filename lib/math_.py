@@ -313,24 +313,6 @@ class Date_Vector(np.ndarray):
       return self.resize(min(self.first_day, other.first_day),
                          max(self.last_day, other.last_day))
 
-   def shrink_to(self, other):
-      '''Return a copy of myself shrunk to match the bounds of the smaller of
-         myself and other. For example:
-
-         >>> a = Date_Vector('2013-06-02', np.arange(2, 5))
-         >>> b = Date_Vector('2013-06-03', np.arange(3, 6))
-         >>> a.shrink_to(b)
-         Date_Vector('2013-06-03', [3, 4])
-         >>> b.shrink_to(a)
-         Date_Vector('2013-06-03', [3, 4])
-
-         If there is no overlap, return None:
-
-         >>> a.shrink_to(Date_Vector.zeros('2013-06-05', '2013-06-05')) is None
-         True'''
-      return self.resize(max(self.first_day, other.first_day),
-                         min(self.last_day, other.last_day))
-
    def normalize(self, other, parts_per=1):
       '''Divide self by other over the range where the bounds intersect. E.g.:
 
@@ -443,6 +425,24 @@ class Date_Vector(np.ndarray):
                             np.hstack([np.zeros(add_start, dtype=self.dtype),
                                        self[trim_start:len(self) - trim_end],
                                        np.zeros(add_end, dtype=self.dtype)]))
+
+   def shrink_to(self, other):
+      '''Return a copy of myself shrunk to match the bounds of the smaller of
+         myself and other. For example:
+
+         >>> a = Date_Vector('2013-06-02', np.arange(2, 5))
+         >>> b = Date_Vector('2013-06-03', np.arange(3, 6))
+         >>> a.shrink_to(b)
+         Date_Vector('2013-06-03', [3, 4])
+         >>> b.shrink_to(a)
+         Date_Vector('2013-06-03', [3, 4])
+
+         If there is no overlap, return None:
+
+         >>> a.shrink_to(Date_Vector.zeros('2013-06-05', '2013-06-05')) is None
+         True'''
+      return self.resize(max(self.first_day, other.first_day),
+                         min(self.last_day, other.last_day))
 
 
 def pearson(a, b, a_mask=None, b_mask=None, min_data=3):
