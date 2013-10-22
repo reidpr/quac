@@ -11,15 +11,25 @@
        'total':      <total number of occurrences as an integer>,
        'series':     <Date_Vector containing the time series> }
 
-   Note that the n-gram is redundantly encoded (as the key and as part of the
-   value). This is so that values can be independently used without retaining
-   the corresponding key.'''
+   The n-gram is redundantly encoded (as the key and as part of the value).
+   This is so that values can be independently used without retaining the
+   corresponding key.
+
+   Dates in this pipeline are very weird -- they are the "proleptic Gregorian
+   ordinal" of the date (http://docs.python.org/2/library/datetime.html)
+   represented as an integer. That is, the 1-based day number starting at
+   January 1 in the year 1. The ordinal of 2012-10-21 is 734,797. This is for
+   performance reasons (parsing a date is about 200 times slower than parsing
+   an int, and we do it once per input line).'''
 
 
 import collections
 import datetime
+import glob
+import gzip
+import itertools
+import operator
 import sys
-import urllib
 
 import numpy as np
 
@@ -132,42 +142,64 @@ class Tweet_Job(base.TSV_Input_Job, Build_Job):
       for token in self.tzer.tokenize(fields[2]):  # tweet text
          yield (token, (date, 1))
 
+
 class Wikimedia_Job(Build_Job):
 
-   def map(self, fields):
-      date = int(fields[0])  # Gregorian ordinal
-      project = fields[1]
-      # We don't decode the article name (which uses percent-encoding to
-      # encode bytes and then some encoding to encode high characters) because
-      # (a) it saves significant time and (b) there are apparently non-UTF-8
-      # encodings in use. I believe the latter is selected by the browser.
-      #
-      # An artifact of (b) is that article counts can be split. For example,
-      # the Russian article Люди Икс (i.e., the X-Men comic series) can be
-      # accessed at both of the following URLs:
-      #
-      #   (UTF-8)        http://ru.wikipedia.org/wiki/%D0%9B%D1%8E%D0%B4%D0%B8_%D0%98%D0%BA%D1%81
-      #   (Windows-1251) http://ru.wikipedia.org/wiki/%CB%FE%E4%E8_%C8%EA%F1
-      #
-      # Other encodings (e.g., ISO 8859-5: %BB%EE%D4%D8_%B8%DA%E1 and KOI8-R,
-      # %EC%C0%C4%C9_%E9%CB%D3) do not work. Figuring out this mess is
-      # something I'm not very interested in.
-      #
-      # We do, however, normalize spaces into underscores. I believe this may
-      # be incomplete (see issue #77).
-      article = fields[2].replace('%20', '_')
-      count = int(fields[3])
-      #print >>sys.stderr, type(project + ' ' + article)
-      yield (project + ' ' + article, (date, count))
+   # A note on decoding article names in URLs: We don't do it because (a) it
+   # saves significant time and (b) there are apparently non-UTF-8 encodings
+   # in use. I believe the URL encoding is selected by the browser.
+   #
+   # An artifact of (b) is that article counts can be split. For example, the
+   # Russian article Люди Икс (i.e., the X-Men comic series) can be accessed
+   # at both of the following URLs:
+   #
+   #   (UTF-8)        http://ru.wikipedia.org/wiki/%D0%9B%D1%8E%D0%B4%D0%B8_%D0%98%D0%BA%D1%81
+   #   (Windows-1251) http://ru.wikipedia.org/wiki/%CB%FE%E4%E8_%C8%EA%F1
+   #
+   # Other encodings (e.g., ISO 8859-5: %BB%EE%D4%D8_%B8%DA%E1 and KOI8-R,
+   # %EC%C0%C4%C9_%E9%CB%D3) do not work. Figuring out this mess is something
+   # I'm not very interested in.
+   #
+   # We do, however, normalize spaces into underscores. I believe this may be
+   # incomplete (see issue #77).
 
-   def map_open_input(self):
-      # Input is space-separated lines which are byte sequences, not UTF-8
-      # encoded text. We can coerce tsv_glue.Reader to read this.
-      self.infp = tsv_glue.Reader(sys.stdin.fileno(), separator=' ', mode='b')
+   def reduce_inputs(self):
+      'Date and count are simply tab-separated, not encoded.'
+      for (key, values) in itertools.groupby((l.split('\t') for l in self.infp),
+                                             key=operator.itemgetter(0)):
+         try:
+            key = key.decode('utf8')
+            values = ((int(d), int(c)) for (a, d, c) in values)
+            yield (key, values)
+         except UnicodeDecodeError:
+            # ignore Unicode problems, as they represent broken URLs
+            continue
+
+   def map(self, dirname):
+      '''This mapper is a bit odd. Rather than actual content, it accepts
+         simply a directory name, then opens and emits the content of each
+         gzipped file in that directory. While this limits parallelism, it
+         reduces the number of dependencies to manage in the job (there are
+         currently about 50,000) pageview files in the dataset, which we
+         multiply by the number of reducers (50k * 256 = 12.8 million).
+
+         We do this for performance reasons. It saves several I/O steps to
+         embed the reading in the mapper rather than having a very simple
+         mapper. This is likely to break Hadoop Streaming compatibility, but
+         since it's so simple, it's easy to re-do if we go direction.'''
+      for filename in glob.glob(dirname + '/pagecounts-*.gz'):
+         date = str(wikimedia.timestamp_parse(filename).toordinal())
+         for line in gzip.open(filename, 'rb'):
+            fields = line.split(' ')
+            project = fields[0]
+            article = fields[1].replace('%20', '_')  # see issue #77
+            count = fields[2]
+            yield (project + ' ' + article, (date, count))
 
    def map_write(self, key, value):
-      'Treat key and value as a stream of bytes rather than Unicode objects.'
+      'Write value elements as tab-separated, not encoded.'
       self.outfp.write(key)
-      self.outfp.write('\t')
-      self.outfp.write(base.encode(value))
+      for v in value:
+         self.outfp.write('\t')
+         self.outfp.write(v)
       self.outfp.write('\n')

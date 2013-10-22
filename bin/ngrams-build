@@ -124,7 +124,7 @@ class Wikimedia_Job(Job):
    def args_munge(self):
       args.python = 'qr.ngramtime.Wikimedia_Job'
       args.pyargs = qr.base.encode({ 'min_occur': args.min_occur })
-      args.file_reader = 'zcat-prefix'
+      args.file_reader = 'echo -n'
       args.inputs = glob.glob('%s/20??/20??-??' % (args.inputs[0]))
 
    def totals_build(self):

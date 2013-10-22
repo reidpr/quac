@@ -128,6 +128,7 @@ class Job(object):
 
    def map_stdinout(self):
       '''Connect myself to input and output and run my mapper.'''
+      #p = u.Profiler()
       self.map_open_input()
       self.map_open_output()
       self.map_init()
@@ -135,6 +136,7 @@ class Job(object):
          for kv in self.map(i):
             self.map_write(*kv)
       self.cleanup()
+      #p.stop('map.prof')
 
    def map_write(self, key, value):
       '''Write one key/value pair to the mapper output.'''
@@ -159,13 +161,9 @@ class Job(object):
          values.'''
       for grp in itertools.groupby((l.partition('\t') for l in self.infp),
                                    key=operator.itemgetter(0)):
-         try:
-            key = grp[0].decode('utf8')
-            values = (decode(i[2]) for i in grp[1])
-            yield (key, values)
-         except UnicodeDecodeError:
-            # ignore unicode problems (they're bogus URLs for the most part)
-            continue
+         key = grp[0].decode('utf8')
+         values = (decode(i[2]) for i in grp[1])
+         yield (key, values)
 
    def reduce_open_input(self):
       self.infp = io.open(sys.stdin.fileno(), 'rb')
@@ -178,9 +176,9 @@ class Job(object):
       self.outfp = io.open(self.reduce_output_filename, 'wt',
                            encoding='utf8', buffering=OUTPUT_BUFSIZE)
 
-
    def reduce_stdinout(self, rid):
       '''Connect myself to input and output, and run my reducer.'''
+      #p = u.Profiler()
       self.rid = rid
       self.reduce_open_input()
       self.reduce_open_output()
@@ -189,6 +187,7 @@ class Job(object):
          for item in self.reduce(*kvals):
             self.reduce_write(item)
       self.cleanup()
+      #p.stop('reduce.prof')
 
    @abstractmethod
    def reduce_write(self, item):
