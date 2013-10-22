@@ -9,54 +9,27 @@ usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
                   FILE [FILE ...]
 quacreduce: error: input file basenames must be unique
 2
-*** Check that either --python xor --map and --reduce are specified
+*** Check specification of --python, --map, --reduce
 *** these should succeed
 $ quacreduce --map foo --reduce bar input.txt
 0
+$ quacreduce --python foo --map bar input.txt
+0
+$ quacreduce --python foo --reduce bar input.txt
+0
 *** these should fail
 $ quacreduce --notimes input.txt
-quacr FATAL    --python or --map and --reduce must be specified
+quacr FATAL    must specify both mapper and reducer
 1
-$ quacreduce --map bar input.txt
-usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
-                  [--dist] [--file-reader CMD] [--jobdir DIR] [--partitions N]
-                  [--sortdir DIR] [--sortmem N] [--update] [-h] [--notimes]
-                  [--unittest] [--verbose]
-                  FILE [FILE ...]
-quacreduce: error: --map and --reduce must both be specified if one is
-2
-$ quacreduce --reduce bar input.txt
-usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
-                  [--dist] [--file-reader CMD] [--jobdir DIR] [--partitions N]
-                  [--sortdir DIR] [--sortmem N] [--update] [-h] [--notimes]
-                  [--unittest] [--verbose]
-                  FILE [FILE ...]
-quacreduce: error: --map and --reduce must both be specified if one is
-2
-$ quacreduce --python foo --map bar input.txt
-usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
-                  [--dist] [--file-reader CMD] [--jobdir DIR] [--partitions N]
-                  [--sortdir DIR] [--sortmem N] [--update] [-h] [--notimes]
-                  [--unittest] [--verbose]
-                  FILE [FILE ...]
-quacreduce: error: --python cannot be specified with --map and/or --reduce
-2
-$ quacreduce --python foo --reduce bar input.txt
-usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
-                  [--dist] [--file-reader CMD] [--jobdir DIR] [--partitions N]
-                  [--sortdir DIR] [--sortmem N] [--update] [-h] [--notimes]
-                  [--unittest] [--verbose]
-                  FILE [FILE ...]
-quacreduce: error: --python cannot be specified with --map and/or --reduce
-2
-$ quacreduce --python foo --map bar --reduce baz input.txt
-usage: quacreduce [--map CMD] [--reduce CMD] [--python CLASS] [--pyargs DICT]
-                  [--dist] [--file-reader CMD] [--jobdir DIR] [--partitions N]
-                  [--sortdir DIR] [--sortmem N] [--update] [-h] [--notimes]
-                  [--unittest] [--verbose]
-                  FILE [FILE ...]
-quacreduce: error: --python cannot be specified with --map and/or --reduce
-2
+$ quacreduce --notimes --map bar input.txt
+quacr FATAL    must specify both mapper and reducer
+1
+$ quacreduce --notimes --reduce bar input.txt
+quacr FATAL    must specify both mapper and reducer
+1
+$ quacreduce --notimes --python foo --map bar --reduce baz input.txt
+quacr FATAL    cannot specify all of --python, --map, --reduce
+1
 *** Check that job fails if the map or reduce commands fail
 $ quacreduce --notimes --map false --reduce true /dev/null
 $ (make || true)

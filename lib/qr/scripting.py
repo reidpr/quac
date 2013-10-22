@@ -64,10 +64,6 @@ def parse_args(ap):
    # check arguments
    if (len(set(os.path.basename(i) for i in args.inputs)) != len(args.inputs)):
       ap.error('input file basenames must be unique')
-   if (args.python and (args.map or args.reduce)):
-      ap.error('--python cannot be specified with --map and/or --reduce')
-   if (args.map and not args.reduce or args.reduce and not args.map):
-      ap.error('--map and --reduce must both be specified if one is')
    # absolutize input files
    args.inputs = [os.path.abspath(i) for i in args.inputs]
    # set sortdir if unset
@@ -80,8 +76,12 @@ def run(args, job_ct):
    sp.check_call('cd %s && make -j%d' % (args.jobdir, job_ct), shell=True)
 
 def setup(args):
-   if (not (args.python or args.map or args.reduce)):
-      u.abort('--python or --map and --reduce must be specified')
+   # These tests are here, rather than in argument parsing, so scripts can
+   # insert mappers and reducers not specified on the command line.
+   if (not (args.map and args.reduce or args.python)):
+      u.abort('must specify both mapper and reducer')
+   if (args.map and args.reduce and args.python):
+      u.abort('cannot specify all of --python, --map, --reduce')
 
    directories_setup(args)
    if (args.python):
@@ -215,8 +215,10 @@ def pythonify(args):
    # dictionary. See base.Job.__init__() for more on how this hack works.
    params = repr(u.str_to_dict(args.pyargs))
    base = "python -c \"import %(module)s; j = %(class_)s(%(params)s); " % locals()
-   args.map = base + "j.map_stdinout()\""
-   args.reduce = base + "j.reduce_stdinout(%(RID))\""
+   if (args.map is None):
+      args.map = base + "j.map_stdinout()\""
+   if (args.reduce is None):
+      args.reduce = base + "j.reduce_stdinout(%(RID))\""
 
 def slurm_dump(args):
    pass  # unimplemented, see issue #33

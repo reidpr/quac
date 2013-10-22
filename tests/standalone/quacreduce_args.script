@@ -19,26 +19,26 @@ echo $?
 x quacreduce --map cat --reduce cat foo/bar.txt baz/bar.txt
 echo $?
 
-echo '*** Check that either --python xor --map and --reduce are specified'
+echo '*** Check specification of --python, --map, --reduce'
 
 echo '*** these should succeed'
 #x quacreduce --python foo job1 input.txt
 #echo $?
 x quacreduce --map foo --reduce bar input.txt
 echo $?
-
-echo '*** these should fail'
-x quacreduce --notimes input.txt
-echo $?
-x quacreduce --map bar input.txt
-echo $?
-x quacreduce --reduce bar input.txt
-echo $?
 x quacreduce --python foo --map bar input.txt
 echo $?
 x quacreduce --python foo --reduce bar input.txt
 echo $?
-x quacreduce --python foo --map bar --reduce baz input.txt
+
+echo '*** these should fail'
+x quacreduce --notimes input.txt
+echo $?
+x quacreduce --notimes --map bar input.txt
+echo $?
+x quacreduce --notimes --reduce bar input.txt
+echo $?
+x quacreduce --notimes --python foo --map bar --reduce baz input.txt
 echo $?
 
 echo '*** Check that job fails if the map or reduce commands fail'
