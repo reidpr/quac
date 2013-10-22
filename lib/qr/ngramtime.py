@@ -150,7 +150,7 @@ class Wikimedia_Job(Build_Job):
    # in use. I believe the URL encoding is selected by the browser.
    #
    # An artifact of (b) is that article counts can be split. For example, the
-   # Russian article Люди Икс (i.e., the X-Men comic series) can be accessed
+   # Russian article Люди_Икс (i.e., the X-Men comic series) can be accessed
    # at both of the following URLs:
    #
    #   (UTF-8)        http://ru.wikipedia.org/wiki/%D0%9B%D1%8E%D0%B4%D0%B8_%D0%98%D0%BA%D1%81
