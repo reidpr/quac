@@ -44,9 +44,7 @@ def main():
       totals = u.pickle_load('%s/total.pkl.gz' % (args.inputdir))
    except Exception, x:
       u.abort('cannot read total file: %s' % (x))
-   tot_vec = totals['series']
-   dates = (time_.iso8601_date(date)
-            for date in time_.dateseq(tot_vec.first_day, tot_vec.last_day))
+   tsv = tsv_glue.Writer(sys.stdout.fileno())
    for i in xrange(file_ct):
       if (args.query is not None and u.djb2(args.query) % file_ct != i):
          continue
@@ -55,13 +53,14 @@ def main():
          (k, _, v) = line.partition('\t')
          k = k.decode('utf8')
          v = qr.base.decode(v)
+         (proj, _, article) = k.partition(' ')
          ngram_vec = v['series']
+         tot_vec = totals[proj]['series']
          if (args.query is None or k == args.query):
             if (args.detail):
-               tsv = tsv_glue.Writer(sys.stdout.fileno())
-               (ngram_vec, _) = ngram_vec.bi_union(ngram_vec, tot_vec)
+               (ngram_vec, tot_vec) = ngram_vec.bi_intersect(ngram_vec, tot_vec)
                assert (ngram_vec.bounds_eq(tot_vec))
-               for row in zip(dates,
+               for row in zip(ngram_vec.iso8601iter,
                               ngram_vec.astype(np.int64),
                               tot_vec.astype(np.int64),
                               ngram_vec / tot_vec * 1e6):
@@ -69,8 +68,7 @@ def main():
             else:
                fd = time_.iso8601_date(ngram_vec.first_day)
                ld = time_.iso8601_date(ngram_vec.last_day)
-               print >>u.utf8_stdout, (u'%s\t%d\t%s\t%s'
-                                       % (k, v['total'], fd, ld))
+               tsv.writerow((k, v['total'], fd, ld))
             if (k == args.query):
                break
 

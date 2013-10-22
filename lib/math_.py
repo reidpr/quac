@@ -260,6 +260,18 @@ class Date_Vector(np.ndarray):
       self._first_day = time_.dateify(x)
 
    @property
+   def iso8601iter(self):
+      '''Iterator which lists my days in ISO 8601 format. For example:
+
+         >>> a = Date_Vector.zeros('2013-06-02', '2013-06-05')
+         >>> a.iso8601iter
+         <generator object iso8601iter at 0x...>
+         >>> list(a.iso8601iter)
+         ['2013-06-02', '2013-06-03', '2013-06-04', '2013-06-05']'''
+      for d in time_.dateseq(self.first_day, self.last_day):
+         yield time_.iso8601_date(d)
+
+   @property
    def last_day(self):
       if (self._first_day is None):
          return None

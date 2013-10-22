@@ -23,11 +23,8 @@ x ls -R series
 
 ## ngrams-search ##
 
-# Test that ngrams-search complains properly if input is incorrect.
-y 'ngrams-search --notimes --query candy /nonexistent || true'
-
 # "candy" should peak near Halloween. (Note that midnight UTC is 8pm EST, so a
-# lot of trick-or-treating related traffice will happen on November 1 UTC.)
+# lot of trick-or-treating related traffic will happen on November 1 UTC.)
 x ngrams-search --query candy series/out
 x ngrams-search --detail --query candy series/out
 
