@@ -43,7 +43,7 @@ gr.add_argument('--strategy',
 gr.add_argument("--trials",
                 metavar='N',
                 type=int,
-                default=10,
+                default=20,
                 help="number of active learning trials to average",
                 )
 gr.add_argument("--variance",
@@ -132,6 +132,7 @@ def random(unlabeled, clf):
 def uncertainty(unlabeled, clf):
    """ Select day at random, then select instance with least certain
    classification (i.e., closest to 0.5) """
+   # FIXME: search over all days
    # select non-empty day
    dayi = u.rand.randint(0, len(unlabeled) - 1)
    while len(unlabeled[dayi][0]) == 0:
@@ -153,6 +154,7 @@ def active_learn(unlabeled, labeled, test_data, clf, strategy, iters):
       labeled[1] = np.append(labeled[1], y)
       clf.fit(labeled[0], labeled[1])
       # acc = metrics.accuracy_score(test_data[1], clf.predict(test_data[0]))
+      # acc = metrics.f1_score(test_data[1], clf.predict(test_data[0]))
       acc = metrics.roc_auc_score(test_data[1], [p[1] for p in clf.predict_proba(test_data[0])])
       accuracies.append(acc)
       # print metrics.confusion_matrix(test_data[1], clf.predict(test_data[0]))
@@ -164,8 +166,9 @@ def do_active_learn(strategy):
    all_accuracies = []
    for triali in range(args.trials):
       ndays = args.days + 1
+      # include a final day for testing.
       priors = [min(1., max(0., u.rand.gauss(args.mean, args.variance)))
-                for i in range(args.days)] + [.1]
+                for i in range(args.days)] + [args.mean]
       data = generate_examples(ndays * 100, 100, ndays, priors,
                                ninformative=2, nclusters_per_class=2)
       clf = linear_model.LogisticRegression()
@@ -175,7 +178,7 @@ def do_active_learn(strategy):
       labeled[1] = data[0][1][[0,-1]]
       clf.fit(labeled[0][[0,-1]], labeled[1][[0,-1]])
       test_data = data[-1]
-      data = data[2:-1]
+      data = data[1:-1]
       strategy_f = getattr(sys.modules[__name__], strategy)
       accuracies = active_learn(data, labeled, test_data, clf, strategy_f, args.iters)
       print 'strategy=%s trial=%d acc=%.3f' % (strategy, triali, np.average(accuracies))
