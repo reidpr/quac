@@ -45,8 +45,6 @@ y 'ngrams-search --detail --query "en Sandy,_Utah" series/out'
 y 'ngrams-search --query "en Hurricane_Sandy" series/out'
 y 'ngrams-search --detail --query "en Hurricane_Sandy" series/out'
 
-exit
-
 ## ngrams-correlate ##
 
 # Test that ngrams-correlate complains properly if input is incorrect.
@@ -55,17 +53,8 @@ y "ngrams-correlate --notimes /bin/sh halloween.xls || true"
 y "ngrams-correlate --notimes /bin /etc || true"
 y "ngrams-correlate --notimes series /nonexistent.xls || true"
 
-# Build the correlations. The sample rate is so tiny because:
-#
-#     0.01   spritzer 1%
-#   * 0.05   5% sample for testing
-#   * 0.015  1.5% of tweets are geotagged
-#   * 0.5    last day of test sample is incomplete
-#   -------
-#   = 3.75e-6
-#
 echo "$ ngrams-correlate ..."
-ngrams-correlate --notimes --min-similarity 0.7 --min-ppm 2000 --sample-rate 3.75e-6 --run 4 --clean --jobdir corr series/out halloween.xls > /dev/null
+ngrams-correlate --notimes --min-similarity 0.5 --min-ppm 100 --run 2 --clean --jobdir corr series/out halloween.xls > /dev/null
 
 # Results
 x ls -R corr

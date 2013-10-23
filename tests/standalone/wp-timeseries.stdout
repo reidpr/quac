@@ -79,3 +79,70 @@ $ (ngrams-search --detail --query "en Hurricane_Sandy" series/out)
 2012-11-02	148859	266744672	558.058
 2012-11-03	114007	246240160	462.991
 2012-11-04	89297	265980816	335.727
+$ (ngrams-correlate --notimes /nonexistent halloween.xls || true)
+usage: ngrams-correlate [--min-similarity X] [--min-ppm X]
+                        [--tw-sample-rate X] [--run RUN] [--clean] [--map CMD]
+                        [--reduce CMD] [--python CLASS] [--pyargs DICT]
+                        [--dist] [--file-reader CMD] [--jobdir DIR]
+                        [--partitions N] [--sortdir DIR] [--sortmem N]
+                        [--update] [-h] [--notimes] [--unittest] [--verbose]
+                        FILE [FILE ...]
+ngrams-correlate: error: /nonexistent is not a directory
+$ (ngrams-correlate --notimes /bin/sh halloween.xls || true)
+usage: ngrams-correlate [--min-similarity X] [--min-ppm X]
+                        [--tw-sample-rate X] [--run RUN] [--clean] [--map CMD]
+                        [--reduce CMD] [--python CLASS] [--pyargs DICT]
+                        [--dist] [--file-reader CMD] [--jobdir DIR]
+                        [--partitions N] [--sortdir DIR] [--sortmem N]
+                        [--update] [-h] [--notimes] [--unittest] [--verbose]
+                        FILE [FILE ...]
+ngrams-correlate: error: /bin/sh is not a directory
+$ (ngrams-correlate --notimes /bin /etc || true)
+usage: ngrams-correlate [--min-similarity X] [--min-ppm X]
+                        [--tw-sample-rate X] [--run RUN] [--clean] [--map CMD]
+                        [--reduce CMD] [--python CLASS] [--pyargs DICT]
+                        [--dist] [--file-reader CMD] [--jobdir DIR]
+                        [--partitions N] [--sortdir DIR] [--sortmem N]
+                        [--update] [-h] [--notimes] [--unittest] [--verbose]
+                        FILE [FILE ...]
+ngrams-correlate: error: /etc is not a file
+$ (ngrams-correlate --notimes series /nonexistent.xls || true)
+usage: ngrams-correlate [--min-similarity X] [--min-ppm X]
+                        [--tw-sample-rate X] [--run RUN] [--clean] [--map CMD]
+                        [--reduce CMD] [--python CLASS] [--pyargs DICT]
+                        [--dist] [--file-reader CMD] [--jobdir DIR]
+                        [--partitions N] [--sortdir DIR] [--sortmem N]
+                        [--update] [-h] [--notimes] [--unittest] [--verbose]
+                        FILE [FILE ...]
+ngrams-correlate: error: /nonexistent.xls is not a file
+$ ngrams-correlate ...
+ngcor INFO     starting
+ngcor INFO     setting up job
+ngcor INFO     running job
+ngcor INFO     cleaning up job
+ngcor INFO     done
+$ ls -R corr
+corr:
+Makefile
+out
+tmp
+
+corr/out:
+halloween:halloween.tsv
+halloween:s%40ndy.tsv
+
+corr/tmp:
+$ head -10 corr/out/halloween:halloween.tsv
+en Halloween	0.999828812323	13586.1	31.0247
+en Halloween_(disambiguation)	0.999563902118	206.44	0.395273
+en Halloween_around_the_world	0.999312119626	123.066	0.424708
+en Halloween_Horror_Nights	0.999104849073	192.283	0.252302
+ru %D0%A5%D1%8D%D0%BB%D0%BB%D0%BE%D1%83%D0%B8%D0%BD_(%D1%84%D0%B8%D0%BB%D1%8C%D0%BC)	0.997415107448	119.87	0.290369
+en Halloween_(1978_film)	0.974562714834	128.029	2.26231
+ru %D0%A5%D1%8D%D0%BB%D0%BB%D0%BE%D1%83%D0%B8%D0%BD	0.9735718217	5775.24	18.7288
+en Halloween_(franchise)	0.958193216976	123.399	2.26651
+en Effects_of_Hurricane_Sandy_in_New_York	0.930826432493	166.125	0.0
+en Halloween_(2007_film)	0.927019153871	123.764	1.37084
+$ head -10 corr/out/halloween:s%40ndy.tsv
+en Hurricane_Sandy_(2012)	0.974445068716	137.969	1.35402
+en Hurricane_Sandy	0.963662060558	1294.29	10.7481

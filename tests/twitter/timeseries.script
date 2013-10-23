@@ -43,12 +43,6 @@ x ngrams-search --detail --query taco series/out
 
 ## ngrams-correlate ##
 
-# Test that ngrams-correlate complains properly if input is incorrect.
-y "ngrams-correlate --notimes /nonexistent halloween.xls || true"
-y "ngrams-correlate --notimes /bin/sh halloween.xls || true"
-y "ngrams-correlate --notimes /bin /etc || true"
-y "ngrams-correlate --notimes series /nonexistent.xls || true"
-
 # Build the correlations. The sample rate is so tiny because:
 #
 #     0.01   spritzer 1%

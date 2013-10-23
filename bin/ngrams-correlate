@@ -37,8 +37,8 @@ gr.add_argument('--min-ppm',
                 type=float,
                 metavar='X',
                 default=1000,
-                help='ignore series with peak < X occurs per million tweets')
-gr.add_argument('--sample-rate',
+                help='ignore series with peak < X occurrences per million')
+gr.add_argument('--tw-sample-rate',
                 type=float,
                 metavar='X',
                 default=0.01,
@@ -77,7 +77,7 @@ try:
    args.python = 'qr.ngramtime.Correlate_Job'
    args.pyargs = qr.base.encode({ 'min_similarity': args.min_similarity,
                                   'min_ppm': args.min_ppm,
-                                  'sample_rate': args.sample_rate,
+                                  'tw_sample_rate': args.tw_sample_rate,
                                   'total_file': total_file,
                                   'input_sss': xls_inputs })
    qr.scripting.setup(args)

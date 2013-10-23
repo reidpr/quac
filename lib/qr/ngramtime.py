@@ -30,6 +30,7 @@ import gzip
 import itertools
 import operator
 import sys
+import urllib
 
 import numpy as np
 
@@ -71,43 +72,52 @@ class Build_Job(base.KV_Pickle_Seq_Output_Job):
 class Correlate_Job(base.KV_Pickle_Seq_Input_Job, base.TSV_Output_Job):
 
    def map_init(self):
-      self.total_vec = u.pickle_load(self.params['total_file'])['series']
-      mask = np.array([tweet.is_enough(self.total_vec.date(i),
-                                       self.total_vec[i],
-                                       sample_rate=self.params['sample_rate'])
-                       for i in xrange(len(self.total_vec))],
-                      dtype=bool)
-      if (mask.sum() < 0.5 * len(mask)):
-         u.abort('too few valid n-gram days (%d of %d); check sample rate?'
-                 % (mask.sum(), len(mask)))
-      self.total_mask = math_.Date_Vector(self.total_vec.first_day, mask)
+      self.totals = u.pickle_load(self.params['total_file'])
+      # Compute masks (find days with insufficient data)
+      for (proj, pdata) in self.totals.iteritems():
+         if (proj != 't@'):
+            # Wikipedia - no masking needed
+            pdata['mask'] = None
+         else:
+            # Twitter - data have holes, so compute masks
+            mask = [tweet.is_enough(pdata['series'].date(i),
+                                    pdata['series'][i],
+                                    sample_rate=self.params['sample_rate'])
+                    for i in xrange(len(pdata['series']))]
+            mask = np.array(mask, dtype=bool)
+            if (mask.sum() < 0.5 * len(mask)):
+               u.abort('too many low-data days (%d of %d); check sample rate?'
+                       % (mask.sum(), len(mask)))
+            pdata['mask'] = math_.Date_Vector(pdata['series'].first_day, mask)
+      # Read target time series
       self.targets = list()
       short_names = u.without_common_prefix(self.params['input_sss'])
       for (sn, ln) in zip(short_names, self.params['input_sss']):
          e = ssheet.Excel(file_=ln)
-         for (name, (data, mask)) in e.data.iteritems():
+         for (name, (series, mask)) in e.data.iteritems():
             name = '%s:%s' % (urllib.quote_plus(u.without_ext(sn, '.xls')),
                               urllib.quote_plus(name))
-            self.targets.append({ 'name': name,
-                                  'data': data,
-                                  'mask': mask })
+            self.targets.append({ 'name':   name,
+                                  'series': series,
+                                  'mask':   mask })
 
    def map(self, kv):
       (_, ngram) = kv
       for t in self.targets:
          # Extend the ngram series to match the target, to make sure that
          # leading and trailing zeroes are not lost.
-         ng_vec = ngram['series'].grow_to(t['data'])
-         ng_vec = ng_vec.normalize(self.total_vec, parts_per=1e6)
+         ng_vec = ngram['series'].grow_to(t['series'])
+         proj = ngram['ngram'].split(' ')[0]
+         ng_vec = ng_vec.normalize(self.totals[proj]['series'], parts_per=1e6)
          peak = ng_vec.max()
          trough = ng_vec.min()
          # Ignore series with a peak that is too low.
          if (peak < self.params['min_ppm']):
             continue
          # Compute correlation.
-         assert (t['data'].bounds_eq(t['mask']))
-         r = math_.pearson(ng_vec, t['data'],
-                           self.total_mask, t['mask'])
+         assert (t['series'].bounds_eq(t['mask']))
+         r = math_.pearson(ng_vec, t['series'],
+                           self.totals[proj]['mask'], t['mask'])
          if (abs(r) >= self.params['min_similarity']):
             yield (t['name'], (ngram['ngram'], r, peak, trough))
 
