@@ -16,7 +16,7 @@ exec 2>&1
 # We use several partitions so that we can test that
 # hash-based time series lookup works.
 echo "$ ngrams-build ..."
-ngrams-build --notimes --partitions 10 --min-occur 10 --run 4 --clean --jobdir series $TWEETDIR/pre > /dev/null
+ngrams-build --notimes --partitions 10 --min-occur 10 --run 1 --clean --jobdir series $TWEETDIR/pre > /dev/null
 
 x ls -R series
 
@@ -25,20 +25,20 @@ x ls -R series
 
 # "candy" should peak near Halloween. (Note that midnight UTC is 8pm EST, so a
 # lot of trick-or-treating related traffic will happen on November 1 UTC.)
-x ngrams-search --query candy series/out
-x ngrams-search --detail --query candy series/out
+y "ngrams-search --query 't@ candy' series/out"
+y "ngrams-search --detail --query 't@ candy' series/out"
 
 # "sandy" is the hurricane.
-x ngrams-search --query sandy series/out
-x ngrams-search --detail --query sandy series/out
+y "ngrams-search --query 't@ sandy' series/out"
+y "ngrams-search --detail --query 't@ sandy' series/out"
 
 # We include "a" because it's an n-gram that had trouble being sorted (see
 # commit 885d3d)
-x ngrams-search --query a series/out
+y "ngrams-search --query 't@ a' series/out"
 
 # Make sure zeros are inserted properly: "taco" has no data on October 28
 # (beginning), November 1 (middle), and November 4/5 (end).
-x ngrams-search --detail --query taco series/out
+y "ngrams-search --detail --query 't@ taco' series/out"
 
 
 ## ngrams-correlate ##
@@ -53,7 +53,7 @@ x ngrams-search --detail --query taco series/out
 #   = 3.75e-6
 #
 echo "$ ngrams-correlate ..."
-ngrams-correlate --notimes --min-similarity 0.7 --min-ppm 2000 --sample-rate 3.75e-6 --run 4 --clean --jobdir corr series/out halloween.xls > /dev/null
+ngrams-correlate --notimes --min-similarity 0.7 --min-ppm 2000 --tw-sample-rate 3.75e-6 --run 1 --clean --jobdir corr series/out halloween.xls > /dev/null
 
 # Results
 x ls -R corr

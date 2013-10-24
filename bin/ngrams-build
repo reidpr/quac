@@ -114,9 +114,7 @@ class Tweet_Job(Job):
       cts = [v['count'] for (k, v) in sorted(self.metadata['days'].iteritems())]
       cts = math_.Date_Vector(min(self.metadata['days'].iterkeys()),
                               np.array(cts, dtype=np.float32))
-      return { 'ngram':      None,
-               'total':      sum(cts),
-               'series':     cts }
+      return { 't@': { 'total':  sum(cts), 'series': cts } }
 
 
 class Wikimedia_Job(Job):

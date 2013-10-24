@@ -44,13 +44,15 @@ import u
 import wikimedia
 
 
-class Build_Job(base.KV_Pickle_Seq_Output_Job):
+class Build_Job(base.TSV_Internal_Job, base.KV_Pickle_Seq_Output_Job):
 
    def reduce(self, ngram, datecounts):
       cts = collections.Counter()
       first_day = float('+inf')
       last_day = float('-inf')
       for (date, count) in datecounts:
+         date = int(date)
+         count = int(count)
          first_day = min(first_day, date)
          last_day = max(last_day, date)
          cts[date] += count
@@ -82,7 +84,7 @@ class Correlate_Job(base.KV_Pickle_Seq_Input_Job, base.TSV_Output_Job):
             # Twitter - data have holes, so compute masks
             mask = [tweet.is_enough(pdata['series'].date(i),
                                     pdata['series'][i],
-                                    sample_rate=self.params['sample_rate'])
+                                    sample_rate=self.params['tw_sample_rate'])
                     for i in xrange(len(pdata['series']))]
             mask = np.array(mask, dtype=bool)
             if (mask.sum() < 0.5 * len(mask)):
@@ -148,9 +150,18 @@ class Tweet_Job(base.TSV_Input_Job, Build_Job):
 
    def map(self, fields):
       # WARNING: make sure field indices match any file format changes
-      date = fields[1][:10]  # first 10 characters of ISO 8601 string is date
+      #
+      # Note: While we have an iso8601_parse() method in time_, it is kind of
+      # slow (~60 μs per parse on my box) and contains a number of
+      # contingencies we don't need here. In past experience, parsing dates
+      # once per input line consumes quite a lot of the total time, so we want
+      # to be expedient here (this approach takes ~9.5 µs). Another option
+      # would be to reprocess the Twitter data to include proleptic Gregorian
+      # ordinals directly (parsing ints takes only 250 ns).
+      date = str(datetime.datetime.strptime(fields[1][:10],  # date only
+                                            '%Y-%m-%d').toordinal())
       for token in self.tzer.tokenize(fields[2]):  # tweet text
-         yield (token, (date, 1))
+         yield (('t@ ' + token).encode('utf8'), (date, '1'))
 
 
 class Wikimedia_Job(Build_Job):
@@ -173,18 +184,6 @@ class Wikimedia_Job(Build_Job):
    # We do, however, normalize spaces into underscores. I believe this may be
    # incomplete (see issue #77).
 
-   def reduce_inputs(self):
-      'Date and count are simply tab-separated, not encoded.'
-      for (key, values) in itertools.groupby((l.split('\t') for l in self.infp),
-                                             key=operator.itemgetter(0)):
-         try:
-            key = key.decode('utf8')
-            values = ((int(d), int(c)) for (a, d, c) in values)
-            yield (key, values)
-         except UnicodeDecodeError:
-            # ignore Unicode problems, as they represent broken URLs
-            continue
-
    def map(self, dirname):
       '''This mapper is a bit odd. Rather than actual content, it accepts
          simply a directory name, then opens and emits the content of each
@@ -205,11 +204,3 @@ class Wikimedia_Job(Build_Job):
             article = fields[1].replace('%20', '_')  # see issue #77
             count = fields[2]
             yield (project + ' ' + article, (date, count))
-
-   def map_write(self, key, value):
-      'Write value elements as tab-separated, not encoded.'
-      self.outfp.write(key)
-      for v in value:
-         self.outfp.write('\t')
-         self.outfp.write(v)
-      self.outfp.write('\n')

@@ -15,7 +15,7 @@ exec 2>&1
 
 # We use several partitions to test that hash-based time series lookup works.
 echo "$ ngrams-build ..."
-ngrams-build --notimes --partitions 10 --min-occur 10 --run 2 --clean --jobdir series $QUACBASE/tests/standalone/wp-access > /dev/null
+ngrams-build --notimes --partitions 10 --min-occur 10 --run 1 --clean --jobdir series $QUACBASE/tests/standalone/wp-access > /dev/null
 
 x ls -R series
 
@@ -54,7 +54,7 @@ y "ngrams-correlate --notimes /bin /etc || true"
 y "ngrams-correlate --notimes series /nonexistent.xls || true"
 
 echo "$ ngrams-correlate ..."
-ngrams-correlate --notimes --min-similarity 0.5 --min-ppm 100 --run 2 --clean --jobdir corr series/out halloween.xls > /dev/null
+ngrams-correlate --notimes --min-similarity 0.5 --min-ppm 100 --run 1 --clean --jobdir corr series/out halloween.xls > /dev/null
 
 # Results
 x ls -R corr

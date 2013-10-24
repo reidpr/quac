@@ -271,6 +271,34 @@ class TSV_Input_Job(Job):
       self.infp = tsv_glue.Reader(sys.stdin.fileno())
 
 
+class TSV_Internal_Job(Job):
+
+   '''Values transferred from mappers to reducers are iterables. They are
+      "encoded" by simple tab separation. No checks for internal tabs or
+      newlines are performed, and anything that is not a string object needs
+      to be manually dealt with (keys are still Unicode).'''
+
+   def map_write(self, key, value):
+      self.outfp.write(key)
+      for v in value:
+         self.outfp.write('\t')
+         self.outfp.write(v)
+      self.outfp.write('\n')
+
+   def reduce_inputs(self):
+      for (key, values) in itertools.groupby((l.split('\t') for l in self.infp),
+                                             key=operator.itemgetter(0)):
+         try:
+            key = key.decode('utf8')
+            # Skip first item in each iterator within values (it's the key
+            # again). We use a generator and islice() to remain lazy.
+            values = (itertools.islice(i, 1, None) for i in values)
+            yield (key, values)
+         except UnicodeDecodeError:
+            # ignore Unicode problems, as they represent broken URLs
+            continue
+
+
 class TSV_Output_Job(Job):
 
    '''Mixin for TSV UTF-8 text output. :meth:`reduce_write()` expects a
