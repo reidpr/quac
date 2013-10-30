@@ -1,0 +1,111 @@
+#!/usr/bin/env python
+
+'Given a set of pageview files, update a metadata file.'
+
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+import collections
+import datetime
+import gzip
+from pprint import pprint
+
+import quacpath
+import pickle_glue
+import testable
+import time_
+import u
+import wikimedia
+l = u.l
+
+
+### Setup ###
+
+ap = u.ArgumentParser(description=__doc__)
+gr = ap.default_group
+gr.add_argument('outfile',
+                metavar='OUTFILE',
+                help='metadata file to create or update')
+gr.add_argument('pv_files',
+                metavar='PAGEVIEWS',
+                nargs='+',
+                help='pageview files to add to metadata')
+
+
+### Globals ###
+
+# minimum and maximum timestamps seen so far
+date_min = time_.date_max
+date_max = time_.date_min
+
+
+### Main ###
+
+def main():
+   u.logging_init('wpmtd')
+   l.debug('starting')
+   mdp = metadata_pkl_open(args.outfile)
+   md = mdp.data
+   for filename in args.pv_files:
+      pv_process(filename, md)
+   l.debug('writing %s' % (args.outfile))
+   mdp.commit()
+   l.debug('done')
+
+
+### Functions and classes ###
+
+def metadata_pkl_open(filename):
+   return pickle_glue.File(filename, writable=True, default=dict())
+
+def pv_process(filename, md):
+   'Compute and save metadata for the given pageview file.'
+   l.debug('reading %s' % (filename))
+   ts = wikimedia.timestamp_parse(filename)
+   fp = gzip.open(filename, 'rb')
+   counts = collections.Counter()
+   for line in fp:
+      (proj, _, count, _) = line.split(' ')
+      counts[proj] += int(count)
+   for (proj, count) in counts.iteritems():
+      update(md, ts, proj, count)
+
+def update(md, timestamp, proj, count):
+   '''e.g.:
+
+      >>> d = dict()
+      >>> update(d, datetime.datetime(2013, 10, 31, 12, 1, 1), 'en', 100)
+      >>> pprint(d)
+      {'en': {datetime.date(2013, 10, 31): {'hours': {12: 100}, 'total': 100}}}
+      >>> update(d, datetime.datetime(2013, 10, 31, 13), 'en', 10)
+      >>> pprint(d)
+      {'en': {datetime.date(2013, 10, 31): {'hours': {12: 100, 13: 10},
+                                            'total': 110}}}
+      >>> update(d, datetime.datetime(2013, 10, 30, 12), 'en', 200)
+      >>> pprint(d)
+      {'en': {datetime.date(2013, 10, 30): {'hours': {12: 200}, 'total': 200},
+              datetime.date(2013, 10, 31): {'hours': {12: 100, 13: 10},
+                                            'total': 110}}}
+
+      Setting a new value for an hour already in the data silently replaces
+      the old value:
+
+      >>> update(d, datetime.datetime(2013, 10, 31, 12, 2, 2), 'en', 300)
+      >>> pprint(d)
+      {'en': {datetime.date(2013, 10, 30): {'hours': {12: 200}, 'total': 200},
+              datetime.date(2013, 10, 31): {'hours': {12: 300, 13: 10},
+                                            'total': 310}}}'''
+   date = timestamp.date()
+   hour = timestamp.hour
+   md.setdefault(proj, dict())
+   md[proj].setdefault(date, { 'total': None, 'hours': dict() })
+   md[proj][date]['hours'][hour] = count
+   md[proj][date]['total'] = sum(md[proj][date]['hours'].itervalues())
+
+### Bootstrap ###
+
+try:
+   args = u.parse_args(ap)
+   if (__name__ == '__main__'):
+      main()
+except testable.Unittests_Only_Exception:
+   testable.register('')

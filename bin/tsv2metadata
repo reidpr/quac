@@ -29,7 +29,7 @@ ap.add_argument('--verbose',
                 help='be more verbose with log output')
 ap.add_argument('outfile',
                 metavar='OUTFILE',
-                help='.stats for raw tweet file to parse')
+                help='metadata file to create or update')
 ap.add_argument('tsv_files',
                 metavar='TSV',
                 nargs='+',

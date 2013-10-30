@@ -7,6 +7,7 @@
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
 import datetime
+from pprint import pprint
 import pytz
 import re
 import time
@@ -31,6 +32,19 @@ def as_utc(dt):
    '''Convert an aware datetime with an arbitrary time zone into the
       equivalent UTC datetime.'''
    return dt.astimezone(pytz.utc)
+
+def date_hours(d):
+   '''Given a date object, return an iterable of datetime objects, one for
+      each hour on that date. For example:
+
+      >>> pprint(list(date_hours(datetime.date(2013, 10, 31))))
+      [datetime.datetime(2013, 10, 31, 0, 0),
+       datetime.datetime(2013, 10, 31, 1, 0),
+       datetime.datetime(2013, 10, 31, 2, 0),
+       ...
+       datetime.datetime(2013, 10, 31, 23, 0)]'''
+   for hour in xrange(24):
+      yield datetime.datetime.combine(d, datetime.time(hour))
 
 def dateify(x):
    '''Try to convert x to a date and return the result. E.g.:
@@ -60,7 +74,6 @@ def dateify(x):
    if (isinstance(x, basestring)):
       return iso8601_parse(x).date()
    raise ValueError("can't convert %s to a date" % (str(x)))
-
 
 def dateseq_str(start, end):
    '''Return a sequence of date strings from start to end (in ISO 8601

@@ -1,28 +1,33 @@
 .. Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
-Preprocessing
-*************
+Preprocessing data
+******************
 
-*Note: All times and dates are in UTC except as otherwise noted.*
+Typically, raw data direct from collection is not to useful. QUAC implements a
+preprocessing step to translate it into more pleasant formats as well as do
+some preliminary analysis. This section describes the steps to do that.
 
-This preprocessing pipeline translates tweets from raw JSON to a form more
-suitable for later study.
+*All times and dates are in UTC except as otherwise noted.*
+
+Twitter
+=======
 
 Overview
-========
+--------
 
-QUAC preprocessing has three basic steps:
+QUAC's Twitter pipeline has three basic steps:
 
 #. Collect tweets using the streaming API. (``collect`` script.)
 
 #. Convert the tweets from the raw JSON, de-duplicate and clean them up, and
    produce nicely organized and ordered TSV files. (``parse.mk`` makefile.)
 
-#. Geo-locate tweets that do not contain a geotag. (``geo.mk`` makefile.)
+#. Geo-locate tweets that do not contain a geotag. (``geo.mk`` makefile.) (But
+   see issue `#15 <https://github.com/reidpr/quac/issues/15>`_.)
 
 
 File organization
-=================
+-----------------
 
 A fully populated data directory looks something like this:
 
@@ -75,10 +80,10 @@ are simply log files produced during processing.
 
 
 File formats
-============
+------------
 
 Raw JSON tweets
----------------
+~~~~~~~~~~~~~~~
 
 Each raw tweet file (``.json.gz``) is a gzipped sequence of JSON-encoded
 tweets in the `format documented by Twitter
@@ -116,7 +121,7 @@ parsability of the JSON.
      "source":"\u003Ca href=\"http:\/\/blackberry.com\/twitter"
 
 TSV files
----------
+~~~~~~~~~
 
 The raw tweet files are not so convenient to work with: JSON parsing is slow,
 and tweets can be duplicated and out of order (including between files, which
@@ -168,7 +173,7 @@ applications should ignore them.
   roughly halve.
 
 Preprocessing metadata file
----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This file is a pickled Python dictionary containing metadata about the
 directory of preprocessed TSV files. It currently contains one item:
@@ -187,7 +192,7 @@ as well. This proved to be not so useful, and so it hasn't been reimplemented
 in the new make-based processing scheme.*
 
 Geo-located tweets
-------------------
+~~~~~~~~~~~~~~~~~~
 
 `FIXME`
 
@@ -196,7 +201,7 @@ Geo-located tweets
 * GMM even if geotagged
 
 Alternatives that were considered and rejected
-----------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We tried the following and ultimately rejected them (for now). A key
 requirement (as of 2/21/2013) is that we'd like convenient parallel access and
@@ -225,3 +230,126 @@ not to mess with setting up servers.
   etc.). However, none seem to offer both an embedded option (i.e., no server
   process) and key/tuple (document- or column-oriented?) rather than simply
   key/value.
+
+
+Wikimedia pageview logs
+=======================
+
+Overview
+--------
+
+The pipeline for Wikimedia data (Wikipedia and related projects) is simpler.
+We acquire them using the ``wp-get-access-logs`` script, and then build some
+metadata with the ``wp-metadata.mk`` makefile.
+
+File organization
+-----------------
+
+A fully populated data directory looks (in part) something like this:
+
+* :samp:`raw/` --- Raw text files direct from WMF.
+
+  * :samp:`2012/`
+
+    * :samp:`2012-04/` --- Article access counts ("pageviews") from April
+      2012. Each month gets its own subdirectory.
+
+      * :samp:`pagecounts-20120428-130001.gz` --- Number of times each URL was
+        served.
+
+      * :samp:`projectcounts-20120428-130001` --- Total number of URLs served
+        from each project (e.g., Norwegian Wiktionary) for the same hour.
+        These files have a number of problems, so we don't use them (see issue
+        `#81 <https://github.com/reidpr/quac/issues/81>`_).
+
+* :samp:`hashed/` --- Text files in an improved hierarchy.
+
+  * :samp:`185/` --- Pageviews whose filenames hashed to 185. Currently, we
+    use the DJB2 hash algorithm mod 256 (the modulus is configurable). QUAC
+    Wikimedia processing code is directory-parallel, so by doing this we can
+    operate with wider parallelism (there are currently 71 months in the data
+    set).
+
+    * :samp:`pagecounts-20120428-130001.gz` --- Symlink to the corresponding
+      pagecount file in the raw directory.
+
+* :samp:`hashed_small/` --- Subset of the above, retaining only the midnight
+  to 1am data for each day; this sampling strategy avoids introducing new gaps
+  in the data. This is for testing and yields a dataset somewhat less than 4%
+  the size of the full dataset.
+
+* :samp:`hashed_tiny/` --- An even tinier subset (not necessarily a subset of
+  the small subset). Sampling strategy varies, but the goal is about 2-3 GB of
+  compressed pageview data. Note that available parallelism is less than the
+  full dataset.
+
+* :samp:`metadata` --- The metadata file.
+
+File formats
+------------
+
+Pagecount files
+~~~~~~~~~~~~~~~
+
+The file format of the pagecount files is `documented by WMF
+<http://dumps.wikimedia.org/other/pagecounts-raw/>`_. There are some quirks:
+
+#. The timestamp in the filename is the *end* of the hour recorded in the
+   file. Often, these timestamps are a few seconds past the hour; we ignore
+   this.
+
+#. The files are ASCII, with high bytes in article URLs percent-encoded. We do
+   not decode them because (a) it saves significant time and (b) there are
+   apparently non-UTF-8 encodings in use. (I believe the URL encoding is
+   selected by the browser.)
+
+   An artifact of (b) is that article counts can be split. For example, the
+   Russian article Люди_Икс
+   (i.e., the X-Men comic series) can be accessed at both of the following
+   URLs:
+
+   * (UTF-8) http://ru.wikipedia.org/wiki/%D0%9B%D1%8E%D0%B4%D0%B8_%D0%98%D0%BA%D1%81
+   * (Windows-1251) http://ru.wikipedia.org/wiki/%CB%FE%E4%E8_%C8%EA%F1
+
+   Other encodings (e.g., ISO 8859-5, %BB%EE%D4%D8_%B8%DA%E1 and KOI8-R,
+   %EC%C0%C4%C9_%E9%CB%D3) do not work. Figuring out this mess is something
+   I'm not very interested in. How WMF does it, I have no idea.
+
+   We do, however, normalize spaces into underscores. I believe this may be
+   incomplete (see issue #77).
+
+#. There have been periods of modest `underreporting
+   <http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts//readme.txt>`_,
+   with up to 20% of hits unrecorded. We assume such underreporting is random
+   and do not try to correct it. Because our analysis works on fraction of
+   total traffic rather than raw hit counts, the effect should be minimal.
+
+
+Metadata file
+~~~~~~~~~~~~~
+
+This is a pickled Python dictionary. Example content::
+
+   { 'en':   { date: { 'total': count,
+                       'hours': {  0: count,
+                                   1: count,
+                                   ... ,
+                                  23: count }],
+               ... }
+     'en.b': ... ,
+     'ru':   ... ,
+     ... }
+
+That is, keys are project codes from the pageview files (e.g., ``fr.b`` for
+French Wikibooks). Values are themselves dictionaries, mapping
+``datetime.date`` instances to the number of hits that day. The hits consist
+of a dictionary. Item ``'total'`` gives the total number of hits on that day,
+while item ``'hours'`` is a dictionary mapping hours (0 to 23) to the number
+of hits in that hour.
+
+In both cases, the value ``0`` means no hits. A missing date or a missing hour
+means no data (i.e., the ``'hours'`` dict would have only 23 entries if one
+hour of data were missing on that day).
+
+
+..  LocalWords:  pagecount samp

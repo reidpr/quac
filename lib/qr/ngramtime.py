@@ -166,24 +166,6 @@ class Tweet_Job(base.TSV_Input_Job, Build_Job):
 
 class Wikimedia_Job(Build_Job):
 
-   # A note on decoding article names in URLs: We don't do it because (a) it
-   # saves significant time and (b) there are apparently non-UTF-8 encodings
-   # in use. I believe the URL encoding is selected by the browser.
-   #
-   # An artifact of (b) is that article counts can be split. For example, the
-   # Russian article Люди_Икс (i.e., the X-Men comic series) can be accessed
-   # at both of the following URLs:
-   #
-   #   (UTF-8)        http://ru.wikipedia.org/wiki/%D0%9B%D1%8E%D0%B4%D0%B8_%D0%98%D0%BA%D1%81
-   #   (Windows-1251) http://ru.wikipedia.org/wiki/%CB%FE%E4%E8_%C8%EA%F1
-   #
-   # Other encodings (e.g., ISO 8859-5: %BB%EE%D4%D8_%B8%DA%E1 and KOI8-R,
-   # %EC%C0%C4%C9_%E9%CB%D3) do not work. Figuring out this mess is something
-   # I'm not very interested in.
-   #
-   # We do, however, normalize spaces into underscores. I believe this may be
-   # incomplete (see issue #77).
-
    def map(self, dirname):
       '''This mapper is a bit odd. Rather than actual content, it accepts
          simply a directory name, then opens and emits the content of each

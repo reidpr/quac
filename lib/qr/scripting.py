@@ -83,6 +83,10 @@ def setup(args):
    if (args.map and args.reduce and args.python):
       u.abort('cannot specify all of --python, --map, --reduce')
 
+   # Bad script might screw this up. It's a programming problem, not a user
+   # problem, so assert instead of erroring.
+   assert (len(args.inputs) > 0)
+
    directories_setup(args)
    if (args.python):
       pythonify(args)

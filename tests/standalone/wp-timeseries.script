@@ -47,6 +47,11 @@ y 'ngrams-search --detail --query "en Hurricane_Sandy" series/out'
 
 ## ngrams-correlate ##
 
+# Note: The correlations are messed up because the sample we took in order to
+# make the test data is not random -- it's a search for "halloween" and
+# "sandy" (see get-test-data). These correlated data are then used to build
+# the totals, so a lot of the signal is normalized out.
+
 # Test that ngrams-correlate complains properly if input is incorrect.
 y "ngrams-correlate --notimes /nonexistent halloween.xls || true"
 y "ngrams-correlate --notimes /bin/sh halloween.xls || true"

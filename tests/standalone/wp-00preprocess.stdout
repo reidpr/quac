@@ -1,0 +1,863 @@
+$ (make -f ../../../misc/wp-preprocess.mk xargs-test)
+chunks of size 1
+gopher a
+gopher b
+list of length 0
+list length equals chunk size
+gopher a b
+list divides evenly
+gopher a b c
+gopher d e f
+list does not divide evenly
+gopher a b c
+gopher d e
+$ ls -R raw
+raw:
+2012
+
+raw/2012:
+2012-10
+2012-11
+
+raw/2012/2012-10:
+pagecounts-20121028-010000.gz
+pagecounts-20121028-020000.gz
+pagecounts-20121028-030000.gz
+pagecounts-20121028-040000.gz
+pagecounts-20121028-050000.gz
+pagecounts-20121028-060000.gz
+pagecounts-20121028-070000.gz
+pagecounts-20121028-080000.gz
+pagecounts-20121028-090000.gz
+pagecounts-20121028-100000.gz
+pagecounts-20121028-110000.gz
+pagecounts-20121028-120001.gz
+pagecounts-20121028-130000.gz
+pagecounts-20121028-140000.gz
+pagecounts-20121028-150000.gz
+pagecounts-20121028-160000.gz
+pagecounts-20121028-170000.gz
+pagecounts-20121028-180000.gz
+pagecounts-20121028-190000.gz
+pagecounts-20121028-200000.gz
+pagecounts-20121028-210000.gz
+pagecounts-20121028-220000.gz
+pagecounts-20121028-230000.gz
+pagecounts-20121029-000000.gz
+pagecounts-20121029-010001.gz
+pagecounts-20121029-020000.gz
+pagecounts-20121029-030000.gz
+pagecounts-20121029-040000.gz
+pagecounts-20121029-050000.gz
+pagecounts-20121029-060000.gz
+pagecounts-20121029-070000.gz
+pagecounts-20121029-080000.gz
+pagecounts-20121029-090000.gz
+pagecounts-20121029-100000.gz
+pagecounts-20121029-110000.gz
+pagecounts-20121029-120000.gz
+pagecounts-20121029-130000.gz
+pagecounts-20121029-140000.gz
+pagecounts-20121029-150001.gz
+pagecounts-20121029-160000.gz
+pagecounts-20121029-170000.gz
+pagecounts-20121029-180000.gz
+pagecounts-20121029-190000.gz
+pagecounts-20121029-200000.gz
+pagecounts-20121029-210000.gz
+pagecounts-20121029-220000.gz
+pagecounts-20121029-230000.gz
+pagecounts-20121030-000000.gz
+pagecounts-20121030-010000.gz
+pagecounts-20121030-020000.gz
+pagecounts-20121030-030000.gz
+pagecounts-20121030-040001.gz
+pagecounts-20121030-050000.gz
+pagecounts-20121030-060000.gz
+pagecounts-20121030-070000.gz
+pagecounts-20121030-080000.gz
+pagecounts-20121030-090000.gz
+pagecounts-20121030-100000.gz
+pagecounts-20121030-110000.gz
+pagecounts-20121030-120000.gz
+pagecounts-20121030-130000.gz
+pagecounts-20121030-140000.gz
+pagecounts-20121030-150000.gz
+pagecounts-20121030-160000.gz
+pagecounts-20121030-170001.gz
+pagecounts-20121030-180000.gz
+pagecounts-20121030-190000.gz
+pagecounts-20121030-200000.gz
+pagecounts-20121030-210000.gz
+pagecounts-20121030-220000.gz
+pagecounts-20121030-230000.gz
+pagecounts-20121031-000000.gz
+pagecounts-20121031-010000.gz
+pagecounts-20121031-020000.gz
+pagecounts-20121031-030000.gz
+pagecounts-20121031-040000.gz
+pagecounts-20121031-050000.gz
+pagecounts-20121031-060001.gz
+pagecounts-20121031-070000.gz
+pagecounts-20121031-080000.gz
+pagecounts-20121031-090000.gz
+pagecounts-20121031-100000.gz
+pagecounts-20121031-110000.gz
+pagecounts-20121031-120000.gz
+pagecounts-20121031-130000.gz
+pagecounts-20121031-140000.gz
+pagecounts-20121031-150000.gz
+pagecounts-20121031-160000.gz
+pagecounts-20121031-170000.gz
+pagecounts-20121031-180000.gz
+pagecounts-20121031-190001.gz
+pagecounts-20121031-200000.gz
+pagecounts-20121031-210000.gz
+pagecounts-20121031-220000.gz
+pagecounts-20121031-230000.gz
+
+raw/2012/2012-11:
+pagecounts-20121101-000000.gz
+pagecounts-20121101-010000.gz
+pagecounts-20121101-020000.gz
+pagecounts-20121101-030000.gz
+pagecounts-20121101-040000.gz
+pagecounts-20121101-050000.gz
+pagecounts-20121101-060000.gz
+pagecounts-20121101-070000.gz
+pagecounts-20121101-080001.gz
+pagecounts-20121101-090000.gz
+pagecounts-20121101-100000.gz
+pagecounts-20121101-110000.gz
+pagecounts-20121101-120000.gz
+pagecounts-20121101-130000.gz
+pagecounts-20121101-140000.gz
+pagecounts-20121101-150000.gz
+pagecounts-20121101-160000.gz
+pagecounts-20121101-170000.gz
+pagecounts-20121101-180000.gz
+pagecounts-20121101-190000.gz
+pagecounts-20121101-200000.gz
+pagecounts-20121101-210000.gz
+pagecounts-20121101-220001.gz
+pagecounts-20121101-230000.gz
+pagecounts-20121102-000000.gz
+pagecounts-20121102-010000.gz
+pagecounts-20121102-020000.gz
+pagecounts-20121102-030000.gz
+pagecounts-20121102-040000.gz
+pagecounts-20121102-050000.gz
+pagecounts-20121102-060000.gz
+pagecounts-20121102-070000.gz
+pagecounts-20121102-080000.gz
+pagecounts-20121102-090000.gz
+pagecounts-20121102-100000.gz
+pagecounts-20121102-110000.gz
+pagecounts-20121102-120001.gz
+pagecounts-20121102-130000.gz
+pagecounts-20121102-140000.gz
+pagecounts-20121102-150000.gz
+pagecounts-20121102-160000.gz
+pagecounts-20121102-170000.gz
+pagecounts-20121102-180000.gz
+pagecounts-20121102-190000.gz
+pagecounts-20121102-200000.gz
+pagecounts-20121102-210000.gz
+pagecounts-20121102-220000.gz
+pagecounts-20121102-230000.gz
+pagecounts-20121103-000000.gz
+pagecounts-20121103-010001.gz
+pagecounts-20121103-020000.gz
+pagecounts-20121103-030000.gz
+pagecounts-20121103-040000.gz
+pagecounts-20121103-050000.gz
+pagecounts-20121103-060000.gz
+pagecounts-20121103-070000.gz
+pagecounts-20121103-080000.gz
+pagecounts-20121103-090000.gz
+pagecounts-20121103-100000.gz
+pagecounts-20121103-110000.gz
+pagecounts-20121103-120000.gz
+pagecounts-20121103-130000.gz
+pagecounts-20121103-140001.gz
+pagecounts-20121103-150000.gz
+pagecounts-20121103-160000.gz
+pagecounts-20121103-170000.gz
+pagecounts-20121103-180000.gz
+pagecounts-20121103-190000.gz
+pagecounts-20121103-200000.gz
+pagecounts-20121103-210000.gz
+pagecounts-20121103-220000.gz
+pagecounts-20121103-230000.gz
+pagecounts-20121104-000000.gz
+pagecounts-20121104-010000.gz
+pagecounts-20121104-020000.gz
+pagecounts-20121104-030001.gz
+pagecounts-20121104-040000.gz
+pagecounts-20121104-050000.gz
+pagecounts-20121104-060000.gz
+pagecounts-20121104-070000.gz
+pagecounts-20121104-080000.gz
+pagecounts-20121104-090000.gz
+pagecounts-20121104-100000.gz
+pagecounts-20121104-110000.gz
+pagecounts-20121104-120000.gz
+pagecounts-20121104-130000.gz
+pagecounts-20121104-140000.gz
+pagecounts-20121104-150000.gz
+pagecounts-20121104-160001.gz
+pagecounts-20121104-170000.gz
+pagecounts-20121104-180000.gz
+pagecounts-20121104-190000.gz
+pagecounts-20121104-200000.gz
+pagecounts-20121104-210000.gz
+pagecounts-20121104-220000.gz
+pagecounts-20121104-230000.gz
+$ (make -f ../../../misc/wp-preprocess.mk clean)
+rm -Rf hashed hashed_small hashed_tiny metadata
+$ ls
+get-test-data
+raw
+README
+$ (make -f ../../../misc/wp-preprocess.mk HASHMOD=4 XARGS_BLOCK=128)
+test -d raw -a -d raw/2012 -a -d raw/2012/2012-10
+mkdir -p hashed
+wp-hashfiles on 191 files ...
+touch hashed
+wp-update-metadata on 191 files ...
+$ (ls -l hashed/* hashed_small/* hashed_tiny/* | sed -E 's/^l.+:[0-9]{2} //')
+hashed/0:
+total 0
+pagecounts-20121028-030000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-030000.gz
+pagecounts-20121028-070000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-070000.gz
+pagecounts-20121028-160000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-160000.gz
+pagecounts-20121028-210000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-210000.gz
+pagecounts-20121029-020000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-020000.gz
+pagecounts-20121029-060000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-060000.gz
+pagecounts-20121029-130000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-130000.gz
+pagecounts-20121029-170000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-170000.gz
+pagecounts-20121029-200000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-200000.gz
+pagecounts-20121030-020000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-020000.gz
+pagecounts-20121030-060000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-060000.gz
+pagecounts-20121030-130000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-130000.gz
+pagecounts-20121030-200000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-200000.gz
+pagecounts-20121031-030000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-030000.gz
+pagecounts-20121031-060001.gz -> ../../raw/2012/2012-10/pagecounts-20121031-060001.gz
+pagecounts-20121031-070000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-070000.gz
+pagecounts-20121031-120000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-120000.gz
+pagecounts-20121031-160000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-160000.gz
+pagecounts-20121031-210000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-210000.gz
+pagecounts-20121101-010000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-010000.gz
+pagecounts-20121101-050000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-050000.gz
+pagecounts-20121101-080001.gz -> ../../raw/2012/2012-11/pagecounts-20121101-080001.gz
+pagecounts-20121101-090000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-090000.gz
+pagecounts-20121101-100000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-100000.gz
+pagecounts-20121101-140000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-140000.gz
+pagecounts-20121101-180000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-180000.gz
+pagecounts-20121101-220001.gz -> ../../raw/2012/2012-11/pagecounts-20121101-220001.gz
+pagecounts-20121101-230000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-230000.gz
+pagecounts-20121102-020000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-020000.gz
+pagecounts-20121102-060000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-060000.gz
+pagecounts-20121102-120001.gz -> ../../raw/2012/2012-11/pagecounts-20121102-120001.gz
+pagecounts-20121102-130000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-130000.gz
+pagecounts-20121102-170000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-170000.gz
+pagecounts-20121102-200000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-200000.gz
+pagecounts-20121103-030000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-030000.gz
+pagecounts-20121103-070000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-070000.gz
+pagecounts-20121103-120000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-120000.gz
+pagecounts-20121103-160000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-160000.gz
+pagecounts-20121103-210000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-210000.gz
+pagecounts-20121104-000000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-000000.gz
+pagecounts-20121104-040000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-040000.gz
+pagecounts-20121104-080000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-080000.gz
+pagecounts-20121104-110000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-110000.gz
+pagecounts-20121104-150000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-150000.gz
+pagecounts-20121104-190000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-190000.gz
+pagecounts-20121104-220000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-220000.gz
+
+hashed/1:
+total 0
+pagecounts-20121028-020000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-020000.gz
+pagecounts-20121028-060000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-060000.gz
+pagecounts-20121028-120001.gz -> ../../raw/2012/2012-10/pagecounts-20121028-120001.gz
+pagecounts-20121028-130000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-130000.gz
+pagecounts-20121028-170000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-170000.gz
+pagecounts-20121028-200000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-200000.gz
+pagecounts-20121029-030000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-030000.gz
+pagecounts-20121029-070000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-070000.gz
+pagecounts-20121029-120000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-120000.gz
+pagecounts-20121029-160000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-160000.gz
+pagecounts-20121029-210000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-210000.gz
+pagecounts-20121030-030000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-030000.gz
+pagecounts-20121030-070000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-070000.gz
+pagecounts-20121030-120000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-120000.gz
+pagecounts-20121030-160000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-160000.gz
+pagecounts-20121030-170001.gz -> ../../raw/2012/2012-10/pagecounts-20121030-170001.gz
+pagecounts-20121030-210000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-210000.gz
+pagecounts-20121031-020000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-020000.gz
+pagecounts-20121031-130000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-130000.gz
+pagecounts-20121031-170000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-170000.gz
+pagecounts-20121031-200000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-200000.gz
+pagecounts-20121101-000000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-000000.gz
+pagecounts-20121101-040000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-040000.gz
+pagecounts-20121101-110000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-110000.gz
+pagecounts-20121101-150000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-150000.gz
+pagecounts-20121101-190000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-190000.gz
+pagecounts-20121102-030000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-030000.gz
+pagecounts-20121102-070000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-070000.gz
+pagecounts-20121102-160000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-160000.gz
+pagecounts-20121102-210000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-210000.gz
+pagecounts-20121103-020000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-020000.gz
+pagecounts-20121103-060000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-060000.gz
+pagecounts-20121103-130000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-130000.gz
+pagecounts-20121103-170000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-170000.gz
+pagecounts-20121103-200000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-200000.gz
+pagecounts-20121104-010000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-010000.gz
+pagecounts-20121104-050000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-050000.gz
+pagecounts-20121104-090000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-090000.gz
+pagecounts-20121104-100000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-100000.gz
+pagecounts-20121104-140000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-140000.gz
+pagecounts-20121104-180000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-180000.gz
+pagecounts-20121104-230000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-230000.gz
+
+hashed/2:
+total 0
+pagecounts-20121028-010000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-010000.gz
+pagecounts-20121028-050000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-050000.gz
+pagecounts-20121028-090000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-090000.gz
+pagecounts-20121028-100000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-100000.gz
+pagecounts-20121028-140000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-140000.gz
+pagecounts-20121028-180000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-180000.gz
+pagecounts-20121028-230000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-230000.gz
+pagecounts-20121029-000000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-000000.gz
+pagecounts-20121029-010001.gz -> ../../raw/2012/2012-10/pagecounts-20121029-010001.gz
+pagecounts-20121029-040000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-040000.gz
+pagecounts-20121029-080000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-080000.gz
+pagecounts-20121029-110000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-110000.gz
+pagecounts-20121029-190000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-190000.gz
+pagecounts-20121029-220000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-220000.gz
+pagecounts-20121030-000000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-000000.gz
+pagecounts-20121030-080000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-080000.gz
+pagecounts-20121030-110000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-110000.gz
+pagecounts-20121030-150000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-150000.gz
+pagecounts-20121030-190000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-190000.gz
+pagecounts-20121030-220000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-220000.gz
+pagecounts-20121031-010000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-010000.gz
+pagecounts-20121031-050000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-050000.gz
+pagecounts-20121031-090000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-090000.gz
+pagecounts-20121031-100000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-100000.gz
+pagecounts-20121031-140000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-140000.gz
+pagecounts-20121031-180000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-180000.gz
+pagecounts-20121031-190001.gz -> ../../raw/2012/2012-10/pagecounts-20121031-190001.gz
+pagecounts-20121031-230000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-230000.gz
+pagecounts-20121101-030000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-030000.gz
+pagecounts-20121101-070000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-070000.gz
+pagecounts-20121101-120000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-120000.gz
+pagecounts-20121101-160000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-160000.gz
+pagecounts-20121101-210000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-210000.gz
+pagecounts-20121102-000000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-000000.gz
+pagecounts-20121102-040000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-040000.gz
+pagecounts-20121102-080000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-080000.gz
+pagecounts-20121102-110000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-110000.gz
+pagecounts-20121102-150000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-150000.gz
+pagecounts-20121102-190000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-190000.gz
+pagecounts-20121102-220000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-220000.gz
+pagecounts-20121103-050000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-050000.gz
+pagecounts-20121103-090000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-090000.gz
+pagecounts-20121103-100000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-100000.gz
+pagecounts-20121103-180000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-180000.gz
+pagecounts-20121103-230000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-230000.gz
+pagecounts-20121104-020000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-020000.gz
+pagecounts-20121104-030001.gz -> ../../raw/2012/2012-11/pagecounts-20121104-030001.gz
+pagecounts-20121104-060000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-060000.gz
+pagecounts-20121104-130000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-130000.gz
+pagecounts-20121104-160001.gz -> ../../raw/2012/2012-11/pagecounts-20121104-160001.gz
+pagecounts-20121104-170000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-170000.gz
+pagecounts-20121104-200000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-200000.gz
+
+hashed/3:
+total 0
+pagecounts-20121028-040000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-040000.gz
+pagecounts-20121028-080000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-080000.gz
+pagecounts-20121028-110000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-110000.gz
+pagecounts-20121028-150000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-150000.gz
+pagecounts-20121028-190000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-190000.gz
+pagecounts-20121028-220000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-220000.gz
+pagecounts-20121029-050000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-050000.gz
+pagecounts-20121029-090000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-090000.gz
+pagecounts-20121029-100000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-100000.gz
+pagecounts-20121029-140000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-140000.gz
+pagecounts-20121029-150001.gz -> ../../raw/2012/2012-10/pagecounts-20121029-150001.gz
+pagecounts-20121029-180000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-180000.gz
+pagecounts-20121029-230000.gz -> ../../raw/2012/2012-10/pagecounts-20121029-230000.gz
+pagecounts-20121030-010000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-010000.gz
+pagecounts-20121030-040001.gz -> ../../raw/2012/2012-10/pagecounts-20121030-040001.gz
+pagecounts-20121030-050000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-050000.gz
+pagecounts-20121030-090000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-090000.gz
+pagecounts-20121030-100000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-100000.gz
+pagecounts-20121030-140000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-140000.gz
+pagecounts-20121030-180000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-180000.gz
+pagecounts-20121030-230000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-230000.gz
+pagecounts-20121031-000000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-000000.gz
+pagecounts-20121031-040000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-040000.gz
+pagecounts-20121031-080000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-080000.gz
+pagecounts-20121031-110000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-110000.gz
+pagecounts-20121031-150000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-150000.gz
+pagecounts-20121031-220000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-220000.gz
+pagecounts-20121101-020000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-020000.gz
+pagecounts-20121101-060000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-060000.gz
+pagecounts-20121101-130000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-130000.gz
+pagecounts-20121101-170000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-170000.gz
+pagecounts-20121101-200000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-200000.gz
+pagecounts-20121102-010000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-010000.gz
+pagecounts-20121102-050000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-050000.gz
+pagecounts-20121102-090000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-090000.gz
+pagecounts-20121102-100000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-100000.gz
+pagecounts-20121102-140000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-140000.gz
+pagecounts-20121102-180000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-180000.gz
+pagecounts-20121102-230000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-230000.gz
+pagecounts-20121103-000000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-000000.gz
+pagecounts-20121103-010001.gz -> ../../raw/2012/2012-11/pagecounts-20121103-010001.gz
+pagecounts-20121103-040000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-040000.gz
+pagecounts-20121103-080000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-080000.gz
+pagecounts-20121103-110000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-110000.gz
+pagecounts-20121103-140001.gz -> ../../raw/2012/2012-11/pagecounts-20121103-140001.gz
+pagecounts-20121103-150000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-150000.gz
+pagecounts-20121103-190000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-190000.gz
+pagecounts-20121103-220000.gz -> ../../raw/2012/2012-11/pagecounts-20121103-220000.gz
+pagecounts-20121104-070000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-070000.gz
+pagecounts-20121104-120000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-120000.gz
+pagecounts-20121104-210000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-210000.gz
+
+hashed_small/0:
+total 0
+pagecounts-20121101-010000.gz -> ../../raw/2012/2012-11/pagecounts-20121101-010000.gz
+
+hashed_small/1:
+total 0
+pagecounts-20121104-010000.gz -> ../../raw/2012/2012-11/pagecounts-20121104-010000.gz
+
+hashed_small/2:
+total 0
+pagecounts-20121028-010000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-010000.gz
+pagecounts-20121029-010001.gz -> ../../raw/2012/2012-10/pagecounts-20121029-010001.gz
+pagecounts-20121031-010000.gz -> ../../raw/2012/2012-10/pagecounts-20121031-010000.gz
+
+hashed_small/3:
+total 0
+pagecounts-20121030-010000.gz -> ../../raw/2012/2012-10/pagecounts-20121030-010000.gz
+pagecounts-20121102-010000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-010000.gz
+pagecounts-20121103-010001.gz -> ../../raw/2012/2012-11/pagecounts-20121103-010001.gz
+
+hashed_tiny/0:
+total 0
+pagecounts-20121028-030000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-030000.gz
+$ md5sum metadata
+4a8856aafdf308736cff9957a1b1ba3a  metadata
+{'en': {datetime.date(2012, 10, 28): {'hours': {0: 21523,
+                                                1: 21599,
+                                                2: 20824,
+                                                3: 17451,
+                                                4: 19137,
+                                                5: 16104,
+                                                6: 14707,
+                                                7: 12211,
+                                                8: 11639,
+                                                9: 12595,
+                                                10: 12568,
+                                                11: 13640,
+                                                12: 15438,
+                                                13: 17623,
+                                                14: 19266,
+                                                15: 21970,
+                                                16: 23507,
+                                                17: 25241,
+                                                18: 28290,
+                                                19: 27220,
+                                                20: 30920,
+                                                21: 26776,
+                                                22: 28460,
+                                                23: 31075},
+                                      'total': 489784},
+        datetime.date(2012, 10, 29): {'hours': {0: 32134,
+                                                1: 28544,
+                                                2: 27822,
+                                                3: 24694,
+                                                4: 20706,
+                                                5: 17702,
+                                                6: 16484,
+                                                7: 17234,
+                                                8: 17837,
+                                                9: 18773,
+                                                10: 20586,
+                                                11: 24616,
+                                                12: 28468,
+                                                13: 33234,
+                                                14: 37323,
+                                                15: 39127,
+                                                16: 43979,
+                                                17: 49604,
+                                                18: 55649,
+                                                19: 50691,
+                                                20: 55741,
+                                                21: 53066,
+                                                22: 47644,
+                                                23: 46078},
+                                      'total': 807736},
+        datetime.date(2012, 10, 30): {'hours': {0: 44886,
+                                                1: 37557,
+                                                2: 38972,
+                                                3: 37219,
+                                                4: 33340,
+                                                5: 29334,
+                                                6: 28828,
+                                                7: 27987,
+                                                8: 30417,
+                                                9: 31725,
+                                                10: 33788,
+                                                11: 38200,
+                                                12: 43615,
+                                                13: 53588,
+                                                14: 56014,
+                                                15: 56517,
+                                                16: 70099,
+                                                17: 67497,
+                                                18: 90560,
+                                                19: 95098,
+                                                20: 81222,
+                                                21: 73847,
+                                                22: 80054,
+                                                23: 84595},
+                                      'total': 1264959},
+        datetime.date(2012, 10, 31): {'hours': {0: 103939,
+                                                1: 102616,
+                                                2: 108216,
+                                                3: 145971,
+                                                4: 265887,
+                                                5: 258001,
+                                                6: 229905,
+                                                7: 227305,
+                                                8: 245300,
+                                                9: 262965,
+                                                10: 247212,
+                                                11: 224071,
+                                                12: 240462,
+                                                13: 235180,
+                                                14: 245468,
+                                                15: 242157,
+                                                16: 240490,
+                                                17: 221125,
+                                                18: 186637,
+                                                19: 158161,
+                                                20: 150786,
+                                                21: 132929,
+                                                22: 122451,
+                                                23: 106674},
+                                      'total': 4703908},
+        datetime.date(2012, 11, 1): {'hours': {0: 100069,
+                                               1: 92459,
+                                               2: 93903,
+                                               3: 73104,
+                                               4: 50855,
+                                               5: 37634,
+                                               6: 30921,
+                                               7: 24143,
+                                               8: 23949,
+                                               9: 22783,
+                                               10: 23753,
+                                               11: 26048,
+                                               12: 29583,
+                                               13: 33987,
+                                               14: 35321,
+                                               15: 36677,
+                                               16: 36355,
+                                               17: 35594,
+                                               18: 33941,
+                                               19: 31941,
+                                               20: 31800,
+                                               21: 28272,
+                                               22: 25732,
+                                               23: 30681},
+                                     'total': 989505},
+        datetime.date(2012, 11, 2): {'hours': {0: 23537,
+                                               1: 23018,
+                                               2: 22796,
+                                               3: 20487,
+                                               4: 17727,
+                                               5: 15009,
+                                               6: 12671,
+                                               7: 11888,
+                                               8: 11701,
+                                               9: 12483,
+                                               10: 12429,
+                                               11: 14058,
+                                               12: 16478,
+                                               13: 18986,
+                                               14: 20246,
+                                               15: 20689,
+                                               16: 20873,
+                                               17: 20966,
+                                               18: 21029,
+                                               19: 19776,
+                                               20: 19810,
+                                               21: 19109,
+                                               22: 17842,
+                                               23: 17078},
+                                     'total': 430686},
+        datetime.date(2012, 11, 3): {'hours': {0: 19763,
+                                               1: 18025,
+                                               2: 17007,
+                                               3: 15809,
+                                               4: 12572,
+                                               5: 11208,
+                                               6: 9329,
+                                               7: 8266,
+                                               8: 8369,
+                                               9: 8086,
+                                               10: 8952,
+                                               11: 9473,
+                                               12: 11230,
+                                               13: 12073,
+                                               14: 13527,
+                                               15: 14089,
+                                               16: 14603,
+                                               17: 14169,
+                                               18: 14699,
+                                               19: 15228,
+                                               20: 13670,
+                                               21: 14058,
+                                               22: 14826,
+                                               23: 12565},
+                                     'total': 311596},
+        datetime.date(2012, 11, 4): {'hours': {0: 12635,
+                                               1: 12390,
+                                               2: 11867,
+                                               3: 11315,
+                                               4: 10425,
+                                               5: 9009,
+                                               6: 8025,
+                                               7: 6950,
+                                               8: 6784,
+                                               9: 7253,
+                                               10: 7772,
+                                               11: 8303,
+                                               12: 8820,
+                                               13: 10175,
+                                               14: 11124,
+                                               15: 13103,
+                                               16: 13976,
+                                               17: 13468,
+                                               18: 13302,
+                                               19: 13296,
+                                               20: 13307,
+                                               21: 13182,
+                                               22: 12561},
+                                     'total': 249042}},
+ 'ru': {datetime.date(2012, 10, 28): {'hours': {0: 387,
+                                                1: 353,
+                                                2: 402,
+                                                3: 542,
+                                                4: 737,
+                                                5: 1342,
+                                                6: 1897,
+                                                7: 2550,
+                                                8: 2930,
+                                                9: 2840,
+                                                10: 2991,
+                                                11: 2977,
+                                                12: 3032,
+                                                13: 3107,
+                                                14: 3099,
+                                                15: 3382,
+                                                16: 3791,
+                                                17: 3529,
+                                                18: 3444,
+                                                19: 2813,
+                                                20: 2112,
+                                                21: 1434,
+                                                22: 776,
+                                                23: 481},
+                                      'total': 50948},
+        datetime.date(2012, 10, 29): {'hours': {0: 331,
+                                                1: 287,
+                                                2: 404,
+                                                3: 638,
+                                                4: 947,
+                                                5: 1402,
+                                                6: 1730,
+                                                7: 2156,
+                                                8: 2449,
+                                                9: 2746,
+                                                10: 2939,
+                                                11: 3070,
+                                                12: 3310,
+                                                13: 3395,
+                                                14: 3584,
+                                                15: 3899,
+                                                16: 3963,
+                                                17: 4063,
+                                                18: 3868,
+                                                19: 3440,
+                                                20: 2607,
+                                                21: 1636,
+                                                22: 1012,
+                                                23: 616},
+                                      'total': 54492},
+        datetime.date(2012, 10, 30): {'hours': {0: 487,
+                                                1: 444,
+                                                2: 634,
+                                                3: 989,
+                                                4: 1490,
+                                                5: 2033,
+                                                6: 2784,
+                                                7: 3357,
+                                                8: 3667,
+                                                9: 3796,
+                                                10: 4343,
+                                                11: 4635,
+                                                12: 5065,
+                                                13: 5801,
+                                                14: 6282,
+                                                15: 6882,
+                                                16: 6833,
+                                                17: 7197,
+                                                18: 7021,
+                                                19: 6017,
+                                                20: 7593,
+                                                21: 4442,
+                                                22: 3253,
+                                                23: 1801},
+                                      'total': 96846},
+        datetime.date(2012, 10, 31): {'hours': {0: 1312,
+                                                1: 1474,
+                                                2: 2050,
+                                                3: 3130,
+                                                4: 4896,
+                                                5: 7218,
+                                                6: 9080,
+                                                7: 10334,
+                                                8: 10547,
+                                                9: 10423,
+                                                10: 10178,
+                                                11: 10459,
+                                                12: 10662,
+                                                13: 10975,
+                                                14: 10999,
+                                                15: 11712,
+                                                16: 11498,
+                                                17: 11455,
+                                                18: 10971,
+                                                19: 8901,
+                                                20: 5974,
+                                                21: 3515,
+                                                22: 1758,
+                                                23: 966},
+                                      'total': 180487},
+        datetime.date(2012, 11, 1): {'hours': {0: 541,
+                                               1: 480,
+                                               2: 555,
+                                               3: 848,
+                                               4: 1128,
+                                               5: 1493,
+                                               6: 1642,
+                                               7: 1935,
+                                               8: 1955,
+                                               9: 2035,
+                                               10: 1941,
+                                               11: 1968,
+                                               12: 1993,
+                                               13: 1982,
+                                               14: 2082,
+                                               15: 2064,
+                                               16: 1999,
+                                               17: 2046,
+                                               18: 1730,
+                                               19: 1339,
+                                               20: 1015,
+                                               21: 684,
+                                               22: 410,
+                                               23: 269},
+                                     'total': 34134},
+        datetime.date(2012, 11, 2): {'hours': {0: 147,
+                                               1: 170,
+                                               2: 171,
+                                               3: 241,
+                                               4: 413,
+                                               5: 595,
+                                               6: 663,
+                                               7: 769,
+                                               8: 782,
+                                               9: 844,
+                                               10: 958,
+                                               11: 943,
+                                               12: 976,
+                                               13: 920,
+                                               14: 960,
+                                               15: 1057,
+                                               16: 1032,
+                                               17: 1131,
+                                               18: 1240,
+                                               19: 818,
+                                               20: 681,
+                                               21: 431,
+                                               22: 322,
+                                               23: 169},
+                                     'total': 16433},
+        datetime.date(2012, 11, 3): {'hours': {0: 116,
+                                               1: 109,
+                                               2: 100,
+                                               3: 111,
+                                               4: 179,
+                                               5: 243,
+                                               6: 348,
+                                               7: 529,
+                                               8: 662,
+                                               9: 624,
+                                               10: 715,
+                                               11: 631,
+                                               12: 632,
+                                               13: 670,
+                                               14: 605,
+                                               15: 643,
+                                               16: 770,
+                                               17: 705,
+                                               18: 745,
+                                               19: 561,
+                                               20: 458,
+                                               21: 348,
+                                               22: 247,
+                                               23: 148},
+                                     'total': 10899},
+        datetime.date(2012, 11, 4): {'hours': {0: 116,
+                                               1: 83,
+                                               2: 78,
+                                               3: 95,
+                                               4: 143,
+                                               5: 173,
+                                               6: 270,
+                                               7: 360,
+                                               8: 433,
+                                               9: 515,
+                                               10: 517,
+                                               11: 551,
+                                               12: 457,
+                                               13: 531,
+                                               14: 520,
+                                               15: 519,
+                                               16: 549,
+                                               17: 541,
+                                               18: 508,
+                                               19: 421,
+                                               20: 353,
+                                               21: 279,
+                                               22: 210},
+                                     'total': 8222}}}
+$ touch raw/2012/2012-10/pagecounts-20121029-010001.gz
+$ (make -f ../../../misc/wp-preprocess.mk HASHMOD=4)
+test -d raw -a -d raw/2012 -a -d raw/2012/2012-10
+mkdir -p hashed
+wp-hashfiles on 1 files ...
+touch hashed
+wp-update-metadata on 1 files ...
+$ md5sum metadata
+4a8856aafdf308736cff9957a1b1ba3a  metadata

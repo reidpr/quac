@@ -65,9 +65,11 @@ def main():
    if (os.path.exists('%s/tweet_ct.gp.pdf' % (args.inputs[0]))):
       l.info('input appears to be tweets')
       j = Tweet_Job()
-   else:
+   elif (os.path.exists('%s/hashed' % (args.inputs[0]))):
       l.info('input appears to be Wikimedia pageview logs')
       j = Wikimedia_Job()
+   else:
+      u.abort('no valid input found')
 
    l.info('loading metadata')
    j.metadata_load()
@@ -123,17 +125,16 @@ class Wikimedia_Job(Job):
       args.python = 'qr.ngramtime.Wikimedia_Job'
       args.pyargs = qr.base.encode({ 'min_occur': args.min_occur })
       args.file_reader = 'echo -n'
-      args.inputs = glob.glob('%s/20??/20??-??' % (args.inputs[0]))
+      args.inputs = glob.glob('%s/raw/20??/20??-??' % (args.inputs[0]))
 
    def totals_build(self):
-      counts = dict()
-      for (project, pcounts) in self.metadata['projects'].iteritems():
-         pcounts = sorted(pcounts.iteritems())
-         series = math_.Date_Vector(pcounts[0][0],
-                                    np.array([c for (d,c) in pcounts],
-                                             dtype=np.float32))
-         counts[project] = { 'total': sum(series), 'series': series }
-      return counts
+      totals = dict()
+      for (project, dates) in self.metadata.iteritems():
+         (dates, cts) = zip(*sorted((d, v['total'])
+                                    for (d, v) in dates.iteritems()))
+         series = math_.Date_Vector(dates[0], np.array(cts, dtype=np.float32))
+         totals[project] = { 'total': sum(series), 'series': series }
+      return totals
 
 
 ### Bootstrap ###
