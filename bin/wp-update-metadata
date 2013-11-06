@@ -64,19 +64,24 @@ def pv_process(filename, md):
    ts = wikimedia.timestamp_parse(filename)
    fp = gzip.open(filename, 'rb')
    counts = collections.Counter()
-   for (i, line) in enumerate(fp):
-      try:
-         (proj, _, count, _) = line.split(' ')
-         counts[proj] += int(count)
-      except ValueError, x:
-         # We give up on a file after a single parse error. Indeed, this is
-         # aggressive. The right thing to do would be one of (a) lose the
-         # parseability guarantee for files that pass through metadata, or (b)
-         # patch together a repaired version. I'm currently too lazy for that.
-         l.warning('%s: skipping file, bad line %d: %s'
-                   % (filename, i+1, str(x)))
-         md['badfiles'].add(filename)
-         return
+   try:
+      for (i, line) in enumerate(fp):
+         try:
+            (proj, _, count, _) = line.split(' ')
+            counts[proj] += int(count)
+         except ValueError as x:
+            # We give up on a file after a single parse error. Indeed, this is
+            # aggressive. The right thing to do would be one of (a) lose the
+            # parseability guarantee for files that pass through metadata, or
+            # (b) patch together a repaired version. I'm currently too lazy
+            # for that.
+            x.args = ('bad line %d: %s' % (i+1, x.args[0]),)
+            raise x
+   except (EOFError, ValueError) as x:
+      l.warning('%s: skipping file: %s' % (filename, str(x)))
+      md['badfiles'].add(filename)
+      return
+
    for (proj, count) in counts.iteritems():
       update(md['projects'], ts, proj, count)
 
