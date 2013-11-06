@@ -6,9 +6,12 @@
 # How wide to make the hashed/ directory?
 HASHMOD := 256
 
-# How many files per xargs block? (This is very approximately 128 KiB of
-# command line per invocation.)
-XARGS_BLOCK := 2048
+# How many files per xargs block? (2048 would yield very approximately 128 KiB
+# of command line per invocation.)
+XARGS_BLOCK := 1024
+
+# Set to e.g. '--notimes' or '--verbose' for testing.
+MDARGS :=
 
 
 ## Lists of files
@@ -65,12 +68,12 @@ xargs-test:
 
 ## Actual rules to get stuff done
 
-hashed: $(pagecount_files)
+hashed: metadata $(pagecount_files)
 	mkdir -p hashed
-	@echo wp-hashfiles on $(words $?) files ...
-	@$(call xargs, wp-hashfiles $(HASHMOD), $(XARGS_BLOCK), $?)
+	@echo wp-hashfiles on $(words $(filter %.gz, $?)) files ...
+	@$(call xargs, wp-hashfiles $(HASHMOD) metadata, $(XARGS_BLOCK), $(filter %.gz, $?))
 	touch hashed
 
 metadata: $(pagecount_files)
 	@echo wp-update-metadata on $(words $?) files ...
-	@$(call xargs, wp-update-metadata $@, $(XARGS_BLOCK), $?)
+	@$(call xargs, wp-update-metadata $(MDARGS) $@, $(XARGS_BLOCK), $?)

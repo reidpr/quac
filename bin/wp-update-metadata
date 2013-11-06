@@ -55,7 +55,8 @@ def main():
 ### Functions and classes ###
 
 def metadata_pkl_open(filename):
-   return pickle_glue.File(filename, writable=True, default=dict())
+   return pickle_glue.File(filename, writable=True,
+                           default={ 'badfiles': set(), 'projects': dict() })
 
 def pv_process(filename, md):
    'Compute and save metadata for the given pageview file.'
@@ -63,11 +64,21 @@ def pv_process(filename, md):
    ts = wikimedia.timestamp_parse(filename)
    fp = gzip.open(filename, 'rb')
    counts = collections.Counter()
-   for line in fp:
-      (proj, _, count, _) = line.split(' ')
-      counts[proj] += int(count)
+   for (i, line) in enumerate(fp):
+      try:
+         (proj, _, count, _) = line.split(' ')
+         counts[proj] += int(count)
+      except ValueError, x:
+         # We give up on a file after a single parse error. Indeed, this is
+         # aggressive. The right thing to do would be one of (a) lose the
+         # parseability guarantee for files that pass through metadata, or (b)
+         # patch together a repaired version. I'm currently too lazy for that.
+         l.warning('%s: skipping file, bad line %d: %s'
+                   % (filename, i+1, str(x)))
+         md['badfiles'].add(filename)
+         return
    for (proj, count) in counts.iteritems():
-      update(md, ts, proj, count)
+      update(md['projects'], ts, proj, count)
 
 def update(md, timestamp, proj, count):
    '''e.g.:

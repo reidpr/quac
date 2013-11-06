@@ -13,6 +13,7 @@ import u
 hashmod = int(sys.argv[1])
 tinymod = 8
 tiny_sampled = set()
+md = u.pickle_load(sys.argv[2])
 
 def mkdir(path):
    'http://stackoverflow.com/a/5032238/396038'
@@ -34,7 +35,10 @@ for h in xrange(hashmod):
    if (h % tinymod == 0):
       mkdir('hashed_tiny/%d' % (h))
 
-for path in sys.argv[2:]:
+for path in sys.argv[3:]:
+   if (path in md['badfiles']):
+      # file has parse problems, skip
+      continue
    filename = os.path.basename(path)
    h = u.djb2(filename) % hashmod
    target = '../../%s' % (path)

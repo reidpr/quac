@@ -25,7 +25,7 @@ l = u.l
 
 help_epilogue = '''
 Note that FILE must be a *directory*: either containing preprocessed tweets or
-the root of the Wikimedia pageview log tree. Output is in JOBDIR/out/.
+one of the hashed Wikimedia data directories. Output is in JOBDIR/out/.
 ''' + qr.scripting.help_epilogue
 
 
@@ -41,6 +41,10 @@ gr.add_argument('--min-occur',
                 metavar='N',
                 default=10,
                 help='drop n-grams rarer than this (default 10 occurrences)')
+gr.add_argument('--hashdir',
+                metavar='DIR',
+                default='hashed',
+                help='hashed Wikimedia datafiles directory (default hashed/)')
 gr.add_argument('--run',
                 type=int,
                 help='run make with -j N after job setup')
@@ -125,11 +129,11 @@ class Wikimedia_Job(Job):
       args.python = 'qr.ngramtime.Wikimedia_Job'
       args.pyargs = qr.base.encode({ 'min_occur': args.min_occur })
       args.file_reader = 'echo -n'
-      args.inputs = glob.glob('%s/raw/20??/20??-??' % (args.inputs[0]))
+      args.inputs = glob.glob('%s/%s/*' % (args.inputs[0], args.hashdir))
 
    def totals_build(self):
       totals = dict()
-      for (project, dates) in self.metadata.iteritems():
+      for (project, dates) in self.metadata['projects'].iteritems():
          (dates, cts) = zip(*sorted((d, v['total'])
                                     for (d, v) in dates.iteritems()))
          series = math_.Date_Vector(dates[0], np.array(cts, dtype=np.float32))

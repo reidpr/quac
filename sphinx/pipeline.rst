@@ -247,7 +247,8 @@ File organization
 
 A fully populated data directory looks (in part) something like this:
 
-* :samp:`raw/` --- Raw text files direct from WMF.
+* :samp:`raw/` --- Raw text files direct from WMF. Note that some of these
+  files contain breakage.
 
   * :samp:`2012/`
 
@@ -262,7 +263,8 @@ A fully populated data directory looks (in part) something like this:
         These files have a number of problems, so we don't use them (see issue
         `#81 <https://github.com/reidpr/quac/issues/81>`_).
 
-* :samp:`hashed/` --- Text files in an improved hierarchy.
+* :samp:`hashed/` --- Text files in an improved hierarchy. All of these files
+  will parse correctly.
 
   * :samp:`185/` --- Pageviews whose filenames hashed to 185. Currently, we
     use the DJB2 hash algorithm mod 256 (the modulus is configurable). QUAC
@@ -330,26 +332,32 @@ Metadata file
 
 This is a pickled Python dictionary. Example content::
 
-   { 'en':   { date: { 'total': count,
-                       'hours': {  0: count,
-                                   1: count,
-                                   ... ,
-                                  23: count }],
-               ... }
-     'en.b': ... ,
-     'ru':   ... ,
-     ... }
+   { 'badfiles': set([ ... ]),
+     'projects': { 'en':   { date: { 'total': count,
+                                     'hours': {  0: count,
+                                                 1: count,
+                                                 ... ,
+                                                23: count }],
+                             ... }
+                   'en.b': ... ,
+                   'ru':   ... ,
+                   ... } }
 
-That is, keys are project codes from the pageview files (e.g., ``fr.b`` for
-French Wikibooks). Values are themselves dictionaries, mapping
-``datetime.date`` instances to the number of hits that day. The hits consist
-of a dictionary. Item ``'total'`` gives the total number of hits on that day,
-while item ``'hours'`` is a dictionary mapping hours (0 to 23) to the number
-of hits in that hour.
+That is, there are two items in the dictionary.
 
-In both cases, the value ``0`` means no hits. A missing date or a missing hour
-means no data (i.e., the ``'hours'`` dict would have only 23 entries if one
-hour of data were missing on that day).
+#. ``badfiles`` is a set of paths (starting with ``raw/``) which are the files
+   that had parse errors. These files are the ones excluded from ``hashed/``.
+
+#. ``projects``, keys are project codes from the pageview files (e.g.,
+   ``fr.b`` for French Wikibooks). Values are themselves dictionaries, mapping
+   ``datetime.date`` instances to the number of hits that day. The hits
+   consist of a dictionary. Item ``'total'`` gives the total number of hits on
+   that day, while item ``'hours'`` is a dictionary mapping hours (0 to 23) to
+   the number of hits in that hour.
+
+   In both cases, the value ``0`` means no hits. A missing date or a missing
+   hour means no data (i.e., the ``'hours'`` dict would have only 23 entries
+   if one hour of data were missing on that day).
 
 
-..  LocalWords:  pagecount samp
+..  LocalWords:  pagecount samp badfiles
