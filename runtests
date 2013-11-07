@@ -190,14 +190,6 @@ def test_module(filename):
    import_test(filename, text)
    # Run tests
    if (args.interactive):
-      # We used to use the interactive testing often, but it's grown stale.
-      # For example, lib/tok/base.py uses modules that no longer exist.
-      # Therefore, it's hard to test the test harness, and so we've disabled
-      # --interactive until it becomes important again.
-      #
-      # Also, it's unclear what to do afterwards. Query the user for
-      # correctness? Just report success? Something else?
-      assert False, 'disabled due to lack of use'
       subprocess.call(['python', '-c',
                        'import %s ; %s.test_interactive()' % (module, module)])
    else:

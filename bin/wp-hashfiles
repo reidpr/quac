@@ -8,6 +8,7 @@ import os.path
 import sys
 
 import quacpath
+import hash_
 import u
 
 hashmod = int(sys.argv[1])
@@ -40,7 +41,7 @@ for path in sys.argv[3:]:
       # file has parse problems, skip
       continue
    filename = os.path.basename(path)
-   h = u.djb2(filename) % hashmod
+   h = hash_.of(filename) % hashmod
    target = '../../%s' % (path)
    # main hash directory
    symlink(target, 'hashed/%d/%s' % (h, filename))

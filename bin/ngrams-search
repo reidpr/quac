@@ -12,6 +12,7 @@ import sys
 import numpy as np
 
 import quacpath
+import hash_
 import qr.base
 import testable
 import time_
@@ -46,7 +47,7 @@ def main():
       u.abort('cannot read total file: %s' % (x))
    tsv = tsv_glue.Writer(sys.stdout.fileno())
    for i in xrange(file_ct):
-      if (args.query is not None and u.djb2(args.query) % file_ct != i):
+      if (args.query is not None and hash_.of(args.query) % file_ct != i):
          continue
       fp = io.open('%s/%d' % (args.inputdir, i), 'rb')
       for line in fp:

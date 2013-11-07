@@ -77,5 +77,6 @@ x cat out.1
 # the size of 100 buckets, which seems reasonable. The actual hash values of
 # the two strings differ.
 y "hashsplit 240 out < in.txt"
-x cat out.7
-x cat out.19
+x cat out.37
+x cat out.145
+x cat out.5

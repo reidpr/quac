@@ -47,7 +47,6 @@ PICKLE_SUFFIX = '.pkl.gz'
 WGS84_SRID = 4326  # FIXME: redundantly defined in geo/srs.py
 CONFIG_DEFAULT = os.path.expanduser('~/.quacrc')
 
-
 ### Globals ###
 
 # These are set to real values on import (i.e., below), so you can do
@@ -60,6 +59,9 @@ c = None  # config object; set after class def and populated in configure()
 l = None  # logging object; see EOF for default
 
 cpath = None  # path of configuration file on the command line
+
+# Root of QUAC installation (set below since we need module_dir)
+quacbase = None
 
 # A random number generator with known seed. Re-seeded in parse_args().
 rand = random.Random(8675309)
@@ -366,36 +368,6 @@ def copyupdate(template, updates):
    r.update(updates)
    return r
 
-def djb2(bytes_):
-   u'''Bernstein's DJB2 hash (http://www.cse.yorku.ca/~oz/hash.html), XOR
-       variant. This is the same algorithm as hashsplit.c, and the results
-       should match. E.g. (see also tests/hashsplit):
-
-       >>> djb2('b')
-       177607
-       >>> djb2('b') % 240
-       7
-       >>> djb2('nullvaluenotab') % 240
-       19
-       >>> djb2(u'私の名前は中野です') % 240
-       19
-
-       Notes:
-
-         * The algorithm works on a byte sequence. Therefore, this function
-           operates on str (byte string) and unicode (converted to bytes by
-           encoding in UTF-8)'
-
-         * This function is not designed to be fast.'''
-   if (isinstance(bytes_, unicode)):
-      bytes_ = bytes_.encode('utf8')
-   assert (isinstance(bytes_, str))
-   hash_ = 5381
-   for b in bytes_:
-      # mod operation simulates 32-bit unsigned int overflow
-      hash_ = ((hash_ * 33) % 2**32) ^ ord(b)
-   return hash_
-
 def glob_maxnumeric(dir_):
    '''Given a directory that has zero or more files named only with digits,
       return the largest integer in those filenames. If there are no such
@@ -668,7 +640,6 @@ def partition_sentinel(iter_, sentinel):
    b = list(iter2)
    return (a, b)
 
-
 def parse_args(ap, args=sys.argv[1:]):
    '''Parse command line arguments and set a few globals based on the result.
       Note that this function must be called before logging_init().'''
@@ -930,6 +901,8 @@ def fmt_real(num, factor, units):
 # Default logger to allow testing. You should never actually see output from
 # this unless tests fail.
 logging_init('tstng', level=logging.WARNING)
+
+quacbase = os.path.abspath(module_dir() + '/..')
 
 
 testable.register('''

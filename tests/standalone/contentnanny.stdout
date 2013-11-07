@@ -14,6 +14,7 @@ tab(s) present:    ./tests/standalone/contentnanny.script:1
 tab(s) present:    ./tests/standalone/hashsplit.script:22
 tab(s) present:    ./tests/standalone/quacreduce.script:1
 copyright missing: ./tests/standalone/wp-access/README
+copyright missing: ./tests/standalone/wp-access/ls-R.fulldata
 copyright missing: ./tests/tmp/README
 copyright missing: ./tests/twitter/README
 copyright missing: ./tests/twitter/tweets/ids.txt

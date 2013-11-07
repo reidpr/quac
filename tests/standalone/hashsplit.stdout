@@ -90,9 +90,10 @@ b	5
 nullvaluenotab
 私の名前は中野です
 $ (hashsplit 240 out < in.txt)
-$ cat out.7
+$ cat out.37
 b	2
 b	5
-$ cat out.19
+$ cat out.145
 nullvaluenotab
+$ cat out.5
 私の名前は中野です
