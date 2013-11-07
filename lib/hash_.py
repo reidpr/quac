@@ -4,8 +4,9 @@
    with identical results in Python, C, and perhaps other places. The primary
    documentation is here.
 
-   These algorithms operate on byte strings, i.e. str objects. They also
-   accept unicode objects, which are converted to bytes by encoding in UTF-8.
+   Unless otherwise specified, these algorithms operate on byte strings, i.e.
+   str objects. They also accept unicode objects, which are converted to bytes
+   by encoding in UTF-8.
 
    None of the Python implementations are optimized for speed.
 
@@ -19,6 +20,8 @@
 # duplicate implementation. (We would need tests on both sides anyway.)
 
 # If you edit this file, make sure tests match hashsplit.c.
+
+from __future__ import division
 
 import testable
 import u
@@ -40,6 +43,22 @@ def byteify(byteme):
       return byteme.encode('utf8')
    else:
       raise ValueError('cannot convert %s to byte string' % (type(byteme)))
+
+def consecutive(x, bin_ct, min_, max_):
+   '''Hash integers into consecutive bins. Given a range of integers from min_
+      to max_ inclusive, divide it into bin_ct bins of consecutive integers
+      numbered 0 to bin_ct-1. Return the bin index containing x. E.g.:
+
+      >>> [consecutive(i, 3, 11, 24) for i in xrange(11, 25)]
+      [0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2]
+      >>> [consecutive(i, 3, 0, 2) for i in xrange(3)]
+      [0, 1, 2]
+      >>> [consecutive(i, 3, 0, 3) for i in xrange(4)]
+      [0, 1, 2, 2]
+      >>> [consecutive(i, 3, 0, 4) for i in xrange(5)]
+      [0, 0, 1, 2, 2]'''
+   per_bin = (max_ - min_) / bin_ct
+   return int(min((x - min_) / per_bin, bin_ct - 1))
 
 def djb2(bytes_):
    u'''Bernstein's DJB2 hash (http://www.cse.yorku.ca/~oz/hash.html), XOR

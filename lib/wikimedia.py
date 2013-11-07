@@ -9,6 +9,31 @@ import testable
 import time_
 
 
+def hour_bizarro(x):
+   '''Convert x into an hour number; it can be a filename or a metadata date
+      thingy. In the latter case, both the minimum and maximum available hours
+      are returned in a tuple. For example:
+
+      >>> hour_bizarro('2013/2013-10/pagecounts-20131016-090001.gz')
+      17643776
+      >>> a = (datetime.date(2009, 9, 10),
+      ...      {'hours': {2: 9058752, 3: 8307681, 4: 7311189, 5: 6341115},
+      ...       'total': 49270827})
+      >>> hour_bizarro(a)
+      (17607842, 17607845)
+
+      (Yes, this is a strange, very specific function with a weird interface.
+      It's what I need, though. It really belongs in wp-hashfiles, but that
+      has no tests.)'''
+   if (isinstance(x, basestring)):
+      dt = timestamp_parse(x)
+      return dt.toordinal() * 24 + dt.hour
+   else:
+      do = x[0].toordinal() * 24
+      return (do + min(x[1]['hours'].iterkeys()),
+              do + max(x[1]['hours'].iterkeys()))
+
+
 def timestamp_parse(text):
    '''Parse the timestamp embedded in pagecount and projectcount files. A
       quirk is that the stamp marks the *end* of the data collection period;
