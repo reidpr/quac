@@ -17,7 +17,7 @@ MDARGS :=
 ## Lists of files
 
 # Pagecounts files -- all 50,000 of them.
-pagecount_files := raw/*/*/pagecounts-*
+pagecount_files := raw/*/*/pagecounts-*.gz
 
 
 ## Functions

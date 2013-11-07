@@ -228,6 +228,7 @@ raw/2099:
 raw/2099/2099-01:
 pagecounts-20990101-010000.gz
 pagecounts-20990101-020000.gz
+pagecounts-20990101-030000.tmp
 $ (make -f ../../../misc/wp-preprocess.mk clean)
 rm -Rf hashed hashed_small hashed_tiny metadata
 $ ls
