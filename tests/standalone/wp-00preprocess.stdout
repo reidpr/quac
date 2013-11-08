@@ -242,8 +242,8 @@ wp-update-metadata on 194 files ...
 wpmtd WARNING  raw/2008/2008-10/pagecounts-20081021-090000.gz: skipping file: bad line 1: need more than 2 values to unpack
 wpmtd WARNING  raw/2099/2099-01/pagecounts-20990101-010000.gz: skipping file: bad line 1: need more than 1 value to unpack
 wpmtd WARNING  raw/2099/2099-01/pagecounts-20990101-020000.gz: skipping file: Compressed file ended before the end-of-stream marker was reached
-mkdir -p hashed
-wp-hashfiles on 194 files ...
+rm -Rf hashed hashed_small hashed_tiny
+wp-hashfiles ...
 touch hashed
 $ (for i in hashed/*; do echo -n $i ' '; ls $i | wc -l; done)
 hashed/0  48
@@ -885,8 +885,8 @@ $ touch raw/2012/2012-10/pagecounts-20121029-010001.gz
 $ (make -f ../../../misc/wp-preprocess.mk MDARGS=--notimes HASHMOD=4)
 test -d raw -a -d raw/2012 -a -d raw/2012/2012-10
 wp-update-metadata on 1 files ...
-mkdir -p hashed
-wp-hashfiles on 1 files ...
+rm -Rf hashed hashed_small hashed_tiny
+wp-hashfiles ...
 touch hashed
 $ md5sum metadata
 5048f76eee14b29be50a8ebc47fd57ff  metadata

@@ -50,6 +50,7 @@ all: dircheck hashed metadata
 clean:
 	rm -Rf hashed hashed_small hashed_tiny metadata
 
+
 dircheck:
 	test -d raw -a -d raw/2012 -a -d raw/2012/2012-10
 
@@ -68,10 +69,12 @@ xargs-test:
 
 ## Actual rules to get stuff done
 
+# We have to rebuild all the hashed symlinks each time, because the hash value
+# of each file will change when there are more of them.
 hashed: metadata $(pagecount_files)
-	mkdir -p hashed
-	@echo wp-hashfiles on $(words $(filter %.gz, $?)) files ...
-	@$(call xargs, wp-hashfiles $(HASHMOD) metadata, $(XARGS_BLOCK), $(filter %.gz, $?))
+	rm -Rf hashed hashed_small hashed_tiny
+	@echo wp-hashfiles ...
+	@$(call xargs, wp-hashfiles $(HASHMOD) metadata, $(XARGS_BLOCK), $(pagecount_files))
 	touch hashed
 
 metadata: $(pagecount_files)
