@@ -890,7 +890,7 @@ dee659e32c1b3ac5a8b61ec3923e5fef  -
                                                             21: 279,
                                                             22: 210},
                                                   'total': 8222}}}}
-$ touch raw/2012/2012-10/pagecounts-20121029-010001.gz
+$ (touch raw/2012/2012-10/pagecounts-20121029-010001.gz && sleep 1.5)
 $ (make -f ../../../misc/wp-preprocess.mk MDARGS=--notimes HASHMOD=4)
 test -d raw -a -d raw/2012 -a -d raw/2012/2012-10
 wp-update-metadata on 1 files ...
