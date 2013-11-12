@@ -14,6 +14,7 @@ gopher d e
 $ ls -R raw
 raw:
 2008
+2011
 2012
 2099
 
@@ -22,6 +23,12 @@ raw/2008:
 
 raw/2008/2008-10:
 pagecounts-20081021-090000.gz
+
+raw/2011:
+2011-10
+
+raw/2011/2011-10:
+pagecounts-20111008-180001.gz
 
 raw/2012:
 2012-10
@@ -238,8 +245,9 @@ raw
 README
 $ (make -f ../../../misc/wp-preprocess.mk MDARGS=--notimes HASHMOD=4 XARGS_BLOCK=128)
 test -d raw -a -d raw/2012 -a -d raw/2012/2012-10
-wp-update-metadata on 194 files ...
+wp-update-metadata on 195 files ...
 wpmtd WARNING  raw/2008/2008-10/pagecounts-20081021-090000.gz: skipping file: bad line 1: need more than 2 values to unpack
+wpmtd WARNING  raw/2011/2011-10/pagecounts-20111008-180001.gz: skipping file: Not a gzipped file
 wpmtd WARNING  raw/2099/2099-01/pagecounts-20990101-010000.gz: skipping file: bad line 1: need more than 1 value to unpack
 wpmtd WARNING  raw/2099/2099-01/pagecounts-20990101-020000.gz: skipping file: Compressed file ended before the end-of-stream marker was reached
 rm -Rf hashed hashed_small hashed_tiny
@@ -478,9 +486,10 @@ hashed_tiny/0:
 total 0
 pagecounts-20121028-010000.gz -> ../../raw/2012/2012-10/pagecounts-20121028-010000.gz
 $ md5sum metadata
-3906c4a1a372595d6a53cf315568c5ce  metadata
-42a559934a7dd674ce2a2571780bc7b7  -
+d47d07126193f920451af08634c05376  metadata
+dee659e32c1b3ac5a8b61ec3923e5fef  -
 {'badfiles': set(['raw/2008/2008-10/pagecounts-20081021-090000.gz',
+                  'raw/2011/2011-10/pagecounts-20111008-180001.gz',
                   'raw/2099/2099-01/pagecounts-20990101-010000.gz',
                   'raw/2099/2099-01/pagecounts-20990101-020000.gz']),
  'projects': {'en': {datetime.date(2012, 10, 28): {'hours': {0: 21523,
@@ -889,5 +898,5 @@ rm -Rf hashed hashed_small hashed_tiny
 wp-hashfiles ...
 touch hashed
 $ md5sum metadata
-5048f76eee14b29be50a8ebc47fd57ff  metadata
-42a559934a7dd674ce2a2571780bc7b7  -
+01f60cd0580344cd312a132e64c6f265  metadata
+dee659e32c1b3ac5a8b61ec3923e5fef  -

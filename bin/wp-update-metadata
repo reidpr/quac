@@ -77,7 +77,7 @@ def pv_process(filename, md):
             # for that.
             x.args = ('bad line %d: %s' % (i+1, x.args[0]),)
             raise x
-   except (EOFError, ValueError) as x:
+   except (EOFError, IOError, ValueError) as x:
       l.warning('%s: skipping file: %s' % (filename, str(x)))
       md['badfiles'].add(filename)
       return

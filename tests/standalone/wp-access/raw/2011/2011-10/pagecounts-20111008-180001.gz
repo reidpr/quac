@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<!--[if IE 6]>
+<html id="ie6" dir="ltr" lang="en">
+<![endif]-->
+<!--[if IE 7]>
+<html id="ie7" dir="ltr" lang="en">
+<![endif]-->
+<!--[if IE 8]>
+<html id="ie8" dir="ltr" lang="en">
+<![endif]-->
+<!--[if !(IE 6) | !(IE 7) | !(IE 8)  ]><!-->
+<html dir="ltr" lang="en">
+<!--<![endif]-->
+<!--
+	generated in 0.423 seconds
+	91637 bytes batcached for 300 seconds
+-->
+<head>
+<meta charset="UTF-8" />
+<title>domas mituzas</title>
+<link rel="profile" href="http://gmpg.org/xfn/11" />
+<link rel="stylesheet" type="text/css" media="all" href="http://s1.wp.com/wp-content/themes/pub/twentyten/style.css?m=1310505437g" />
+<link rel="pingback" href="http://dom.as/xmlrpc.php" />
+		<script src='http://wordpress.com/remote-login.php?action=js&amp;host=dom.as&amp;id=190075&amp;t=1319062696&amp;back=dom.as%2F' type="text/javascript"></script>
+		<script type="text/javascript">
+		/* <![CDATA[ */
+			if ( 'function' === typeof WPRemoteLogin ) {
+				document.cookie = "wordpress_test_cookie=test; path=/";
+				if ( document.cookie.match( /(;|^)\s*wordpress_test_cookie\=/ ) ) {
+					WPRemoteLogin();
+				}
+			}
+		/* ]]> */
+		</script>
+		<link rel="alternate" type="application/rss+xml" title="domas mituzas &raquo; Feed" href="http://dom.as/feed/" />
+<link rel="alternate" type="application/rss+xml" title="domas mituzas &raquo; Comments Feed" href="http://dom.as/comments/feed/" />
+<script type="text/javascript">
+/* <![CDATA[ */
+function addLoadEvent(func){var oldonload=window.onload;if(typeof window.onload!='function'){window.onload=func;}else{window.onload=function(){oldonload();func();}}}
+/* ]]> */
+</script>
+<link rel="stylesheet" href="http://s0.wp.com/wp-content/themes/h4/global.css?m=1313010129g" type="text/css" />
+<link rel='stylesheet' id='loggedout-subscribe-css'  href='http://s1.wp.com/wp-content/blog-plugins/loggedout-follow/widget.css?m=1318259504g&#038;ver=20110926' type='text/css' media='all' />
+<link rel='stylesheet' id='post-reactions-css'  href='http://s1.wp.com/wp-content/mu-plugins/post-flair/style.css?m=1318977324g&#038;ver=3' type='text/css' media='all' />
+<script type='text/javascript' src='http://s0.wp.com/wp-includes/js/jquery/jquery.js?m=1305842152g&amp;ver=1.6.1'></script>
+<script type='text/javascript' src='http://s1.wp.com/wp-content/blog-plugins/loggedout-follow/widget.js?m=1316614528g&amp;ver=20110921a'></script>
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://domasmituzas.wordpress.com/xmlrpc.php?rsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="http://domasmituzas.wordpress.com/wp-includes/wlwmanifest.xml" /> 
+<meta name="generator" content="WordPress.com" />
+<link rel='shortlink' href='http://wp.me/NrJ' />
+<meta property="og:type" content="blog" />
+<meta property="og:title" content="domas mituzas" />
+<meta property="og:url" content="http://dom.as" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="domas mituzas" />
+<meta property="og:image" content="http://0.gravatar.com/blavatar/6e344c6e0cd7462eb056f8b98eb2cbcd?s=300" />
+<link rel="shortcut icon" type="image/x-icon" href="http://0.gravatar.com/blavatar/cb8b633a19d5957766a952a6522e81e5?s=16" sizes="16x16" />
+<link rel="icon" type="image/x-icon" href="http://0.gravatar.com/blavatar/cb8b633a19d5957766a952a6522e81e5?s=16" sizes="16x16" />
+<link rel="apple-touch-icon-precomposed" href="http://0.gravatar.com/blavatar/6e344c6e0cd7462eb056f8b98eb2cbcd?s=114" />
+<link rel='openid.server' href='http://domasmituzas.wordpress.com/?openidserver=1' />
+<link rel='openid.delegate' href='http://domasmituzas.wordpress.com/' />
+<link rel="search" type="application/opensearchdescription+xml" href="http://dom.as/osd.xml" title="domas mituzas" />
+<link rel="search" type="application/opensearchdescription+xml" href="http://wordpress.com/opensearch.xml" title="WordPress.com" />
+	<style type="text/css">
+	/* <![CDATA[ */
+			/* ]]> */
+	</style>
+	<style type="text/css">
+body { background-color: #ebebeb; }
+</style>
+<style type="text/css">.recentcomments a{display:inline !important;padding: 0 !important;margin: 0 !important;}</style>
+<meta name="application-name" content="domas mituzas" /><meta name="msapplication-window" content="width=device-width;height=device-height" /><meta name="msapplication-task" content="name=Subscribe;action-uri=http://dom.as/feed/;icon-uri=http://0.gravatar.com/blavatar/cb8b633a19d5957766a952a6522e81e5?s=16" /><meta name="msapplication-task" content="name=Sign up for a free blog;action-uri=http://wordpress.com/signup/;icon-uri=http://s2.wp.com/i/favicon.ico" /><meta name="msapplication-task" content="name=WordPress.com Support;action-uri=http://support.wordpress.com/;icon-uri=http://s2.wp.com/i/favicon.ico" /><meta name="msapplication-task" content="name=WordPress.com Forums;action-uri=http://forums.wordpress.com/;icon-uri=http://s2.wp.com/i/favicon.ico" />
+<script type='text/javascript'>/*<![CDATA[*/if(typeof(addLoadEvent)!='undefined'){addLoadEvent(function(){if(top==self){i=document.createElement('img');i.src='http://botd2.wordpress.com/botd.gif?blog=190075&post=0&lang=en&date=1317988286&ip=208.80.152.185&url=http://dom.as/';i.style.width='0px';i.style.height='0px';i.style.overflow='hidden';document.body.appendChild(i);}});}/*]]>*/</script>
+</head>
+
+<body class="home blog typekit-enabled highlander-enabled highlander-light">
+<div id="wrapper" class="hfeed">
+	<div id="header">
+		<div id="masthead">
+			<div id="branding" role="banner">
+								<h1 id="site-title">
+					<span>
+						<a href="http://dom.as/" title="domas mituzas" rel="home">domas mituzas</a>
+					</span>
+				</h1>
+				<div id="site-description"></div>
+
+							</div><!-- #branding -->
+
+			<div id="access" role="navigation">
+			  				<div class="skip-link screen-reader-text"><a href="#content" title="Skip to content">Skip to content</a></div>
+								<div class="menu-header"><ul id="menu-blog" class="menu"><li id="menu-item-1516" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1516"><a href="http://dom.as/domas/">me</a></li>
+<li id="menu-item-1514" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1514"><a href="http://dom.as/talks/">talks</a></li>
+<li id="menu-item-1512" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1512"><a href="http://dom.as/tech/">tech</a>
+<ul class="sub-menu">
+	<li id="menu-item-1513" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1513"><a href="http://dom.as/tech/query-cache-tuner/">query cache tuner</a></li>
+</ul>
+</li>
+<li id="menu-item-1515" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1515"><a href="http://dom.as/blank/">blank</a></li>
+</ul></div>			</div><!-- #access -->
+		</div><!-- #masthead -->
+	</div><!-- #header -->
+
+	<div id="main">
+
+		<div id="container">
+			<div id="content" role="main">
+
+			
+	<div id="nav-above" class="navigation">
+		<div class="nav-previous"><a href="http://dom.as/page/2/" ><span class="meta-nav">&larr;</span> Older posts</a></div>
+		<div class="nav-next"></div>
+	</div><!-- #nav-above -->
+
+
+
+
+			<div id="post-1520" class="post-1520 post type-post status-publish format-standard hentry category-wikipedia category-wikitech tag-stats">
+			<h2 class="entry-title"><a href="http://dom.as/2011/10/07/steve-jobs/" title="Permalink to &#8230; in&nbsp;numbers" rel="bookmark">&#8230; in&nbsp;numbers</a></h2>
+
+			<div class="entry-meta">
+				<span class="meta-prep meta-prep-author">Posted on</span> <a href="http://dom.as/2011/10/07/steve-jobs/" title="11:51" rel="bookmark"><span class="entry-date">2011/10/07</span></a> <span class="meta-sep">by</span> <span class="author vcard"><a class="url fn n" href="http://dom.as/author/domasmituzas/" title="View all posts by Domas Mituzas">Domas Mituzas</a></span>			</div><!-- .entry-meta -->
+
+				<div class="entry-content">
+				<p><a href="https://docs.google.com/spreadsheet/ccc?key=0AtHDNfVx0WNhdHllX2hVVG8zMU14MUdjT1lILWR5dUE&amp;hl=en_US#gid=2"><img class="alignnone size-full wp-image-1526" title="Steve Jobs Wikipedia" src="http://domasmituzas.files.wordpress.com/2011/10/steve-jobs-wikipedia.png?w=600&#038;h=371" alt="" width="600" height="371" /></a></p>
+<div class="sharedaddy sd-sharing-enabled"><div class="robots-nocontent sd-block sd-social sd-social-official sd-sharing"><div class="sd-content"><ul><li class="share-facebook"><div class="like_button"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fdom.as%2F2011%2F10%2F07%2Fsteve-jobs%2F&amp;layout=button_count&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;height=21&amp;locale=en_EN&amp;width=90" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:96px; height:21px;" allowTransparency="true"></iframe></div></li><li class="share-twitter"><div class="twitter_button"><iframe allowtransparency="true" frameborder="0" scrolling="no" src="http://platform.twitter.com/widgets/tweet_button.html?url=http%3A%2F%2Fwp.me%2FpNrJ-ow&counturl=http%3A%2F%2Fdom.as%2F2011%2F10%2F07%2Fsteve-jobs%2F&count=horizontal&text=...%20in%20numbers%3A&via=wordpressdotcom&related=wordpressdotcom" style="width:97px; height:20px;"></iframe></div></li><li class="share-end"></li></ul><div class="sharing-clear"></div></div></div></div>							</div><!-- .entry-content -->
+	
+			<div class="entry-utility">
+									<span class="cat-links">
+						<span class="entry-utility-prep entry-utility-prep-cat-links">Posted in</span> <a href="http://dom.as/category/wikipedia/" title="View all posts in wikipedia" rel="category tag">wikipedia</a>, <a href="http://dom.as/category/wikitech/" title="View all posts in wikitech" rel="category tag">wikitech</a>					</span>
+					<span class="meta-sep">|</span>
+													<span class="tag-links">
+						<span class="entry-utility-prep entry-utility-prep-tag-links">Tagged</span> <a href="http://dom.as/tag/stats/" rel="tag">stats</a>					</span>
+					<span class="meta-sep">|</span>
+								<span class="comments-link"><a href="http://dom.as/2011/10/07/steve-jobs/#comments" title="Comment on &#8230; in&nbsp;numbers">4 Comments</a></span>
+							</div><!-- .entry-utility -->
+		</div><!-- #post-## -->
+
+		
+	
+
+
+			<div id="post-1509" class="post-1509 post type-post status-publish format-standard hentry category-mysql tag-efficiency tag-innodb tag-memory tag-partitions">
+			<h2 class="entry-title"><a href="http://dom.as/2011/09/25/blowing-up-in-memory/" title="Permalink to Blowing up in&nbsp;memory" rel="bookmark">Blowing up in&nbsp;memory</a></h2>
+
+			<div class="entry-meta">
+				<span class="meta-prep meta-prep-author">Posted on</span> <a href="http://dom.as/2011/09/25/blowing-up-in-memory/" title="16:19" rel="bookmark"><span class="entry-date">2011/09/25</span></a> <span class="meta-sep">by</span> <span class="author vcard"><a class="url fn n" href="http://dom.as/author/domasmituzas/" title="View all posts by Domas Mituzas">Domas Mituzas</a></span>			</div><!-- .entry-meta -->
+
+				<div class="entry-content">
+				<p>MySQL isn&#8217;t too concerned about table handler memory usage &#8211; it will allocate row size buffer thrice per each table invocation. There&#8217;s a few year <a href="http://bugs.mysql.com/bug.php?id=44626">old bug</a> discussing UNION memory usage &#8211; for each mention in an union one can allocate nearly 200k of unaccounted memory &#8211; so a megabyte sized query can consume 7GB of RAM already.</p>
+<p>Partitioning though adds even more pain here &#8211; it will allocate those three buffers per each partition, so opening a table with 1000 partitions looks like this on memory profile:</p>
+<p><a href="http://domasmituzas.files.wordpress.com/2011/09/partitions-memory-usage1.png"><img class="alignnone size-medium wp-image-1507" title="Partitions memory usage" src="http://domasmituzas.files.wordpress.com/2011/09/partitions-memory-usage1.png?w=300&#038;h=239" alt="" width="300" height="239" /></a></p>
+<p>Click to enlarge, and you will see 191MB sent to execute a simple single-row fetching query from a table (I filed <a href="http://bugs.mysql.com/bug.php?id=62536">a bug</a> on this).</p>
+<p>There&#8217;re multiple real life situations when this is painful (e.g. any kind of server stall may lead to multiple concurrent threads reading from same table, consuming additional gigabytes or tens of gigabytes of memory). It gets even more painful when combined with UNION bug &#8211; a megabyte query on an empty table can now consume 7TB of memory and I doubt anyone has that much on their MySQL servers :-)</p>
+<p>P.S. Also, <a href="http://bugs.mysql.com/bug.php?id=62535">check out</a> how much memory can be wasted for malloc overhead, once discussed <a title="Wasting InnoDB memory" href="http://dom.as/2008/05/29/wasting-innodb-memory/">here</a>.<br />
+P.P.S. And <a href="http://bugs.mysql.com/bug.php?id=62534">here</a> you can see why innodb_max_dirty_pages_pct=0 doesn&#8217;t do what you&#8217;d expect.</p>
+<div class="sharedaddy sd-sharing-enabled"><div class="robots-nocontent sd-block sd-social sd-social-official sd-sharing"><div class="sd-content"><ul><li class="share-facebook"><div class="like_button"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fdom.as%2F2011%2F09%2F25%2Fblowing-up-in-memory%2F&amp;layout=button_count&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;height=21&amp;locale=en_EN&amp;width=90" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:96px; height:21px;" allowTransparency="true"></iframe></div></li><li class="share-twitter"><div class="twitter_button"><iframe allowtransparency="true" frameborder="0" scrolling="no" src="http://platform.twitter.com/widgets/tweet_button.html?url=http%3A%2F%2Fwp.me%2FpNrJ-ol&counturl=http%3A%2F%2Fdom.as%2F2011%2F09%2F25%2Fblowing-up-in-memory%2F&count=horizontal&text=Blowing%20up%20in%20memory%3A&via=wordpressdotcom&related=wordpressdotcom" style="width:97px; height:20px;"></iframe></div></li><li class="share-end"></li></ul><div class="sharing-clear"></div></div></div></div>							</div><!-- .entry-content -->
+	
+			<div class="entry-utility">
+									<span class="cat-links">
+						<span class="entry-utility-prep entry-utility-prep-cat-links">Posted in</span> <a href="http://dom.as/category/mysql/" title="View all posts in mysql" rel="category tag">mysql</a>					</span>
+					<span class="meta-sep">|</span>
+													<span class="tag-links">
+						<span class="entry-utility-prep entry-utility-prep-tag-links">Tagged</span> <a href="http://dom.as/tag/efficiency/" rel="tag">efficiency</a>, <a href="http://dom.as/tag/innodb/" rel="tag">innodb</a>, <a href="http://dom.as/tag/memory/" rel="tag">memory</a>, <a href="http://dom.as/tag/partitions/" rel="tag">partitions</a>					</span>
+					<span class="meta-sep">|</span>
+								<span class="comments-link"><a href="http://dom.as/2011/09/25/blowing-up-in-memory/#comments" title="Comment on Blowing up in&nbsp;memory">3 Comments</a></span>
+							</div><!-- .entry-utility -->
+		</div><!-- #post-## -->
+
+		
+	
+
+
+			<div id="post-897" class="post-897 post type-post status-publish format-standard hentry category-facebook category-mysql tag-connections tag-network tag-performance">
+			<h2 class="entry-title"><a href="http://dom.as/2011/08/28/mysql-connection-accept-speed/" title="Permalink to On&nbsp;connections" rel="bookmark">On&nbsp;connections</a></h2>
+
+			<div class="entry-meta">
+				<span class="meta-prep meta-prep-author">Posted on</span> <a href="http://dom.as/2011/08/28/mysql-connection-accept-speed/" title="23:51" rel="bookmark"><span class="entry-date">2011/08/28</span></a> <span class="meta-sep">by</span> <span class="author vcard"><a class="url fn n" href="http://dom.as/author/domasmituzas/" title="View all posts by Domas Mituzas">Domas Mituzas</a></span>			</div><!-- .entry-meta -->
+
+				<div class="entry-content">
+				<p>MySQL is needlessly slow at accepting new connections. People usually work around that by having various sorts of connection pools, but there’s always a scale at which connection pools are not feasible. Sometimes connection avalanches come unexpected, and even if MySQL would have no trouble dealing with queries, it will have problems letting clients in. Something has to be done about it.</p>
+<p>Lots of these problems have been low hanging fruits for years &#8211; it ‘was not detected’ by benchmarks because everyone who benchmarks MySQL would know that persistent connections are much faster and therefore wouldn’t look at connection speeds anymore.</p>
+<p>Usually people attribute most of slowness to the LOCK_thread_count mutex &#8211; they are only partially right. This mutex does not just handle the counter of active running connections, but pretty much every operation that deals with increase or decrease of threads (thread cache, active thread lists, etc) has to hold it for a while.</p>
+<p>Also, it is common wisdom to use <a href="http://dev.mysql.com/doc/refman/5.5/en/connection-threads.html">thread cache</a>, but what people quite often miss is that thread cache is something that was created back when OS threads were extremely expensive to create, and all it does is caching pthreads. It does not do any of MySQL specific thread caching magic &#8211; everything gets completely reinitialized for each incoming structure.</p>
+<p>I decided to attack this problem based on very simple hypothesis &#8211; whatever ‘accept thread’ is doing, is bottleneck for whole process. It is very simple to analyze everything from this perspective (and I had some success looking at replication threads from this perspective).</p>
+<p>All we need is gdb and two loops &#8211; gdb attaches to accept thread, one loop does ‘breakpoint; continue’, another sends signals at a certain sampling rate (I picked 10Hz in order to avoid profiling bias). I <a href="https://www.facebook.com/poormansprofiler/posts/147734715313155">posted</a> those scripts on <a href="https://www.facebook.com/poormansprofiler">PMP page</a>. After a lunch break I had 50k stacks (long lunch ;-) that I fed into graphviz for full data visualisation and could look at individually:</p>
+<p><a href="http://dammit.files.wordpress.com/2011/09/connects-5-5.png"><img class="alignnone size-full wp-image-1170" title="5.5 accept thread time analysis" src="http://dammit.files.wordpress.com/2011/09/connects-5-5.png?w=384&#038;h=235" alt="" width="384" height="235" /></a></p>
+<p>A picture is worth thousand words (well, is easier than looking at thousands of lines in stack aggregations), and I immediately noticed few things worth looking at:</p>
+<ul>
+<li>Initializing THD (MySQL thread) structure is CPU-heavy task that resides in choke-point thread</li>
+<li>There is way too much time spent in syscalls, whatever they do</li>
+<li>Too much memory allocation done by the master thread</li>
+<li>There’s mutex contention on thread cache waking up worker threads</li>
+<li>There’s needless mutex contention in few other places</li>
+</ul>
+<p>I didn’t want to look at mutex contention issues first so I ended up with something as simple as looking at syscall costs.</p>
+<ul>
+<li>15% was going into actual accept()</li>
+<li>8.5% was going into poll()</li>
+<li>8% went into fcntl()</li>
+<li>7% went into setsockopt()</li>
+<li>1.2% went into getsockname()</li>
+</ul>
+<p>An strace on mysqld gives a picture that explains quite a bit:<br />
+<code><br />
+poll([{fd=12, ...}, {fd=13, ...}], 2, -1) = 1<br />
+fcntl(12, F_GETFL) = 0x2 (flags O_RDWR)<br />
+fcntl(12, F_SETFL, O_RDWR|O_NONBLOCK) = 0<br />
+accept(12, {... sin_port=htons(59183), ...) = 32<br />
+fcntl(12, F_SETFL, O_RDWR)<br />
+getsockname(32, {... sin_port=htons(3306), ...) = 0<br />
+fcntl(32, F_SETFL, O_RDONLY) fcntl(32, F_GETFL) = 0x2 (flags O_RDWR)<br />
+setsockopt(32, SOL_SOCKET, SO_RCVTIMEO, ...)<br />
+setsockopt(32, SOL_SOCKET, SO_SNDTIMEO, ...)<br />
+fcntl(32, F_SETFL, O_RDWR|O_NONBLOCK)<br />
+setsockopt(32, SOL_IP, IP_TOS, [8], 4)<br />
+setsockopt(32, SOL_TCP, TCP_NODELAY, [1], 4)<br />
+</code></p>
+<p>I’ll skip walking through the code, but essentially what it does here is (12 is accept socket, 32 is connection socket):</p>
+<ul>
+<li>poll() checks whether there are pending connections. If server is busy, trying to accept first, poll on failure is a better approach. There are side effects with that idea though &#8211; other sockets may starve a bit, but it is solvable by injecting occasional poll.</li>
+<li>What happens next is a bit sad. Instead of storing per-socket flags (nobody is touching that for now anyway), it gets the socket flags, figures out it is a blocking socket, sets it to nonblocking mode, accepts the connection, sets it back to blocking mode. Just setting to nonblocking at the start and using it forever that way is much cheaper and constipates way less.</li>
+<li>accept() itself can be scaled only by having parallel accept() threads. Maybe most of this post would be not necessary if there were multiple accept threads, but I’m not eager to go into that kind of refactoring for now.</li>
+<li>getsockname() is used just to verify if socket is correct (probably catching EINVAL later seems to be too complicated), it is a very pessimistic code path for a case that nearly never happens (it probably was added for some random Unix back from nineties)</li>
+<li>Next fcntl “get flags” call is quite unnecessary &#8211; this is a fresh socket and one shouldn’t expect anything special within it. Later non-blocking mode is set, so that overrides whatever was obtained here.</li>
+<li>Three out of four setsockopt()s are necessary evil (one turns of <a>Nagle’s algorithm</a>, two other set socket timeouts), so they have to be done before network I/O is done on the socket. Fourth setsockopt() is usually completely useless &#8211; not every network observes <a href="http://en.wikipedia.org/wiki/Type_of_Service">IP_TOS header</a>, and one has to talk to network administrator first about decent values. I’d say it can be optional parameter (yay, more tuning options).</li>
+</ul>
+<p>Pretty much every connection socket operation can be done later, in a worker thread, without consuming expensive accept thread time, and pretty much every syscall except accept() can be removed from a busy accept thread(), which is what I did in my testing build.</p>
+<p>Once I got rid of syscalls I started looking at other low hanging fruits. The most obvious one was sprintf() called inside vio_new(). Though it accounted only for 4% of thread time, the uselessness of it was depressing. Here it is:</p>
+<pre>sprintf(vio-&gt;desc,
+   (vio-&gt;type == VIO_TYPE_SOCKET ? "socket (%d)" : "TCP/IP (%d)"),
+   vio-&gt;sd);</pre>
+<p>It formats a string that is not used at all by production builds (only few DBUG messages are calling vio_description()). Though I removed this code in non-debug build, as I was moving over network initialization to worker threads, whole my_net_init() and vio() ended up outside of accept thread anyway ;-)</p>
+<p>The overall thread cache design is centered around LOCK_thread_count &#8211; lock is held while signaling threads, and threads that wake up need the lock too &#8211; so there’s lots of overhead involved in the coordination &#8211; 13% of time is spent just to pass the task to a worker thread.</p>
+<p>Allowing multiple threads to wake up and multiple entries to be placed into thread cache before it is all drained (more of an InnoDB concurrency-queue with FLIFO approach) could be somewhat better &#8211; so would be worker threads accepting connections directly (I already said that, I guess). There’s simply too much time wasted waking up and sending threads to sleep, and quite some of that time is on a choke point.</p>
+<p>THD initializations are somewhat simpler, as they don’t include SMP madness.</p>
+<p>There’re some low hanging fruits of course there as well. For example THD initializer calls sql_rnd_with_mutex(), which locks thread count mutex. Simplest fix could be using another mutex, though lockless random function or on-demand variable initialization would help too.</p>
+<p>Some initializers there are quite expensive too &#8211; e.g. Warning_info class could initialize dynamic storage only when actually used, and not at THD initialization chokepoint. THD::init can be moved to a worker thread, and lots of THD initialization could be moved over to it.</p>
+<p>Quite a lot of time (12%) is spent on malloc() &#8211; and lots of that is for allocating lots of various fixed-size structures &#8211; slab allocator (or just more efficient malloc implementation) could cut on CPU time there. Of course, more drastic alternative is not dealing with THD at all during accept phase &#8211; one can pass stub structure to build upon later, or (oh, am I writing this again) moving accept() part to individual workers.</p>
+<p>So far I tested just few optimizations &#8211; moved over vio/net initialization to worker threads, reduced number of syscalls, added a new mutex for rand initialization, and that alone got me <strong>additional 50% increase</strong> in connection accepts. Think how much more one could get from fixing this problem properly ;-)</p>
+<p><strong>TL;DR:</strong> MySQL sucks at accepting new connections, but there’re lots of low hanging fruit there. Ask your MySQL provider for a fix.</p>
+<p>MySQL bug entries:</p>
+<ul>
+<li>rand(): <a href="http://bugs.mysql.com/bug.php?id=62282">#62282</a></li>
+<li>fcntl on accept(): <a href="http://bugs.mysql.com/bug.php?id=62283">#62283</a></li>
+<li>network init costs: <a href="http://bugs.mysql.com/bug.php?id=62284">#62284</a></li>
+<li>vio sprintf(): <a href="http://bugs.mysql.com/bug.php?id=62285">#62285</a></li>
+<li>poll() vs accept(): <a href="http://bugs.mysql.com/bug.php?id=62286">#62286</a></li>
+<li>thread cache performance: <a href="http://bugs.mysql.com/bug.php?id=62287">#62287</a></li>
+<li>THD initialization: <a href="http://bugs.mysql.com/bug.php?id=62288">#62288</a></li>
+</ul>
+<div class="sharedaddy sd-sharing-enabled"><div class="robots-nocontent sd-block sd-social sd-social-official sd-sharing"><div class="sd-content"><ul><li class="share-facebook"><div class="like_button"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fdom.as%2F2011%2F08%2F28%2Fmysql-connection-accept-speed%2F&amp;layout=button_count&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;height=21&amp;locale=en_EN&amp;width=90" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:96px; height:21px;" allowTransparency="true"></iframe></div></li><li class="share-twitter"><div class="twitter_button"><iframe allowtransparency="true" frameborder="0" scrolling="no" src="http://platform.twitter.com/widgets/tweet_button.html?url=http%3A%2F%2Fwp.me%2FpNrJ-et&counturl=http%3A%2F%2Fdom.as%2F2011%2F08%2F28%2Fmysql-connection-accept-speed%2F&count=horizontal&text=On%20connections%3A&via=wordpressdotcom&related=wordpressdotcom" style="width:97px; height:20px;"></iframe></div></li><li class="share-end"></li></ul><div class="sharing-clear"></div></div></div></div>							</div><!-- .entry-content -->
+	
+			<div class="entry-utility">
+									<span class="cat-links">
+						<span class="entry-utility-prep entry-utility-prep-cat-links">Posted in</span> <a href="http://dom.as/category/facebook/" title="View all posts in facebook" rel="category tag">facebook</a>, <a href="http://dom.as/category/mysql/" title="View all posts in mysql" rel="category tag">mysql</a>					</span>
+					<span class="meta-sep">|</span>
+													<span class="tag-links">
+						<span class="entry-utility-prep entry-utility-prep-tag-links">Tagged</span> <a href="http://dom.as/tag/connections/" rel="tag">connections</a>, <a href="http://dom.as/tag/network/" rel="tag">network</a>, <a href="http://dom.as/tag/performance/" rel="tag">performance</a>					</span>
+					<span class="meta-sep">|</span>
+								<span class="comments-link"><a href="http://dom.as/2011/08/28/mysql-connection-accept-speed/#comments" title="Comment on On&nbsp;connections">16 Comments</a></span>
+							</div><!-- .entry-utility -->
+		</div><!-- #post-## -->
+
+		
+	
+
+
+			<div id="post-886" class="post-886 post type-post status-publish format-standard hentry category-mysql tag-code tag-innodb tag-internals">
+			<h2 class="entry-title"><a href="http://dom.as/2011/07/10/innodb-subsystems-in-color/" title="Permalink to InnoDB subsystems in&nbsp;color" rel="bookmark">InnoDB subsystems in&nbsp;color</a></h2>
+
+			<div class="entry-meta">
+				<span class="meta-prep meta-prep-author">Posted on</span> <a href="http://dom.as/2011/07/10/innodb-subsystems-in-color/" title="19:28" rel="bookmark"><span class="entry-date">2011/07/10</span></a> <span class="meta-sep">by</span> <span class="author vcard"><a class="url fn n" href="http://dom.as/author/domasmituzas/" title="View all posts by Domas Mituzas">Domas Mituzas</a></span>			</div><!-- .entry-meta -->
+
+				<div class="entry-content">
+				<p>I tried to put every subdirectory of InnoDB codebase into a chart that would explain some of relations between subsystems and modules inside the source. This is what I got (click to enlarge):</p>
+<p><a href="http://dammit.files.wordpress.com/2011/07/innodb-internals.png"><img class="alignnone size-full wp-image-1174" title="InnoDB internals diagram" src="http://dammit.files.wordpress.com/2011/07/innodb-internals.png?w=640&#038;h=619" alt="" width="640" height="619" /></a></p>
+<p><strong>Update:</strong> Check <a href="http://www.mysqlperformanceblog.com/2010/04/26/xtradb-innodb-internals-in-drawing/">Vadim&#8217;s diagram</a> for a more operational view of InnoDB<br />
+<strong>Another update:</strong> There&#8217;s a <a href="http://dammit.files.wordpress.com/2011/09/innodb-internals.pdf">vector PDF version</a></p>
+<div class="sharedaddy sd-sharing-enabled"><div class="robots-nocontent sd-block sd-social sd-social-official sd-sharing"><div class="sd-content"><ul><li class="share-facebook"><div class="like_button"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fdom.as%2F2011%2F07%2F10%2Finnodb-subsystems-in-color%2F&amp;layout=button_count&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;height=21&amp;locale=en_EN&amp;width=90" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:96px; height:21px;" allowTransparency="true"></iframe></div></li><li class="share-twitter"><div class="twitter_button"><iframe allowtransparency="true" frameborder="0" scrolling="no" src="http://platform.twitter.com/widgets/tweet_button.html?url=http%3A%2F%2Fwp.me%2FpNrJ-ei&counturl=http%3A%2F%2Fdom.as%2F2011%2F07%2F10%2Finnodb-subsystems-in-color%2F&count=horizontal&text=InnoDB%20subsystems%20in%20color%3A&via=wordpressdotcom&related=wordpressdotcom" style="width:97px; height:20px;"></iframe></div></li><li class="share-end"></li></ul><div class="sharing-clear"></div></div></div></div>							</div><!-- .entry-content -->
+	
+			<div class="entry-utility">
+									<span class="cat-links">
+						<span class="entry-utility-prep entry-utility-prep-cat-links">Posted in</span> <a href="http://dom.as/category/mysql/" title="View all posts in mysql" rel="category tag">mysql</a>					</span>
+					<span class="meta-sep">|</span>
+													<span class="tag-links">
+						<span class="entry-utility-prep entry-utility-prep-tag-links">Tagged</span> <a href="http://dom.as/tag/code/" rel="tag">code</a>, <a href="http://dom.as/tag/innodb/" rel="tag">innodb</a>, <a href="http://dom.as/tag/internals/" rel="tag">internals</a>					</span>
+					<span class="meta-sep">|</span>
+								<span class="comments-link"><a href="http://dom.as/2011/07/10/innodb-subsystems-in-color/#comments" title="Comment on InnoDB subsystems in&nbsp;color">5 Comments</a></span>
+							</div><!-- .entry-utility -->
+		</div><!-- #post-## -->
+
+		
+	
+
+
+			<div id="post-880" class="post-880 post type-post status-publish format-standard hentry category-facebook category-mysql tag-disks tag-io tag-memory tag-newsql tag-rant">
+			<h2 class="entry-title"><a href="http://dom.as/2011/07/08/stonebraker-trapped/" title="Permalink to Stonebraker trapped in Stonebraker &#039;fate worse than&nbsp;death&#039;" rel="bookmark">Stonebraker trapped in Stonebraker &#039;fate worse than&nbsp;death&#039;</a></h2>
+
+			<div class="entry-meta">
+				<span class="meta-prep meta-prep-author">Posted on</span> <a href="http://dom.as/2011/07/08/stonebraker-trapped/" title="09:25" rel="bookmark"><span class="entry-date">2011/07/08</span></a> <span class="meta-sep">by</span> <span class="author vcard"><a class="url fn n" href="http://dom.as/author/domasmituzas/" title="View all posts by Domas Mituzas">Domas Mituzas</a></span>			</div><!-- .entry-meta -->
+
+				<div class="entry-content">
+				<p><a href='http://en.wikipedia.org/wiki/Troll_(Internet)'><img src='http://upload.wikimedia.org/wikipedia/en/thumb/7/73/Trollface.png/150px-Trollface.png' align='right' /></a></p>
+<p>Oh well, I know I shouldn&#8217;t poke directly at people, but they <a href='http://gigaom.com/cloud/facebook-trapped-in-mysql-fate-worse-than-death/'>deserve</a> that sometimes (at least in my very personal opinion). Heck, I even gave 12h window for this not to be hot-headed opinion.</p>
+<p>Those who followed <a href='http://facebook.com/MySQLatFacebook/'>MySQL at facebook</a> development probably know how much we focus on actual performance on top of mixed-composition I/O devices (flashcache, etc) &#8211; not just retreating to comfortable zone of in-memory (or in-pure-flash) data.</p>
+<p>I feel somewhat sad that I have to put this truism out here &#8211; disks are way more cost efficient, and if used properly can be used to facilitate way more long-term products, not just real time data. Think Wikipedia without history, think comments that disappear on old posts, together with old posts, think all 404s you hit on various articles you remember from the past and want to read.</p>
+<p>Building the web that lasts is completely different task from what academia people imagine building the web is.</p>
+<p>I already had this issue with other RDBMS pioneer (there&#8217;s something in common among top database luminaries) &#8211; he also suggested that disks are things of the past and now everything has to be in memory, because memory is cheap. And data can be whatever unordered clutter, because CPUs can sort it, because CPUs are cheap.</p>
+<p>They probably missed Al Gore message. Throwing more and more hardware without fine tuning for actual operational efficiency requirements is wasteful and harms our planet. Yes, we do lots of in-memory efficiency work, so that we reduce our I/O, but at the same time we balance the workload so that I/O subsystem provides as efficient as possible delivery of the long tail.</p>
+<p>What happens in real world if one gets 2x efficiency gain? Twice more data can be stored, twice more data intensive products can be launched.<br />
+What happens in academia of in-memory databases, if one gets 2x efficiency gain? A paper.<br />
+What happens when real world doesn&#8217;t read your papers anymore? You troll everyone via GigaOM.</p>
+<p>Though sure, there&#8217;s some operational overhead in handling sharding and availability of MySQL deployments, at large scale it becomes somewhat constant cost, whereas operational efficiency gains are linear.</p>
+<p><b>Update:</b> Quite a few people pointed out that I was dissing a person who has done incredible amount of contributions, or that I&#8217;m anti-academia. I&#8217;m not, and I extremely value any work that people do wherever they are, albeit I do apply critical thinking to whatever they speak.</p>
+<p>In my text above (I don&#8217;t want to edit and hide what I said) I don&#8217;t mean that &#8220;a paper&#8221; is useless. Me and my colleagues do read papers and try to understand the direction of computer science and how it applies to our work (there are indeed various problems yet to solve). I&#8217;d love to come up with something worth a paper (and quite a few of my colleagues did).</p>
+<p>Still, if someone does not find that direction useful, there&#8217;s no way to portray them the way the original GigaOM article did.</p>
+<div class="sharedaddy sd-sharing-enabled"><div class="robots-nocontent sd-block sd-social sd-social-official sd-sharing"><div class="sd-content"><ul><li class="share-facebook"><div class="like_button"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fdom.as%2F2011%2F07%2F08%2Fstonebraker-trapped%2F&amp;layout=button_count&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;height=21&amp;locale=en_EN&amp;width=90" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:96px; height:21px;" allowTransparency="true"></iframe></div></li><li class="share-twitter"><div class="twitter_button"><iframe allowtransparency="true" frameborder="0" scrolling="no" src="http://platform.twitter.com/widgets/tweet_button.html?url=http%3A%2F%2Fwp.me%2FpNrJ-ec&counturl=http%3A%2F%2Fdom.as%2F2011%2F07%2F08%2Fstonebraker-trapped%2F&count=horizontal&text=Stonebraker%20trapped%20in%20Stonebraker%20%26%23039%3Bfate%20worse%20than%20death%26%23039%3B%3A&via=wordpressdotcom&related=wordpressdotcom" style="width:97px; height:20px;"></iframe></div></li><li class="share-end"></li></ul><div class="sharing-clear"></div></div></div></div>							</div><!-- .entry-content -->
+	
+			<div class="entry-utility">
+									<span class="cat-links">
+						<span class="entry-utility-prep entry-utility-prep-cat-links">Posted in</span> <a href="http://dom.as/category/facebook/" title="View all posts in facebook" rel="category tag">facebook</a>, <a href="http://dom.as/category/mysql/" title="View all posts in mysql" rel="category tag">mysql</a>					</span>
+					<span class="meta-sep">|</span>
+													<span class="tag-links">
+						<span class="entry-utility-prep entry-utility-prep-tag-links">Tagged</span> <a href="http://dom.as/tag/disks/" rel="tag">disks</a>, <a href="http://dom.as/tag/io/" rel="tag">io</a>, <a href="http://dom.as/tag/memory/" rel="tag">memory</a>, <a href="http://dom.as/tag/newsql/" rel="tag">newsql</a>, <a href="http://dom.as/tag/rant/" rel="tag">rant</a>					</span>
+					<span class="meta-sep">|</span>
+								<span class="comments-link"><a href="http://dom.as/2011/07/08/stonebraker-trapped/#comments" title="Comment on Stonebraker trapped in Stonebraker &#039;fate worse than&nbsp;death&#039;">30 Comments</a></span>
+							</div><!-- .entry-utility -->
+		</div><!-- #post-## -->
+
+		
+	
+
+
+			<div id="post-873" class="post-873 post type-post status-publish format-standard hentry category-facebook category-mysql tag-innodb tag-io tag-mutex tag-performance">
+			<h2 class="entry-title"><a href="http://dom.as/2011/07/03/innodb-index-lock/" title="Permalink to InnoDB locking makes me&nbsp;sad" rel="bookmark">InnoDB locking makes me&nbsp;sad</a></h2>
+
+			<div class="entry-meta">
+				<span class="meta-prep meta-prep-author">Posted on</span> <a href="http://dom.as/2011/07/03/innodb-index-lock/" title="11:05" rel="bookmark"><span class="entry-date">2011/07/03</span></a> <span class="meta-sep">by</span> <span class="author vcard"><a class="url fn n" href="http://dom.as/author/domasmituzas/" title="View all posts by Domas Mituzas">Domas Mituzas</a></span>			</div><!-- .entry-meta -->
+
+				<div class="entry-content">
+				<p>Vadim and others have <a href='http://www.mysqlperformanceblog.com/2010/02/25/index-lock-and-adaptive-search-next-two-biggest-innodb-problems/'>pointed</a> at the index-&gt;lock problems before, but I think they didn&#8217;t good job enough at pointing out how bad it can get (the actual problematic was hidden somewhere as some odd edge case). What &#8216;index lock&#8217; means is generally the fact that InnoDB has table-level locking which will kill performance on big tables miserably.</p>
+<p>InnoDB is a huge pie of layers, that have various locking behaviors, and are layered on top of each other, and are structured nicely as subdirectories in your innodb_plugin directory. Low level storage interfaces are done via os/ routines, then on top of that there&#8217;s some file space manager, fsp/, which allocates space for btr/ to live in, where individual page/ entities live, with multiple row/ pieces. There&#8217;re few other subsystems around, that got quite some attention lately &#8211; e.g. buf/ pool, transaction log/, and large trx/ transactions are composed of micro transactions living in mtr/.</p>
+<p>If you live in memory, you care about buffer pool and transaction log performance, if you write insane amounts of data to in-memory buffers you hit mtr/ problems and depend o how fast you can write out log/ or flush out buf/. If you are in I/O-heavy land most of stuff you care about happens in btr/.</p>
+<p>Generally InnoDB is quite good about read scalability in I/O bound environments &#8211; nowadays one can saturate really fast I/O devices and there will be plenty of parallel reads done. Major scalability problem in this field was read-ahead which was funneling all read-ahead activity into a small set of threads, but other than that there can be hundreds of parallel reads issued to underlying devices. Situation changes when writes are added to the mix, though again, there&#8217;re few different scenarios.</p>
+<p>There&#8217;re two ways for InnoDB to write out updates to pages, &#8220;optimistic&#8221; and &#8220;pessimistic&#8221;. Optimism here means that only in-page (page/row) operation will be needed without changing the tree structure. In one case you can expect quite high parallelism &#8211; multiple pages can be read for that operation at a time, multiple of them can be edited at a time, then some serialization will happen while writing out changes to redo log and undo segments. Expect good performance.</p>
+<p>The much worse case is when B-Tree is supposed to be reorganized and multiple page operations can happen; thats pessimism. In this case whole index gets locked (via a read-write lock obtained from dict/),<br />
+then B-Tree path is latched, then changes are done, then it is all unlocked until next row operation needs to hit the tree. Unfortunately, both &#8216;path is latched&#8217; and &#8216;changes are done&#8217; are expensive operations, and not only in-core, but are doing sync page read-ins, one at a time, which on busy systems serving lots of read load are supposed to be slow. Ironically, as no other operations can happen on the table at that time, you may find out you have spare I/O capacity.. ;-)</p>
+<p>What gets quite interesting though is the actual operation needed to latch b-tree path. Usual wisdom would say that if you want to change a row (read-modify-write), you probably looked up the page already, so there won&#8217;t be I/O. Unfortunately, InnoDB uses an slightly more complicated binary tree version, where pages have links to neighbors, and tree latching does this (a bit simplified for reading clarity):</p>
+<p><code><br />
+/* x-latch also brothers from left to right */<br />
+get_block = btr_block_get(space, zip_size, left_page_no, RW_X_LATCH, mtr);<br />
+get_block = btr_block_get(space, zip_size, page_no, RW_X_LATCH, mtr);<br />
+get_block = btr_block_get(space, zip_size, right_page_no, RW_X_LATCH, mtr);<br />
+</code></p>
+<p>So, essentially in this case, just because InnoDB is being pessimistic, it reads neighboring blocks to lock them, even if they may not be touched/accessed in any way &#8211; and bloats buffer pool at that time with tripple reads. It doesn&#8217;t cost much if whole tree fits in memory, but it is doing three I/Os in here, if we&#8217;re pessimistic about InnoDB being pessimistic (and I am). So, this isn&#8217;t just locking problem &#8211; it is also resource consumption problem at this stage.</p>
+<p>Now, as the dictionary lock is hold in write mode, not only updates to this table stop, but reads too &#8211; think MyISAM kind of stop. Of course, this &#8216;table locking&#8217; happens at entirely different layer than MyISAM. In MyISAM it is statement-length locking whereas in InnoDB this lock is held just for row operation on single index, but if statement is doing multiple row operations it can be acquired multiple times.</p>
+<p>Probably there exist decent workarounds if anyone wants to tackle this &#8211; grabbing read locks on the tree while reading pages into buffer pool, then escalating lock to exclusive. A bit bigger architectural change would be allowing to grab locks on neighbors (if they are needed) without bringing in page data into memory &#8211; but that needs InnoDB overlords to look at it. Talk to your closest MySQL vendor and ask for a fix!</p>
+<p>How do regular workloads hit this? Larger your records are, more likely you are to have tree changes, lower your performance will be. In my edge case I was inserting 7k sized rows &#8211; even though my machine had multiple disks, once the dataset fell out of buffer pool, it couldn&#8217;t insert more than 50 rows a second, even though there were many disks idle and capacity gods cried. It gets worse with out-of-page blobs &#8211; then every operation is pessimistic.</p>
+<p>Of course, there&#8217;re ways to work around this &#8211; usually by taking the hit of sharding/partitioning (this is where common wisdom of &#8220;large tables need to be partitioned&#8221; mostly comes from). Then, like with MyISAM, one will have multiple table locks and there may be some scalability then.</p>
+<p>TL;DR: InnoDB index lock is major architectural performance flaw, and that is why you hear that large tables are slower. There&#8217;s a big chance that there&#8217;re more scalable engines for on-disk writes out there, and all the large InnoDB write/insert benchmarks were severely hit by this.</p>
+<p><b>Update:</b> Filed bugs <a href='http://bugs.mysql.com/bug.php?id=61735'>#61735</a> and <a href='http://bugs.mysql.com/bug.php?id=61736'>#61736</a> with MySQL</p>
+<div class="sharedaddy sd-sharing-enabled"><div class="robots-nocontent sd-block sd-social sd-social-official sd-sharing"><div class="sd-content"><ul><li class="share-facebook"><div class="like_button"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fdom.as%2F2011%2F07%2F03%2Finnodb-index-lock%2F&amp;layout=button_count&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;height=21&amp;locale=en_EN&amp;width=90" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:96px; height:21px;" allowTransparency="true"></iframe></div></li><li class="share-twitter"><div class="twitter_button"><iframe allowtransparency="true" frameborder="0" scrolling="no" src="http://platform.twitter.com/widgets/tweet_button.html?url=http%3A%2F%2Fwp.me%2FpNrJ-e5&counturl=http%3A%2F%2Fdom.as%2F2011%2F07%2F03%2Finnodb-index-lock%2F&count=horizontal&text=InnoDB%20locking%20makes%20me%20sad%3A&via=wordpressdotcom&related=wordpressdotcom" style="width:97px; height:20px;"></iframe></div></li><li class="share-end"></li></ul><div class="sharing-clear"></div></div></div></div>							</div><!-- .entry-content -->
+	
+			<div class="entry-utility">
+									<span class="cat-links">
+						<span class="entry-utility-prep entry-utility-prep-cat-links">Posted in</span> <a href="http://dom.as/category/facebook/" title="View all posts in facebook" rel="category tag">facebook</a>, <a href="http://dom.as/category/mysql/" title="View all posts in mysql" rel="category tag">mysql</a>					</span>
+					<span class="meta-sep">|</span>
+													<span class="tag-links">
+						<span class="entry-utility-prep entry-utility-prep-tag-links">Tagged</span> <a href="http://dom.as/tag/innodb/" rel="tag">innodb</a>, <a href="http://dom.as/tag/io/" rel="tag">io</a>, <a href="http://dom.as/tag/mutex/" rel="tag">mutex</a>, <a href="http://dom.as/tag/performance/" rel="tag">performance</a>					</span>
+					<span class="meta-sep">|</span>
+								<span class="comments-link"><a href="http://dom.as/2011/07/03/innodb-index-lock/#comments" title="Comment on InnoDB locking makes me&nbsp;sad">19 Comments</a></span>
+							</div><!-- .entry-utility -->
+		</div><!-- #post-## -->
+
+		
+	
+
+
+			<div id="post-861" class="post-861 post type-post status-publish format-standard hentry category-facebook category-mysql tag-easy tag-innodb tag-monitoring tag-performance tag-profiling">
+			<h2 class="entry-title"><a href="http://dom.as/2011/05/19/mysql-metrics-for-read-workloads/" title="Permalink to MySQL metrics for read&nbsp;workloads" rel="bookmark">MySQL metrics for read&nbsp;workloads</a></h2>
+
+			<div class="entry-meta">
+				<span class="meta-prep meta-prep-author">Posted on</span> <a href="http://dom.as/2011/05/19/mysql-metrics-for-read-workloads/" title="13:45" rel="bookmark"><span class="entry-date">2011/05/19</span></a> <span class="meta-sep">by</span> <span class="author vcard"><a class="url fn n" href="http://dom.as/author/domasmituzas/" title="View all posts by Domas Mituzas">Domas Mituzas</a></span>			</div><!-- .entry-meta -->
+
+				<div class="entry-content">
+				<p>There are multiple metrics that are really useful for read workload analysis, that should all be tracked and looked at in performance-critical environments.</p>
+<p>The most commonly used is of course <strong>Questions</strong> (or &#8216;Queries&#8217;, &#8216;COM_Select&#8217;) &#8211; this is probably primary finger-pointing metric that can be used in communication with different departments (&#8220;why did your qps go up by 30%?&#8221;) &#8211; it doesn&#8217;t always reveal actual cost, it can be increase of actual request rates, it can be new feature, it can be fat fingers error somewhere in the code or improperly handled cache failure.</p>
+<p>Another important to note is <strong>Connections</strong> &#8211; MySQL&#8217;s costly bottleneck. Though most of users won&#8217;t be approaching ~10k/s area &#8211; at that point connection pooling starts actually making sense &#8211; it is worth to check for other reasons, such as &#8220;maybe we connect when we shouldn&#8217;t&#8221;, or needlessly reconnect, or actually should start looking more at thread cache performance or pooling options. There&#8217;re some neighboring metrics like &#8216;Bytes_sent&#8217; &#8211; make sure you don&#8217;t hit 120MB/s on a gigabit network :-)</p>
+<p>Other metrics usually are way more about what actually gets done. Major query efficiency signal for me for a long time used to be <b>Innodb_rows_read</b>. It is immediately pointing out when there are queries which don&#8217;t use indexes properly or are reading too much data. Gets a bit confusing if logical backup is running, but backup windows aside, this metric is probably one that is easy enough to track and understand. It has been extremely helpful to detect query plans gone wrong too &#8211; quite a few interesting edge cases could be resolved with FORCE INDEX (thats a topic for another post already :-)</p>
+<p>For I/O heavy environments there&#8217;re few metrics that show mostly the same &#8211; <strong>Innodb_buffer_pool_reads</strong>, <strong>Innodb_data_reads</strong>, <strong>Innodb_pages_read</strong> &#8211; they all show how much your requests hit underlying storage &#8211; and higher increases ask for better data locality, more in-memory efficiency (smaller object sizes!) or simply more RAM/IO capacity.</p>
+<p>For a long time lots of my metrics-oriented performance optimization could be summed up in this very simple ruleset:</p>
+<ul>
+<li>Number of rows shown to user in the UI has to be as close as possible to rows read from the index/table</li>
+<li>Number of physical I/Os done to serve rows has to be as close to 0 as possible :-)</li>
+</ul>
+<p>Something I like to look at is the I/O queue size (both via iostat and from InnoDB&#8217;s point of view) &#8211; <strong>Innodb_data_pending_reads</strong> can tell how loaded your underlying storage is &#8211; on rotating media you can allow multiples of your disk count, on flash it can already mean something is odd. Do note, innodb_thread_concurrency can be a limiting factor here.</p>
+<p>Overloads can be also detected from <strong>Threads_running</strong> &#8211; which is easy enough to track and extremely important quality of service data.</p>
+<p>An interesting metric, that lately became more and more important for me is <strong>Innodb_buffer_pool_read_requests</strong>. Though it is often to use buffer pool efficiency in the ratio with &#8216;buffer pool reads&#8217;, it is actually much more interesting if compared against &#8216;Innodb_rows_read&#8217;. While Innodb_rows_read and Handler* metrics essentially show what has been delivered by InnoDB to upper SQL layer, there are certain expensive operations that are not accounted for, like <a href='http://dom.as/2011/01/27/a-case-for-force-index/'>index estimations</a>.</p>
+<p>Though tracking this activity helps I/O quite a bit (right FORCE INDEX reduces the amount of data that has to be cached in memory), there can be also various edge cases that will heavily hit CPU itself. A rough example could be:</p>
+<p>SELECT * FROM table WHERE parent_id=X and type IN (1,2,4,6,8,&#8230;,20) LIMIT 10;</p>
+<p>If there was an index on (parent_id,type) this query would <i>look</i> efficient, but would actually do range estimations for each type in the query, even if they would not be fetched anymore. It gets worse if there&#8217;s separate (type) index &#8211; each time query would be executed, records-in-rage estimation would be done for each type in IN() list &#8211; and usually discarded, as going after id/type lookup is much more efficient.</p>
+<p>By looking at Innodb_buffer_pool_read_requests we could identify optimizer inefficiency cases like this &#8211; and FORCE INDEX made certain queries 30x faster, even if we forced exactly same indexes. Unfortunately, there is no per-session or per-query metric that would do same &#8211; it could be extremely useful in sample based profiling analysis.</p>
+<p>Innodb_buffer_pool_read_requests:Innodb_rows_read ratio can vary due to multiple reasons &#8211; adaptive hash efficiency, deeper B-Trees because of wide keys (each tree node access will count in), etc &#8211; so there&#8217;s no constant baseline everyone should adjust to.</p>
+<p>I deliberately left out query cache (<a href='http://dom.as/tech/query-cache-tuner/'>here&#8217;s the reason</a>), or adaptive hash (I don&#8217;t fully understand performance implications there :). In <a href='https://code.launchpad.net/~mysqlatfacebook/mysqlatfacebook/5.1'>mysql@facebook</a> builds we have some additional extremely useful instrumentation &#8211; wall clock seconds per various server operation types &#8211; execution, I/O, parsing, optimization, etc.</p>
+<p>Of course, some people may point out that I&#8217;m writing here from a stone age, and that nowadays performance schema should be used. Maybe there will be more accurate ways to dissect workload costs, but nowadays one can spend few minutes looking at metrics mentioned above and have a decent understanding what the system is or should be doing.</p>
+<div class="sharedaddy sd-sharing-enabled"><div class="robots-nocontent sd-block sd-social sd-social-official sd-sharing"><div class="sd-content"><ul><li class="share-facebook"><div class="like_button"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fdom.as%2F2011%2F05%2F19%2Fmysql-metrics-for-read-workloads%2F&amp;layout=button_count&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;height=21&amp;locale=en_EN&amp;width=90" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:96px; height:21px;" allowTransparency="true"></iframe></div></li><li class="share-twitter"><div class="twitter_button"><iframe allowtransparency="true" frameborder="0" scrolling="no" src="http://platform.twitter.com/widgets/tweet_button.html?url=http%3A%2F%2Fwp.me%2FpNrJ-dT&counturl=http%3A%2F%2Fdom.as%2F2011%2F05%2F19%2Fmysql-metrics-for-read-workloads%2F&count=horizontal&text=MySQL%20metrics%20for%20read%20workloads%3A&via=wordpressdotcom&related=wordpressdotcom" style="width:97px; height:20px;"></iframe></div></li><li class="share-end"></li></ul><div class="sharing-clear"></div></div></div></div>							</div><!-- .entry-content -->
+	
+			<div class="entry-utility">
+									<span class="cat-links">
+						<span class="entry-utility-prep entry-utility-prep-cat-links">Posted in</span> <a href="http://dom.as/category/facebook/" title="View all posts in facebook" rel="category tag">facebook</a>, <a href="http://dom.as/category/mysql/" title="View all posts in mysql" rel="category tag">mysql</a>					</span>
+					<span class="meta-sep">|</span>
+													<span class="tag-links">
+						<span class="entry-utility-prep entry-utility-prep-tag-links">Tagged</span> <a href="http://dom.as/tag/easy/" rel="tag">easy</a>, <a href="http://dom.as/tag/innodb/" rel="tag">innodb</a>, <a href="http://dom.as/tag/monitoring/" rel="tag">monitoring</a>, <a href="http://dom.as/tag/performance/" rel="tag">performance</a>, <a href="http://dom.as/tag/profiling/" rel="tag">profiling</a>					</span>
+					<span class="meta-sep">|</span>
+								<span class="comments-link"><span>Comments Off</span></span>
+							</div><!-- .entry-utility -->
+		</div><!-- #post-## -->
+
+		
+	
+
+
+			<div id="post-849" class="post-849 post type-post status-publish format-standard hentry category-facebook category-mysql tag-oltp tag-profiling tag-replication">
+			<h2 class="entry-title"><a href="http://dom.as/2011/05/10/write-workload-profiling/" title="Permalink to On database write workload&nbsp;profiling" rel="bookmark">On database write workload&nbsp;profiling</a></h2>
+
+			<div class="entry-meta">
+				<span class="meta-prep meta-prep-author">Posted on</span> <a href="http://dom.as/2011/05/10/write-workload-profiling/" title="12:18" rel="bookmark"><span class="entry-date">2011/05/10</span></a> <span class="meta-sep">by</span> <span class="author vcard"><a class="url fn n" href="http://dom.as/author/domasmituzas/" title="View all posts by Domas Mituzas">Domas Mituzas</a></span>			</div><!-- .entry-meta -->
+
+				<div class="entry-content">
+				<p>I always have difficulties with complex analysis schemes, so fall back to something that is somewhat easier. Or much easier. Here I will explain the super-powerful method of database write workload analysis.</p>
+<p>Doing any analysis on master servers is already too complicated, as instead of analyzing write costs one can be too obsessed with locking and there&#8217;s sometimes uncontrollable amount of workload hitting the server beside writes. Fortunately, slaves are much better targets, not only because writes there are single-threaded, thus exposing every costly I/O as time component, but also one can drain traffic from slaves, or send more in order to cause more natural workload.</p>
+<p>Also, there can be multiple states of slave load:</p>
+<ul>
+<li>Healthy, always at 0-1s lag, write statements are always immediate</li>
+<li>Spiky, usually at 0s lag, but has jumps due to sometimes occuring slow statements</li>
+<li>Lagging, because of read load stealing I/O capacity</li>
+<li>Lagging (or not catching up fast enough), because it can&#8217;t keep up with writes anymore, even with no read load</li>
+</ul>
+<p>Each of these states are interesting by themselves, and may have slightly different properties, but pretty much all of them are quite easy to look at using replication profiling.</p>
+<p>The code for it is somewhat straightforward:<br />
+<code><br />
+(while true; do<br />
+  echo 'SELECT info FROM information_schema.processlist<br />
+        WHERE db IS NOT NULL AND user="system user"; '<br />
+  sleep 0.1; done) | mysql -BN | head -n 100000 &gt; replication-sample<br />
+</code></p>
+<p>There are multiple ways to analyze it, e.g. finding slowest statements is as easy as:<br />
+<code><br />
+uniq -c replication-sample | sort -nr | head<br />
+</code></p>
+<p>More advanced methods may group up statements by statement types, tables, user IDs or any other random metadata embedded in query comments &#8211; and really lots of value can be obtained by doing ad-hoc analysis using simply &#8216;grep -c keyword replication-sample&#8217; &#8211; to understand what share of your workload certain feature has.</p>
+<p>I already mentioned, that there are different shapes of slave performance, and it is easy to test it in different shapes. One of methods is actually stopping a slave for a day, then running the sampler while it is trying to catch up. It will probably have much more buffer pool space usable for write operations, so keep that in mind &#8211; certain operations that are depending on larger buffer pools would be much faster.</p>
+<p>This is really simple, although remarkably powerful method, that allows quite deep workload analysis without spending too much time on statistics features. As there&#8217;s no EXPLAIN for UPDATE or DELETE statements, longer, coarser samples allow detecting deviations from good query plans too.</p>
+<p>Systematic use of it has allowed to reveal quite a few important issues that had to be fixed &#8211; which were not that obvious from general statistics view. I like.</p>
+<div class="sharedaddy sd-sharing-enabled"><div class="robots-nocontent sd-block sd-social sd-social-official sd-sharing"><div class="sd-content"><ul><li class="share-facebook"><div class="like_button"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fdom.as%2F2011%2F05%2F10%2Fwrite-workload-profiling%2F&amp;layout=button_count&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;height=21&amp;locale=en_EN&amp;width=90" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:96px; height:21px;" allowTransparency="true"></iframe></div></li><li class="share-twitter"><div class="twitter_button"><iframe allowtransparency="true" frameborder="0" scrolling="no" src="http://platform.twitter.com/widgets/tweet_button.html?url=http%3A%2F%2Fwp.me%2FpNrJ-dH&counturl=http%3A%2F%2Fdom.as%2F2011%2F05%2F10%2Fwrite-workload-profiling%2F&count=horizontal&text=On%20database%20write%20workload%20profiling%3A&via=wordpressdotcom&related=wordpressdotcom" style="width:97px; height:20px;"></iframe></div></li><li class="share-end"></li></ul><div class="sharing-clear"></div></div></div></div>							</div><!-- .entry-content -->
+	
+			<div class="entry-utility">
+									<span class="cat-links">
+						<span class="entry-utility-prep entry-utility-prep-cat-links">Posted in</span> <a href="http://dom.as/category/facebook/" title="View all posts in facebook" rel="category tag">facebook</a>, <a href="http://dom.as/category/mysql/" title="View all posts in mysql" rel="category tag">mysql</a>					</span>
+					<span class="meta-sep">|</span>
+													<span class="tag-links">
+						<span class="entry-utility-prep entry-utility-prep-tag-links">Tagged</span> <a href="http://dom.as/tag/oltp/" rel="tag">oltp</a>, <a href="http://dom.as/tag/profiling/" rel="tag">profiling</a>, <a href="http://dom.as/tag/replication/" rel="tag">replication</a>					</span>
+					<span class="meta-sep">|</span>
+								<span class="comments-link"><a href="http://dom.as/2011/05/10/write-workload-profiling/#comments" title="Comment on On database write workload&nbsp;profiling">5 Comments</a></span>
+							</div><!-- .entry-utility -->
+		</div><!-- #post-## -->
+
+		
+	
+
+
+			<div id="post-840" class="post-840 post type-post status-publish format-standard hentry category-mysql tag-ad">
+			<h2 class="entry-title"><a href="http://dom.as/2011/04/15/5-6/" title="Permalink to 5.6!" rel="bookmark">5.6!</a></h2>
+
+			<div class="entry-meta">
+				<span class="meta-prep meta-prep-author">Posted on</span> <a href="http://dom.as/2011/04/15/5-6/" title="20:40" rel="bookmark"><span class="entry-date">2011/04/15</span></a> <span class="meta-sep">by</span> <span class="author vcard"><a class="url fn n" href="http://dom.as/author/domasmituzas/" title="View all posts by Domas Mituzas">Domas Mituzas</a></span>			</div><!-- .entry-meta -->
+
+				<div class="entry-content">
+				<p>As extremely happy user of crash-safe-slave functionality since 4.0, I hereby welcome this feature in upcoming 5.6 release!</p>
+<p>5.6 seems to be strongest production-support release since introduction of InnoDB, solving issues of long running high performance systems, that were forced to use Percona/M@FB/GooglePatch/.. before. Good!</p>
+<div class="sharedaddy sd-sharing-enabled"><div class="robots-nocontent sd-block sd-social sd-social-official sd-sharing"><div class="sd-content"><ul><li class="share-facebook"><div class="like_button"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fdom.as%2F2011%2F04%2F15%2F5-6%2F&amp;layout=button_count&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;height=21&amp;locale=en_EN&amp;width=90" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:96px; height:21px;" allowTransparency="true"></iframe></div></li><li class="share-twitter"><div class="twitter_button"><iframe allowtransparency="true" frameborder="0" scrolling="no" src="http://platform.twitter.com/widgets/tweet_button.html?url=http%3A%2F%2Fwp.me%2FpNrJ-dy&counturl=http%3A%2F%2Fdom.as%2F2011%2F04%2F15%2F5-6%2F&count=horizontal&text=5.6%21%3A&via=wordpressdotcom&related=wordpressdotcom" style="width:97px; height:20px;"></iframe></div></li><li class="share-end"></li></ul><div class="sharing-clear"></div></div></div></div>							</div><!-- .entry-content -->
+	
+			<div class="entry-utility">
+									<span class="cat-links">
+						<span class="entry-utility-prep entry-utility-prep-cat-links">Posted in</span> <a href="http://dom.as/category/mysql/" title="View all posts in mysql" rel="category tag">mysql</a>					</span>
+					<span class="meta-sep">|</span>
+													<span class="tag-links">
+						<span class="entry-utility-prep entry-utility-prep-tag-links">Tagged</span> <a href="http://dom.as/tag/ad/" rel="tag">ad</a>					</span>
+					<span class="meta-sep">|</span>
+								<span class="comments-link"><span>Comments Off</span></span>
+							</div><!-- .entry-utility -->
+		</div><!-- #post-## -->
+
+		
+	
+
+
+			<div id="post-834" class="post-834 post type-post status-publish format-standard hentry category-facebook category-mysql tag-force tag-optimizer tag-performance tag-sql">
+			<h2 class="entry-title"><a href="http://dom.as/2011/01/27/a-case-for-force-index/" title="Permalink to A case for FORCE&nbsp;INDEX" rel="bookmark">A case for FORCE&nbsp;INDEX</a></h2>
+
+			<div class="entry-meta">
+				<span class="meta-prep meta-prep-author">Posted on</span> <a href="http://dom.as/2011/01/27/a-case-for-force-index/" title="06:57" rel="bookmark"><span class="entry-date">2011/01/27</span></a> <span class="meta-sep">by</span> <span class="author vcard"><a class="url fn n" href="http://dom.as/author/domasmituzas/" title="View all posts by Domas Mituzas">Domas Mituzas</a></span>			</div><!-- .entry-meta -->
+
+				<div class="entry-content">
+				<p>I remember various discussions in different mediums where people were building cases against use of FORCE INDEX in SQL queries. I&#8217;ll hereby suggest it using way more often, but at first I&#8217;ll start with small explanation.</p>
+<p>For ages, the concept of index statistics affecting query plans has been clogging minds of DBAs, supported by long explanations of <a href='http://dev.mysql.com/doc/refman/5.1/en/myisam-index-statistics.html'>MyISAM</a> and <a href='http://dev.mysql.com/doc/innodb-plugin/1.0/en/innodb-other-changes-statistics-estimation.html'>InnoDB</a> manuals. Actually, statistics are used just for determining which index to use for a joined table, as predicate is not known at the time of &#8216;optimization&#8217;.</p>
+<p>What happens if you do a simple query like:</p>
+<blockquote><p>SELECT * FROM table WHERE a=5 AND b=6
+</p></blockquote>
+<p>? If there&#8217;s an index that enforces uniqueness on (a,b), it will be used &#8211; this is short-path for PRIMARY KEY lookups. Otherwise, it will go to any index, composite or not, that can satisfy either a or b (or both), and evaluate how many rows it will fetch from it using the provided criteria.</p>
+<p>Now, contrary to what people usually think, the row count evaluation has nothing really much to do with cardinality statistics &#8211; instead it builds the range that the known predicate can check on existing index, and does two full B-Tree dives to the index &#8211; one at the start of the range, and one at the end of it. For each possible index.<br />
+This simply means that even if you are not using the index to execute query, two leaf pages (and all the tree branches to reach them) will end up being fetched from disk into the cache &#8211; wasting both I/O cycles and memory.</p>
+<p>There&#8217;s also quite interesting paradox at this &#8211; in some cases, more similar other indexes are, more waste they create because of rows-in-range checks. If a table has indexes on (a,b,c) and (a,b,d), query for (a,b,d) will be best satisfied by (a,b,d) index, but will evaluate range sizes for (a,b). If the first index were (a,c,b), it would be only able to check head and tail of (a) &#8211; so way less B-Tree positions would be cached in memory for the check. This makes better indexing sometimes fare worse than what they&#8217;re worth in benchmarks (assuming that people do I/O-heavy benchmarking :)</p>
+<p>The easy way out is using FORCE INDEX. It will not do the index evaluation &#8211; and no B-Tree dives on unneeded index.</p>
+<p>In my edge case testing with real data and skewed access pattern hitting a second index during &#8216;statistics&#8217; phase has increased execution time by 70%, number of I/Os done by 75%, number of entrances into buffer pool by 31% and bloated buffer pool with data I didn&#8217;t need for read workload.</p>
+<p>For some queries like &#8220;newest 10 entries&#8221; this will actually waste some space preheating blocks from the other end of the range that will never be shown &#8211; there will definitely be a B-Tree leaf page in buffer pool with edits from few years ago because of RIR. Unfortunately, the only MySQL-side solution for this is HANDLER interface (or probably HandlerSocket) &#8211; but it doesn&#8217;t make using FORCE INDEX not worth it &#8211; it just pushes towards making FORCE INDEX be much more forceful.</p>
+<p>So, use the FORCE, Luke :)</p>
+<div class="sharedaddy sd-sharing-enabled"><div class="robots-nocontent sd-block sd-social sd-social-official sd-sharing"><div class="sd-content"><ul><li class="share-facebook"><div class="like_button"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fdom.as%2F2011%2F01%2F27%2Fa-case-for-force-index%2F&amp;layout=button_count&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;height=21&amp;locale=en_EN&amp;width=90" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:96px; height:21px;" allowTransparency="true"></iframe></div></li><li class="share-twitter"><div class="twitter_button"><iframe allowtransparency="true" frameborder="0" scrolling="no" src="http://platform.twitter.com/widgets/tweet_button.html?url=http%3A%2F%2Fwp.me%2FpNrJ-ds&counturl=http%3A%2F%2Fdom.as%2F2011%2F01%2F27%2Fa-case-for-force-index%2F&count=horizontal&text=A%20case%20for%20FORCE%20INDEX%3A&via=wordpressdotcom&related=wordpressdotcom" style="width:97px; height:20px;"></iframe></div></li><li class="share-end"></li></ul><div class="sharing-clear"></div></div></div></div>							</div><!-- .entry-content -->
+	
+			<div class="entry-utility">
+									<span class="cat-links">
+						<span class="entry-utility-prep entry-utility-prep-cat-links">Posted in</span> <a href="http://dom.as/category/facebook/" title="View all posts in facebook" rel="category tag">facebook</a>, <a href="http://dom.as/category/mysql/" title="View all posts in mysql" rel="category tag">mysql</a>					</span>
+					<span class="meta-sep">|</span>
+													<span class="tag-links">
+						<span class="entry-utility-prep entry-utility-prep-tag-links">Tagged</span> <a href="http://dom.as/tag/force/" rel="tag">force</a>, <a href="http://dom.as/tag/optimizer/" rel="tag">optimizer</a>, <a href="http://dom.as/tag/performance/" rel="tag">performance</a>, <a href="http://dom.as/tag/sql/" rel="tag">sql</a>					</span>
+					<span class="meta-sep">|</span>
+								<span class="comments-link"><a href="http://dom.as/2011/01/27/a-case-for-force-index/#comments" title="Comment on A case for FORCE&nbsp;INDEX">7 Comments</a></span>
+							</div><!-- .entry-utility -->
+		</div><!-- #post-## -->
+
+		
+	
+
+				<div id="nav-below" class="navigation">
+					<div class="nav-previous"><a href="http://dom.as/page/2/" ><span class="meta-nav">&larr;</span> Older posts</a></div>
+					<div class="nav-next"></div>
+				</div><!-- #nav-below -->
+			</div><!-- #content -->
+		</div><!-- #container -->
+
+
+		<div id="primary" class="widget-area" role="complementary">
+			<ul class="xoxo">
+
+		<li id="recent-posts-3" class="widget-container widget_recent_entries">		<h3 class="widget-title">Recent Posts</h3>		<ul>
+				<li><a href="http://dom.as/2011/10/07/steve-jobs/" title="&#8230; in&nbsp;numbers">&#8230; in&nbsp;numbers</a></li>
+				<li><a href="http://dom.as/2011/09/25/blowing-up-in-memory/" title="Blowing up in&nbsp;memory">Blowing up in&nbsp;memory</a></li>
+				<li><a href="http://dom.as/2011/08/28/mysql-connection-accept-speed/" title="On&nbsp;connections">On&nbsp;connections</a></li>
+				<li><a href="http://dom.as/2011/07/10/innodb-subsystems-in-color/" title="InnoDB subsystems in&nbsp;color">InnoDB subsystems in&nbsp;color</a></li>
+				<li><a href="http://dom.as/2011/07/08/stonebraker-trapped/" title="Stonebraker trapped in Stonebraker &#039;fate worse than&nbsp;death&#039;">Stonebraker trapped in Stonebraker &#039;fate worse than&nbsp;death&#039;</a></li>
+				</ul>
+		</li>
+		<li id="recent-comments" class="widget-container widget_recent_comments">			<h3 class="widget-title">Recent Comments</h3>			<ul id="recentcomments"><li class="recentcomments"><a href='http://dom.as/' rel='external nofollow' class='url'>Domas Mituzas</a> on <a href="http://dom.as/2011/10/07/steve-jobs/#comment-1983">&#8230; in&nbsp;numbers</a></li><li class="recentcomments"><a href='http://engineeringinprogress.wordpress.com' rel='external nofollow' class='url'>btongminh</a> on <a href="http://dom.as/2011/10/07/steve-jobs/#comment-1982">&#8230; in&nbsp;numbers</a></li><li class="recentcomments"><a href='http://dom.as/' rel='external nofollow' class='url'>Domas Mituzas</a> on <a href="http://dom.as/2011/10/07/steve-jobs/#comment-1979">&#8230; in&nbsp;numbers</a></li><li class="recentcomments"><a href='http://twitter.com/daliusd' rel='external nofollow' class='url'>Dalius (@daliusd)</a> on <a href="http://dom.as/2011/10/07/steve-jobs/#comment-1978">&#8230; in&nbsp;numbers</a></li><li class="recentcomments">Mark Callaghan on <a href="http://dom.as/2011/07/10/innodb-subsystems-in-color/#comment-1938">InnoDB subsystems in&nbsp;color</a></li></ul>
+		</li>			</ul>
+		</div><!-- #primary .widget-area -->
+
+
+		<div id="secondary" class="widget-area" role="complementary">
+			<ul class="xoxo">
+				<li id="archives-3" class="widget-container widget_archive"><h3 class="widget-title">Archives</h3>		<select name="archive-dropdown" onchange='document.location.href=this.options[this.selectedIndex].value;'> <option value="">Select Month</option> 	<option value='http://dom.as/2011/10/'> October 2011 </option>
+	<option value='http://dom.as/2011/09/'> September 2011 </option>
+	<option value='http://dom.as/2011/08/'> August 2011 </option>
+	<option value='http://dom.as/2011/07/'> July 2011 </option>
+	<option value='http://dom.as/2011/05/'> May 2011 </option>
+	<option value='http://dom.as/2011/04/'> April 2011 </option>
+	<option value='http://dom.as/2011/01/'> January 2011 </option>
+	<option value='http://dom.as/2010/11/'> November 2010 </option>
+	<option value='http://dom.as/2010/10/'> October 2010 </option>
+	<option value='http://dom.as/2010/09/'> September 2010 </option>
+	<option value='http://dom.as/2010/08/'> August 2010 </option>
+	<option value='http://dom.as/2010/07/'> July 2010 </option>
+	<option value='http://dom.as/2010/06/'> June 2010 </option>
+	<option value='http://dom.as/2010/05/'> May 2010 </option>
+	<option value='http://dom.as/2010/04/'> April 2010 </option>
+	<option value='http://dom.as/2010/02/'> February 2010 </option>
+	<option value='http://dom.as/2010/01/'> January 2010 </option>
+	<option value='http://dom.as/2009/12/'> December 2009 </option>
+	<option value='http://dom.as/2009/11/'> November 2009 </option>
+	<option value='http://dom.as/2009/10/'> October 2009 </option>
+	<option value='http://dom.as/2009/09/'> September 2009 </option>
+	<option value='http://dom.as/2009/08/'> August 2009 </option>
+	<option value='http://dom.as/2009/07/'> July 2009 </option>
+	<option value='http://dom.as/2009/06/'> June 2009 </option>
+	<option value='http://dom.as/2009/05/'> May 2009 </option>
+	<option value='http://dom.as/2009/04/'> April 2009 </option>
+	<option value='http://dom.as/2009/03/'> March 2009 </option>
+	<option value='http://dom.as/2009/02/'> February 2009 </option>
+	<option value='http://dom.as/2009/01/'> January 2009 </option>
+	<option value='http://dom.as/2008/12/'> December 2008 </option>
+	<option value='http://dom.as/2008/11/'> November 2008 </option>
+	<option value='http://dom.as/2008/10/'> October 2008 </option>
+	<option value='http://dom.as/2008/08/'> August 2008 </option>
+	<option value='http://dom.as/2008/07/'> July 2008 </option>
+	<option value='http://dom.as/2008/06/'> June 2008 </option>
+	<option value='http://dom.as/2008/05/'> May 2008 </option>
+	<option value='http://dom.as/2008/04/'> April 2008 </option>
+	<option value='http://dom.as/2008/03/'> March 2008 </option>
+	<option value='http://dom.as/2008/02/'> February 2008 </option>
+	<option value='http://dom.as/2008/01/'> January 2008 </option>
+	<option value='http://dom.as/2007/12/'> December 2007 </option>
+	<option value='http://dom.as/2007/11/'> November 2007 </option>
+	<option value='http://dom.as/2007/10/'> October 2007 </option>
+	<option value='http://dom.as/2007/07/'> July 2007 </option>
+	<option value='http://dom.as/2007/06/'> June 2007 </option>
+	<option value='http://dom.as/2007/05/'> May 2007 </option>
+	<option value='http://dom.as/2007/04/'> April 2007 </option>
+	<option value='http://dom.as/2007/03/'> March 2007 </option>
+	<option value='http://dom.as/2007/02/'> February 2007 </option>
+	<option value='http://dom.as/2007/01/'> January 2007 </option>
+	<option value='http://dom.as/2006/12/'> December 2006 </option>
+	<option value='http://dom.as/2006/09/'> September 2006 </option>
+	<option value='http://dom.as/2006/08/'> August 2006 </option>
+	<option value='http://dom.as/2006/07/'> July 2006 </option>
+	<option value='http://dom.as/2006/06/'> June 2006 </option>
+	<option value='http://dom.as/2006/05/'> May 2006 </option>
+	<option value='http://dom.as/2006/04/'> April 2006 </option>
+	<option value='http://dom.as/2006/03/'> March 2006 </option>
+	<option value='http://dom.as/2006/02/'> February 2006 </option>
+	<option value='http://dom.as/2006/01/'> January 2006 </option>
+	<option value='http://dom.as/2005/12/'> December 2005 </option>
+ </select>
+</li><li id="wp_tag_cloud" class="widget-container wp_widget_tag_cloud"><h3 class="widget-title">Tags</h3><div style="overflow:hidden"><a href='http://dom.as/tag/50/' class='tag-link-63235' title='3 topics' style='font-size: 9.5849056603774pt;'>5.0</a>
+<a href='http://dom.as/tag/abstraction/' class='tag-link-12238' title='2 topics' style='font-size: 8pt;'>abstraction</a>
+<a href='http://dom.as/tag/algorithm/' class='tag-link-18127' title='3 topics' style='font-size: 9.5849056603774pt;'>algorithm</a>
+<a href='http://dom.as/tag/backup/' class='tag-link-5469' title='2 topics' style='font-size: 8pt;'>backup</a>
+<a href='http://dom.as/tag/benchmarks/' class='tag-link-42221' title='2 topics' style='font-size: 8pt;'>benchmarks</a>
+<a href='http://dom.as/tag/board/' class='tag-link-79128' title='2 topics' style='font-size: 8pt;'>board</a>
+<a href='http://dom.as/tag/bug/' class='tag-link-1621' title='4 topics' style='font-size: 10.905660377358pt;'>bug</a>
+<a href='http://dom.as/tag/career/' class='tag-link-14560' title='3 topics' style='font-size: 9.5849056603774pt;'>career</a>
+<a href='http://dom.as/tag/code/' class='tag-link-656' title='3 topics' style='font-size: 9.5849056603774pt;'>code</a>
+<a href='http://dom.as/tag/conference/' class='tag-link-33525' title='10 topics' style='font-size: 15.396226415094pt;'>conference</a>
+<a href='http://dom.as/tag/crash/' class='tag-link-68015' title='3 topics' style='font-size: 9.5849056603774pt;'>crash</a>
+<a href='http://dom.as/tag/desktop/' class='tag-link-4635' title='4 topics' style='font-size: 10.905660377358pt;'>desktop</a>
+<a href='http://dom.as/tag/dtrace/' class='tag-link-356715' title='4 topics' style='font-size: 10.905660377358pt;'>dtrace</a>
+<a href='http://dom.as/tag/easy/' class='tag-link-34251' title='3 topics' style='font-size: 9.5849056603774pt;'>easy</a>
+<a href='http://dom.as/tag/efficiency/' class='tag-link-47945' title='4 topics' style='font-size: 10.905660377358pt;'>efficiency</a>
+<a href='http://dom.as/tag/fun/' class='tag-link-272' title='27 topics' style='font-size: 20.811320754717pt;'>fun</a>
+<a href='http://dom.as/tag/gcc/' class='tag-link-185469' title='3 topics' style='font-size: 9.5849056603774pt;'>gcc</a>
+<a href='http://dom.as/tag/gdb/' class='tag-link-320749' title='9 topics' style='font-size: 14.867924528302pt;'>gdb</a>
+<a href='http://dom.as/tag/google/' class='tag-link-81' title='6 topics' style='font-size: 12.88679245283pt;'>google</a>
+<a href='http://dom.as/tag/hack/' class='tag-link-16981' title='4 topics' style='font-size: 10.905660377358pt;'>hack</a>
+<a href='http://dom.as/tag/howto/' class='tag-link-1921' title='6 topics' style='font-size: 12.88679245283pt;'>howto</a>
+<a href='http://dom.as/tag/innodb/' class='tag-link-39561' title='34 topics' style='font-size: 22pt;'>innodb</a>
+<a href='http://dom.as/tag/io/' class='tag-link-47237' title='16 topics' style='font-size: 17.905660377358pt;'>io</a>
+<a href='http://dom.as/tag/kernel/' class='tag-link-2428' title='3 topics' style='font-size: 9.5849056603774pt;'>kernel</a>
+<a href='http://dom.as/tag/macosx/' class='tag-link-12481' title='3 topics' style='font-size: 9.5849056603774pt;'>macosx</a>
+<a href='http://dom.as/tag/mediawiki/' class='tag-link-46101' title='3 topics' style='font-size: 9.5849056603774pt;'>mediawiki</a>
+<a href='http://dom.as/tag/memory/' class='tag-link-1471' title='8 topics' style='font-size: 14.207547169811pt;'>memory</a>
+<a href='http://dom.as/tag/mutex/' class='tag-link-805807' title='6 topics' style='font-size: 12.88679245283pt;'>mutex</a>
+<a href='http://dom.as/tag/mysql/' class='tag-link-4419' title='4 topics' style='font-size: 10.905660377358pt;'>mysql</a>
+<a href='http://dom.as/tag/mysqlconf/' class='tag-link-24920759' title='8 topics' style='font-size: 14.207547169811pt;'>mysqlconf</a>
+<a href='http://dom.as/tag/optimizer/' class='tag-link-442348' title='3 topics' style='font-size: 9.5849056603774pt;'>optimizer</a>
+<a href='http://dom.as/tag/performance/' class='tag-link-1930' title='31 topics' style='font-size: 21.603773584906pt;'>performance</a>
+<a href='http://dom.as/tag/php/' class='tag-link-458' title='4 topics' style='font-size: 10.905660377358pt;'>php</a>
+<a href='http://dom.as/tag/pmp/' class='tag-link-74688' title='6 topics' style='font-size: 12.88679245283pt;'>pmp</a>
+<a href='http://dom.as/tag/postgres/' class='tag-link-434917' title='4 topics' style='font-size: 10.905660377358pt;'>postgres</a>
+<a href='http://dom.as/tag/profiling/' class='tag-link-29443' title='13 topics' style='font-size: 16.849056603774pt;'>profiling</a>
+<a href='http://dom.as/tag/rant/' class='tag-link-287' title='14 topics' style='font-size: 17.245283018868pt;'>rant</a>
+<a href='http://dom.as/tag/replication/' class='tag-link-481477' title='7 topics' style='font-size: 13.547169811321pt;'>replication</a>
+<a href='http://dom.as/tag/scale/' class='tag-link-260428' title='4 topics' style='font-size: 10.905660377358pt;'>scale</a>
+<a href='http://dom.as/tag/security/' class='tag-link-801' title='4 topics' style='font-size: 10.905660377358pt;'>security</a>
+<a href='http://dom.as/tag/slides/' class='tag-link-148129' title='3 topics' style='font-size: 9.5849056603774pt;'>slides</a>
+<a href='http://dom.as/tag/talk/' class='tag-link-739' title='3 topics' style='font-size: 9.5849056603774pt;'>talk</a>
+<a href='http://dom.as/tag/travel/' class='tag-link-200' title='14 topics' style='font-size: 17.245283018868pt;'>travel</a>
+<a href='http://dom.as/tag/trick/' class='tag-link-2356' title='3 topics' style='font-size: 9.5849056603774pt;'>trick</a>
+<a href='http://dom.as/tag/xfs/' class='tag-link-493193' title='3 topics' style='font-size: 9.5849056603774pt;'>xfs</a></div></li>			</ul>
+		</div><!-- #secondary .widget-area -->
+
+	</div><!-- #main -->
+
+	<div id="footer" role="contentinfo">
+		<div id="colophon">
+
+
+
+			<div id="site-info">
+				<a href="http://dom.as/" title="domas mituzas" rel="home">
+					domas mituzas				</a>
+			</div><!-- #site-info -->
+
+			<div id="site-generator">
+				Theme: <a href="http://theme.wordpress.com/themes/twentyten/">Twenty Ten</a>				<a href="http://wordpress.com/?ref=footer" rel="generator">Blog at WordPress.com</a>. 
+			</div><!-- #site-generator -->
+
+		</div><!-- #colophon -->
+	</div><!-- #footer -->
+
+</div><!-- #wrapper -->
+
+<script type="text/javascript">
+// <![CDATA[
+(function() {
+try{
+  if ( window.external &&'msIsSiteMode' in window.external) {
+    if (window.external.msIsSiteMode()) {
+      var jl = document.createElement('script');
+      jl.type='text/javascript';
+      jl.async=true;
+      jl.src='/wp-content/plugins/ie-sitemode/custom-jumplist.php';
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(jl, s);
+    }
+  }
+}catch(e){}
+})();
+// ]]>
+</script><script type='text/javascript' src='http://s.gravatar.com/js/gprofiles.js?z&#038;ver=MU'></script>
+<script type='text/javascript'>
+/* <![CDATA[ */
+var WPGroHo = {"my_hash":""};
+
+/* ]]> */
+</script>
+<script type='text/javascript' src='http://s1.wp.com/wp-content/mu-plugins/gravatar-hovercards/wpgroho.js?m=1318621575g&amp;ver=MU'></script>
+<script type="text/javascript">_qoptions={qacct:'p-18-mFEk4J448M',labels:',language.en,type.wpcom'};</script>
+<script type="text/javascript" src="http://edge.quantserve.com/quant.js"></script>
+<noscript><p><img class="robots-nocontent" src="http://pixel.quantserve.com/pixel/p-18-mFEk4J448M.gif?labels=%2Clanguage.en%2Ctype.wpcom" style="display:none" height="1" width="1" alt="" /></p></noscript>
+<script>jQuery(document).ready(function($){ Gravatar.profile_cb = function( h, d ) { WPGroHo.syncProfileData( h, d );	}; Gravatar.my_hash = WPGroHo.my_hash; Gravatar.init( 'body', '#wpadminbar' ); });</script>	<div style="display:none">
+	</div>
+		<style type="text/css">
+			
+				.reblog-from img                   { margin: 0 10px 0 0; vertical-align: middle; padding: 0; border: 0; }
+				.reblogger-note img.avatar         { float: left; padding: 0; border: 0; }
+				.reblogger-note-content            { margin: 0 0 20px 35px; }
+				.reblog-post                       { border-left: 3px solid #eee; padding-left: 15px; }
+				.reblog-post ul.thumb-list         { display: block; list-style: none; margin: 2px 0; padding: 0; clear: both; }
+				.reblog-post ul.thumb-list li      { display: inline; margin: 0; padding: 0 1px; border: 0; }
+				.reblog-post ul.thumb-list li a    { margin: 0; padding: 0; border: 0; }
+				.reblog-post ul.thumb-list li img  { margin: 0; padding: 0; border: 0; }
+				.reblog-post                       { border-left: 3px solid #eee; padding-left: 15px; }
+					</style>	
+	<div id="bit" class="loggedout-follow-normal">
+		<a class="bsub" href="javascript:void(0)"><span id='bsub-text'>Follow</span></a>
+		<div id="bitsubscribe">
+			
+			<h3><label for="loggedout-follow-field">Follow domas mituzas</label></h3>
+		
+					<form action="http://subscribe.wordpress.com" method="post" accept-charset="utf-8" id="loggedout-follow">
+			<p>Get every new post delivered to your Inbox.</p>
+
+					
+			
+			<p><input type="text" name="email" style="width: 95%; padding: 1px 2px" value="Enter email address" onfocus='this.value=(this.value=="Enter email address") ? "" : this.value;' onblur='this.value=(this.value=="") ? "Enter email address" : this.value;'  id="loggedout-follow-field"/></p>
+
+			<input type="hidden" name="action" value="subscribe"/>
+			<input type="hidden" name="blog_id" value="190075"/>
+			<input type="hidden" name="source" value="http://dom.as/"/>
+			<input type="hidden" name="sub-type" value="loggedout-follow"/>
+
+			<input type="hidden" id="_wpnonce" name="_wpnonce" value="7ab018aa47" /><input type="hidden" name="_wp_http_referer" value="/" />
+			<p id='bsub-subscribe-button'><input type="submit" value="Sign me up!" /></p>
+			</form>
+					<div id='bsub-credit'><a href="http://wordpress.com">Powered by WordPress.com</a></div>
+		</div><!-- #bitsubscribe -->
+	</div><!-- #bit -->
+<script type='text/javascript' src='http://s2.wp.com/wp-content/mu-plugins/post-flair/sharing/sharing.js?m=1315610355g&amp;ver=0.2'></script>
+	<script type="text/javascript" charset="utf-8">
+	jQuery(document).ready(function(){
+		jQuery( '.share-facebook' ).click(function(){
+			window.open( jQuery(this).attr( 'href' ), 'wpcom-facebook', 'menubar=1,resizable=1,width=600,height=400' );
+			return false;
+		});
+	});
+	</script>
+	<script type="text/javascript" charset="utf-8">
+	jQuery(document).ready(function(){
+		jQuery( '.share-twitter' ).click(function(){
+			window.open( jQuery(this).attr( 'href' ), 'wpcom-twitter', 'menubar=1,resizable=1,width=600,height=350' );
+			return false;
+		});
+	});
+	</script>
+<script type="text/javascript" src="http://b.scorecardresearch.com/beacon.js"></script><script type="text/javascript">try{COMSCORE.beacon({c1:2,c2:7518284});}catch(e){}</script><noscript><p class="robots-nocontent"><img src="http://b.scorecardresearch.com/p?cj=1c1=2&#038;c2=7518284" alt="" style="display:none" width="1" height="1" /></p></noscript><script src="http://s.stats.wordpress.com/w.js?21" type="text/javascript"></script>
+<script type="text/javascript">
+st_go({'blog':'190075','v':'wpcom','user_id':'0','post':'0','subd':'domasmituzas'});
+ex_go({'crypt':'UE40eW5QN0p8M2Y/RE1LVmwrVi5vQS5fVFtfdHBbPyw1VXIrU3hWLHhzVndTdktBX0ddJnpXRjVaOTd6fj1YMX4ydzRUSk0wbVRfODlnNUZzflpnbkZvTEYsOXA5ZlVwZkhadkQ1ZTgmblYmWzdEVGxsbjVzX25CZyZ5PyYvP0FhWjc9QVhDclR0dVdXOS5YNVdnZXl1NGZxaUZLfHZIeDhyc3pRWHY5OXxXMmQ0bEFrMm89SU8yQ1F3dXZJZkxxOFtXdEliUnFQSWdxbk9BMFlwby5KUC9SLGVTXUY4dFg='});
+addLoadEvent(function(){linktracker_init('190075',0);});
+	</script>
+<noscript><img src="http://stats.wordpress.com/b.gif?v=noscript" style="height:0px;width:0px;overflow:hidden" alt="" /></noscript>
+</body>
+</html>

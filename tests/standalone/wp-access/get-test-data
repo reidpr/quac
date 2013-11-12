@@ -20,29 +20,37 @@ mkdir -p raw/2012/2012-10
 mkdir -p raw/2012/2012-11
 
 
-# First: some normal, working data.
+if [ -z "$2" ]; then  # give a 2nd argument to skip the lengthy copy
 
-for file in $1/2012/2012-10/pagecounts-201210{28,29,30,31}-*.gz; do
-    extract $file
-done
+    # First: some normal, working data.
 
-for file in $1/2012/2012-11/pagecounts-201211{01,02,03,04}-*.gz; do
-    extract $file
-done
+    for file in $1/2012/2012-10/pagecounts-201210{28,29,30,31}-*.gz; do
+        extract $file
+    done
 
-# Second: timestamps are off by one, so remove a couple files from previous
-# days.
-rm raw/2012/2012-10/pagecounts-20121028-000000.gz
+    for file in $1/2012/2012-11/pagecounts-201211{01,02,03,04}-*.gz; do
+        extract $file
+    done
+
+    # Second: timestamps are off by one, so remove a couple files from
+    # previous days.
+    rm raw/2012/2012-10/pagecounts-20121028-000000.gz
+
+fi
 
 # Third: pathological cases. Here be breakage. We want to test that we deal
 # with is correctly. Important: None of these files should contain any valid
 # data! (We want to keep the test data duration nice and compact.) All of
 # these problems were downloaded correctly from WMF.
-mkdir -p raw/2099/2099-01  # synthetic problems go here
 mkdir -p raw/2008/2008-10
+mkdir -p raw/2011/2011-10
+mkdir -p raw/2099/2099-01  # synthetic problems go here
 
 # This file ends in the middle of a line (real)
 zcat $1/2008/2008-10/pagecounts-20081021-090000.gz | tail -1 | gzip -9 > raw/2008/2008-10/pagecounts-20081021-090000.gz
+
+# This file is named .gz but is not gzipped (real)
+cp $1/2011/2011-10/pagecounts-20111008-180001.gz raw/2011/2011-10
 
 # This file contains 100 unparseable lines (synthetic)
 (for i in {1..100}; do echo a; done) | gzip -9 > raw/2099/2099-01/pagecounts-20990101-010000.gz
