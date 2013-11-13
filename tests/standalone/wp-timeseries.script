@@ -45,6 +45,12 @@ y 'ngrams-search --detail --query "en Sandy,_Utah" series/out'
 y 'ngrams-search --query "en Hurricane_Sandy" series/out'
 y 'ngrams-search --detail --query "en Hurricane_Sandy" series/out'
 
+# Make sure zeros are inserted properly. This URL has no hits:
+# at the beginning:  October 26, 28
+# in the middle:     October 30
+# at the end:        November 2-4
+y 'ngrams-search --detail --query "en File%3AHurricane_Sandy_East_River_Manhattan_1.JPG" series/out'
+
 ## ngrams-correlate ##
 
 # Note: The correlations are messed up because the sample we took in order to

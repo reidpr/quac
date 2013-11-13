@@ -42,6 +42,7 @@ $ (ngrams-search --detail --query 't@ candy' series/out)
 2012-11-02	2	3078	649.773
 2012-11-03	4	3014	1327.14
 2012-11-04	2	3209	623.247
+2012-11-05	0	1185	0.0
 $ (ngrams-search --query 't@ sandy' series/out)
 t@ sandy	119	2012-10-28	2012-11-04
 $ (ngrams-search --detail --query 't@ sandy' series/out)
@@ -53,15 +54,19 @@ $ (ngrams-search --detail --query 't@ sandy' series/out)
 2012-11-02	5	3078	1624.43
 2012-11-03	4	3014	1327.14
 2012-11-04	3	3209	934.871
+2012-11-05	0	1185	0.0
 $ (ngrams-search --query 't@ a' series/out)
 t@ a	3222	2012-10-28	2012-11-05
 $ (ngrams-search --detail --query 't@ taco' series/out)
+2012-10-28	0	2302	0.0
 2012-10-29	2	3086	648.088
 2012-10-30	9	3055	2945.99
 2012-10-31	3	2950	1016.95
 2012-11-01	0	2887	0.0
 2012-11-02	1	3078	324.886
 2012-11-03	1	3014	331.785
+2012-11-04	0	3209	0.0
+2012-11-05	0	1185	0.0
 $ ngrams-correlate ...
 ngcor INFO     starting
 ngcor INFO     setting up job

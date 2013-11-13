@@ -60,7 +60,7 @@ def main():
          tot_vec = totals['projects'][proj]['series']
          if (args.query is None or k == args.query):
             if (args.detail):
-               (ngram_vec, tot_vec) = ngram_vec.bi_intersect(ngram_vec, tot_vec)
+               (ngram_vec, tot_vec) = ngram_vec.bi_union(ngram_vec, tot_vec)
                assert (ngram_vec.bounds_eq(tot_vec))
                for (i, row) in enumerate(zip(ngram_vec.iso8601iter,
                                              ngram_vec.astype(np.int64),

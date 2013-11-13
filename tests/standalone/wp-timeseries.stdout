@@ -83,6 +83,17 @@ $ (ngrams-search --detail --query "en Hurricane_Sandy" series/out)
 2012-11-02	148859	430686	345632.0
 2012-11-03	114007	311596	365881.0
 2012-11-04	89297	249042	358562.0
+$ (ngrams-search --detail --query "en File%3AHurricane_Sandy_East_River_Manhattan_1.JPG" series/out)
+2012-10-26	0	304599	0.0
+2012-10-27			
+2012-10-28	0	489784	0.0
+2012-10-29	1	807736	1.23803
+2012-10-30	0	1208945	0.0
+2012-10-31	11	4703908	2.33848
+2012-11-01	3	989505	3.03182
+2012-11-02	0	430686	0.0
+2012-11-03	0	311596	0.0
+2012-11-04	0	249042	0.0
 $ (ngrams-correlate --notimes /nonexistent halloween.xls || true)
 usage: ngrams-correlate [--min-similarity X] [--min-ppm X]
                         [--tw-sample-rate X] [--run RUN] [--clean] [--map CMD]
