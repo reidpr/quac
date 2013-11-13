@@ -64,9 +64,16 @@ class Writer(object):
          default), append.'''
       if (isinstance(file_, basestring)):
          self.filename = file_
-      mode = 'wt' if clobber else 'at'
-      self.fp = io.open(file_, mode=mode, buffering=buffering,
-                        encoding='utf8')
+      if (clobber or file_ == 1):
+         # io.open() on file descriptor 1 (stdout) with mode='at' crashes with
+         # "IOError: [Errno 29] Illegal seek". That's very odd; perhaps a
+         # Python bug (e.g., <http://bugs.python.org/issue6236>)? Anyway, we
+         # work around it by forcing mode='wt', since mode='at' isn't
+         # meaningful in that context anyway.
+         mode = 'wt'
+      else:
+         mode = 'at'
+      self.fp = io.open(file_, mode=mode, buffering=buffering, encoding='utf8')
 
    def close(self):
       self.fp.close()
