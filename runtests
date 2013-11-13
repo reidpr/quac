@@ -24,8 +24,10 @@ and --force not specified, etc. Note that import problems do cause failure.'''
 
 import argparse
 from collections import Counter, defaultdict
+import glob
 import os.path
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -38,6 +40,9 @@ ap.add_argument('--force',
 ap.add_argument('--interactive',
                 action='store_true',
                 help='run interactive tests instead of non-interactive (currently disabled)')
+ap.add_argument('--noclean',
+                action='store_true',
+                help="don't remove old test runs from test directory")
 ap.add_argument('target',
                 help='modules, scripts, and/or cmdtests to run (default all)',
                 nargs='*',
@@ -57,6 +62,11 @@ for (i, t) in enumerate(args.target):
 # typical default TMPDIR settings are not shared between nodes in a cluster,
 # which we need for some tests.
 os.environ['TMPDIR'] = os.path.join(quacbase, 'tests/tmp')
+if (not args.noclean):
+   print '### removing old failed tests'
+   for old_testdir in glob.glob('%s/tmp*' % (os.environ['TMPDIR'])):
+      print old_testdir
+      shutil.rmtree(old_testdir)
 
 # Used to remember which ready.sh scripts we have already tried, because some
 # of them take a few seconds to run. We are lame and use a global variable.
