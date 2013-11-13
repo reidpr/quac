@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>3. Preprocessing &mdash; QUAC documentation for commit 9bcb1e6</title>
+    <title>3. Preprocessing data &mdash; QUAC documentation for commit c57df96</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="QUAC documentation for commit 9bcb1e6" href="index.html" />
+    <link rel="top" title="QUAC documentation for commit c57df96" href="index.html" />
     <link rel="next" title="4. Map-Reduce with QUACreduce" href="map_reduce.html" />
     <link rel="prev" title="2. Collecting data" href="collecting.html" /> 
   </head>
@@ -40,22 +40,35 @@
         <li class="right" >
           <a href="collecting.html" title="2. Collecting data"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 9bcb1e6</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit c57df96</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">3. Preprocessing</a><ul>
-<li><a class="reference internal" href="#overview">3.1. Overview</a></li>
-<li><a class="reference internal" href="#file-organization">3.2. File organization</a></li>
-<li><a class="reference internal" href="#file-formats">3.3. File formats</a><ul>
-<li><a class="reference internal" href="#raw-json-tweets">3.3.1. Raw JSON tweets</a></li>
-<li><a class="reference internal" href="#tsv-files">3.3.2. TSV files</a></li>
-<li><a class="reference internal" href="#preprocessing-metadata-file">3.3.3. Preprocessing metadata file</a></li>
-<li><a class="reference internal" href="#geo-located-tweets">3.3.4. Geo-located tweets</a></li>
-<li><a class="reference internal" href="#alternatives-that-were-considered-and-rejected">3.3.5. Alternatives that were considered and rejected</a></li>
+<li><a class="reference internal" href="#">3. Preprocessing data</a><ul>
+<li><a class="reference internal" href="#twitter">3.1. Twitter</a><ul>
+<li><a class="reference internal" href="#overview">3.1.1. Overview</a></li>
+<li><a class="reference internal" href="#file-organization">3.1.2. File organization</a></li>
+<li><a class="reference internal" href="#file-formats">3.1.3. File formats</a><ul>
+<li><a class="reference internal" href="#raw-json-tweets">3.1.3.1. Raw JSON tweets</a></li>
+<li><a class="reference internal" href="#tsv-files">3.1.3.2. TSV files</a></li>
+<li><a class="reference internal" href="#preprocessing-metadata-file">3.1.3.3. Preprocessing metadata file</a></li>
+<li><a class="reference internal" href="#geo-located-tweets">3.1.3.4. Geo-located tweets</a></li>
+<li><a class="reference internal" href="#alternatives-that-were-considered-and-rejected">3.1.3.5. Alternatives that were considered and rejected</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#wikimedia-pageview-logs">3.2. Wikimedia pageview logs</a><ul>
+<li><a class="reference internal" href="#id2">3.2.1. Overview</a></li>
+<li><a class="reference internal" href="#id3">3.2.2. File organization</a></li>
+<li><a class="reference internal" href="#id5">3.2.3. File formats</a><ul>
+<li><a class="reference internal" href="#pagecount-files">3.2.3.1. Pagecount files</a></li>
+<li><a class="reference internal" href="#metadata-file">3.2.3.2. Metadata file</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -89,23 +102,27 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="preprocessing">
-<h1>3. Preprocessing<a class="headerlink" href="#preprocessing" title="Permalink to this headline">¶</a></h1>
-<p><em>Note: All times and dates are in UTC except as otherwise noted.</em></p>
-<p>This preprocessing pipeline translates tweets from raw JSON to a form more
-suitable for later study.</p>
+  <div class="section" id="preprocessing-data">
+<h1>3. Preprocessing data<a class="headerlink" href="#preprocessing-data" title="Permalink to this headline">¶</a></h1>
+<p>Typically, raw data direct from collection is not to useful. QUAC implements a
+preprocessing step to translate it into more pleasant formats as well as do
+some preliminary analysis. This section describes the steps to do that.</p>
+<p><em>All times and dates are in UTC except as otherwise noted.</em></p>
+<div class="section" id="twitter">
+<h2>3.1. Twitter<a class="headerlink" href="#twitter" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="overview">
-<h2>3.1. Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
-<p>QUAC preprocessing has three basic steps:</p>
+<h3>3.1.1. Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h3>
+<p>QUAC&#8217;s Twitter pipeline has three basic steps:</p>
 <ol class="arabic simple">
 <li>Collect tweets using the streaming API. (<tt class="docutils literal"><span class="pre">collect</span></tt> script.)</li>
 <li>Convert the tweets from the raw JSON, de-duplicate and clean them up, and
 produce nicely organized and ordered TSV files. (<tt class="docutils literal"><span class="pre">parse.mk</span></tt> makefile.)</li>
-<li>Geo-locate tweets that do not contain a geotag. (<tt class="docutils literal"><span class="pre">geo.mk</span></tt> makefile.)</li>
+<li>Geo-locate tweets that do not contain a geotag. (<tt class="docutils literal"><span class="pre">geo.mk</span></tt> makefile.) (But
+see issue <a class="reference external" href="https://github.com/reidpr/quac/issues/15">#15</a>.)</li>
 </ol>
 </div>
 <div class="section" id="file-organization">
-<h2>3.2. File organization<a class="headerlink" href="#file-organization" title="Permalink to this headline">¶</a></h2>
+<h3>3.1.2. File organization<a class="headerlink" href="#file-organization" title="Permalink to this headline">¶</a></h3>
 <p>A fully populated data directory looks something like this:</p>
 <ul class="simple">
 <li><tt class="samp docutils literal"><span class="pre">raw/</span></tt> &#8212; Raw JSON tweets fresh from the Streaming API.<ul>
@@ -147,9 +164,9 @@ files.</li>
 are simply log files produced during processing.</p>
 </div>
 <div class="section" id="file-formats">
-<h2>3.3. File formats<a class="headerlink" href="#file-formats" title="Permalink to this headline">¶</a></h2>
+<h3>3.1.3. File formats<a class="headerlink" href="#file-formats" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="raw-json-tweets">
-<h3>3.3.1. Raw JSON tweets<a class="headerlink" href="#raw-json-tweets" title="Permalink to this headline">¶</a></h3>
+<h4>3.1.3.1. Raw JSON tweets<a class="headerlink" href="#raw-json-tweets" title="Permalink to this headline">¶</a></h4>
 <p>Each raw tweet file (<tt class="docutils literal"><span class="pre">.json.gz</span></tt>) is a gzipped sequence of JSON-encoded
 tweets in the <a class="reference external" href="https://dev.twitter.com/docs/platform-objects">format documented by Twitter</a>, separated by newlines
 (i.e., a file cannot be parsed as a single JSON object). Non-tweet objects do
@@ -185,7 +202,7 @@ to be escaped, but they are anyway:</p>
 </ul>
 </div>
 <div class="section" id="tsv-files">
-<h3>3.3.2. TSV files<a class="headerlink" href="#tsv-files" title="Permalink to this headline">¶</a></h3>
+<h4>3.1.3.2. TSV files<a class="headerlink" href="#tsv-files" title="Permalink to this headline">¶</a></h4>
 <p>The raw tweet files are not so convenient to work with: JSON parsing is slow,
 and tweets can be duplicated and out of order (including between files, which
 makes parallelization difficult). Therefore, we pre-process the JSON into a
@@ -236,7 +253,7 @@ roughly halve.</li>
 </ul>
 </div>
 <div class="section" id="preprocessing-metadata-file">
-<h3>3.3.3. Preprocessing metadata file<a class="headerlink" href="#preprocessing-metadata-file" title="Permalink to this headline">¶</a></h3>
+<h4>3.1.3.3. Preprocessing metadata file<a class="headerlink" href="#preprocessing-metadata-file" title="Permalink to this headline">¶</a></h4>
 <p>This file is a pickled Python dictionary containing metadata about the
 directory of preprocessed TSV files. It currently contains one item:</p>
 <ol class="arabic simple">
@@ -255,7 +272,7 @@ as well. This proved to be not so useful, and so it hasn&#8217;t been reimplemen
 in the new make-based processing scheme.</em></p>
 </div>
 <div class="section" id="geo-located-tweets">
-<h3>3.3.4. Geo-located tweets<a class="headerlink" href="#geo-located-tweets" title="Permalink to this headline">¶</a></h3>
+<h4>3.1.3.4. Geo-located tweets<a class="headerlink" href="#geo-located-tweets" title="Permalink to this headline">¶</a></h4>
 <p><cite>FIXME</cite></p>
 <ul class="simple">
 <li>TSV, one per day</li>
@@ -264,7 +281,7 @@ in the new make-based processing scheme.</em></p>
 </ul>
 </div>
 <div class="section" id="alternatives-that-were-considered-and-rejected">
-<h3>3.3.5. Alternatives that were considered and rejected<a class="headerlink" href="#alternatives-that-were-considered-and-rejected" title="Permalink to this headline">¶</a></h3>
+<h4>3.1.3.5. Alternatives that were considered and rejected<a class="headerlink" href="#alternatives-that-were-considered-and-rejected" title="Permalink to this headline">¶</a></h4>
 <p>We tried the following and ultimately rejected them (for now). A key
 requirement (as of 2/21/2013) is that we&#8217;d like convenient parallel access and
 not to mess with setting up servers.</p>
@@ -292,6 +309,133 @@ key/value.</li>
 </div>
 </div>
 </div>
+<div class="section" id="wikimedia-pageview-logs">
+<h2>3.2. Wikimedia pageview logs<a class="headerlink" href="#wikimedia-pageview-logs" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id2">
+<h3>3.2.1. Overview<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>The pipeline for Wikimedia data (Wikipedia and related projects) is simpler.
+We acquire them using the <tt class="docutils literal"><span class="pre">wp-get-access-logs</span></tt> script, and then build some
+metadata with the <tt class="docutils literal"><span class="pre">wp-metadata.mk</span></tt> makefile.</p>
+</div>
+<div class="section" id="id3">
+<h3>3.2.2. File organization<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>A fully populated data directory looks (in part) something like this:</p>
+<ul class="simple">
+<li><tt class="samp docutils literal"><span class="pre">raw/</span></tt> &#8212; Raw text files direct from WMF. Note that some of these
+files contain breakage.<ul>
+<li><tt class="samp docutils literal"><span class="pre">2012/</span></tt><ul>
+<li><tt class="samp docutils literal"><span class="pre">2012-04/</span></tt> &#8212; Article access counts (&#8220;pageviews&#8221;) from April
+2012. Each month gets its own subdirectory.<ul>
+<li><tt class="samp docutils literal"><span class="pre">pagecounts-20120428-130001.gz</span></tt> &#8212; Number of times each URL was
+served.</li>
+<li><tt class="samp docutils literal"><span class="pre">projectcounts-20120428-130001</span></tt> &#8212; Total number of URLs served
+from each project (e.g., Norwegian Wiktionary) for the same hour.
+These files have a number of problems, so we don&#8217;t use them (see issue
+<a class="reference external" href="https://github.com/reidpr/quac/issues/81">#81</a>).</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><tt class="samp docutils literal"><span class="pre">hashed/</span></tt> &#8212; Text files in an improved hierarchy. All of these files
+will parse correctly.<ul>
+<li><tt class="samp docutils literal"><span class="pre">185/</span></tt> &#8212; Pageviews whose filenames hashed to 185. Currently, we
+use the DJB2 hash algorithm mod 256 (the modulus is configurable). QUAC
+Wikimedia processing code is directory-parallel, so by doing this we can
+operate with wider parallelism (there are currently 71 months in the data
+set).<ul>
+<li><tt class="samp docutils literal"><span class="pre">pagecounts-20120428-130001.gz</span></tt> &#8212; Symlink to the corresponding
+pagecount file in the raw directory.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><tt class="samp docutils literal"><span class="pre">hashed_small/</span></tt> &#8212; Subset of the above, retaining only the midnight
+to 1am data for each day; this sampling strategy avoids introducing new gaps
+in the data. This is for testing and yields a dataset somewhat less than 4%
+the size of the full dataset.</li>
+<li><tt class="samp docutils literal"><span class="pre">hashed_tiny/</span></tt> &#8212; An even tinier subset (not necessarily a subset of
+the small subset). Sampling strategy varies, but the goal is about 2-3 GB of
+compressed pageview data. Note that available parallelism is less than the
+full dataset.</li>
+<li><tt class="samp docutils literal"><span class="pre">metadata</span></tt> &#8212; The metadata file.</li>
+</ul>
+</div>
+<div class="section" id="id5">
+<h3>3.2.3. File formats<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="pagecount-files">
+<h4>3.2.3.1. Pagecount files<a class="headerlink" href="#pagecount-files" title="Permalink to this headline">¶</a></h4>
+<p>The file format of the pagecount files is <a class="reference external" href="http://dumps.wikimedia.org/other/pagecounts-raw/">documented by WMF</a>. There are some quirks:</p>
+<ol class="arabic">
+<li><p class="first">The timestamp in the filename is the <em>end</em> of the hour recorded in the
+file. Often, these timestamps are a few seconds past the hour; we ignore
+this.</p>
+</li>
+<li><p class="first">Filesystem timestamps are not reliable, especially in the older parts of
+the data. That is, sometimes older files have newer timestamps, and the
+interval between consecutive files can be much less than one hour
+(sometimes less than a second, making them equal on many filesystems).</p>
+</li>
+<li><p class="first">The files are ASCII, with high bytes in article URLs percent-encoded. We do
+not decode them because (a) it saves significant time and (b) there are
+apparently non-UTF-8 encodings in use. (I believe the URL encoding is
+selected by the browser.)</p>
+<p>An artifact of (b) is that article counts can be split. For example, the
+Russian article Люди_Икс
+(i.e., the X-Men comic series) can be accessed at both of the following
+URLs:</p>
+<ul class="simple">
+<li>(UTF-8) <a class="reference external" href="http://ru.wikipedia.org/wiki/%D0%9B%D1%8E%D0%B4%D0%B8_%D0%98%D0%BA%D1%81">http://ru.wikipedia.org/wiki/%D0%9B%D1%8E%D0%B4%D0%B8_%D0%98%D0%BA%D1%81</a></li>
+<li>(Windows-1251) <a class="reference external" href="http://ru.wikipedia.org/wiki/%CB%FE%E4%E8_%C8%EA%F1">http://ru.wikipedia.org/wiki/%CB%FE%E4%E8_%C8%EA%F1</a></li>
+</ul>
+<p>Other encodings (e.g., ISO 8859-5, %BB%EE%D4%D8_%B8%DA%E1 and KOI8-R,
+%EC%C0%C4%C9_%E9%CB%D3) do not work. Figuring out this mess is something
+I&#8217;m not very interested in. How WMF does it, I have no idea.</p>
+<p>We do, however, normalize spaces into underscores. I believe this may be
+incomplete (see issue #77).</p>
+</li>
+<li><p class="first">There have been periods of modest <a class="reference external" href="http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts//readme.txt">underreporting</a>,
+with up to 20% of hits unrecorded. We assume such underreporting is random
+and do not try to correct it. Because our analysis works on fraction of
+total traffic rather than raw hit counts, the effect should be minimal.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="metadata-file">
+<h4>3.2.3.2. Metadata file<a class="headerlink" href="#metadata-file" title="Permalink to this headline">¶</a></h4>
+<p>This is a pickled Python dictionary. Example content:</p>
+<div class="highlight-python"><pre>{ 'badfiles': set([ ... ]),
+  'projects': { 'en':   { date: { 'total': count,
+                                  'hours': {  0: count,
+                                              1: count,
+                                              ... ,
+                                             23: count }],
+                          ... }
+                'en.b': ... ,
+                'ru':   ... ,
+                ... } }</pre>
+</div>
+<p>That is, there are two items in the dictionary.</p>
+<ol class="arabic">
+<li><p class="first"><tt class="docutils literal"><span class="pre">badfiles</span></tt> is a set of paths (starting with <tt class="docutils literal"><span class="pre">raw/</span></tt>) which are the files
+that had parse errors. These files are the ones excluded from <tt class="docutils literal"><span class="pre">hashed/</span></tt>.</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">projects</span></tt>, keys are project codes from the pageview files (e.g.,
+<tt class="docutils literal"><span class="pre">fr.b</span></tt> for French Wikibooks). Values are themselves dictionaries, mapping
+<tt class="docutils literal"><span class="pre">datetime.date</span></tt> instances to the number of hits that day. The hits
+consist of a dictionary. Item <tt class="docutils literal"><span class="pre">'total'</span></tt> gives the total number of hits on
+that day, while item <tt class="docutils literal"><span class="pre">'hours'</span></tt> is a dictionary mapping hours (0 to 23) to
+the number of hits in that hour.</p>
+<p>In both cases, the value <tt class="docutils literal"><span class="pre">0</span></tt> means no hits. A missing date or a missing
+hour means no data (i.e., the <tt class="docutils literal"><span class="pre">'hours'</span></tt> dict would have only 23 entries
+if one hour of data were missing on that day).</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
 
 
           </div>
@@ -308,7 +452,7 @@ key/value.</li>
         <li class="right" >
           <a href="collecting.html" title="2. Collecting data"
              >previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 9bcb1e6</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit c57df96</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

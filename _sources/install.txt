@@ -24,7 +24,7 @@ Summary
 #. Run the tests (this is actually pretty important, as it tells you whether
    you've installed all the dependencies correctly)::
 
-     ./test.sh
+     ./runtests
 
    Some tests require additional data or resources; if they are not available,
    then the tests are skipped.

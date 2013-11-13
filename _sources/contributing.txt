@@ -76,6 +76,8 @@ Doing actual work
 Merging to ``master``
 ---------------------
 
+#. Verify that you have a pull request, not just a branch.
+
 #. Go to the pull request & read about what's going on.
 
 #. ``git checkout master``

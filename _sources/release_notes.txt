@@ -23,6 +23,14 @@ List of releases
 Improvements in each release are below. Key changes are listed, while full
 details are available in GitHub.
 
+v0.5 (November 13, 2013)
+------------------------
+
+* Time series computation and correlation for Wikipedia data.
+* Metadata re-computation for Wikipedia data.
+* Improved test harness.
+* `Full details <https://github.com/reidpr/quac/issues?direction=asc&milestone=5&sort=created&state=closed>`__
+
 v0.4 (October 10, 2013)
 -----------------------
 
