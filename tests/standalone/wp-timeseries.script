@@ -1,0 +1,73 @@
+#!/bin/bash
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+# Compute Wikimedia time series and related analyses.
+
+. ./environment.sh
+
+cp $QUACBASE/misc/halloween.xls $DATADIR
+cd $DATADIR
+
+exec 2>&1
+
+
+## ngrams-build ##
+
+# We use several partitions to test that hash-based time series lookup works.
+echo "$ ngrams-build ..."
+ngrams-build --notimes --partitions 10 --min-occur 10 --run 1 --clean --jobdir series $QUACBASE/tests/standalone/wp-access > /dev/null
+
+x ls -R series
+
+## ngrams-search ##
+
+# Test that ngrams-search complains properly if input is incorrect.
+y 'ngrams-search --notimes --query candy /nonexistent || true'
+
+# "Halloween" is the holiday
+y 'ngrams-search --query "en Halloween" series/out'
+y 'ngrams-search --detail --query "en Halloween" series/out'
+
+# "Хэллоуин" is the holiday in Russian
+# UTF-8
+y 'ngrams-search --query "ru %D0%A5%D1%8D%D0%BB%D0%BB%D0%BE%D1%83%D0%B8%D0%BD" series/out'
+y 'ngrams-search --detail --query "ru %D0%A5%D1%8D%D0%BB%D0%BB%D0%BE%D1%83%D0%B8%D0%BD" series/out'
+# Windows-1251 (in the current test set we only have UTF-8, so this returns
+# zero results)
+y 'ngrams-search --query "ru %D5%FD%EB%EB%EE%F3%E8%ED" series/out'
+y 'ngrams-search --detail --query "ru %D5%FD%EB%EB%EE%F3%E8%ED" series/out'
+
+# "Sandy, Utah" is a town
+y 'ngrams-search --query "en Sandy,_Utah" series/out'
+y 'ngrams-search --detail --query "en Sandy,_Utah" series/out'
+
+# "Hurricane Sandy" is the hurricance
+y 'ngrams-search --query "en Hurricane_Sandy" series/out'
+y 'ngrams-search --detail --query "en Hurricane_Sandy" series/out'
+
+# Make sure zeros are inserted properly. This URL has no hits:
+# at the beginning:  October 26, 28
+# in the middle:     October 30
+# at the end:        November 2-4
+y 'ngrams-search --detail --query "en File%3AHurricane_Sandy_East_River_Manhattan_1.JPG" series/out'
+
+## ngrams-correlate ##
+
+# Note: The correlations are messed up because the sample we took in order to
+# make the test data is not random -- it's a search for "halloween" and
+# "sandy" (see get-test-data). These correlated data are then used to build
+# the totals, so a lot of the signal is normalized out.
+
+# Test that ngrams-correlate complains properly if input is incorrect.
+y "ngrams-correlate --notimes /nonexistent halloween.xls || true"
+y "ngrams-correlate --notimes /bin/sh halloween.xls || true"
+y "ngrams-correlate --notimes /bin /etc || true"
+y "ngrams-correlate --notimes series /nonexistent.xls || true"
+
+echo "$ ngrams-correlate ..."
+ngrams-correlate --notimes --min-similarity 0.5 --min-ppm 100 --run 1 --clean --jobdir corr series/out halloween.xls > /dev/null
+
+# Results
+x ls -R corr
+x head -10 corr/out/halloween:halloween.tsv
+x head -10 corr/out/halloween:s%40ndy.tsv

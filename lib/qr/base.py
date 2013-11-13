@@ -44,6 +44,7 @@ import sys
 
 import testable
 import tsv_glue
+import u
 
 
 # We use a relatively large output buffer size of 512K; see also
@@ -127,6 +128,7 @@ class Job(object):
 
    def map_stdinout(self):
       '''Connect myself to input and output and run my mapper.'''
+      #p = u.Profiler()
       self.map_open_input()
       self.map_open_output()
       self.map_init()
@@ -134,6 +136,7 @@ class Job(object):
          for kv in self.map(i):
             self.map_write(*kv)
       self.cleanup()
+      #p.stop('map.prof')
 
    def map_write(self, key, value):
       '''Write one key/value pair to the mapper output.'''
@@ -173,9 +176,9 @@ class Job(object):
       self.outfp = io.open(self.reduce_output_filename, 'wt',
                            encoding='utf8', buffering=OUTPUT_BUFSIZE)
 
-
    def reduce_stdinout(self, rid):
       '''Connect myself to input and output, and run my reducer.'''
+      #p = u.Profiler()
       self.rid = rid
       self.reduce_open_input()
       self.reduce_open_output()
@@ -184,6 +187,7 @@ class Job(object):
          for item in self.reduce(*kvals):
             self.reduce_write(item)
       self.cleanup()
+      #p.stop('reduce.prof')
 
    @abstractmethod
    def reduce_write(self, item):
@@ -265,6 +269,35 @@ class TSV_Input_Job(Job):
 
    def map_open_input(self):
       self.infp = tsv_glue.Reader(sys.stdin.fileno())
+
+
+class TSV_Internal_Job(Job):
+
+   '''Values transferred from mappers to reducers are iterables. They are
+      "encoded" by simple tab separation. No checks for internal tabs or
+      newlines are performed, and anything that is not a string object needs
+      to be manually dealt with (keys are still Unicode).'''
+
+   def map_write(self, key, value):
+      self.outfp.write(key)
+      for v in value:
+         self.outfp.write('\t')
+         self.outfp.write(v)
+      self.outfp.write('\n')
+
+   def reduce_inputs(self):
+      for (key, values) in itertools.groupby((l.split('\t') for l in self.infp),
+                                             key=operator.itemgetter(0)):
+         try:
+            key = key.decode('utf8')
+            # Skip first item in each iterator within values (it's the key
+            # again). We use a generator and islice() to remain lazy.
+            values = (itertools.islice(i, 1, None) for i in values)
+            yield (key, values)
+         except UnicodeDecodeError:
+            # ignore Unicode problems, as they represent broken URLs
+            continue
+
 
 class TSV_Output_Job(Job):
 

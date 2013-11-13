@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# This script tests content issues. Currently, we ensure that all text-based
+# files, except for certain excluded extensions, contain:
+#
+#   1. The copyright notice.
+#   2. No tab characters.
+#
+# The output of this script is files which violate these guidelines; this is
+# compared against the list of known exceptions in the .stdout file.
+
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others
+
+. ./environment.sh
+
+cd ../..  # don't use $QUACBASE because it's an absolute path
+
+C='Copyright (\(c\)|©) 2012-2013 Los Alamos National Security, LLC, and others'
+
+# We use find rather than git ls-files so that we catch problems even in files
+# not yet added to git.
+for filename in $(find . \( -path ./.git -o -path ./deps -o -path ./doc -o -path ./sphinx/_build \) -prune -o -type f | LC_ALL=C sort); do
+    if (file $filename | fgrep -q 'text' \
+        && echo $filename | egrep -qv '\.(gz|stderr|stdout|tmp|tsv)'); then
+
+        # Missing copyright notices.
+        egrep -iL "$C" $filename | sed 's/^/copyright missing: /'
+
+        # Tabs. Specifically, for each file containing at least one tab,
+        # prints the number of lines containing a tab. Finding these lines is
+        # up to you. :) (We don't print line numbers because that will change
+        # based on non-tab revisions.)
+        if (echo $filename | egrep -qv '(\.gz$|/Makefile$|\.mk$)'); then
+
+            fgrep -Hc '	' $filename | egrep -v ':0$' | sed 's/^/tab(s) present:    /'
+        fi
+
+    fi
+done

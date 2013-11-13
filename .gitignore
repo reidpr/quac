@@ -105,7 +105,14 @@ bin/hashsplit
 *.stdout-actual
 *.stdout-diff
 
+# test temporary files
+tests/tmp/tmp*
+
 # test tweets
 tests/twitter/tweets/raw
 tests/twitter/tweets/pre
 tests/twitter/tweets/geo
+
+# derived test wikimedia data
+tests/standalone/wp-access/hashed*
+tests/standalone/wp-access/metadata

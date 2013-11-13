@@ -1,0 +1,171 @@
+$ ngrams-build ...
+ngbld INFO     starting
+ngbld INFO     input appears to be Wikimedia pageview logs
+ngbld INFO     loading metadata
+ngbld INFO     setting up job
+ngbld INFO     writing totals
+ngbld INFO     running job
+ngbld INFO     cleaning up job
+ngbld INFO     done
+$ ls -R series
+series:
+Makefile
+out
+tmp
+
+series/out:
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+total.pkl.gz
+
+series/tmp:
+$ (ngrams-search --notimes --query candy /nonexistent || true)
+ngsch FATAL    no input files in /nonexistent
+$ (ngrams-search --query "en Halloween" series/out)
+en Halloween	5431084	2012-10-26	2012-11-04
+$ (ngrams-search --detail --query "en Halloween" series/out)
+2012-10-26	147818	304599	485287.0
+2012-10-27			
+2012-10-28	190064	489784	388057.0
+2012-10-29	230443	807736	285295.0
+2012-10-30	507344	1208945	419658.0
+2012-10-31	3766649	4703908	800749.0
+2012-11-01	392849	989505	397016.0
+2012-11-02	96888	430686	224962.0
+2012-11-03	53633	311596	172124.0
+2012-11-04	45396	249042	182282.0
+$ (ngrams-search --query "ru %D0%A5%D1%8D%D0%BB%D0%BB%D0%BE%D1%83%D0%B8%D0%BD" series/out)
+ru %D0%A5%D1%8D%D0%BB%D0%BB%D0%BE%D1%83%D0%B8%D0%BD	438028	2012-10-26	2012-11-04
+$ (ngrams-search --detail --query "ru %D0%A5%D1%8D%D0%BB%D0%BB%D0%BE%D1%83%D0%B8%D0%BD" series/out)
+2012-10-26	38835	42391	916114.0
+2012-10-27			
+2012-10-28	46503	50948	912754.0
+2012-10-29	49348	54492	905601.0
+2012-10-30	83526	90564	922287.0
+2012-10-31	165207	180487	915340.0
+2012-11-01	28959	34134	848392.0
+2012-11-02	12914	16433	785858.0
+2012-11-03	7405	10899	679420.0
+2012-11-04	5331	8222	648382.0
+$ (ngrams-search --query "ru %D5%FD%EB%EB%EE%F3%E8%ED" series/out)
+$ (ngrams-search --detail --query "ru %D5%FD%EB%EB%EE%F3%E8%ED" series/out)
+$ (ngrams-search --query "en Sandy,_Utah" series/out)
+en Sandy,_Utah	8505	2012-10-26	2012-11-04
+$ (ngrams-search --detail --query "en Sandy,_Utah" series/out)
+2012-10-26	276	304599	906.109
+2012-10-27			
+2012-10-28	663	489784	1353.66
+2012-10-29	1815	807736	2247.02
+2012-10-30	2080	1208945	1720.51
+2012-10-31	989	4703908	210.251
+2012-11-01	748	989505	755.934
+2012-11-02	698	430686	1620.67
+2012-11-03	724	311596	2323.52
+2012-11-04	512	249042	2055.88
+$ (ngrams-search --query "en Hurricane_Sandy" series/out)
+en Hurricane_Sandy	1445003	2012-10-26	2012-11-04
+$ (ngrams-search --detail --query "en Hurricane_Sandy" series/out)
+2012-10-26	20000	304599	65660.1
+2012-10-27			
+2012-10-28	77527	489784	158288.0
+2012-10-29	278489	807736	344777.0
+2012-10-30	334931	1208945	277044.0
+2012-10-31	204730	4703908	43523.4
+2012-11-01	177163	989505	179042.0
+2012-11-02	148859	430686	345632.0
+2012-11-03	114007	311596	365881.0
+2012-11-04	89297	249042	358562.0
+$ (ngrams-search --detail --query "en File%3AHurricane_Sandy_East_River_Manhattan_1.JPG" series/out)
+2012-10-26	0	304599	0.0
+2012-10-27			
+2012-10-28	0	489784	0.0
+2012-10-29	1	807736	1.23803
+2012-10-30	0	1208945	0.0
+2012-10-31	11	4703908	2.33848
+2012-11-01	3	989505	3.03182
+2012-11-02	0	430686	0.0
+2012-11-03	0	311596	0.0
+2012-11-04	0	249042	0.0
+$ (ngrams-correlate --notimes /nonexistent halloween.xls || true)
+usage: ngrams-correlate [--min-similarity X] [--min-ppm X]
+                        [--tw-sample-rate X] [--run RUN] [--clean] [--map CMD]
+                        [--reduce CMD] [--python CLASS] [--pyargs DICT]
+                        [--dist] [--file-reader CMD] [--jobdir DIR]
+                        [--partitions N] [--sortdir DIR] [--sortmem N]
+                        [--update] [-h] [--notimes] [--unittest] [--verbose]
+                        FILE [FILE ...]
+ngrams-correlate: error: /nonexistent is not a directory
+$ (ngrams-correlate --notimes /bin/sh halloween.xls || true)
+usage: ngrams-correlate [--min-similarity X] [--min-ppm X]
+                        [--tw-sample-rate X] [--run RUN] [--clean] [--map CMD]
+                        [--reduce CMD] [--python CLASS] [--pyargs DICT]
+                        [--dist] [--file-reader CMD] [--jobdir DIR]
+                        [--partitions N] [--sortdir DIR] [--sortmem N]
+                        [--update] [-h] [--notimes] [--unittest] [--verbose]
+                        FILE [FILE ...]
+ngrams-correlate: error: /bin/sh is not a directory
+$ (ngrams-correlate --notimes /bin /etc || true)
+usage: ngrams-correlate [--min-similarity X] [--min-ppm X]
+                        [--tw-sample-rate X] [--run RUN] [--clean] [--map CMD]
+                        [--reduce CMD] [--python CLASS] [--pyargs DICT]
+                        [--dist] [--file-reader CMD] [--jobdir DIR]
+                        [--partitions N] [--sortdir DIR] [--sortmem N]
+                        [--update] [-h] [--notimes] [--unittest] [--verbose]
+                        FILE [FILE ...]
+ngrams-correlate: error: /etc is not a file
+$ (ngrams-correlate --notimes series /nonexistent.xls || true)
+usage: ngrams-correlate [--min-similarity X] [--min-ppm X]
+                        [--tw-sample-rate X] [--run RUN] [--clean] [--map CMD]
+                        [--reduce CMD] [--python CLASS] [--pyargs DICT]
+                        [--dist] [--file-reader CMD] [--jobdir DIR]
+                        [--partitions N] [--sortdir DIR] [--sortmem N]
+                        [--update] [-h] [--notimes] [--unittest] [--verbose]
+                        FILE [FILE ...]
+ngrams-correlate: error: /nonexistent.xls is not a file
+$ ngrams-correlate ...
+ngcor INFO     starting
+ngcor INFO     setting up job
+ngcor INFO     running job
+ngcor INFO     cleaning up job
+ngcor INFO     done
+$ ls -R corr
+corr:
+Makefile
+out
+tmp
+
+corr/out:
+halloween:halloween.tsv
+halloween:s%40ndy.tsv
+
+corr/tmp:
+$ head -10 corr/out/halloween:halloween.tsv
+ru %D0%A4%D0%B0%D0%B9%D0%BB:Halloween.JPG	0.997995141253	234.37	0.0
+en Superstorm_Sandy_/_Frankenstorm_2012	0.997995126989	114.149	0.0
+en File:Enterprise_torn_tent_Sandy_jeh.jpg	0.986632834481	1582.37	0.0
+en File:Hurricane_Sandy_on_101st_St.JPG	0.983991800204	3708.19	0.0
+en Halloween_Horror_Nights	0.976076524487	11332.9	831.205
+en Sandy_Springs,_Georgia	-0.95956248192	943.529	131.168
+en Sandy_Lyle	-0.948585521909	246.225	18.7078
+en Halloween_(disambiguation)	0.935884509511	12167.3	2586.68
+en Sandy_(singer)	-0.922231078962	240.923	30.1877
+en 4th_of_July,_Asbury_Park_(Sandy)	-0.899680938708	2224.03	152.426
+$ head -10 corr/out/halloween:s%40ndy.tsv
+en File:President_Barack_Obama_receiving_update_to_Hurricane_Sandy.jpg	0.997157426971	6023.43	0.0
+en File:Hurricane_Sandy_on_101st_St.JPG	0.995288417372	3708.19	0.0
+en File:Hurricane_Sandy_GOES-13_Oct_24_2012_1445z.png	0.994750131286	3550.67	0.0
+en File:Sandy_Oct_28_17.50(UTC).jpg	0.9942997801	6542.98	0.0
+en File:Unknown_soldier_during_Sandy.jpg	0.982889375626	6812.55	0.0
+en File:Enterprise_torn_tent_Sandy_jeh.jpg	0.981902388017	1582.37	0.0
+en Hurricane_Sandy_in_New_York	0.980836683169	1806.53	0.0
+en File:Hull,_Mass_weathering_Sandy.jpg	0.979869085327	1905.79	0.0
+en File:Sandy_Oct_28_2012_16.00(UTC).jpg	0.979674999542	9812.61	0.0
+en File:Hurricane_Sandy_NYC_Jordan_Balderas_DSC_1632.jpg	0.979402340953	5694.22	0.0

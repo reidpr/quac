@@ -29,7 +29,7 @@ ap.add_argument('--verbose',
                 help='be more verbose with log output')
 ap.add_argument('outfile',
                 metavar='OUTFILE',
-                help='.stats for raw tweet file to parse')
+                help='metadata file to create or update')
 ap.add_argument('tsv_files',
                 metavar='TSV',
                 nargs='+',
@@ -96,11 +96,11 @@ def metadata_init(md, date):
    global date_max
    date_min = min(date_min, date)
    date_max = max(date_max, date)
-   for dt in time_.dateseq(date_min, date_max):
-      md.setdefault(dt.date(), { 'count': None,
-                                 'count_geotag': None,
-                                 'min_id': None,
-                                 'max_id': None })
+   for date in time_.dateseq(date_min, date_max):
+      md.setdefault(date, { 'count': None,
+                            'count_geotag': None,
+                            'min_id': None,
+                            'max_id': None })
 
 
 ### Bootstrap ###

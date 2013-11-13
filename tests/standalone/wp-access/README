@@ -1,0 +1,5 @@
+This directory is a small subset of the Wikimedia page view statistics. See
+the documentation for more details.
+
+The file "ls-R.fulldata" contains filenames of all the page count files as of
+November 6, 2013. This is used for hash testing.

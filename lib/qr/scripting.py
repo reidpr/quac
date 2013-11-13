@@ -49,7 +49,7 @@ import u
 l = u.l
 
 # This command returns false if the first command in the previous pipe failed.
-PIPEFAIL = 'if [ $${PIPESTATUS[0]} -ne 0 ]; then false; fi'
+PIPEFAIL = 'if [ $${PIPESTATUS[1]} -ne 0 ]; then false; fi'
 
 
 
@@ -64,10 +64,6 @@ def parse_args(ap):
    # check arguments
    if (len(set(os.path.basename(i) for i in args.inputs)) != len(args.inputs)):
       ap.error('input file basenames must be unique')
-   if (args.python and (args.map or args.reduce)):
-      ap.error('--python cannot be specified with --map and/or --reduce')
-   if (args.map and not args.reduce or args.reduce and not args.map):
-      ap.error('--map and --reduce must both be specified if one is')
    # absolutize input files
    args.inputs = [os.path.abspath(i) for i in args.inputs]
    # set sortdir if unset
@@ -80,8 +76,16 @@ def run(args, job_ct):
    sp.check_call('cd %s && make -j%d' % (args.jobdir, job_ct), shell=True)
 
 def setup(args):
-   if (not (args.python or args.map or args.reduce)):
-      u.abort('--python or --map and --reduce must be specified')
+   # These tests are here, rather than in argument parsing, so scripts can
+   # insert mappers and reducers not specified on the command line.
+   if (not (args.map and args.reduce or args.python)):
+      u.abort('must specify both mapper and reducer')
+   if (args.map and args.reduce and args.python):
+      u.abort('cannot specify all of --python, --map, --reduce')
+
+   # Bad script might screw this up. It's a programming problem, not a user
+   # problem, so assert instead of erroring.
+   assert (len(args.inputs) > 0)
 
    directories_setup(args)
    if (args.python):
@@ -116,6 +120,10 @@ class ArgumentParser(u.ArgumentParser):
       gr.add_argument('--dist',
                       action='store_true',
                       help='run distributed using sshrot')
+      gr.add_argument('--file-reader',
+                      metavar='CMD',
+                      default='cat',
+                      help='command to read input files (default cat)')
       gr.add_argument('--jobdir',
                       metavar='DIR',
                       default='.',
@@ -175,14 +183,15 @@ reallyclean: clean
    for filename in args.inputs:
       fp.write('''
 %(mapdone)s: %(input)s
-	%(map_cmd)s < %(input)s | hashsplit %(nparts)d tmp/%(ibase)s && %(pipefail)s
+	%(read_cmd)s %(input)s | %(map_cmd)s | hashsplit %(nparts)d tmp/%(ibase)s && %(pipefail)s
 	touch %(mapdone)s
 ''' % { 'ibase': os.path.basename(filename),
         'input': filename,
         'map_cmd': args.map,
         'mapdone': 'tmp/%s.mapped' % (os.path.basename(filename)),
         'nparts': args.partitions,
-        'pipefail': PIPEFAIL })
+        'pipefail': PIPEFAIL,
+        'read_cmd': args.file_reader })
    # reducers
    for rid in xrange(args.partitions):
       input_bases = [os.path.basename(i) for i in args.inputs]
@@ -210,8 +219,10 @@ def pythonify(args):
    # dictionary. See base.Job.__init__() for more on how this hack works.
    params = repr(u.str_to_dict(args.pyargs))
    base = "python -c \"import %(module)s; j = %(class_)s(%(params)s); " % locals()
-   args.map = base + "j.map_stdinout()\""
-   args.reduce = base + "j.reduce_stdinout(%(RID))\""
+   if (args.map is None):
+      args.map = base + "j.map_stdinout()\""
+   if (args.reduce is None):
+      args.reduce = base + "j.reduce_stdinout(%(RID))\""
 
 def slurm_dump(args):
    pass  # unimplemented, see issue #33

@@ -1,6 +1,8 @@
 $ ngrams-build ...
 ngbld INFO     starting
-ngbld INFO     loading metadata and setting up job
+ngbld INFO     input appears to be tweets
+ngbld INFO     loading metadata
+ngbld INFO     setting up job
 ngbld INFO     writing totals
 ngbld INFO     running job
 ngbld INFO     cleaning up job
@@ -25,11 +27,13 @@ series/out:
 total.pkl.gz
 
 series/tmp:
-$ (ngrams-search --notimes --query candy /nonexistent || true)
-ngsch FATAL    no input files in /nonexistent
-$ ngrams-search --query candy series/out
-candy	32	2012-10-28	2012-11-04
-$ ngrams-search --detail --query candy series/out
+$ dump-pickle total.pkl.gz ...
+{'projects': {'t@': {'series': Date_Vector('2012-10-28', [ 2302.,  3086.,  3055.,  2950.,  2887.,  3078.,  3014.,  3209.,
+        1185.], dtype=float32),
+                     'total': 24766.0}}}
+$ (ngrams-search --query 't@ candy' series/out)
+t@ candy	32	2012-10-28	2012-11-04
+$ (ngrams-search --detail --query 't@ candy' series/out)
 2012-10-28	2	2302	868.81
 2012-10-29	2	3086	648.088
 2012-10-30	1	3055	327.332
@@ -39,9 +43,9 @@ $ ngrams-search --detail --query candy series/out
 2012-11-03	4	3014	1327.14
 2012-11-04	2	3209	623.247
 2012-11-05	0	1185	0.0
-$ ngrams-search --query sandy series/out
-sandy	119	2012-10-28	2012-11-04
-$ ngrams-search --detail --query sandy series/out
+$ (ngrams-search --query 't@ sandy' series/out)
+t@ sandy	119	2012-10-28	2012-11-04
+$ (ngrams-search --detail --query 't@ sandy' series/out)
 2012-10-28	8	2302	3475.24
 2012-10-29	45	3086	14582.0
 2012-10-30	42	3055	13748.0
@@ -51,9 +55,9 @@ $ ngrams-search --detail --query sandy series/out
 2012-11-03	4	3014	1327.14
 2012-11-04	3	3209	934.871
 2012-11-05	0	1185	0.0
-$ ngrams-search --query a series/out
-a	3222	2012-10-28	2012-11-05
-$ ngrams-search --detail --query taco series/out
+$ (ngrams-search --query 't@ a' series/out)
+t@ a	3222	2012-10-28	2012-11-05
+$ (ngrams-search --detail --query 't@ taco' series/out)
 2012-10-28	0	2302	0.0
 2012-10-29	2	3086	648.088
 2012-10-30	9	3055	2945.99
@@ -63,42 +67,6 @@ $ ngrams-search --detail --query taco series/out
 2012-11-03	1	3014	331.785
 2012-11-04	0	3209	0.0
 2012-11-05	0	1185	0.0
-$ (ngrams-correlate --notimes /nonexistent halloween.xls || true)
-usage: ngrams-correlate [--min-similarity X] [--min-ppm X] [--sample-rate X]
-                        [--run RUN] [--clean] [--map CMD] [--reduce CMD]
-                        [--python CLASS] [--pyargs DICT] [--dist]
-                        [--jobdir DIR] [--partitions N] [--sortdir DIR]
-                        [--sortmem N] [--update] [-h] [--notimes] [--unittest]
-                        [--verbose]
-                        FILE [FILE ...]
-ngrams-correlate: error: /nonexistent is not a directory
-$ (ngrams-correlate --notimes /bin/sh halloween.xls || true)
-usage: ngrams-correlate [--min-similarity X] [--min-ppm X] [--sample-rate X]
-                        [--run RUN] [--clean] [--map CMD] [--reduce CMD]
-                        [--python CLASS] [--pyargs DICT] [--dist]
-                        [--jobdir DIR] [--partitions N] [--sortdir DIR]
-                        [--sortmem N] [--update] [-h] [--notimes] [--unittest]
-                        [--verbose]
-                        FILE [FILE ...]
-ngrams-correlate: error: /bin/sh is not a directory
-$ (ngrams-correlate --notimes /bin /etc || true)
-usage: ngrams-correlate [--min-similarity X] [--min-ppm X] [--sample-rate X]
-                        [--run RUN] [--clean] [--map CMD] [--reduce CMD]
-                        [--python CLASS] [--pyargs DICT] [--dist]
-                        [--jobdir DIR] [--partitions N] [--sortdir DIR]
-                        [--sortmem N] [--update] [-h] [--notimes] [--unittest]
-                        [--verbose]
-                        FILE [FILE ...]
-ngrams-correlate: error: /etc is not a file
-$ (ngrams-correlate --notimes series /nonexistent.xls || true)
-usage: ngrams-correlate [--min-similarity X] [--min-ppm X] [--sample-rate X]
-                        [--run RUN] [--clean] [--map CMD] [--reduce CMD]
-                        [--python CLASS] [--pyargs DICT] [--dist]
-                        [--jobdir DIR] [--partitions N] [--sortdir DIR]
-                        [--sortmem N] [--update] [-h] [--notimes] [--unittest]
-                        [--verbose]
-                        FILE [FILE ...]
-ngrams-correlate: error: /nonexistent.xls is not a file
 $ ngrams-correlate ...
 ngcor INFO     starting
 ngcor INFO     setting up job
@@ -117,24 +85,24 @@ halloween:s%40ndy.tsv
 
 corr/tmp:
 $ head -10 corr/out/halloween:halloween.tsv
-happyhalloween	0.998131075392	2078.28	0.0
-happy halloween	0.996925606519	10847.5	0.0
-trick or	0.995727657015	3728.81	0.0
-thingsaboutme	0.993012003619	4067.8	0.0
-trick	0.990344975957	3728.81	0.0
-nba	0.9881173924	4582.65	0.0
-or treating	0.9881173924	2372.88	0.0
-treating	0.986329162782	2372.88	0.0
-halloween	0.984747458302	28135.6	623.247
-happy	0.983947838105	15593.2	5063.29
+t@ happyhalloween	0.998131075392	2078.28	0.0
+t@ happy halloween	0.996925606519	10847.5	0.0
+t@ trick or	0.995727657015	3728.81	0.0
+t@ thingsaboutme	0.993012003619	4067.8	0.0
+t@ trick	0.990344975957	3728.81	0.0
+t@ or treating	0.9881173924	2372.88	0.0
+t@ nba	0.9881173924	4582.65	0.0
+t@ treating	0.986329162782	2372.88	0.0
+t@ halloween	0.984747458302	28135.6	623.247
+t@ happy	0.983947838105	15593.2	5063.29
 $ head -10 corr/out/halloween:s%40ndy.tsv
-super	0.99810059828	3600.65	1558.12
-sandy	0.99518702064	14582.0	934.871
-hurricane	0.993076652371	8425.15	0.0
-bonito	0.987933152078	2531.65	0.0
-car	0.985450405022	2945.99	1303.21
-storm	0.982598080446	2172.02	311.624
-nba nba	0.980498061745	3273.32	0.0
-nationaltextyourexday	0.980498001965	2291.33	0.0
-day	0.980068437556	13748.0	7962.84
-us	0.978356546112	6804.93	2531.65
+t@ super	0.99810059828	3600.65	1558.12
+t@ sandy	0.99518702064	14582.0	934.871
+t@ hurricane	0.993076652371	8425.15	0.0
+t@ bonito	0.987933152078	2531.65	0.0
+t@ car	0.985450405022	2945.99	1303.21
+t@ storm	0.982598080446	2172.02	311.624
+t@ nba nba	0.980498061745	3273.32	0.0
+t@ nationaltextyourexday	0.980498001965	2291.33	0.0
+t@ day	0.980068437556	13748.0	7962.84
+t@ us	0.978356546112	6804.93	2531.65

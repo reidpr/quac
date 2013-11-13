@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+# This script extracts a subset of the Wikimedia access logs. You probably
+# don't need to run it, since the data are included with QUAC.
+#
+# It takes one argument: the directory containing the raw Wikimedia data you
+# want to pull from.
+
+extract () {
+    file=$(basename $1)
+    month=$(basename $(dirname $1))
+    year=$(echo $month | sed -e 's/...$//')
+    echo $year/$month/$file
+    zcat $1 | egrep '^(en|ru) .*(Sandy|Halloween|%D0%A5%D1%8D%D0%BB%D0%BB%D0%BE%D1%83%D0%B8%D0%BD)' | gzip -9 > raw/$year/$month/$file
+}
+
+mkdir -p raw/2012/2012-10
+mkdir -p raw/2012/2012-11
+
+
+if [ -z "$2" ]; then  # give a 2nd argument to skip the lengthy copy
+
+    # Some normal, working data. Note the 1-day gap.
+    for file in $1/2012/2012-10/pagecounts-201210{26,28,29,30,31}-*.gz; do
+        extract $file
+    done
+    for file in $1/2012/2012-11/pagecounts-201211{01,02,03,04}-*.gz; do
+        extract $file
+    done
+
+    # Timestamps are off by one, so remove a couple files from
+    # previous days.
+    rm raw/2012/2012-10/pagecounts-20121026-000000.gz
+    rm raw/2012/2012-10/pagecounts-20121028-000000.gz
+
+    # Create a 1-hour gap.
+    rm raw/2012/2012-10/pagecounts-20121030-150000.gz
+
+fi
+
+# Pathological cases. Here be breakage. We want to test that we deal with it
+# correctly. Important: None of these files should contain any valid data! (We
+# want to keep the test data duration nice and compact.) All of these problems
+# were downloaded correctly from WMF.
+mkdir -p raw/2008/2008-10
+mkdir -p raw/2011/2011-10
+mkdir -p raw/2099/2099-01  # synthetic problems go here
+
+# This file ends in the middle of a line (real)
+zcat $1/2008/2008-10/pagecounts-20081021-090000.gz | tail -1 | gzip -9 > raw/2008/2008-10/pagecounts-20081021-090000.gz
+
+# This file is named .gz but is not gzipped (real)
+cp $1/2011/2011-10/pagecounts-20111008-180001.gz raw/2011/2011-10
+
+# This file contains 100 unparseable lines (synthetic)
+(for i in {1..100}; do echo a; done) | gzip -9 > raw/2099/2099-01/pagecounts-20990101-010000.gz
+
+# This file ends in a way that breaks the gzip decompression (real, but with a
+# synthetic truncation added).
+dd if=$1/2009/2009-09/pagecounts-20090921-160000.gz of=raw/2099/2099-01/pagecounts-20990101-020000.gz bs=1k count=16
+
+# This file is not a gzip file (real, but truncated)
+head -10 $1/2010/2010-07/pagecounts-20100707-112221.tmp > raw/2099/2099-01/pagecounts-20990101-030000.tmp

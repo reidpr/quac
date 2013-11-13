@@ -12,7 +12,8 @@
 # The main reason for this is that many vectors share the same mask.
 # MaskedArray objects each carry around their own mask, and AFAICT full masks
 # are stored even if they're empty (i.e., no elements are excluded). This
-# redundant storage wastes space and adds a consistency problem.
+# redundant storage wastes space and adds a consistency problem. (But see
+# issue #61).
 #
 # (MaskedArrays are also rather slow, but not enough that it matters for this
 # application IMO. In face, we use them in some of our computations.)
@@ -26,6 +27,7 @@ from __future__ import division
 
 import datetime
 import numbers
+from pprint import pprint
 import sys
 
 import numpy as np
@@ -260,6 +262,32 @@ class Date_Vector(np.ndarray):
       self._first_day = time_.dateify(x)
 
    @property
+   def enumerated(self):
+      '''Enumerate my indexes, dates, and values, yielding 3-tuples. E.g.:
+
+         >>> a = Date_Vector('2013-06-02', np.arange(2, 7))
+         >>> pprint(list(a.enumerated))
+         [(0, datetime.date(2013, 6, 2), 2),
+          (1, datetime.date(2013, 6, 3), 3),
+          (2, datetime.date(2013, 6, 4), 4),
+          (3, datetime.date(2013, 6, 5), 5),
+          (4, datetime.date(2013, 6, 6), 6)]'''
+      for i in xrange(len(self)):
+         yield (i, self.date(i), self[i])
+
+   @property
+   def iso8601iter(self):
+      '''Iterator which lists my days in ISO 8601 format. For example:
+
+         >>> a = Date_Vector.zeros('2013-06-02', '2013-06-05')
+         >>> a.iso8601iter
+         <generator object iso8601iter at 0x...>
+         >>> list(a.iso8601iter)
+         ['2013-06-02', '2013-06-03', '2013-06-04', '2013-06-05']'''
+      for d in time_.dateseq(self.first_day, self.last_day):
+         yield time_.iso8601_date(d)
+
+   @property
    def last_day(self):
       if (self._first_day is None):
          return None
@@ -313,23 +341,25 @@ class Date_Vector(np.ndarray):
       return self.resize(min(self.first_day, other.first_day),
                          max(self.last_day, other.last_day))
 
-   def shrink_to(self, other):
-      '''Return a copy of myself shrunk to match the bounds of the smaller of
-         myself and other. For example:
+   def max(self, mask=None):
+      '''Return my maximum value, excluding anything masked out. E.g.:
 
          >>> a = Date_Vector('2013-06-02', np.arange(2, 5))
-         >>> b = Date_Vector('2013-06-03', np.arange(3, 6))
-         >>> a.shrink_to(b)
-         Date_Vector('2013-06-03', [3, 4])
-         >>> b.shrink_to(a)
-         Date_Vector('2013-06-03', [3, 4])
+         >>> a.max()
+         4
+         >>> a.max(np.array([True, True, False]))
+         3'''
+      return maskify(self, mask).max()
 
-         If there is no overlap, return None:
+   def min(self, mask=None):
+      '''Return my minimum value, excluding anything masked out. E.g.:
 
-         >>> a.shrink_to(Date_Vector.zeros('2013-06-05', '2013-06-05')) is None
-         True'''
-      return self.resize(max(self.first_day, other.first_day),
-                         min(self.last_day, other.last_day))
+         >>> a = Date_Vector('2013-06-02', np.arange(2, 5))
+         >>> a.min()
+         2
+         >>> a.min(np.array([False, True, True]))
+         3'''
+      return maskify(self, mask).min()
 
    def normalize(self, other, parts_per=1):
       '''Divide self by other over the range where the bounds intersect. E.g.:
@@ -444,6 +474,81 @@ class Date_Vector(np.ndarray):
                                        self[trim_start:len(self) - trim_end],
                                        np.zeros(add_end, dtype=self.dtype)]))
 
+   def shrink_to(self, other):
+      '''Return a copy of myself shrunk to match the bounds of the smaller of
+         myself and other. For example:
+
+         >>> a = Date_Vector('2013-06-02', np.arange(2, 5))
+         >>> b = Date_Vector('2013-06-03', np.arange(3, 6))
+         >>> a.shrink_to(b)
+         Date_Vector('2013-06-03', [3, 4])
+         >>> b.shrink_to(a)
+         Date_Vector('2013-06-03', [3, 4])
+
+         If there is no overlap, return None:
+
+         >>> a.shrink_to(Date_Vector.zeros('2013-06-05', '2013-06-05')) is None
+         True'''
+      return self.resize(max(self.first_day, other.first_day),
+                         min(self.last_day, other.last_day))
+
+
+def maskify(dv, mask):
+   '''Return Date_Vector dv as an array or MaskedArray (if mask is not None).
+      mask need not be a Date_Vector. For example:
+
+      >>> a = Date_Vector('2013-06-02', np.arange(2, 5))
+      >>> mask = np.array([True, False, True])
+      >>> mask_big = np.array([True, False, True, True])
+      >>> mask_small = np.array([True, False])
+      >>> mask_dv = Date_Vector('2013-06-02', [True, False, True])
+      >>> mask_dvbig = Date_Vector('2013-06-02', [True, False, True, True])
+      >>> mask_dvsmall = Date_Vector('2013-06-02', [True, False])
+      >>> maskify(a, None)
+      array([2, 3, 4])
+      >>> maskify(a, mask)
+      masked_array(data = [2 -- 4],
+                   mask = [False  True False],
+             fill_value = 999999)
+      <BLANKLINE>
+      >>> maskify(a, mask_big)
+      Traceback (most recent call last):
+        ...
+      ValueError: mask length must match vector if the former is not a Date_Vector
+      >>> maskify(a, mask_small)
+      Traceback (most recent call last):
+        ...
+      ValueError: mask length must match vector if the former is not a Date_Vector
+      >>> maskify(a, mask_dv)
+      masked_array(data = [2 -- 4],
+                   mask = [False  True False],
+             fill_value = 999999)
+      <BLANKLINE>
+      >>> maskify(a, mask_dvbig)
+      masked_array(data = [2 -- 4],
+                   mask = [False  True False],
+             fill_value = 999999)
+      <BLANKLINE>
+      >>> maskify(a, mask_dvsmall)
+      Traceback (most recent call last):
+        ...
+      ValueError: mask must not be smaller than vector'''
+   if (mask is None):
+      return np.array(dv)
+   else:
+      if (isinstance(mask, Date_Vector)):
+         if (dv.bounds_le(mask)):
+            mask = mask.shrink_to(dv)
+         else:
+            raise ValueError('mask must not be smaller than vector')
+      elif (len(dv) != len(mask)):
+         raise ValueError('mask length must match vector if the former is not a Date_Vector')
+      assert (mask.dtype == np.bool)
+      # We invert the mask because MaskedArray has made the baffling choice
+      # that True mask elements correspond to *in*valid data. This is the
+      # opposite of every other mask I've seen...
+      return ma.array(np.array(dv), mask=~mask)
+
 
 def pearson(a, b, a_mask=None, b_mask=None, min_data=3):
    '''Given two Date_Vectors a and b, return their Pearson correlation.
@@ -470,11 +575,11 @@ def pearson(a, b, a_mask=None, b_mask=None, min_data=3):
       >>> pearson(a, b, a_mask=m)
       Traceback (most recent call last):
         ...
-      ValueError: mask must have equal or greater bounds than vector
+      ValueError: mask is smaller than vector: [2013-06-02, 2013-06-04] < [2013-06-02, 2013-06-05]
       >>> pearson(a, b, b_mask=m)
       Traceback (most recent call last):
         ...
-      ValueError: mask must have equal or greater bounds than vector
+      ValueError: mask is smaller than vector: [2013-06-02, 2013-06-04] < [2013-06-02, 2013-06-05]
 
       The mask need not be boolean:
 
@@ -505,21 +610,16 @@ def pearson(a, b, a_mask=None, b_mask=None, min_data=3):
       >>> pearson(e, a)
       0.0'''
    # Implemented per <http://en.wikipedia.org/wiki/Pearson_correlation>.
-   def maskify(x, mask):
-      'Promote x to a MaskedArray if mask is not None.'
-      if (mask is None):
-         return x
-      else:
-         assert x.bounds_eq(mask)
-         assert (mask.dtype == np.bool)
-         # We invert the mask because MaskedArray has made the baffling choice
-         # that True mask elements correspond to *in*valid data. This is the
-         # opposite of every other mask I've seen...
-         return ma.array(x, mask=~mask)
    # line up all the bounds and masks
-   if ((a_mask is not None and not a.bounds_le(a_mask))
-       or (b_mask is not None and not b.bounds_le(b_mask))):
-      raise ValueError('mask must have equal or greater bounds than vector')
+   def mask_gripe(vec, mask):
+      if (mask is not None and not vec.bounds_le(mask)):
+         raise ValueError('mask is smaller than vector: [%s, %s] < [%s, %s]'
+                          % (time_.iso8601_date(mask.first_day),
+                             time_.iso8601_date(mask.last_day),
+                             time_.iso8601_date(vec.first_day),
+                             time_.iso8601_date(vec.last_day)))
+   mask_gripe(a, a_mask)
+   mask_gripe(b, b_mask)
    (a, b, a_mask, b_mask) = Date_Vector.bi_intersect(a, b, a_mask, b_mask)
    ab_mask = Date_Vector(a.first_day, np.ones(len(a), dtype=np.bool))
    if (a_mask is not None):

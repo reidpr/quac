@@ -62,7 +62,7 @@ def main():
       l.info('mode: update')
       l.info('bandwidth limit is %d KB/s' % (bwlimit))
       # FIXME: awkward to specify --include * simply to override --exclude *.
-      rsync.all(mirror_url, log_dir, bwlimit, args.verbose)
+      rsync.all(mirror_url, log_dir + '/raw', bwlimit, args.verbose)
    l.info('done')
 
 

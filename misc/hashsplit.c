@@ -1,6 +1,8 @@
 /* Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others. See
    the file COPYRIGHT for details. */
 
+/* Note: Make sure hash output exactly matches hash_.py. */
+
 /* FIXME: This is not the most robust program. Patches to improve this are
    super welcome. In particular, I think it only compiles with gcc, which
    makes me sad.
@@ -78,21 +80,18 @@ void fatal(char * fmt, ...)
    exit(EXIT_FAILURE);
 }
 
-/* Bernstein's DJB2 hash algorithm (http://www.cse.yorku.ca/~oz/hash.html),
-   XOR variant. This implementation restores the multiplication for clarity,
-   since we're an I/O bound program on newer CPUs.
-
-   Note: This needs to match (exactly!) the DJB2 implementation in u.py.
-
-   end is a pointer to the first character *not* to include in the hash, or
-   NULL if all of str is to be included. */
+/* FNV hash algorithm, version 1a, 32 bits. end is a pointer to the first
+   character *not* to include in the hash, or NULL if all of str is to be
+   included. */
 unsigned int hash (char * str, char * end)
 {
-   unsigned int hash = 5381;
+   unsigned int hash = 2166136261;
    unsigned char c;
 
-   while ((str != end) && (c = *str++))
-      hash = hash * 33 ^ c;
+   while ((str != end) && (c = *str++)) {
+      hash ^= c;
+      hash *= 16777619;
+   }
 
    return hash;
 }
