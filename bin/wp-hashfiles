@@ -10,14 +10,11 @@ import sys
 import quacpath
 import hash_
 import u
-import wikimedia
 
 hashmod = int(sys.argv[1])
 tinymod = 8
 tiny_sampled = set()
 md = u.pickle_load(sys.argv[2])
-hourn_min = min(wikimedia.hour_bizarro(min(md['projects']['en'].iteritems())))
-hourn_max = max(wikimedia.hour_bizarro(max(md['projects']['en'].iteritems())))
 
 def mkdir(path):
    'http://stackoverflow.com/a/5032238/396038'
@@ -44,8 +41,7 @@ for path in sys.argv[3:]:
       # file has parse problems, skip
       continue
    filename = os.path.basename(path)
-   hourn = wikimedia.hour_bizarro(filename)
-   h = hash_.consecutive(hourn, hashmod, hourn_min, hourn_max)
+   h = hash_.of(filename) % hashmod
    target = '../../%s' % (path)
    # main hash directory
    symlink(target, 'hashed/%d/%s' % (h, filename))

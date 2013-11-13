@@ -46,7 +46,7 @@ x ls
 # Run the make job.
 y "make -f $MAKEFILE MDARGS=--notimes HASHMOD=4 XARGS_BLOCK=128"
 
-# Check output. (Note that the hash dirs will be imbalanced due to the gaps.)
+# Check output.
 y "for i in hashed/*; do echo -n \$i ' '; ls \$i | wc -l; done"
 y "ls -l hashed/* hashed_small/* hashed_tiny/* | sed -E 's/^l.+:[0-9]{2} //'"
 x md5sum metadata
