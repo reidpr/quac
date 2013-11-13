@@ -18,10 +18,10 @@ mystat () {
     else
         # Linux stat prints times down to the nanosecond (WTF?) but you can
         # only set it (from Python at least) down to the microsecond (WTF?).
-        # Additionally, wp-update-metadata sets the modify time to one µm
+        # Additionally, wp-update-metadata sets the modify time to 2µs
         # later than the reference file. Therefore, we compare only to a
-        # resolution of 10 µm.
-        stat $1 | cut -c1-33
+        # resolution of 100µs.
+        stat $1 | cut -c1-32
     fi | egrep '^Modify:'
 }
 
