@@ -86,7 +86,22 @@ def dateseq_str(start, end):
    return [iso8601_date(d) for d in dateseq(start, end)]
 
 def dateseq(start, end):
-   return rrule.rrule(rrule.DAILY, dtstart=start, until=end)
+   '''E.g.:
+
+      >>> pprint(list(dateseq(datetime.date(2013, 03, 25),
+      ...                     datetime.date(2013, 03, 28))))
+      [datetime.date(2013, 3, 25),
+       datetime.date(2013, 3, 26),
+       datetime.date(2013, 3, 27),
+       datetime.date(2013, 3, 28)]
+      >>> pprint(list(dateseq(datetime.datetime(2013, 03, 25, 1, 2, 3),
+      ...                     datetime.datetime(2013, 03, 28, 4, 5, 6))))
+      [datetime.date(2013, 3, 25),
+       datetime.date(2013, 3, 26),
+       datetime.date(2013, 3, 27),
+       datetime.date(2013, 3, 28)]'''
+   return (dt.date()
+           for dt in rrule.rrule(rrule.DAILY, dtstart=start, until=end))
 
 def days_f(td):
    '''Return the fractional number of days in timedelta td. E.g.:

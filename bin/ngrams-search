@@ -10,6 +10,7 @@ import io
 import sys
 
 import numpy as np
+np.seterr(invalid='ignore')  # let 0/0 simply result in NaN
 
 import quacpath
 import hash_
@@ -56,16 +57,21 @@ def main():
          v = qr.base.decode(v)
          (proj, _, article) = k.partition(' ')
          ngram_vec = v['series']
-         tot_vec = totals[proj]['series']
+         tot_vec = totals['projects'][proj]['series']
          if (args.query is None or k == args.query):
             if (args.detail):
                (ngram_vec, tot_vec) = ngram_vec.bi_intersect(ngram_vec, tot_vec)
                assert (ngram_vec.bounds_eq(tot_vec))
-               for row in zip(ngram_vec.iso8601iter,
-                              ngram_vec.astype(np.int64),
-                              tot_vec.astype(np.int64),
-                              ngram_vec / tot_vec * 1e6):
-                 tsv.writerow(row)
+               for (i, row) in enumerate(zip(ngram_vec.iso8601iter,
+                                             ngram_vec.astype(np.int64),
+                                             tot_vec.astype(np.int64),
+                                             ngram_vec / tot_vec * 1e6)):
+                  if (totals.has_key('mask') and not totals['mask'][i]):
+                     # Print nothing instead of (invalid) masked data.
+                     # FIXME: Does not work for Twitter. See issue #86.
+                     tsv.writerow((row[0], None, None, None))
+                  else:
+                     tsv.writerow(row)
             else:
                fd = time_.iso8601_date(ngram_vec.first_day)
                ld = time_.iso8601_date(ngram_vec.last_day)

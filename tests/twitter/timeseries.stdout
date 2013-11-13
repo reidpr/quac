@@ -27,6 +27,10 @@ series/out:
 total.pkl.gz
 
 series/tmp:
+$ dump-pickle total.pkl.gz ...
+{'projects': {'t@': {'series': Date_Vector('2012-10-28', [ 2302.,  3086.,  3055.,  2950.,  2887.,  3078.,  3014.,  3209.,
+        1185.], dtype=float32),
+                     'total': 24766.0}}}
 $ (ngrams-search --query 't@ candy' series/out)
 t@ candy	32	2012-10-28	2012-11-04
 $ (ngrams-search --detail --query 't@ candy' series/out)

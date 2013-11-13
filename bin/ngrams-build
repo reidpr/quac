@@ -11,7 +11,9 @@ n-gram.'''
 import glob
 import os
 import os.path
+from pprint import pprint
 import subprocess as sp
+import sys
 
 import numpy as np
 
@@ -19,6 +21,7 @@ import quacpath
 import qr.base
 import qr.scripting
 import math_
+import time_
 import u
 l = u.l
 
@@ -120,7 +123,7 @@ class Tweet_Job(Job):
       cts = [v['count'] for (k, v) in sorted(self.metadata['days'].iteritems())]
       cts = math_.Date_Vector(min(self.metadata['days'].iterkeys()),
                               np.array(cts, dtype=np.float32))
-      return { 't@': { 'total':  sum(cts), 'series': cts } }
+      return { 'projects': { 't@': { 'total': sum(cts), 'series': cts } } }
 
 
 class Wikimedia_Job(Job):
@@ -133,11 +136,24 @@ class Wikimedia_Job(Job):
 
    def totals_build(self):
       totals = dict()
+      # Compute mask. If a day has more than 12 hours of data in English
+      # Wikipedia, we call it a valid day's data.
+      en = self.metadata['projects']['en']
+      date_min = min(en.iterkeys())
+      date_max = max(en.iterkeys())
+      mask = math_.Date_Vector.zeros(date_min, date_max, dtype=np.bool)
+      for (i, d) in enumerate(time_.dateseq(date_min, date_max)):
+         if (en.has_key(d) and len(en[d]['hours']) >= 12):
+            mask[i] = True
+      totals['mask'] = mask
+      # Compute totals for each project
+      totals['projects'] = dict()
       for (project, dates) in self.metadata['projects'].iteritems():
-         (dates, cts) = zip(*sorted((d, v['total'])
-                                    for (d, v) in dates.iteritems()))
-         series = math_.Date_Vector(dates[0], np.array(cts, dtype=np.float32))
-         totals[project] = { 'total': sum(series), 'series': series }
+         series = math_.Date_Vector.zeros(date_min, date_max, dtype=np.float32)
+         for (i, d, _) in series.enumerated:
+            series[i] = dates.get(d, {'total': 0})['total']
+         totals['projects'][project] = { 'total': sum(series),
+                                         'series': series }
       return totals
 
 

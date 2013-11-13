@@ -33,6 +33,7 @@ import sys
 import urllib
 
 import numpy as np
+np.seterr(invalid='ignore')
 
 from . import base
 import math_
@@ -74,23 +75,24 @@ class Build_Job(base.TSV_Internal_Job, base.KV_Pickle_Seq_Output_Job):
 class Correlate_Job(base.KV_Pickle_Seq_Input_Job, base.TSV_Output_Job):
 
    def map_init(self):
-      self.totals = u.pickle_load(self.params['total_file'])
+      pickle_ = u.pickle_load(self.params['total_file'])
+      self.totals = pickle_['projects']
       # Compute masks (find days with insufficient data)
-      for (proj, pdata) in self.totals.iteritems():
-         if (proj != 't@'):
-            # Wikipedia - no masking needed
-            pdata['mask'] = None
-         else:
-            # Twitter - data have holes, so compute masks
-            mask = [tweet.is_enough(pdata['series'].date(i),
-                                    pdata['series'][i],
-                                    sample_rate=self.params['tw_sample_rate'])
-                    for i in xrange(len(pdata['series']))]
-            mask = np.array(mask, dtype=bool)
-            if (mask.sum() < 0.5 * len(mask)):
-               u.abort('too many low-data days (%d of %d); check sample rate?'
-                       % (mask.sum(), len(mask)))
-            pdata['mask'] = math_.Date_Vector(pdata['series'].first_day, mask)
+      try:
+         # use precomputed mask if available (Wikipedia)
+         self.mask = pickle_['mask']
+      except KeyError:
+         # compute a mask for Twitter
+         pdata = self.totals['t@']
+         mask = [tweet.is_enough(pdata['series'].date(i),
+                                 pdata['series'][i],
+                                 sample_rate=self.params['tw_sample_rate'])
+                 for i in xrange(len(pdata['series']))]
+         self.mask = math_.Date_Vector(pdata['series'].first_day,
+                                       np.array(mask, dtype=np.bool))
+      if (self.mask.sum() < 0.5 * len(self.mask)):
+         u.abort('too many low-data days (%d of %d); check sample rate?'
+                 % (self.mask.sum(), len(self.mask)))
       # Read target time series
       self.targets = list()
       short_names = u.without_common_prefix(self.params['input_sss'])
@@ -106,20 +108,32 @@ class Correlate_Job(base.KV_Pickle_Seq_Input_Job, base.TSV_Output_Job):
    def map(self, kv):
       (_, ngram) = kv
       for t in self.targets:
-         # Extend the ngram series to match the target, to make sure that
-         # leading and trailing zeroes are not lost.
-         ng_vec = ngram['series'].grow_to(t['series'])
+         # Aliases which make actual sense.
          proj = ngram['ngram'].split(' ')[0]
-         ng_vec = ng_vec.normalize(self.totals[proj]['series'], parts_per=1e6)
-         peak = ng_vec.max()
-         trough = ng_vec.min()
-         # Ignore series with a peak that is too low.
+         ng_vec = ngram['series']
+         ng_mask = self.mask
+         trg_vec = t['series']
+         trg_mask = t['mask']
+         tot_vec = self.totals[proj]['series']
+         assert (trg_vec.bounds_eq(trg_mask))
+         # Normalize n-gram vector.
+         ng_vec = ng_vec.normalize(tot_vec, parts_per=1e6)
+         # The n-gram vector may have leading and trailing zeroes which are
+         # implicit; we need to make them explicit. (For example, if the first
+         # instance of an n-gram is on the second day of the target series,
+         # the n-gram vector will start on the second day, omitting the first
+         # day's zero -- but that zero needs to be part of the computation).
+         # However, we need to also extend the mask, in case it really is a
+         # no-data situation.
+         ng_vec = ng_vec.grow_to(trg_vec)
+         ng_mask = ng_mask.grow_to(trg_vec)
+         # Compute peak and trough, and ignore series with a too-low peak.
+         peak = ng_vec.max(ng_mask)
+         trough = ng_vec.min(ng_mask)
          if (peak < self.params['min_ppm']):
             continue
          # Compute correlation.
-         assert (t['series'].bounds_eq(t['mask']))
-         r = math_.pearson(ng_vec, t['series'],
-                           self.totals[proj]['mask'], t['mask'])
+         r = math_.pearson(ng_vec, trg_vec, ng_mask, trg_mask)
          if (abs(r) >= self.params['min_similarity']):
             yield (t['name'], (ngram['ngram'], r, peak, trough))
 

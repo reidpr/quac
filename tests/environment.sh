@@ -36,6 +36,15 @@ y () {
     bash -c "$1"
 }
 
+# dump content of a pickle file
+dump-pickle () {
+    python <<EOF
+import u
+import pprint
+pprint.pprint(u.pickle_load('$1'))
+EOF
+}
+
 # Decide how to call netstat. The problem is that Red Hat and everyone else
 # chose incompatible options for not truncating hostnames.
 if (netstat --help 2>&1 | fgrep -q -- --wide); then

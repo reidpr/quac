@@ -19,6 +19,8 @@ echo "$ ngrams-build ..."
 ngrams-build --notimes --partitions 10 --min-occur 10 --run 1 --clean --jobdir series $TWEETDIR/pre > /dev/null
 
 x ls -R series
+echo "$ dump-pickle total.pkl.gz ..."
+dump-pickle series/out/total.pkl.gz
 
 
 ## ngrams-search ##

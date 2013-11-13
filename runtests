@@ -166,7 +166,7 @@ def test_cmdtest(filename):
    # /dev/tty, which is impossible to redirect. This will not work on OS X
    # because script takes different arguments there. See issue 76.
    testout = subprocess.check_output(
-      ("cd %s && script -q -c 'cmdtest -t %s .' /dev/null || true"
+      ("cd %s && script -q -c 'cmdtest -k -t %s .' /dev/null || true"
        % (os.path.dirname(filename), os.path.basename(filename)[:-7])),
       stderr=subprocess.STDOUT, shell=True)
    if (testout.find('0 failures') < 0):

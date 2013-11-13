@@ -10,15 +10,6 @@ exec 2>&1
 
 MAKEFILE='../../../misc/wp-preprocess.mk'
 
-# pprint pickled content
-dump-metadata () {
-    python <<EOF
-import u
-import pprint
-pprint.pprint(u.pickle_load('metadata'))
-EOF
-}
-
 # Reasonably portable stat. OS X, why must you be so difficult?
 mystat () {
     if [ $(uname) == 'Darwin' ]; then
@@ -55,13 +46,13 @@ x ls
 # Run the make job.
 y "make -f $MAKEFILE MDARGS=--notimes HASHMOD=4 XARGS_BLOCK=128"
 
-# Check output.
+# Check output. (Note that the hash dirs will be imbalanced due to the gaps.)
 y "for i in hashed/*; do echo -n \$i ' '; ls \$i | wc -l; done"
 y "ls -l hashed/* hashed_small/* hashed_tiny/* | sed -E 's/^l.+:[0-9]{2} //'"
 x md5sum metadata
 mystat metadata | diff -u $DATADIR/20990101-01.stat - || true
-dump-metadata | md5sum
-dump-metadata
+dump-pickle metadata | md5sum
+dump-pickle metadata
 
 # Check updating
 y "touch raw/2012/2012-10/pagecounts-20121029-010001.gz && sleep 1.5"
@@ -69,4 +60,4 @@ mystat raw/2012/2012-10/pagecounts-20121029-010001.gz > $DATADIR/20121029-01.sta
 y "make -f $MAKEFILE MDARGS=--notimes HASHMOD=4"
 x md5sum metadata
 mystat metadata | diff -u $DATADIR/20121029-01.stat - || true
-dump-metadata | md5sum
+dump-pickle metadata | md5sum
