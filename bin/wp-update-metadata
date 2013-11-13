@@ -54,18 +54,21 @@ def main():
    l.debug('writing %s' % (args.outfile))
    mdp.commit()
    l.debug('setting mtime')
-   # Set metadata's mtimex to one microsecond beyond mtime_max. This is
+   # Set metadata's mtime to two microseconds beyond mtime_max. This is
    # because some Linux filesystems (e.g., ext4) store timestamps to
    # nanosecond resolution, but Python can only set to microsecond resolution.
    # For example, copying the mtime 2013-11-12 14:46:35.567961144 will result
    # in 2013-11-12 14:46:35.567961000, which is earlier; therefore,
-   # unnecessary files may be processed. Adding a microsecond guarantees that
-   # the metadata file is the same or newer. (This assumes that the earliest
-   # file processed in the *next* run is at least one microsecond newer than
-   # the latest file in this run; to violate this would require processing
-   # around one million files per second, which is pretty fast even if you are
-   # just copying or moving the logfiles.)
-   os.utime(args.outfile, (mtime_max + 1e-6, mtime_max + 1e-6))
+   # unnecessary files may be processed. Adding a small interval guarantees
+   # that the metadata file is the same or newer. We use two microseconds
+   # rather than one because I saw (but couldn't reproduce) an example of make
+   # not believing the metadata file to be newer, which I think is
+   # attributable to a rounding error of some kind. (This assumes that the
+   # earliest file processed in the *next* run is at least two microseconds
+   # newer than the latest file in this run; to violate this would require
+   # processing around a half million files per second, which is pretty fast
+   # even if you are just copying or moving the logfiles.)
+   os.utime(args.outfile, (mtime_max + 2e-6, mtime_max + 2e-6))
    l.debug('done')
 
 
