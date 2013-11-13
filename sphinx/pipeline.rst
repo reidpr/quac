@@ -300,6 +300,11 @@ The file format of the pagecount files is `documented by WMF
    file. Often, these timestamps are a few seconds past the hour; we ignore
    this.
 
+#. Filesystem timestamps are not reliable, especially in the older parts of
+   the data. That is, sometimes older files have newer timestamps, and the
+   interval between consecutive files can be much less than one hour
+   (sometimes less than a second, making them equal on many filesystems).
+
 #. The files are ASCII, with high bytes in article URLs percent-encoded. We do
    not decode them because (a) it saves significant time and (b) there are
    apparently non-UTF-8 encodings in use. (I believe the URL encoding is
