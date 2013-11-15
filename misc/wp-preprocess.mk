@@ -44,6 +44,7 @@ endef
 ## Phony rules to organize things
 
 .PHONY: all clean
+.PRECIOUS: metadata
 
 all: dircheck hashed metadata
 
