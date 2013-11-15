@@ -53,6 +53,7 @@ def main():
       pv_process(filename, md)
    l.debug('writing %s' % (args.outfile))
    mdp.commit()
+   metadata_daily_dump(md)
    l.debug('setting mtime')
    # Set metadata's mtime to two microseconds beyond mtime_max. This is
    # because some Linux filesystems (e.g., ext4) store timestamps to
@@ -73,6 +74,23 @@ def main():
 
 
 ### Functions and classes ###
+
+def metadata_daily_dump(md):
+   '''Make the daily extract of the metadata and dump it to a pickle file. The
+      main hourly file is canonical, so we don't lock the daily one or try to
+      reload it.'''
+   md_daily = dict()
+   md_daily['badfiles'] = md['badfiles']
+   md_daily['projects'] = dict()
+   for (proj, pdata) in md['projects'].iteritems():
+      md_daily['projects'][proj] = dict()
+      pdata_d = md_daily['projects'][proj]
+      for (date, ddata) in pdata.iteritems():
+         pdata_d[date] = dict()
+         ddata_d = pdata_d[date]
+         ddata_d['total'] = ddata['total']
+         ddata_d['hours_len'] = len(ddata['hours'])
+   u.pickle_dump(args.outfile + '.daily', md_daily)
 
 def metadata_pkl_open(filename):
    return pickle_glue.File(filename, writable=True,

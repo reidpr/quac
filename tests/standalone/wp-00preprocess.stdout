@@ -259,7 +259,7 @@ pagecounts-20990101-010000.gz
 pagecounts-20990101-020000.gz
 pagecounts-20990101-030000.tmp
 $ (make -f ../../../misc/wp-preprocess.mk clean)
-rm -Rf hashed hashed_small hashed_tiny metadata
+rm -Rf hashed hashed_small hashed_tiny metadata metadata.daily.pkl.gz
 $ ls
 get-test-data
 ls-R.fulldata
@@ -529,8 +529,6 @@ pagecounts-20121102-010000.gz -> ../../raw/2012/2012-11/pagecounts-20121102-0100
 hashed_tiny/0:
 total 0
 pagecounts-20121026-030000.gz -> ../../raw/2012/2012-10/pagecounts-20121026-030000.gz
-$ md5sum metadata
-d4f38517745d9cff99b86836eafc8a53  metadata
 ed1b3ff77e84d13d0275d665686bfd77  -
 {'badfiles': set(['raw/2008/2008-10/pagecounts-20081021-090000.gz',
                   'raw/2011/2011-10/pagecounts-20111008-180001.gz',
@@ -980,12 +978,52 @@ ed1b3ff77e84d13d0275d665686bfd77  -
                                                             21: 279,
                                                             22: 210},
                                                   'total': 8222}}}}
+9c5adc9e29e86ececa20b159a36da08a  -
+{'badfiles': set(['raw/2008/2008-10/pagecounts-20081021-090000.gz',
+                  'raw/2011/2011-10/pagecounts-20111008-180001.gz',
+                  'raw/2099/2099-01/pagecounts-20990101-010000.gz',
+                  'raw/2099/2099-01/pagecounts-20990101-020000.gz']),
+ 'projects': {'en': {datetime.date(2012, 10, 26): {'hours_len': 23,
+                                                   'total': 304599},
+                     datetime.date(2012, 10, 28): {'hours_len': 24,
+                                                   'total': 489784},
+                     datetime.date(2012, 10, 29): {'hours_len': 24,
+                                                   'total': 807736},
+                     datetime.date(2012, 10, 30): {'hours_len': 23,
+                                                   'total': 1208945},
+                     datetime.date(2012, 10, 31): {'hours_len': 24,
+                                                   'total': 4703908},
+                     datetime.date(2012, 11, 1): {'hours_len': 24,
+                                                  'total': 989505},
+                     datetime.date(2012, 11, 2): {'hours_len': 24,
+                                                  'total': 430686},
+                     datetime.date(2012, 11, 3): {'hours_len': 24,
+                                                  'total': 311596},
+                     datetime.date(2012, 11, 4): {'hours_len': 23,
+                                                  'total': 249042}},
+              'ru': {datetime.date(2012, 10, 26): {'hours_len': 23,
+                                                   'total': 42391},
+                     datetime.date(2012, 10, 28): {'hours_len': 24,
+                                                   'total': 50948},
+                     datetime.date(2012, 10, 29): {'hours_len': 24,
+                                                   'total': 54492},
+                     datetime.date(2012, 10, 30): {'hours_len': 23,
+                                                   'total': 90564},
+                     datetime.date(2012, 10, 31): {'hours_len': 24,
+                                                   'total': 180487},
+                     datetime.date(2012, 11, 1): {'hours_len': 24,
+                                                  'total': 34134},
+                     datetime.date(2012, 11, 2): {'hours_len': 24,
+                                                  'total': 16433},
+                     datetime.date(2012, 11, 3): {'hours_len': 24,
+                                                  'total': 10899},
+                     datetime.date(2012, 11, 4): {'hours_len': 23,
+                                                  'total': 8222}}}}
 $ (touch raw/2012/2012-10/pagecounts-20121029-010001.gz && sleep 1.5)
 $ (make -f ../../../misc/wp-preprocess.mk MDARGS=--notimes HASHMOD=4)
 test -d raw -a -d raw/2012 -a -d raw/2012/2012-10
 wp-update-metadata on 1 files ...
 wp-hashfiles on 1 files ...
 touch hashed
-$ md5sum metadata
-f9ec2ae93202a3c830e41c1d1a357f35  metadata
 ed1b3ff77e84d13d0275d665686bfd77  -
+9c5adc9e29e86ececa20b159a36da08a  -

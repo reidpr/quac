@@ -115,4 +115,4 @@ tests/twitter/tweets/geo
 
 # derived test wikimedia data
 tests/standalone/wp-access/hashed*
-tests/standalone/wp-access/metadata
+tests/standalone/wp-access/metadata*

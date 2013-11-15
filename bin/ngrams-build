@@ -100,7 +100,8 @@ def main():
 class Job(object):
 
    def metadata_load(self):
-      self.metadata = u.pickle_load('%s/metadata' % (args.inputs[0]))
+      self.metadata = u.pickle_load('%s/%s' % (args.inputs[0],
+                                               self.metadata_name))
 
    def setup(self):
       self.args_munge()
@@ -112,6 +113,10 @@ class Job(object):
 
 
 class Tweet_Job(Job):
+
+   @property
+   def metadata_name(self):
+      return 'metadata'
 
    def args_munge(self):
       args.python = 'qr.ngramtime.Tweet_Job' # kind of a hack?
@@ -128,6 +133,10 @@ class Tweet_Job(Job):
 
 class Wikimedia_Job(Job):
 
+   @property
+   def metadata_name(self):
+      return 'metadata.daily.pkl.gz'
+
    def args_munge(self):
       args.python = 'qr.ngramtime.Wikimedia_Job'
       args.pyargs = qr.base.encode({ 'min_occur': args.min_occur })
@@ -143,7 +152,7 @@ class Wikimedia_Job(Job):
       date_max = max(en.iterkeys())
       mask = math_.Date_Vector.zeros(date_min, date_max, dtype=np.bool)
       for (i, d) in enumerate(time_.dateseq(date_min, date_max)):
-         if (en.has_key(d) and len(en[d]['hours']) >= 12):
+         if (en.has_key(d) and en[d]['hours_len'] >= 12):
             mask[i] = True
       totals['mask'] = mask
       # Compute totals for each project

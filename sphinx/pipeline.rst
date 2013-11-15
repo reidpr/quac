@@ -287,6 +287,9 @@ A fully populated data directory looks (in part) something like this:
 
 * :samp:`metadata` --- The metadata file.
 
+* :samp:`metadata.daily` --- A subset of the metadata file containing only
+  daily data.
+
 File formats
 ------------
 
@@ -332,10 +335,10 @@ The file format of the pagecount files is `documented by WMF
    total traffic rather than raw hit counts, the effect should be minimal.
 
 
-Metadata file
-~~~~~~~~~~~~~
+Metadata files
+~~~~~~~~~~~~~~
 
-This is a pickled Python dictionary. Example content::
+These are pickled Python dictionaries. Example content of ``metadata``::
 
    { 'badfiles': set([ ... ]),
      'projects': { 'en':   { date: { 'total': count,
@@ -363,6 +366,12 @@ That is, there are two items in the dictionary.
    In both cases, the value ``0`` means no hits. A missing date or a missing
    hour means no data (i.e., the ``'hours'`` dict would have only 23 entries
    if one hour of data were missing on that day).
+
+Note that ``metadata`` is quite large, requiring over 10 GB of RAM to load.
+
+The ``metadata.daily`` file omits the detailed hourly counts, replacing the
+``hours`` key with ``hours_len``, an integer saying how many hours of data
+were found for that day.
 
 
 ..  LocalWords:  pagecount samp badfiles
