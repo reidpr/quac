@@ -68,6 +68,14 @@ if (not args.noclean):
       print old_testdir
       shutil.rmtree(old_testdir)
 
+# There is a bug in certain versions of the readline library which causes
+# terminal escape codes to be printed on "import readline". This messes up the
+# tests. The workaround is to delete the TERM environment variable. We do this
+# always because it doesn't cause problems if the bug isn't present. See:
+# http://reinout.vanrees.org/weblog/2009/08/14/readline-invisible-character-hack.html
+# http://www.incenp.org/notes/2012/python-term-smm-fix.html
+del os.environ['TERM']
+
 # Used to remember which ready.sh scripts we have already tried, because some
 # of them take a few seconds to run. We are lame and use a global variable.
 ready_tried = defaultdict(lambda: None)
