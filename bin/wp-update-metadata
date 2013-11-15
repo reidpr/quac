@@ -119,10 +119,13 @@ def pv_process(filename, md):
             # parseability guarantee for files that pass through metadata, or
             # (b) patch together a repaired version. I'm currently too lazy
             # for that.
-            x.args = ('bad line %d: %s' % (i+1, x.args[0]),)
+            x.args = ('line %d: %s' % (i+1, x.args[0]),)
             raise x
    except (EOFError, IOError, ValueError) as x:
-      l.warning('%s: skipping file: %s' % (filename, str(x)))
+      if (isinstance(x, ValueError)):
+         l.warning('%s: bad content, skipping file: %s' % (filename, str(x)))
+      else:
+         l.warning('%s: error reading file, skipping' % (filename))
       md['badfiles'].add(filename)
       return
 

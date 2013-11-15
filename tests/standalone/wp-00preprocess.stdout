@@ -268,10 +268,10 @@ README
 $ (make -f ../../../misc/wp-preprocess.mk MDARGS=--notimes HASHMOD=4 XARGS_BLOCK=128)
 test -d raw -a -d raw/2012 -a -d raw/2012/2012-10
 wp-update-metadata on 217 files ...
-wpmtd WARNING  raw/2008/2008-10/pagecounts-20081021-090000.gz: skipping file: bad line 1: need more than 2 values to unpack
-wpmtd WARNING  raw/2011/2011-10/pagecounts-20111008-180001.gz: skipping file: Not a gzipped file
-wpmtd WARNING  raw/2099/2099-01/pagecounts-20990101-010000.gz: skipping file: bad line 1: need more than 1 value to unpack
-wpmtd WARNING  raw/2099/2099-01/pagecounts-20990101-020000.gz: skipping file: Compressed file ended before the end-of-stream marker was reached
+wpmtd WARNING  raw/2008/2008-10/pagecounts-20081021-090000.gz: bad content, skipping file: line 1: need more than 2 values to unpack
+wpmtd WARNING  raw/2011/2011-10/pagecounts-20111008-180001.gz: error reading file, skipping
+wpmtd WARNING  raw/2099/2099-01/pagecounts-20990101-010000.gz: bad content, skipping file: line 1: need more than 1 value to unpack
+wpmtd WARNING  raw/2099/2099-01/pagecounts-20990101-020000.gz: error reading file, skipping
 wp-hashfiles on 217 files ...
 touch hashed
 $ (for i in hashed/*; do echo -n $i ' '; ls $i | wc -l; done)
