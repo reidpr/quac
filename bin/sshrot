@@ -26,10 +26,10 @@ Warnings/notes/quirks:
 
 * sshrot doesn't do anything to limit the number of jobs on any given host.
 
-* This script drops state files in the current directory. Because they are
-  needed for subsequent invocations, and sshrot doesn't know how many of these
-  there will be, some of the files must be cleaned up manually when you are
-  done (unless you use --muxstop).
+* This script drops state files in /tmp. Because they are needed for
+  subsequent invocations, and sshrot doesn't know how many of these there will
+  be, some of the files must be cleaned up manually when you are done (unless
+  you use --muxstop).
 
 * If the state file names a host that is not in the node list, then we
   silently start over from the beginning of the host list.
@@ -57,8 +57,12 @@ import quacpath
 import testable
 import u
 
-STATEFILE = 'sshrot.state'
-SSH_BASE = ['ssh', '-o', 'BatchMode=yes', '-S', './sshsock.%h']
+CWDPROXY = os.getcwd().replace('/', '+')
+# We put these in /tmp instead of TMPDIR to avoid "ControlPath too long". The
+# limit seems quite short; 129 characters failed for me.
+STATEFILE = '/tmp/%s+%s' % (CWDPROXY, 'sshrot.state')
+SOCKFILE = '/tmp/%s+%s' % (CWDPROXY, 'sshsock.%h')
+SSH_BASE = ['ssh', '-o', 'BatchMode=yes', '-S', SOCKFILE]
 
 
 ### Setup ###

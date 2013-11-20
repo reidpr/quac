@@ -60,11 +60,11 @@ sshinfo () {
     # FIXME: This ps command does not work on Mac. I suspect a portable
     # alternative is possible, but I haven't figured it out yet.
     echo -n 'ssh clients:      '
-    ps -C ssh -o command | fgrep -v 'sleep 86400' | egrep -c -- '-S \./sshsock\..* '$1 || true
+    ps -C ssh -o command | fgrep -v 'sleep 86400' | egrep -c -- '-S .+sshsock\..* '$1 || true
     echo -n 'ssh masters:      '
-    ps -C ssh -o command | egrep -c -- '-S \./sshsock\..* '$1' sleep 86400' || true
+    ps -C ssh -o command | egrep -c -- '-S .+sshsock\..* '$1' sleep 86400' || true
     echo -n 'control sockets:  '
-    ls $DATADIR | fgrep -c 'sshsock.'$1 || true
+    ls /tmp | fgrep -c 'sshsock.'$1 || true
     echo -n 'TCP connections:  '
     netstat $WIDE | egrep -c '(localhost|'$HOSTNAME'):.+'$1'.*:ssh +ESTABLISHED' || true
 }
