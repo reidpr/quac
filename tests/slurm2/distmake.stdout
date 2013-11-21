@@ -1,98 +1,41 @@
+$ sshrot --info
+MPI
 $ sshrot --muxstart
-ssh clients:      0
-ssh masters:      1
-control sockets:  1
-TCP connections:  1
-ssh clients:      0
-ssh masters:      1
-control sockets:  1
-TCP connections:  1
-$ (sshrot 'echo a && sleep 1 && echo b' &)
-$ (sshrot 'echo a && sleep 1 && echo b' &)
-$ (sshrot 'echo a && sleep 1 && echo b' &)
-$ sleep 0.75
-a
-a
-a
-ssh clients:      2
-ssh masters:      1
-control sockets:  1
-TCP connections:  1
-ssh clients:      1
-ssh masters:      1
-control sockets:  1
-TCP connections:  1
-$ sleep 1.25
-b
-b
-b
+usage: sshrot [-c] [-e] [--info] [--muxstart] [--muxstop] [-h] [--notimes]
+              [--unittest] [--verbose]
+              [WORD [WORD ...]]
+sshrot: error: SSH session multiplexing is not supported in MPI mode
 $ sshrot --muxstop
-Exit request sent.
-Exit request sent.
-ssh clients:      0
-ssh masters:      0
-control sockets:  0
-TCP connections:  0
-ssh clients:      0
-ssh masters:      0
-control sockets:  0
-TCP connections:  0
-$ sshrot --muxstart
-$ (sshrot 'sleep 1.5 && echo c' &)
-$ (sshrot 'sleep 1.5 && echo c' &)
-$ (sshrot 'sleep 1.5 && echo c' &)
-$ (sshrot 'sleep 1.5 && echo c' &)
-$ (sshrot 'sleep 1.5 && echo c' &)
-$ (sshrot 'sleep 1.5 && echo c' &)
-$ (sshrot 'sleep 1.5 && echo c' &)
-$ (sshrot 'sleep 1.5 && echo c' &)
-$ (sshrot 'sleep 1.5 && echo c' &)
-$ (sshrot 'sleep 1.5 && echo c' &)
-$ (sshrot 'sleep 1.5 && echo c' &)
-$ (sshrot 'sleep 1.5 && echo c' &)
-$ (sshrot 'sleep 1.5 && echo c' &)
-$ (sshrot 'sleep 1.5 && echo c' &)
-$ (sshrot 'sleep 1.5 && echo c' &)
-$ (sshrot 'sleep 1.5 && echo c' &)
-$ (sshrot 'sleep 1.5 && echo c' &)
-$ (sshrot 'sleep 1.5 && echo c' &)
+usage: sshrot [-c] [-e] [--info] [--muxstart] [--muxstop] [-h] [--notimes]
+              [--unittest] [--verbose]
+              [WORD [WORD ...]]
+sshrot: error: SSH session multiplexing is not supported in MPI mode
+$ (sshrot 'sleep 1 && echo a && sleep 1 && echo b' &)
+$ (sshrot 'sleep 1 && echo a && sleep 1 && echo b' &)
+$ (sshrot 'sleep 1 && echo a && sleep 1 && echo b' &)
 $ sleep 0.5
-ssh clients:      9
-ssh masters:      1
-control sockets:  1
-TCP connections:  1
-ssh clients:      9
-ssh masters:      1
-control sockets:  1
-TCP connections:  1
-$ sleep 2.0
-c
-c
-c
-c
-c
-c
-c
-c
-c
-c
-c
-c
-c
-c
-c
-c
-c
-c
-$ sshrot --muxstop
-Exit request sent.
-Exit request sent.
-$ sshrot --muxstart
+Reported: 1 (out of 1) daemons - 1 (out of 1) procs
+Reported: 1 (out of 1) daemons - 1 (out of 1) procs
+$ sleep 1.0
+a
+a
+a
+$ sleep 1.0
+b
+b
+b
+$ (sshrot 'hostname > hostname.1')
+$ (sshrot 'hostname > hostname.2')
+Reported: 1 (out of 1) daemons - 1 (out of 1) procs
+$ (cmp --quiet hostname.1 hostname.2 || echo commands ran on different nodes)
+commands ran on different nodes
 $ make -j2 --quiet
+Reported: 1 (out of 1) daemons - 1 (out of 1) procs
+Reported: 1 (out of 1) daemons - 1 (out of 1) procs
+Reported: 1 (out of 1) daemons - 1 (out of 1) procs
+Reported: 1 (out of 1) daemons - 1 (out of 1) procs
+Reported: 1 (out of 1) daemons - 1 (out of 1) procs
 $ (cat out/* | sort)
       1 baz
       2 bar
       3 foo
-$ sshrot --muxstop
-Exit request sent.
-Exit request sent.

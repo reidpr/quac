@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-'Run a command on an intelligently-selected other host via ssh.'
+'''\
+Run a command on an intelligently-selected other host. If mpirun is available,
+use that to invoke the command; otherwise, use ssh.'''
 
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
@@ -62,7 +64,12 @@ CWDPROXY = os.getcwd().replace('/', '+')
 # limit seems quite short; 129 characters failed for me.
 STATEFILE = '/tmp/%s+%s' % (CWDPROXY, 'sshrot.state')
 SOCKFILE = '/tmp/%s+%s' % (CWDPROXY, 'sshsock.%h')
-SSH_BASE = ['ssh', '-o', 'BatchMode=yes', '-S', SOCKFILE]
+if (u.mpi_available_p()):
+   MPI_MODE = True
+   CMD_BASE = ['mpirun', '-np', '1', '-H']
+else:
+   MPI_MODE = False
+   CMD_BASE = ['ssh', '-o', 'BatchMode=yes', '-S', SOCKFILE]
 
 
 ### Setup ###
@@ -75,12 +82,15 @@ gr.add_argument('-c',
 gr.add_argument('-e',
                 action='store_true',
                 help='exit with error as soon as command component fails')
+gr.add_argument('--info',
+                action='store_true',
+                help='print transport mechanism (ssh or mpi) and exit')
 gr.add_argument('--muxstart',
                 action='store_true',
-                help='set up session sharing for all nodes')
+                help='set up session multiplexing for all nodes')
 gr.add_argument('--muxstop',
                 action='store_true',
-                help='tear down session sharing')
+                help='tear down session multiplexing')
 gr.add_argument('cmds',
                 metavar='WORD',
                 nargs='*',
@@ -112,10 +122,10 @@ def main():
          # need to support 5.3. The workaround is to run sleep for a generous
          # time period (jobs should complete within this time) and add -f to
          # run in the background (so sshrot returns immediately).
-         subprocess.check_call(SSH_BASE + ['-Mf', node, 'sleep 86400'])
+         subprocess.check_call(CMD_BASE + ['-Mf', node, 'sleep 86400'])
    elif (args.muxstop):
       for node in nodes:
-         subprocess.check_call(SSH_BASE + ['-O', 'exit', node])
+         subprocess.check_call(CMD_BASE + ['-O', 'exit', node])
       os.unlink(STATEFILE)
    else:
       # run a command
@@ -136,18 +146,39 @@ def main():
       statef.close()
 
       # build and run command
-      cmd = SSH_BASE + [curnode, 'cd', os.getcwd(), ';']
+      cmd_args = args.cmds
       if (args.e):
-         cmd += ['set', '-e', ';']
-      cmd += args.cmds
-      os.execvp('ssh', cmd)
+         cmd_args = ['set', '-e', ';'] + cmd_args
+      if (MPI_MODE):
+         # mpirun appears to invoke our command without use of the shell.
+         # Therefore, we construct our own shell invocation. Also, mpirun will
+         # do the cd for us.
+         cmd_args = [curnode, 'sh', '-c', ' '.join(cmd_args)]
+      else:
+         # SSH appears to do its own packing of the command words into a shell
+         # invocation. Therefore, we pass the words individually.
+         cmd_args = [curnode, 'cd', os.getcwd(), ';'] + cmd_args
+      os.execvp(CMD_BASE[0], CMD_BASE + cmd_args)
 
 
 ### Bootstrap ###
 
 try:
-   args = u.parse_args(ap)
+
    if (__name__ == '__main__'):
+      args = u.parse_args(ap)
+
+      if (MPI_MODE and (args.muxstart or args.muxstop)):
+         ap.error('SSH session multiplexing is not supported in MPI mode')
+
+      if (args.info):
+         if (MPI_MODE):
+            print 'MPI'
+         else:
+            print 'SSH'
+         sys.exit(0)
+
       main()
+
 except testable.Unittests_Only_Exception:
    testable.register('')

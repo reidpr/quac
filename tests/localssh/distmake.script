@@ -13,6 +13,9 @@ exec 2>&1
 # the fancy stuff below...
 y "sshrot echo a"
 
+# Should be using SSH (not MPI)
+x sshrot --info
+
 ## SSH multiplexing test ##
 #
 # Set up two simultaneous ssh connections. Note that this test depends on

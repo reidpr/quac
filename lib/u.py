@@ -17,6 +17,7 @@ import collections
 import ConfigParser
 import cProfile
 from datetime import datetime, timedelta
+import distutils.spawn
 import glob
 import gzip
 import functools
@@ -606,6 +607,12 @@ def module_dir(m=None):
    if (m is None):
       m = calling_module(1)
    return os.path.abspath(os.path.dirname(m.__file__))
+
+def mpi_available_p():
+   '''Return True if MPI (including mpirun) is avilable in a SLURM allocation,
+      False otherwise.'''
+   return bool(os.environ.has_key('SLURM_NODELIST')
+               and distutils.spawn.find_executable('mpirun'))
 
 def path_configured(path):
    if (cpath is None):

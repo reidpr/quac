@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Test that distributed make over ssh works in a SLURM allocation.
+# Test that distributed make works in a SLURM allocation using mpirun.
 
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
@@ -9,44 +9,38 @@
 cd $DATADIR
 exec 2>&1
 
-## SSH multiplexing test ##
-x sshrot --muxstart
-# Verify one master to each node.
-sshinfo $SLURM_NODE_A
-sshinfo $SLURM_NODE_B
+
+## Preliminary logistics
+
+# sshrot should claim the correct mechanism
+x sshrot --info
+
+# SSH multiplexing should not work
+x sshrot --muxstart || true
+x sshrot --muxstop || true
+
+
+## Does sshrot work on a basic level? ##
+
 # Run three tasks.
-y "sshrot 'echo a && sleep 1 && echo b' &"
-y "sshrot 'echo a && sleep 1 && echo b' &"
-y "sshrot 'echo a && sleep 1 && echo b' &"
-# Wait for output.
-x sleep 0.75
-# Verify two connections to node A, one to node B.
-sshinfo $SLURM_NODE_A
-sshinfo $SLURM_NODE_B
-# Wait for output.
-x sleep 1.25
-# Stop multiplexing.
-x sshrot --muxstop
-# Verify that everything is gone.
-sshinfo $SLURM_NODE_A
-sshinfo $SLURM_NODE_B
-
-## SSH scale test ##
-x sshrot --muxstart
-for i in {1..18}; do
-    # Note: I don't actually want all 18 sshrot invocations in the output log,
-    # but if I remove the y wrapper, then the ssh invocations show up in ps
-    # output as sshrot instead of ssh, breaking sshinfo function. ???
-    y "sshrot 'sleep 1.5 && echo c' &"
-done
+y "sshrot 'sleep 1 && echo a && sleep 1 && echo b' &"
+y "sshrot 'sleep 1 && echo a && sleep 1 && echo b' &"
+y "sshrot 'sleep 1 && echo a && sleep 1 && echo b' &"
+# Wait for "Reported: ..."
 x sleep 0.5
-sshinfo $SLURM_NODE_A
-sshinfo $SLURM_NODE_B
-x sleep 2.0
-x sshrot --muxstop
+# Wait for "a".
+x sleep 1.0
+# Wait for "b".
+x sleep 1.0
 
-# QUACreduce to multiple nodes test
-x sshrot --muxstart
+# Run two tasks; they should run on different hosts.
+y "sshrot 'hostname > hostname.1'"
+y "sshrot 'hostname > hostname.2'"
+y "cmp --quiet hostname.1 hostname.2 || echo commands ran on different nodes"
+
+
+## QUACreduce test ##
+
 echo -e 'foo bar baz\nfoo foo' > foo1.txt
 echo -e 'bar' > foo2.txt
 quacreduce --dist \
@@ -56,4 +50,3 @@ quacreduce --dist \
            foo*.txt
 x make -j2 --quiet
 y 'cat out/* | sort'
-x sshrot --muxstop

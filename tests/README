@@ -12,7 +12,7 @@ What's here:
   standalone ... tests that require no extra data
   internet ..... need relatively unfettered Internet access
   localssh ..... need passwordless SSH to localhost
-  slurm2 ....... need >=2 node SLURM allocation
+  slurm2 ....... need >=2 node SLURM allocation with mpirun
   twitter ...... need a small Twitter dataset
 
 Tests that require external data which are not present are skipped. These test
