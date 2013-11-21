@@ -10,7 +10,10 @@ import gzip
 import os
 from pprint import pprint
 
+import numpy as np
+
 import quacpath
+import math_
 import pickle_glue
 import testable
 import time_
@@ -53,7 +56,7 @@ def main():
       pv_process(filename, md)
    l.debug('writing %s' % (args.outfile))
    mdp.commit()
-   metadata_daily_dump(md)
+   metadata_vector_dump(md)
    l.debug('setting mtime')
    # Set metadata's mtime to two microseconds beyond mtime_max. This is
    # because some Linux filesystems (e.g., ext4) store timestamps to
@@ -75,22 +78,30 @@ def main():
 
 ### Functions and classes ###
 
-def metadata_daily_dump(md):
-   '''Make the daily extract of the metadata and dump it to a pickle file. The
-      main hourly file is canonical, so we don't lock the daily one or try to
-      reload it.'''
-   md_daily = dict()
-   md_daily['badfiles'] = md['badfiles']
-   md_daily['projects'] = dict()
-   for (proj, pdata) in md['projects'].iteritems():
-      md_daily['projects'][proj] = dict()
-      pdata_d = md_daily['projects'][proj]
-      for (date, ddata) in pdata.iteritems():
-         pdata_d[date] = dict()
-         ddata_d = pdata_d[date]
-         ddata_d['total'] = ddata['total']
-         ddata_d['hours_len'] = len(ddata['hours'])
-   u.pickle_dump(args.outfile + '.daily', md_daily)
+def metadata_vector_dump(md):
+   '''Make the Date_Vector extract of the metadata and dump it to a pickle
+      file. The main hourly file is canonical, so we don't lock the daily one
+      or try to reload it.'''
+   totals = dict()
+   # Compute mask. If a day has more than 12 hours of data in English
+   # Wikipedia, we call it a valid day's data.
+   en = md['projects']['en']
+   date_min = min(en.iterkeys())
+   date_max = max(en.iterkeys())
+   mask = math_.Date_Vector.zeros(date_min, date_max, dtype=np.bool)
+   for (i, d) in enumerate(time_.dateseq(date_min, date_max)):
+      if (en.has_key(d) and len(en[d]['hours']) >= 12):
+         mask[i] = True
+   totals['mask'] = mask
+   # Compute totals for each project
+   totals['projects'] = dict()
+   for (project, dates) in md['projects'].iteritems():
+      series = math_.Date_Vector.zeros(date_min, date_max, dtype=np.float32)
+      for (i, d, _) in series.enumerated:
+         series[i] = dates.get(d, {'total': 0})['total']
+      totals['projects'][project] = { 'total': sum(series),
+                                      'series': series }
+   u.pickle_dump(args.outfile + '.total', totals)
 
 def metadata_pkl_open(filename):
    return pickle_glue.File(filename, writable=True,

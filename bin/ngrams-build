@@ -12,6 +12,7 @@ import glob
 import os
 import os.path
 from pprint import pprint
+import shutil
 import subprocess as sp
 import sys
 
@@ -56,6 +57,7 @@ gr.add_argument('--clean',
                 help='run "make clean" after job completion')
 
 args = qr.scripting.parse_args(ap)
+args.inputdir = args.inputs[0]  # we later overwrite args.inputs
 u.configure(None)
 u.logging_init('ngbld')
 
@@ -69,10 +71,10 @@ def main():
 
    l.info('starting')
 
-   if (os.path.exists('%s/tweet_ct.gp.pdf' % (args.inputs[0]))):
+   if (os.path.exists('%s/tweet_ct.gp.pdf' % (args.inputdir))):
       l.info('input appears to be tweets')
       j = Tweet_Job()
-   elif (os.path.exists('%s/hashed' % (args.inputs[0]))):
+   elif (os.path.exists('%s/hashed' % (args.inputdir))):
       l.info('input appears to be Wikimedia pageview logs')
       j = Wikimedia_Job()
    else:
@@ -100,7 +102,7 @@ def main():
 class Job(object):
 
    def metadata_load(self):
-      self.metadata = u.pickle_load('%s/%s' % (args.inputs[0],
+      self.metadata = u.pickle_load('%s/%s' % (args.inputdir,
                                                self.metadata_name))
 
    def setup(self):
@@ -108,8 +110,11 @@ class Job(object):
       qr.scripting.setup(args)
 
    def totals_write(self):
-      total = self.totals_build()
-      u.pickle_dump('%s/out/total' % (args.jobdir), total)
+      # FIXME: Right now Tweet_Job.totals_build() actually builds and writes a
+      # new totals file, while Wikipedia_Job.totals_build() simply copies an
+      # existing file. Tweet_Job should do the same, and Wikipedia_Job's logic
+      # should be promoted here.
+      self.totals_build()
 
 
 class Tweet_Job(Job):
@@ -122,48 +127,30 @@ class Tweet_Job(Job):
       args.python = 'qr.ngramtime.Tweet_Job' # kind of a hack?
       args.pyargs = qr.base.encode({ 'n': args.n,
                                      'min_occur': args.min_occur })
-      args.inputs = glob.glob('%s/*.all.tsv' % (args.inputs[0]))
+      args.inputs = glob.glob('%s/*.all.tsv' % (args.inputdir))
 
    def totals_build(self):
       cts = [v['count'] for (k, v) in sorted(self.metadata['days'].iteritems())]
       cts = math_.Date_Vector(min(self.metadata['days'].iterkeys()),
                               np.array(cts, dtype=np.float32))
-      return { 'projects': { 't@': { 'total': sum(cts), 'series': cts } } }
+      total = { 'projects': { 't@': { 'total': sum(cts), 'series': cts } } }
+      u.pickle_dump('%s/out/total' % (args.jobdir), total)
 
 
 class Wikimedia_Job(Job):
 
-   @property
-   def metadata_name(self):
-      return 'metadata.daily.pkl.gz'
+   def metadata_load(self):
+      pass
 
    def args_munge(self):
       args.python = 'qr.ngramtime.Wikimedia_Job'
       args.pyargs = qr.base.encode({ 'min_occur': args.min_occur })
       args.file_reader = 'echo -n'
-      args.inputs = glob.glob('%s/%s/*' % (args.inputs[0], args.hashdir))
+      args.inputs = glob.glob('%s/%s/*' % (args.inputdir, args.hashdir))
 
    def totals_build(self):
-      totals = dict()
-      # Compute mask. If a day has more than 12 hours of data in English
-      # Wikipedia, we call it a valid day's data.
-      en = self.metadata['projects']['en']
-      date_min = min(en.iterkeys())
-      date_max = max(en.iterkeys())
-      mask = math_.Date_Vector.zeros(date_min, date_max, dtype=np.bool)
-      for (i, d) in enumerate(time_.dateseq(date_min, date_max)):
-         if (en.has_key(d) and en[d]['hours_len'] >= 12):
-            mask[i] = True
-      totals['mask'] = mask
-      # Compute totals for each project
-      totals['projects'] = dict()
-      for (project, dates) in self.metadata['projects'].iteritems():
-         series = math_.Date_Vector.zeros(date_min, date_max, dtype=np.float32)
-         for (i, d, _) in series.enumerated:
-            series[i] = dates.get(d, {'total': 0})['total']
-         totals['projects'][project] = { 'total': sum(series),
-                                         'series': series }
-      return totals
+      shutil.copy2('%s/metadata.total.pkl.gz' % (args.inputdir),
+                   '%s/out/total.pkl.gz' % (args.jobdir))
 
 
 ### Bootstrap ###

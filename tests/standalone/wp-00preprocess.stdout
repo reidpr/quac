@@ -259,7 +259,7 @@ pagecounts-20990101-010000.gz
 pagecounts-20990101-020000.gz
 pagecounts-20990101-030000.tmp
 $ (make -f ../../../misc/wp-preprocess.mk clean)
-rm -Rf hashed hashed_small hashed_tiny metadata metadata.daily.pkl.gz
+rm -Rf hashed hashed_small hashed_tiny metadata metadata.total.pkl.gz
 $ ls
 get-test-data
 ls-R.fulldata
@@ -978,47 +978,14 @@ ed1b3ff77e84d13d0275d665686bfd77  -
                                                             21: 279,
                                                             22: 210},
                                                   'total': 8222}}}}
-9c5adc9e29e86ececa20b159a36da08a  -
-{'badfiles': set(['raw/2008/2008-10/pagecounts-20081021-090000.gz',
-                  'raw/2011/2011-10/pagecounts-20111008-180001.gz',
-                  'raw/2099/2099-01/pagecounts-20990101-010000.gz',
-                  'raw/2099/2099-01/pagecounts-20990101-020000.gz']),
- 'projects': {'en': {datetime.date(2012, 10, 26): {'hours_len': 23,
-                                                   'total': 304599},
-                     datetime.date(2012, 10, 28): {'hours_len': 24,
-                                                   'total': 489784},
-                     datetime.date(2012, 10, 29): {'hours_len': 24,
-                                                   'total': 807736},
-                     datetime.date(2012, 10, 30): {'hours_len': 23,
-                                                   'total': 1208945},
-                     datetime.date(2012, 10, 31): {'hours_len': 24,
-                                                   'total': 4703908},
-                     datetime.date(2012, 11, 1): {'hours_len': 24,
-                                                  'total': 989505},
-                     datetime.date(2012, 11, 2): {'hours_len': 24,
-                                                  'total': 430686},
-                     datetime.date(2012, 11, 3): {'hours_len': 24,
-                                                  'total': 311596},
-                     datetime.date(2012, 11, 4): {'hours_len': 23,
-                                                  'total': 249042}},
-              'ru': {datetime.date(2012, 10, 26): {'hours_len': 23,
-                                                   'total': 42391},
-                     datetime.date(2012, 10, 28): {'hours_len': 24,
-                                                   'total': 50948},
-                     datetime.date(2012, 10, 29): {'hours_len': 24,
-                                                   'total': 54492},
-                     datetime.date(2012, 10, 30): {'hours_len': 23,
-                                                   'total': 90564},
-                     datetime.date(2012, 10, 31): {'hours_len': 24,
-                                                   'total': 180487},
-                     datetime.date(2012, 11, 1): {'hours_len': 24,
-                                                  'total': 34134},
-                     datetime.date(2012, 11, 2): {'hours_len': 24,
-                                                  'total': 16433},
-                     datetime.date(2012, 11, 3): {'hours_len': 24,
-                                                  'total': 10899},
-                     datetime.date(2012, 11, 4): {'hours_len': 23,
-                                                  'total': 8222}}}}
+4d3ec038cdb4a81ee6541082f10f0641  -
+{'mask': Date_Vector('2012-10-26', [ True, False,  True,  True,  True,  True,  True,  True,  True,  True], dtype=bool),
+ 'projects': {'en': {'series': Date_Vector('2012-10-26', [  304599.,        0.,   489784.,   807736.,  1208945.,  4703908.,
+         989505.,   430686.,   311596.,   249042.], dtype=float32),
+                     'total': 9495801.0},
+              'ru': {'series': Date_Vector('2012-10-26', [  42391.,       0.,   50948.,   54492.,   90564.,  180487.,
+         34134.,   16433.,   10899.,    8222.], dtype=float32),
+                     'total': 488570.0}}}
 $ (touch raw/2012/2012-10/pagecounts-20121029-010001.gz && sleep 1.5)
 $ (make -f ../../../misc/wp-preprocess.mk MDARGS=--notimes HASHMOD=4)
 test -d raw -a -d raw/2012 -a -d raw/2012/2012-10
@@ -1026,4 +993,4 @@ wp-update-metadata on 1 files ...
 wp-hashfiles on 1 files ...
 touch hashed
 ed1b3ff77e84d13d0275d665686bfd77  -
-9c5adc9e29e86ececa20b159a36da08a  -
+4d3ec038cdb4a81ee6541082f10f0641  -
