@@ -17,6 +17,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 
 /** Constants **/
@@ -111,8 +112,16 @@ FILE ** output_open(char * basename, int ct)
    FILE ** out = calloc(ct, sizeof(FILE *));
    char * filename;
 
+   /* Create directory, if needed. We ignore EEXIST because we want to keep
+      going if it's a directory that already exists. */
+   if (mkdir(basename, 0777)) {
+      if (errno != EEXIST)
+         fatal("can't mkdir %s: %s", basename, strerror(errno));
+   }
+
+   // Open files.
    for (int i = 0; i < ct; i++) {
-      if (asprintf(&filename, "%s.%d", basename, i) == -1)
+      if (asprintf(&filename, "%s/%d", basename, i) == -1)
          fatal("asprintf() failed");
       out[i] = fopen(filename, "wb");
       if (!out[i])

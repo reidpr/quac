@@ -34,8 +34,22 @@ invalid number of output files: 0
 $ (hashsplit 2 '')
 length of BASENAME cannot be 0
 1
+$ (hashsplit 2 a < /dev/null)
+$ ls -R a
+a:
+0
+1
 $ (hashsplit 2 /does/not/exist < /dev/null)
-can't open /does/not/exist.0: No such file or directory
+can't mkdir /does/not/exist: No such file or directory
+1
+$ touch thisisafile
+$ (hashsplit 2 thisisafile/out < /dev/null)
+can't mkdir thisisafile/out: Not a directory
+$ mkdir b
+$ (hashsplit 2 b < /dev/null)
+$ ls -R b
+b:
+0
 1
 $ cat in.txt
 a	1
@@ -63,7 +77,7 @@ nullvaluewithtab
 nullvaluenotab
 私の名前は中野です
 $ (hashsplit 2 out < in.txt)
-$ cat out.0
+$ cat out/0
 a	1
 c	3
 a	4
@@ -84,16 +98,16 @@ a	19
 a	20
 a	21
 nullvaluewithtab	
-$ cat out.1
+$ cat out/1
 b	2
 b	5
 nullvaluenotab
 私の名前は中野です
 $ (hashsplit 240 out < in.txt)
-$ cat out.37
+$ cat out/37
 b	2
 b	5
-$ cat out.145
+$ cat out/145
 nullvaluenotab
-$ cat out.5
+$ cat out/5
 私の名前は中野です

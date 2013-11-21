@@ -11,7 +11,6 @@ exec 2>&1  # send stderr to stdout to make output more readable
 
 
 # Check argument parsing
-
 x hashsplit
 echo $?
 x hashsplit 2
@@ -25,16 +24,25 @@ echo $?
 y "hashsplit 2 ''"
 echo $?
 
+# Check directory and file creation.
+y "hashsplit 2 a < /dev/null"
+x ls -R a
 
-# Check failure on can't open output file(s)
-
+# Check failure on can't can't create directory because parent doesn't exist.
 y "hashsplit 2 /does/not/exist < /dev/null"
 echo $?
 
+# Check failure on file where directory should be.
+x touch thisisafile
+y "hashsplit 2 thisisafile/out < /dev/null"
+
+# Check directory already existing does not fail.
+x mkdir b
+y "hashsplit 2 b < /dev/null"
+x ls -R b
 
 # Check that it works (note that we repeat "a" several times to make sure
 # we're hashing just the key and not the whole line), including with UTF-8.
-
 cat > in.txt <<EOF
 a	1
 b	2
@@ -61,11 +69,10 @@ nullvaluewithtab
 nullvaluenotab
 私の名前は中野です
 EOF
-
 x cat in.txt
 y "hashsplit 2 out < in.txt"
-x cat out.0
-x cat out.1
+x cat out/0
+x cat out/1
 
 # Now split with much wider degree. This is mainly used to test that other
 # hash functions are consistent. The value 240 is from the default open files
@@ -77,6 +84,6 @@ x cat out.1
 # the size of 100 buckets, which seems reasonable. The actual hash values of
 # the two strings differ.
 y "hashsplit 240 out < in.txt"
-x cat out.37
-x cat out.145
-x cat out.5
+x cat out/37
+x cat out/145
+x cat out/5

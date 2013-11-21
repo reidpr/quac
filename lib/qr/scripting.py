@@ -203,7 +203,7 @@ reallyclean: clean
 ''' % { 'buf': args.sortmem,
         'cmd': cmd,
         'mapdones': ' '.join('tmp/%s.mapped' % (i) for i in input_bases),
-        'mapouts': ' '.join('tmp/%s.%d' % (i, rid) for i in input_bases),
+        'mapouts': ' '.join('tmp/%s/%d' % (i, rid) for i in input_bases),
         'pipefail': PIPEFAIL,
         'rid': rid,
         'reducedone': 'tmp/%d.reduced' % (rid),
