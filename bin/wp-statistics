@@ -1,0 +1,26 @@
+#!/usr/bin/env python
+
+import sys
+
+import quacpath
+import time_
+import tsv_glue
+import u
+
+md = u.pickle_load(sys.argv[1])
+
+hour_counts = { i: 0 for i in xrange(25) }
+
+en = md['projects']['en']
+for date in time_.dateseq(min(en.iterkeys()), max(en.iterkeys())):
+   hour_ct = len(en.get(date, {'hours': []})['hours'])
+   hour_counts[hour_ct] += 1
+
+tsv = tsv_glue.Writer(sys.stdout.fileno())
+
+tsv.writerow(['hour_ct', 'day_ct', 'cum_day_ct'])
+cum = 0
+for (hour_ct, day_ct) in sorted(hour_counts.iteritems()):
+   cum += day_ct
+   tsv.writerow([hour_ct, day_ct, cum])
+tsv.writerow(['total', sum(hour_counts.itervalues()), cum])
