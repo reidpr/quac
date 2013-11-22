@@ -22,12 +22,12 @@
 
 /** Constants **/
 
-/* We use a relatively large output buffer size of 512K to be prepared for
-   filesystems that use large blocks (e.g., Panasas, some RAID). (See also
-   OUTPUT_BUFSIZE in lib/qr/base.py.)
+/* We use a relatively large output buffer size to be prepared for filesystems
+   that use large blocks (e.g., Panasas, some RAID). (See also OUTPUT_BUFSIZE
+   in lib/qr/base.py.)
 
    FIXME: this parameter has not been tuned experimentally. */
-#define OUTPUT_BUFSIZE 524288
+#define OUTPUT_BUFSIZE 4194304
 
 
 /** Prototypes **/
@@ -111,6 +111,7 @@ FILE ** output_open(char * basename, int ct)
 {
    FILE ** out = calloc(ct, sizeof(FILE *));
    char * filename;
+   char * buf;
 
    /* Create directory, if needed. We ignore EEXIST because we want to keep
       going if it's a directory that already exists. */
@@ -126,7 +127,11 @@ FILE ** output_open(char * basename, int ct)
       out[i] = fopen(filename, "wb");
       if (!out[i])
          fatal("can't open %s: %s", filename, strerror(errno));
-      setvbuf(out[i], NULL, _IOFBF, OUTPUT_BUFSIZE);
+      buf = malloc(OUTPUT_BUFSIZE);
+      if (buf == NULL)
+         fatal("malloc() failed");
+      if (setvbuf(out[i], buf, _IOFBF, OUTPUT_BUFSIZE))
+         fatal("setvbuf() failed: %s", strerror(errno));
       free(filename);
    }
 
