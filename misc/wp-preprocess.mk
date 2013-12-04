@@ -72,7 +72,7 @@ xargs-test:
 hashed: metadata $(pagecount_files)
 	@echo wp-hashfiles on $(words $(filter %.gz, $?)) files ...
 	@$(call xargs, wp-hashfiles $(HASHMOD) metadata, $(XARGS_BLOCK), $(filter %.gz, $?))
-	touch hashed
+	touch -r metadata hashed
 
 metadata: $(pagecount_files)
 	@echo wp-update-metadata on $(words $?) files ...
