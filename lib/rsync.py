@@ -11,9 +11,6 @@ import u
 l = u.l
 
 
-def all(from_url, dest_dir, bwlimit, verbose=False):
-   return fetch(from_url, dest_dir, bwlimit, [], verbose)
-
 def byinclude(from_url, dest_dir, bwlimit, includes, verbose=False):
    '''Mirror from the specified URL, including only the patterns specified.
       rsync output, including error messages, goes to stdout. Return value is
@@ -63,7 +60,6 @@ def include_args(includes):
       >>> list(include_args([]))
       []'''
    return itertools.chain.from_iterable(('--include', i) for i in includes)
-
 
 def leading_dirs(path):
    '''Return a set containing each directory in absolute path path, except for
