@@ -2,7 +2,7 @@
 
 'Convert .json.gz into one or more .raw.tsv and a .d (see the docs).'
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) 2012-2014 Los Alamos National Security, LLC, and others.
 
 help_epilogue = '''
 This script takes a .stats parameter rather than a .json.gz. This is because
@@ -85,7 +85,7 @@ def main():
       try:
          po = tweet.from_json(line)
       except tweet.Nothing_To_Parse_Error, x:
-         # blank line, silently skip
+         # no content on this line, silently skip
          continue
       except ValueError, x:
          # some other parse error, warn and abort if too many

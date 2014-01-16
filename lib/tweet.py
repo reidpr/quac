@@ -1,6 +1,6 @@
 # Classes to represent objects found in tweet streams.
 #
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) 2012-2014 Los Alamos National Security, LLC, and others.
 
 from __future__ import division
 
@@ -85,7 +85,11 @@ def expected_count(date_, sample_rate):
    raise ValueError("extrapolating to %s is too scary" % (date_))
 
 def from_json(text):
-   if (re.search(r'^\s*$', text)):
+   # Skip lines containing nothing but whitespace and lines that contain just
+   # a hexadecimal number. The latter arises when the tweet stream is using
+   # "Transfer-Encoding: chunked" and the chunk delimeters made their way into
+   # the output file (i.e., before issue #92 was fixed).
+   if (re.search(r'^[0-9a-f\s]*$', text)):
       raise Nothing_To_Parse_Error()
    j = json.loads(text)  # raises ValueError on parse failure
    if ('delete' in j):
