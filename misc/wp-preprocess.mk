@@ -77,3 +77,4 @@ hashed: metadata $(pagecount_files)
 metadata: $(pagecount_files)
 	@echo wp-update-metadata on $(words $?) files ...
 	@$(call xargs, wp-update-metadata $(MDARGS) $@, $(XARGS_BLOCK), $?)
+	wp-statistics $@ > missing.tsv
