@@ -47,9 +47,9 @@ import tsv_glue
 import u
 
 
-# We use a relatively large output buffer size of 512K; see also
-# OUTPUT_BUFSIZE in hashsplit.c.)
-OUTPUT_BUFSIZE = 524288
+# We use a relatively large output buffer size; see also OUTPUT_BUFSIZE in
+# hashsplit.c.)
+OUTPUT_BUFSIZE = 4194304
 
 
 ### Helper functions ###
