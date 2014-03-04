@@ -1,0 +1,38 @@
+These directories contain code that coordinates experiments related to QUAC.
+This can mean varying things, including a direct dependency on QUAC or
+experimental functionality which is likely to find its way into QUAC.
+
+The reason we provide this code is to further experimental reproducibility,
+which is one of the core values of science.
+
+This code is targeted at a different audience than QUAC itself and should be
+considered even more "as-is". The goal is reliable experiments conducted on a
+limited timescale, typically leading to one or more scientific publications.
+Caveats include but are not limited to:
+
+  * The code is completely unmaintained.
+  * There is no documentation and no support.
+  * There are no tests.
+  * There is no attempt at portability.
+  * The version of QUAC depended upon is not reliably recorded.
+
+The experiments are organized by year, publication venue, and a short moniker.
+More specifically, what is here:
+
+  2014_CSCW_Tweetlocating
+    Priedhorsky, Culotta, and Del Valle, 2014
+    http://dx.doi.org/10.1145/2531602.2531607
+
+  2014_PLOS-Comp-Bio_Wikidemics_feasibility
+    Generous, Fairchild, Deshpande, Del Valle, and Priedhorsky, 2014
+    (in submission)
+    http://FIXME
+
+Typically, experimental code is not included until after some publication
+milestone, which could be anything from paper submission to final publication.
+
+The license is the same as QUAC proper.
+
+
+--
+Copyright (c) Los Alamos National Security, LLC, and others

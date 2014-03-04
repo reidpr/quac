@@ -59,6 +59,14 @@ Note that for many uses of QUAC (especially research) you are ethically
 obligated to cite it. For guidelines on how to do this, see the *Citing*
 section of the documentation.
 
+Science!
+--------
+
+We use QUAC for scientific research. To promote reproducibility, which is one
+of the core values of science, we try to open-source the code that runs our
+related experiments as well as QUAC itself. This code, and further information
+about it, can be found in the directory ``experiments``.
+
 For more information
 --------------------
 
