@@ -98,6 +98,8 @@ def from_json(text):
       return Scrub_Geo_Notice.from_json(j)
    elif ('status_withheld' in j):
       return Status_Withheld.from_json(j)
+   elif ('limit' in j):
+      return Limit_Notice.from_json(j)
    elif ('text' in j):
       return Tweet.from_json(j)
    else:
@@ -165,6 +167,7 @@ class Ignored_Object(object):
 class Deletion_Notice(Ignored_Object): pass
 class Scrub_Geo_Notice(Ignored_Object): pass
 class Status_Withheld(Ignored_Object): pass
+class Limit_Notice(Ignored_Object): pass
 
 
 class Reader(tsv_glue.Reader):
