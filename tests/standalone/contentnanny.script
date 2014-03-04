@@ -15,7 +15,7 @@
 
 cd ../..  # don't use $QUACBASE because it's an absolute path
 
-C='Copyright (\(c\)|©) 2012-2013 Los Alamos National Security, LLC, and others'
+C='Copyright (\(c\)|©)( 2012-201(3|4))? Los Alamos National Security, LLC, and others'
 
 # We use find rather than git ls-files so that we catch problems even in files
 # not yet added to git. We skip some directories:
@@ -25,7 +25,13 @@ C='Copyright (\(c\)|©) 2012-2013 Los Alamos National Security, LLC, and others'
 #   doc                   compiled documentation
 #   sphinx/_build         compiled documentation
 #   tests/twitter/tweets  mostly Twitter data that are not always present
-for filename in $(find . \( -path ./.git -o -path ./deps -o -path ./doc -o -path ./sphinx/_build -o -path ./tests/twitter/tweets \) -prune -o -type f | LC_ALL=C sort); do
+for filename in $(find . \(    -path ./.git \
+                            -o -path ./deps \
+                            -o -path ./doc \
+                            -o -path ./sphinx/_build \
+                            -o -path ./tests/twitter/tweets \
+                            -o -path './tests/tmp/tmp*' \
+                         \) -prune -o -type f | LC_ALL=C sort); do
     if (file $filename | fgrep -q 'text' \
         && echo $filename | egrep -qv '\.(gz|stderr|stdout|tmp|tsv)'); then
 

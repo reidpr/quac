@@ -49,7 +49,7 @@ endef
 all: dircheck hashed metadata
 
 clean:
-	rm -Rf hashed hashed_small hashed_tiny metadata metadata.total.pkl.gz
+	rm -Rf hashed hashed_small hashed_tiny metadata metadata.total.pkl.gz missing.tsv
 
 dircheck:
 	test -d raw -a -d raw/2012 -a -d raw/2012/2012-10

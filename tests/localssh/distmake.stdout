@@ -1,5 +1,7 @@
 $ (sshrot echo a)
 a
+$ sshrot --info
+SSH
 $ sshrot --muxstart
 $ (sshrot 'echo b && sleep 2 && echo c' &)
 $ (sshrot 'echo b && sleep 3 && echo d' &)
