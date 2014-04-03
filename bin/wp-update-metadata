@@ -104,12 +104,18 @@ def metadata_vector_dump(md):
    u.pickle_dump(args.outfile + '.total', totals)
 
 def metadata_pkl_open(filename):
+   # Include the metadata file in the mtime_max computation. If we are
+   # re-processing some old data, we don't want to re-do everything newer than
+   # that in the next make run.
+   global mtime_max
+   mtime_max = max(mtime_max, os.stat(filename).st_mtime)
    return pickle_glue.File(filename, writable=True,
                            default={ 'badfiles': set(), 'projects': dict() })
 
 def pv_process(filename, md):
    'Compute and save metadata for the given pageview file.'
    l.debug('reading %s' % (filename))
+   md['badfiles'].discard(filename)  # maybe not bad this time?
    ts = wikimedia.timestamp_parse(filename)
    fp = gzip.open(filename, 'rb')
    counts = collections.Counter()
@@ -120,25 +126,30 @@ def pv_process(filename, md):
       # don't want to process it again on the next run.)
       global mtime_max
       mtime_max = max(mtime_max, os.stat(filename).st_mtime)
+      badline_ct = 0
+      badline_last = None
       for (i, line) in enumerate(fp):
          try:
             (proj, _, count, _) = line.split(' ')
             counts[proj] += int(count)
          except ValueError as x:
-            # We give up on a file after a single parse error. Indeed, this is
-            # aggressive. The right thing to do would be one of (a) lose the
-            # parseability guarantee for files that pass through metadata, or
-            # (b) patch together a repaired version. I'm currently too lazy
-            # for that.
-            x.args = ('line %d: %s' % (i+1, x.args[0]),)
-            raise x
-   except (EOFError, IOError, ValueError) as x:
-      if (isinstance(x, ValueError)):
-         l.warning('%s: bad content, skipping file: %s' % (filename, str(x)))
-      else:
-         l.warning('%s: error reading file, skipping' % (filename))
+            # Ignore lines that don't parse. Don't log because some files have
+            # thousands of these (e.g., pagecounts-20130201-010000.gz). We do
+            # warn with a total later if it's greater than 0.
+            #
+            # We used to give up on a file after a single parse error, but
+            # this turned out to be too aggressive -- for example, we'd lose
+            # all of February and half of March 2013.
+            badline_ct += 1
+            badline_last = i + 1
+   except (EOFError, IOError) as x:
+      l.warning('%s: error reading file, skipped: %s' % (filename, str(x)))
       md['badfiles'].add(filename)
       return
+
+   if (badline_ct > 0):
+      l.warning('%s: %d lines with parse errors skipped (last was %d)'
+                % (filename, badline_ct, badline_last))
 
    for (proj, count) in counts.iteritems():
       update(md['projects'], ts, proj, count)
