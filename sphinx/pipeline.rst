@@ -3,8 +3,8 @@
 Preprocessing data
 ******************
 
-Typically, raw data direct from collection is not to useful. QUAC implements a
-preprocessing step to translate it into more pleasant formats as well as do
+Typically, raw data direct from collection is not too useful. QUAC implements
+a preprocessing step to translate it into more pleasant formats as well as do
 some preliminary analysis. This section describes the steps to do that.
 
 *All times and dates are in UTC except as otherwise noted.*
@@ -37,6 +37,10 @@ A fully populated data directory looks something like this:
     directory.
 
     * :samp:`20120401_003115{.json.gz}` --- Sequence of JSON tweet objects.
+      *Note:* As of roughly April 14, 2014, most tweets contain spurious
+      newlines due to the erroneous way that QUAC handles
+      ``Transfer-Encoding: chunked`` HTTP data. Our parsing strategy works
+      around this problem. We plan to fix this in Issue #8.
 
     * :samp:`20120401_003115{.stats}` --- Text file containing a few statistics
       about the above.

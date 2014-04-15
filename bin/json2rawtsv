@@ -36,6 +36,7 @@ l = u.l
 TWEET_FILE_EXTENSION = '.json.gz'
 STATS_FILE_EXTENSION = '.stats'
 DEP_FILE_EXTENSION = '.json.d'
+LINE_COMBINE_LIMIT = 8  # combine up to this many lines to parse a tweet
 
 
 ### Setup ###
@@ -88,7 +89,27 @@ def main():
          l.info('stopping after %d objects per --limit' % (args.limit))
          break
       try:
-         po = tweet.from_json(line)
+         # We get lots of spurious line breaks within tweets. The way we deal
+         # with this is, if parsing a line fails, we paste on the next line
+         # and try again, up to some limit in which case we give up and
+         # re-raise the exception.
+         error_ct = 0
+         while True:
+            try:
+               #print '\n\nTRYING %d <<<%s>>>' % (error_ct, line)
+               po = tweet.from_json(line)
+            except ValueError, x:
+               #print 'BARF: %s' % (x)
+               if (error_ct < LINE_COMBINE_LIMIT):
+                  line = line[:-1] + json_fp.next()
+                  error_ct += 1
+                  line_no += 1
+               else:
+                  l.info('giving up line pasting after %d chunks'
+                         % (LINE_COMBINE_LIMIT))
+                  raise x
+            else:
+               break
       except tweet.Nothing_To_Parse_Error, x:
          # no content on this line, silently skip
          continue
