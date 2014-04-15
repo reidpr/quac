@@ -72,7 +72,12 @@ def main():
       u.abort("can't open raw tweet file: %s" % (x))
    out_tsvs = TSV_Dict(filename_base)
    l.info('opened %s' % (filename_json))
-   # loop over raw tweets
+   # Loop over raw tweets. Note that according to the Twitter docs, tweets can
+   # contain newline characters (\n), the implication being that they will be
+   # unencoded, and JSON objects are separated by a return-newline sequence
+   # (\r\n). However, I'm pretty sure we're separating lines by only newlines
+   # in the files, and I don't recall running into parsing problems with
+   # unencoded newlines in messages.
    line_no = 0
    object_ct = 0
    tweet_ct = 0

@@ -244,8 +244,21 @@ class Tweet_Collector(object):
             if (not TE_CHUNK_HEADER.search(tweet)):
                byte_ct = len(tweet)
                tweet_ct = 1
-               self.fp.write(tweet)
-               self.heartbeat_maybe()
+               # FIXME: Here is more "Transfer-Encoding: chunked"
+               # reconstruction. As of roughly April 14, 2014, chunks can now
+               # appear in the middle of tweets, and the newlines are
+               # appearing at the beginning of the line rather than the end.
+               # The logic is: if the tweet line begins with is an
+               # open brace ("{"), we pass through the newline; otherwise, we
+               # suppress it. This is a real kludge IMO...
+               (char1, tweet) = (tweet[0], tweet[1:])
+               if (char1 != '\n'):
+                  l.warning('object without leading newline, skipping')
+               else:
+                  if (tweet[0] == '{'):
+                     self.fp.write('\n')
+                  self.fp.write(tweet)
+                  self.heartbeat_maybe()
             self.file_rotate_maybe(byte_ct, tweet_ct, stopping=g_shutdown)
             if (g_shutdown):
                raise ShutdownException
