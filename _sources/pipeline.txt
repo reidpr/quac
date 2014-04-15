@@ -3,8 +3,8 @@
 Preprocessing data
 ******************
 
-Typically, raw data direct from collection is not to useful. QUAC implements a
-preprocessing step to translate it into more pleasant formats as well as do
+Typically, raw data direct from collection is not too useful. QUAC implements
+a preprocessing step to translate it into more pleasant formats as well as do
 some preliminary analysis. This section describes the steps to do that.
 
 *All times and dates are in UTC except as otherwise noted.*
@@ -37,6 +37,10 @@ A fully populated data directory looks something like this:
     directory.
 
     * :samp:`20120401_003115{.json.gz}` --- Sequence of JSON tweet objects.
+      *Note:* As of roughly April 14, 2014, most tweets contain spurious
+      newlines due to the erroneous way that QUAC handles
+      ``Transfer-Encoding: chunked`` HTTP data. Our parsing strategy works
+      around this problem. We plan to fix this in Issue #8.
 
     * :samp:`20120401_003115{.stats}` --- Text file containing a few statistics
       about the above.
@@ -287,6 +291,9 @@ A fully populated data directory looks (in part) something like this:
 
 * :samp:`metadata` --- The metadata file.
 
+* :samp:`metadata.daily` --- A subset of the metadata file containing only
+  daily data.
+
 File formats
 ------------
 
@@ -332,10 +339,10 @@ The file format of the pagecount files is `documented by WMF
    total traffic rather than raw hit counts, the effect should be minimal.
 
 
-Metadata file
-~~~~~~~~~~~~~
+Metadata files
+~~~~~~~~~~~~~~
 
-This is a pickled Python dictionary. Example content::
+These are pickled Python dictionaries. Example content of ``metadata``::
 
    { 'badfiles': set([ ... ]),
      'projects': { 'en':   { date: { 'total': count,
@@ -363,6 +370,12 @@ That is, there are two items in the dictionary.
    In both cases, the value ``0`` means no hits. A missing date or a missing
    hour means no data (i.e., the ``'hours'`` dict would have only 23 entries
    if one hour of data were missing on that day).
+
+Note that ``metadata`` is quite large, requiring over 10 GB of RAM to load.
+
+The ``metadata.daily`` file omits the detailed hourly counts, replacing the
+``hours`` key with ``hours_len``, an integer saying how many hours of data
+were found for that day.
 
 
 ..  LocalWords:  pagecount samp badfiles
