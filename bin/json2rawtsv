@@ -101,7 +101,7 @@ def main():
             except ValueError, x:
                #print 'BARF: %s' % (x)
                if (error_ct < LINE_COMBINE_LIMIT):
-                  line = line[:-1] + json_fp.next()
+                  line = line[:-1] + json_fp.next()  # StopIteration at EOF
                   error_ct += 1
                   line_no += 1
                else:
@@ -113,7 +113,7 @@ def main():
       except tweet.Nothing_To_Parse_Error, x:
          # no content on this line, silently skip
          continue
-      except ValueError, x:
+      except (ValueError, StopIteration) as x:
          # some other parse error, warn and abort if too many
          l.info('parsing failed on line %d, skipping: %s' % (line_no, x))
          parse_failure_ct += 1
