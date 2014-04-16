@@ -45,7 +45,7 @@ ap = u.ArgumentParser(description=__doc__, epilog=help_epilogue)
 gr = ap.default_group
 gr.add_argument('--limit',
                 type=int,
-                help='stop after parsing N objects',
+                help='stop after parsing N lines',
                 metavar='N')
 gr.add_argument('file',
                 metavar='FILE',
@@ -82,12 +82,17 @@ def main():
    line_no = 0
    object_ct = 0
    tweet_ct = 0
+   skip_ct = 0
    parse_failure_ct = 0
    for line in json_fp:
       line_no += 1
       if (args.limit is not None and line_no > args.limit):
-         l.info('stopping after %d objects per --limit' % (args.limit))
+         l.info('stopping after %d lines per --limit' % (args.limit))
          break
+      if (len(line) == 0 or line[0] != '{'):
+         # Line doesn't appear to start a JSON object, so skip it.
+         skip_ct += 1
+         continue
       try:
          # We get lots of spurious line breaks within tweets. The way we deal
          # with this is, if parsing a line fails, we paste on the next line
@@ -138,9 +143,9 @@ def main():
       print >>dep_fp, 'pre/metadata: %s %s' % (alltsv, geotsv)
    # done
    elapsed = time.time() - t_start
-   l.info('done: %d objects in %s (%s/second); %d tweets; %d parse failures'
-          % (object_ct, u.fmt_seconds(elapsed),
-             u.fmt_si(object_ct / elapsed), tweet_ct, parse_failure_ct))
+   l.info('done: %d objects in %s (%s/second); %d tweets, %d skips, %d parse failures'
+          % (object_ct, u.fmt_seconds(elapsed), u.fmt_si(object_ct / elapsed),
+             tweet_ct, skip_ct, parse_failure_ct))
 
 
 ### Support functions and classes ###
