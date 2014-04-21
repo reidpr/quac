@@ -9,8 +9,6 @@
 #
 # NOTE: This script is quick and dirty. I'm not proud.
 
-# Copyright (c) Los Alamos National Security, LLC and others.
-
 from collections import defaultdict
 import glob
 from pprint import pprint

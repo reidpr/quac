@@ -1,19 +1,20 @@
 #!/usr/bin/env python
 
-# Copyright (c) Los Alamos National Security, LLC and others.
+"""
+	Generate LaTeX table summaries of our results for the paper.
+"""
 
 import sys
 
 import xlrd
 
 print r'''
-\begin{tabular}{|ll|l|rrrr|rr|}
+\begin{tabular}{|ll|l|cccc|}
 \hline
 
 &
 &
 & \multicolumn{4}{c|}{\textbf{$\boldsymbol{r^2}$ at forecast}}
-& \multicolumn{2}{c|}{\textbf{Best forec.}}
 \\
   \multicolumn{1}{|c}{\textbf{Disease}}
 & \multicolumn{1}{c}{\textbf{Location}}
@@ -22,8 +23,6 @@ print r'''
 & \multicolumn{1}{c}{\textbf{7}}
 & \multicolumn{1}{c}{\textbf{14}}
 & \multicolumn{1}{c|}{\textbf{28}}
-& \multicolumn{1}{c}{\textbf{Days}}
-& \multicolumn{1}{c|}{$\boldsymbol{r^2}$}
 \\
 '''
 
@@ -41,14 +40,12 @@ for ri in xrange(2, sh.nrows):
       else:
          disease_pr = ''
       print r' & '.join((disease_pr,
-                         v[3],             # location
-                         v[8],             # result
-                         '%.2f' %  v[15],  # r^2 at nowcast
-                         '%.2f' %  v[14],  # r^2 at 7-day forecast
-                         '%.2f' %  v[13],  # r^2 at 14-day forecast
-                         '%.2f' %  v[11],  # r^2 at 28-day forecast
-                         '%d'   % -v[10],  # best offset
-                         '%.2f' %  v[9],   # max(r^2)
+                         v[3],            # location
+                         v[8],            # result
+                         '%.2f' % v[15],  # r^2 at nowcast
+                         '%.2f' % v[14],  # r^2 at 7-day forecast
+                         '%.2f' % v[13],  # r^2 at 14-day forecast
+                         '%.2f' % v[11],  # r^2 at 28-day forecast
                        )),
       print r'\\'
       last_disease = disease

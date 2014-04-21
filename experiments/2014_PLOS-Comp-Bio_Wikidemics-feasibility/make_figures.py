@@ -2,13 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-	Run ±28 lagged regressions between wiki data and CSV ground truth data to compare R^2 values.
-
-	ex:
-		python lag_analysis_regression.py ../data/time_series/ja_flu_raw.csv ../data/ground_truth/csv/ja_flu.csv
+	Generate the figures we use in our paper. This code is essentially a modified version of lag_analysis_regression.py.
+	It first computes correlations and fits the models, and then it generates figures.
 """
-
-# Copyright (c) Los Alamos National Security, LLC and others.
 
 from __future__ import print_function, division
 import argparse

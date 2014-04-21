@@ -1,8 +1,9 @@
-"""
-	Index the wikipedia data by creating a SQLite DB for each file.
-"""
+#!/usr/bin/env python
 
-# Copyright (c) Los Alamos National Security, LLC and others.
+"""
+	Index the wikipedia data by creating SQLite DBs (which we then run MapReduce on).
+	This will *not* re-index files that have already been indexed.
+"""
 
 from __future__ import print_function
 import sqlite3

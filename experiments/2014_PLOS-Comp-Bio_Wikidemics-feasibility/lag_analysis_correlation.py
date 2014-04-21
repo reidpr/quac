@@ -2,13 +2,12 @@
 # -*- coding: utf-8 -*-
 
 """
-	Run ±28 lagged correlations between wiki data and CSV ground truth data.
+	Run ±28 lagged correlations between wiki data and CSV ground truth data. This script tries all
+	possible combinations of articles. This is more of an exploratory script to explore the data.
 
-	ex:
+	example:
 		python lag_analysis_correlation.py ../data/time_series/ja_flu_raw.csv ../data/ground_truth/csv/ja_flu.csv
 """
-
-# Copyright (c) Los Alamos National Security, LLC and others.
 
 from __future__ import print_function, division
 import argparse
@@ -146,7 +145,7 @@ for size in range(1, 6):
 					for project, article in combination:
 						date_normalized_wiki_count[start_date] += project_article_date_count[project][article][current_date]
 
-					#for project totals, 
+					#do project totals
 					encountered_projects = set()
 					for project, _ in combination:
 						if project not in encountered_projects:

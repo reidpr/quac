@@ -1,7 +1,15 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-# Copyright (c) Los Alamos National Security, LLC and others.
+"""
+	This is a really quick script to decide percent-encoded strings.
 
+	example:
+		./decode_url.py http://th.wikipedia.org/wiki/%E0%B9%84%E0%B8%82%E0%B9%89%E0%B9%80%E0%B8%94%E0%B9%87%E0%B8%87%E0%B8%81%E0%B8%B5
+		http://th.wikipedia.org/wiki/ไข้เด็งกี
+"""
+
+from __future__ import print_function
 import argparse
 from urllib import unquote
 

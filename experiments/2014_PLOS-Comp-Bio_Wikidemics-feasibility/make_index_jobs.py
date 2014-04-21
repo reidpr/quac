@@ -1,4 +1,9 @@
-# Copyright (c) Los Alamos National Security, LLC and others.
+#!/usr/bin/env python
+
+"""
+	All our code runs on a cluster. We break the jobs up by month, so each month of the Wiki access
+	logs are dealt with independently.
+"""
 
 import datetime
 from dateutil.relativedelta import relativedelta

@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 
 """
-	Run ±28 lagged regressions between wiki data and CSV ground truth data to compare R^2 values.
+	Run ±28 lagged regressions between wiki data and CSV ground truth data to compare R^2 values. This is the
+	heart of the project. It computes article correlations and then feeds the top ten articles (sorted by |r|)
+	into a linear model. We then do a lag analysis. Results are spit out in a text format. We use SciPy to
+	compute Pearson's r and statsmodels to fit the model.
 
-	ex:
-		python lag_analysis_regression.py ../data/time_series/ja_flu_raw.csv ../data/ground_truth/csv/ja_flu.csv
+	example:
+		python lag_analysis_regression.py ../data/time_series/ja_flu_raw.csv ../data/ground_truth/csv/ja_flu.csv > ../data/regression_results/ja_flu.txt
 """
-
-# Copyright (c) Los Alamos National Security, LLC and others.
 
 from __future__ import print_function, division
 import argparse

@@ -2,10 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-	Scrape the MMWR morbidity tables at http://wonder.cdc.gov/mmwr/mmwrmorb.asp
+	Scrape the MMWR morbidity tables at http://wonder.cdc.gov/mmwr/mmwrmorb.asp. No processing is done;
+	we simply save the files for potential offline processing.
 """
-
-# Copyright (c) Los Alamos National Security, LLC and others.
 
 from __future__ import print_function, division
 import requests
