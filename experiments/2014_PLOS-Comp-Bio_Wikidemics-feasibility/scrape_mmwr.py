@@ -6,6 +6,8 @@
 	we simply save the files for potential offline processing.
 """
 
+# Copyright (c) Los Alamos National Security, LLC and others.
+
 from __future__ import print_function, division
 import requests
 import codecs

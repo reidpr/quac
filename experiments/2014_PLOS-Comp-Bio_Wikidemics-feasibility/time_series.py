@@ -9,6 +9,8 @@
 		mpirun -n 32 python time_series.py -a ../data/articles/pl_flu_articles.txt -ao ../data/agg_test.csv -ro ../data/raw_test.csv -at dates -df ../data/dates/poland_flu_dates.txt
 """
 
+# Copyright (c) Los Alamos National Security, LLC and others.
+
 from __future__ import print_function, division
 import sqlite3
 from mrmpi import mrmpi

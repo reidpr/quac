@@ -5,6 +5,8 @@
 	This will *not* re-index files that have already been indexed.
 """
 
+# Copyright (c) Los Alamos National Security, LLC and others.
+
 from __future__ import print_function
 import sqlite3
 from mrmpi import mrmpi

@@ -9,6 +9,8 @@
 		python lag_analysis_correlation.py ../data/time_series/ja_flu_raw.csv ../data/ground_truth/csv/ja_flu.csv
 """
 
+# Copyright (c) Los Alamos National Security, LLC and others.
+
 from __future__ import print_function, division
 import argparse
 import csv

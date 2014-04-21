@@ -6,6 +6,8 @@
 	It first computes correlations and fits the models, and then it generates figures.
 """
 
+# Copyright (c) Los Alamos National Security, LLC and others.
+
 from __future__ import print_function, division
 import argparse
 import csv

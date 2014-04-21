@@ -5,6 +5,8 @@
 	logs are dealt with independently.
 """
 
+# Copyright (c) Los Alamos National Security, LLC and others.
+
 import datetime
 from dateutil.relativedelta import relativedelta
 

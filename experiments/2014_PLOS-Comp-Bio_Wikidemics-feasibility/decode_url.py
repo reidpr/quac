@@ -9,6 +9,8 @@
 		http://th.wikipedia.org/wiki/ไข้เด็งกี
 """
 
+# Copyright (c) Los Alamos National Security, LLC and others.
+
 from __future__ import print_function
 import argparse
 from urllib import unquote
