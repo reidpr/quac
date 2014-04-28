@@ -8,7 +8,7 @@
 	compute Pearson's r and statsmodels to fit the model.
 
 	example:
-		python lag_analysis_regression.py ../data/time_series/ja_flu_raw.csv ../data/ground_truth/csv/ja_flu.csv > ../data/regression_results/ja_flu.txt
+		./lag_analysis_regression.py ../data/time_series/ja_flu_raw.csv ../data/ground_truth/csv/ja_flu.csv > ../data/regression_results/ja_flu.txt
 """
 
 # Copyright (c) Los Alamos National Security, LLC and others.

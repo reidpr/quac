@@ -4,9 +4,9 @@
 	Use MR-MPI to generate a time series of visits to specified Wikipedia articles. Also, aggregate results over specified intervals.
 
 	examples:
-		mpirun -n 32 python time_series.py -a ../data/articles/ja_flu_articles.txt -ao ../data/agg_test.csv -ro ../data/raw_test.csv -at interval -is 2009-01-17 -il 7
+		mpirun -n 32 ./time_series.py -a ../data/articles/ja_flu_articles.txt -ao ../data/agg_test.csv -ro ../data/raw_test.csv -at interval -is 2009-01-17 -il 7
 
-		mpirun -n 32 python time_series.py -a ../data/articles/pl_flu_articles.txt -ao ../data/agg_test.csv -ro ../data/raw_test.csv -at dates -df ../data/dates/poland_flu_dates.txt
+		mpirun -n 32 ./time_series.py -a ../data/articles/pl_flu_articles.txt -ao ../data/agg_test.csv -ro ../data/raw_test.csv -at dates -df ../data/dates/poland_flu_dates.txt
 """
 
 # Copyright (c) Los Alamos National Security, LLC and others.

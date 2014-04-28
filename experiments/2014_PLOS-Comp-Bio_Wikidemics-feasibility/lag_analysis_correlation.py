@@ -6,7 +6,7 @@
 	possible combinations of articles. This is more of an exploratory script to explore the data.
 
 	example:
-		python lag_analysis_correlation.py ../data/time_series/ja_flu_raw.csv ../data/ground_truth/csv/ja_flu.csv
+		./lag_analysis_correlation.py ../data/time_series/ja_flu_raw.csv ../data/ground_truth/csv/ja_flu.csv
 """
 
 # Copyright (c) Los Alamos National Security, LLC and others.

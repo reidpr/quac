@@ -29,7 +29,7 @@ while current_date < end_date:
 		job_file.write('#MSUB -N index_%s-%s\n\n' % (year, month))
 		job_file.write('date\n\n')
 		job_file.write('cd /turquoise/usr/projects/infmodels/gfairchild/wikipedia/src\n')
-		job_file.write('mpirun -n 256 python index_wiki_data.py %s %s\n\n' % (year, month))
+		job_file.write('mpirun -n 256 ./index_wiki_data.py %s %s\n\n' % (year, month))
 		job_file.write('date')	
 
 	current_date += increment
