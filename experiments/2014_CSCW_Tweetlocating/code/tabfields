@@ -1,0 +1,131 @@
+#!/usr/bin/env python
+
+# This script writes two .tex files containing LaTeX tables describing the
+# results of the RQ3 fields experiment.
+#
+# FIXME: This is a festering pile of copy-n-paste and other kludges. In
+# particular, we hard-code field order in several places instead of sortinf.
+
+from __future__ import division
+
+from collections import defaultdict
+import glob
+import operator
+import sys
+
+import u
+
+
+# unified, fields, value
+mcae = defaultdict(dict)
+succ = defaultdict(dict)
+
+# Read in results
+for taskidx in glob.glob('%s/[0-9]*' % sys.argv[1]):
+   try:
+      task = u.pickle_load('%s/summary' % (taskidx))
+   except IOError, x:
+      print "can't load summary for task %s: %s" % (taskidx, x)
+      continue
+   ta = task.args
+   ts = task.summary
+   unify = ta.unify_fields
+   # Kludge past a bug in model-test. This yields bogus results!
+   if (unify is None):
+      unify = True
+      print 'WARNING: unify_fields None -> True for %s' % (taskidx)
+   mcae[unify][frozenset(ta.fields)] = ts.mcae
+   succ[unify][frozenset(ta.fields)] = ts.success_ct / ts.test_tweet_ct
+
+# Some maps
+names = { 'lo': 'user location',
+          'tz': 'user time zone',
+          'tx': 'tweet text',
+          'ds': 'user description',
+          'ln': 'user language' }
+bits = { 0x10: 'lo',
+         0x08: 'tz',
+         0x04: 'tx',
+         0x02: 'ds',
+         0x01: 'ln' }
+
+# Value of each field
+
+fp = open('fieldvalue.tex', 'w')
+print >>fp, r'''
+\begin{tabular}{@{}lrrrr@{}}
+  \toprule
+    \mc{1}{@{}c}{\mr{2}{*}{\textbf{Field}}}
+  & \mc{2}{c}{\textbf{Alone}}
+  & \mc{2}{c@{}}{\textbf{Improvement}}
+  \\
+  & \mc{1}{c}{\textbf{MCAE}}
+  & \mc{1}{c}{\textbf{success}}
+  & \mc{1}{c}{\textbf{MCAE}}
+  & \mc{1}{c@{}}{\textbf{success}} \\
+  \cmidrule(r){1-1}
+  \cmidrule(lr){2-3}
+  \cmidrule(l){4-5}'''
+
+def imp(results, fs):
+   assert (len(fs) == 1)
+   ct = 0
+   sum_ = 0
+   for i in results.iterkeys():
+      if (fs < i):
+         ct += 1
+         #print
+         #print i, results[i]
+         #print i - fs, results[i - fs]
+         inc = results[i] - results[i - fs]
+         sum_ += inc
+   return sum_ / ct
+
+# FIXME: order kludged to avoid figuring out how to sort
+fields = ('lo', 'tz', 'tx', 'ds', 'ln')
+for field in fields:
+   fs = frozenset((field,))
+   # "alone" column is the same regardless of unified, so choose arbitrarily
+   print >>fp, (r'%s & %.0f & %.1f\%% & %.0f & %.1f\%% \\'
+                % (names[field],
+                   mcae[False][fs], succ[False][fs] * 100,
+                   -imp(mcae[False], fs), imp(succ[False], fs) * 100))
+
+print >>fp, r'''
+  \bottomrule
+\end{tabular}'''
+
+# Truth table
+
+fp = open('fieldtruth.tex', 'w')
+print >>fp, r'''
+\begin{tabular}{@{}ccccccr@{}}
+  \toprule
+    \mc{5}{@{}c}{\textbf{Fields}}
+  & \mc{1}{c}{\textbf{MCAE}}
+  & \mc{1}{c@{}}{\textbf{success}} \\
+  \cmidrule(r){1-5}
+  \cmidrule(l){6-7}'''
+
+rows = []
+for i in xrange(1, 32):
+   s = set()
+   for (bf, field) in bits.iteritems():
+      if (bf & i):
+         s.add(field)
+   s = frozenset(s)
+
+   def f(i):
+      return i if (i in s) else '  '
+
+   rows.append((f('lo'), f('tz'), f('tx'), f('ds'), f('ln'),
+                mcae[False][s], succ[False][s] * 100))
+
+rows.sort(key=operator.itemgetter(5))
+for row in rows:
+   print >>fp, r'%s & %s & %s & %s & %s & %.0f & %.1f\%% \\' % (row)
+
+print >>fp, r'''
+  \bottomrule
+
+\end{tabular}'''

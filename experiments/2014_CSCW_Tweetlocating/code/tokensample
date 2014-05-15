@@ -1,0 +1,60 @@
+#!/usr/bin/env python
+
+'''Given a results pickle file, select extract top and bottom test tweets and
+   emit TSV files of each suitable for manual content analysis of their
+   tokens.'''
+
+from collections import Counter
+import operator
+import random
+import sys
+
+import tsv_glue
+import u
+l = u.l
+
+TWEET_TRAIN_CT = 100 # for category figuring
+TWEET_TEST_CT = 300  # categorize these and report
+TOKEN_WEIGHT = 1.00  # use tokens that contribute this much weight collectively
+
+u.logging_init('toksa', verbose_=True)
+rand = random.Random(8675309)
+l.info('starting')
+
+tweets = u.pickle_load(sys.argv[1])
+tweets.sort(key=operator.attrgetter('cae'))
+
+def dump_class(c, clabel):
+   l.debug('%d total %s tweets' % (len(c), clabel))
+   rand.shuffle(c)
+   dump_partition(c[:TWEET_TRAIN_CT], clabel, 'train')
+   dump_partition(c[TWEET_TRAIN_CT:], clabel, 'test')
+
+def dump_partition(p, clabel, plabel):
+   tokens_part = Counter()
+   for tweet in p:
+      tokens = sorted(((wt, tok)
+                       for (tok, wt)
+                       in tweet.location_estimate.tokens.iteritems()),
+                      reverse=True)
+      weight = 0
+      for (wt, tok) in tokens:
+         #l.debug('total weight %g, adding token <%s> with weight %g'
+         #        % (weight, tok, wt))
+         tokens_part[tok] += wt
+         weight += wt
+         if (weight > TOKEN_WEIGHT):
+            break
+   l.info('%d %s %s tweets with %d tokens'
+          % (len(p), clabel, plabel, len(tokens_part)))
+   filename = 'tokens_%s_%s.tsv' % (clabel, plabel)
+   tsv = tsv_glue.Writer(filename, clobber=True)
+   tsv.writerow(('weight', 'field', 'token'))
+   for (tok, wt) in tokens_part.iteritems():
+      tsv.writerow([wt] + tok.split(' ', 1))
+   l.info('wrote %s' % (filename))
+
+dump_class(tweets[:TWEET_TRAIN_CT+TWEET_TEST_CT], 'good')
+dump_class(tweets[-(TWEET_TRAIN_CT+TWEET_TEST_CT):], 'bad')
+
+l.info('done')

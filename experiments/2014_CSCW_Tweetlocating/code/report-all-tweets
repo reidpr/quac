@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+set -x
+
+cd $1
+report --verbose --tweets tweets.tsv --tweet-idx : summary.pkl.gz
+tail -n +2 tweets.tsv | sort -n -r -t$'\t' -k9 - > tweets_cae.tsv
+tail -n +2 tweets.tsv | sort -n -r -t$'\t' -k17 - > tweets_pra.tsv

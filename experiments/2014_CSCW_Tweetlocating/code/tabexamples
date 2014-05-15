@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+
+# tabexamples <number of tweets to report> <pickled results file>
+#
+# This script writes (on standard out) a .tex fragment containing a LaTeX
+# table with example tweets and metrics. It reports tweets that are evenly
+# spaced w.r.t. CAE percentile; e.g., if you ask for 3 tweets, it will report
+# at the 100th, 50th, and 0th percentiles -- the best, median, and worst
+# tweets.
+
+from __future__ import division
+
+from collections import defaultdict
+import io
+import numpy as np
+import operator
+import re
+import sys
+
+import u
+
+WEIGHT_SHOWN = 0.95
+
+
+def clean(text):
+   text = '' if text is None else text
+   text = re.sub(r'@\w*', '\\\\textit{@mention}', text)
+   text = re.sub(r'cunt', '\\\\textit{expletive}', text)
+   text = re.sub(r'([&#])', '\\\\\\1', text)
+   text = re.sub(r'(.+)TimeUSCanada', '\\1', text)
+   text = re.sub(r'([0-9])([kM])', '\\1\\\\,\\2', text)
+   return text
+
+def explget(twts):
+   '''Return a stringified version of the token/weight pairs which
+      collectively make up n% of the total weight.'''
+   toks = iter(sorted([(w, t) for (t, w) in twts.iteritems()], reverse=True))
+   weight_total = 0
+   chunks = list()
+   while weight_total <= WEIGHT_SHOWN:
+      (w, t) = next(toks)
+      # The \vphantom hack adds a box with the height and depth of the string
+      # "Hp", which mostly corrects spacing inconsistency between rows (maybe
+      # 1 point remains?).
+      chunks.append('%.2f %s\\vphantom{Hp}' % (w, clean(t)))
+      weight_total += w
+   return '\\pbox[t]{10cm}{%s}' % (' \\\\ '.join(chunks))
+
+def tw2str(t, percentile, idx):
+   pct = percentile * 100
+   tx = clean(t.tweet.tx)
+   lo = clean(t.tweet.lo)
+   tz = clean(t.tweet.tz).lower()  # didn't we already do this?
+   ln = clean(t.tweet.ln)
+   cae = '{:,}'.format(int(round(t.cae)))
+   sae = '{:,}'.format(int(round(t.sae)))
+   pra = '{:,}'.format(int(round(t.pra50)))
+   tok = explget(t.location_estimate.explanation)
+   return (u'%(pct)g & %(tx)s & %(lo)s & %(tz)s & %(ln)s & %(tok)s & %(cae)s & %(pra)s \\\\ %% %(idx)d'
+           % locals())
+
+# Read in results
+tweets = u.pickle_load(sys.argv[2])
+tweets.sort(key=operator.attrgetter('cae'))
+
+
+out = u.utf8_stdout
+count = int(sys.argv[1])
+inc = 1 / (count - 1)
+
+for i in xrange(count):
+   perc = 1 - i*inc
+   idx = min(int(i * inc * len(tweets)), len(tweets) - 1)
+   #t = tweets[int(perc*len(tweets))]
+   #print >>out, '\\\\'
+   print >>out, tw2str(tweets[idx], perc, idx)
+   if (i < count-1):
+      print >>out, '\\addlinespace'

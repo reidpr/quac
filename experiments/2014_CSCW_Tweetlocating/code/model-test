@@ -1,0 +1,285 @@
+#!/usr/bin/env python
+
+# docstring used for argparse too, which doesn't know how to remove the indent.
+'''
+This script evaluates a tweet location model by repeatedly building and
+testing instances of the model on different subsets of the collected tweets.
+Progress chatter is printed to stderr. Results come in three files:
+
+  tests.tsv ....... results of each test (TSV with header)
+  summary.tsv ..... average of all tests (TSV with header)
+  details.pickle .. complete pickled Test_Sequence object for the test run
+  summary.pickle .. Test_Sequence object without per-tweet results
+
+In addition to test results for each test in the sequence, and a summary, the
+complete pickled Test_Sequence object also contains each token and tweet
+tested, along with the computed Location_Estimate models. An important
+exception is that Monte Carlo samples are deleted before pickling; i.e.,
+analysis which require these samples must be re-run and results will be
+(hopefully not too) different.
+
+These files are placed in OUTPUT_DIR, which will be created if necessary.
+WARNING: If the directory already exists, contents of the above files will be
+overwritten (other files will be untouched).'''
+
+help_epilogue = '''
+Additional usage notes:
+
+* Model parameters specified with --model-parms are a set of key-value pairs
+  separated by a colon. Values can be numbers or strings. If a value is a
+  string, and the module containing the model has a function by that name,
+  that function is used instead of the string itself.
+
+  For example, suppose that following command line arguments are given, and
+  geo.foo defines the function `bar()`:
+
+    --model geo.foo.Model --model-parms foo:4 frobnicate:bar name:baz
+
+  When geo.foo.Model is instantiated, it will be given this options dictionary:
+
+    { foo:        4,
+      name:       'baz',
+      frobnicate: <function geo.foo.bar at 0x...> }
+
+* The possible tweet fields to consider are:
+
+    tx .. tweet text
+    ds .. user description
+    ln .. user language
+    lo .. user location
+    tz .. user time zone
+
+* Dates, times, and durations are given in ISO 8601 format. The default start
+  and end is to analyze everything in the database.
+
+* The effective range of --cores is roughly 1 to 6. After that, communication
+  overhead prevents additional speedup. (FIXME: needs re-testing.)
+
+* --dup-users says what to do if a user has multiple tweets in the data set.
+    If specified, all of the user's tweets are trained or tested on. Otherwise
+    (the default), then only the user's first tweet is used, regardless of
+    phase (i.e., train on at most one tweet from the user, and don't test on
+    the user's tweets at all if he or she appeared in the training set).
+'''
+
+# FIXME:
+#
+#   * Quantify memory use for big runs, and reduce if needed.
+#
+#   * Ensure that the requested window fits what's actually in the database.
+#
+#   * Metrics are reported in alphabetical order rather than a meaningful
+#     order.
+#
+#   * Print friendly errors on failure to parse times & durations.
+
+import argparse
+import cProfile
+from datetime import timedelta
+import pstats
+
+import isodate
+
+import geo.base
+import model_test
+import testable
+import time_
+import u
+
+
+def kv_parse(kv):
+   '''Convert a colon-separated key:value into a tuple, with value being int,
+      float, or string. (Further conversion of strings into functions happens
+      later, in model __init__().) For example:
+
+      >>> kv_parse('hello:1')
+      ('hello', 1)'''
+   (key, value_str) = kv.split(':', 1)
+   try:
+      value = int(value_str)
+   except ValueError:
+      try:
+         value = float(value_str)
+      except ValueError:
+         value = value_str
+   return (key, value)
+
+
+ap = argparse.ArgumentParser(description=__doc__,
+                             epilog=help_epilogue,
+                             formatter_class=argparse.RawTextHelpFormatter)
+ap._optionals.title = 'help'  # see http://bugs.python.org/issue9694
+ap.add_argument('--unittest',
+                nargs=0,
+                action=testable.Raise_Unittest_Exception,
+                help='run the unit tests and exit')
+gr = ap.add_argument_group('input and output')
+gr.add_argument('database_file',
+                metavar='DB_FILE',
+                help='database of geotokens')
+gr.add_argument('output_dir',
+                metavar='OUTPUT_DIR',
+                help='directory for results')
+gr.add_argument('--trim-head',
+                metavar='X',
+                type=float,
+                default=0,
+                help='fraction of tokens (ordered by frequency) to skip')
+gr.add_argument('--min-instances',
+                metavar='N',
+                type=int,
+                default=10,
+                help='ignore tokens with fewer than this many instances')
+gr = ap.add_argument_group('testing parameters')
+gr.add_argument('--model',
+                metavar='CLASS',
+                required=True,
+                help='name of geo.base.Model subclass to use')
+gr.add_argument('--model-parms',
+                metavar='KEY:VALUE',
+                nargs='+',
+                type=kv_parse,
+                default=[],
+                help='set of key:value parameters for the model')
+gr.add_argument('--fields',
+                metavar='FIELDS',
+                nargs='+',
+                default=set(('tx', 'ln', 'lo', 'tz')),
+                help='set of tweet fields to learn on')
+gr.add_argument('--unify-fields',
+                # FIXME: This argument is a lame hack because type=bool
+                # doesn't work (only the empty string is false). I don't want
+                # store_true because the default is hard to change.
+                metavar='B',
+                type=lambda s: bool(int(s)),
+                default=False,
+                help='treat same token in different fields as same')
+gr.add_argument('--srid',
+                metavar='SRID',
+                type=int,
+                default=4326,  # WGS84 geodetic
+                help='project to this SRS (EPSG code) before fitting')
+gr.add_argument('--tokenizer',
+                metavar='T',
+                default='tok.unicode_props.UP_Tiny',
+                help='tokenizer class to use')
+gr.add_argument('--ngram',
+                metavar='N',
+                type=int,
+                default=2,
+                help='use N-grams (default N=2, i.e. bigrams)')
+gr.add_argument('--test-tweet-limit',
+                metavar='N',
+                type=int,
+                default=2000,
+                help='use random sample of N tweets for testing')
+gr.add_argument('--dup-users',
+                action='store_true',
+                help='use all tweets from user, not just the first')
+gr = ap.add_argument_group('timing parameters')
+gr.add_argument('--start',
+                metavar='DATETIME',
+                type=time_.iso8601_parse,
+                help='start time of evaluations (inclusive)')
+gr.add_argument('--end',
+                metavar='DATETIME',
+                type=time_.iso8601_parse,
+                help='end time of evaluations (exclusive)')
+gr.add_argument('--training',
+                metavar='DURATION',
+                required=True,
+                type=isodate.parse_duration,
+                help='duration of training window')
+gr.add_argument('--testing',
+                metavar='DURATION',
+                required=True,
+                type=isodate.parse_duration,
+                help='duration of testing window')
+gr.add_argument('--gap',
+                metavar='DURATION',
+                type=isodate.parse_duration,
+                default=timedelta(0),
+                help='gap between training and testing windows (default: none)')
+gr.add_argument('--stride',
+                metavar='DURATION',
+                type=isodate.parse_duration,
+                default=timedelta(days=1),
+                help='training and testing stride')
+gr.add_argument('--skip-small-tests',
+                # FIXME: Fearless copy of lame hack above for bool args
+                metavar='B',
+                type=lambda s: bool(int(s)),
+                default=True,
+                help='skip tests with suspiciously few tweets')
+gr = ap.add_argument_group('misc')
+gr.add_argument('--cores',
+                metavar='N',
+                type=int,
+                default=1,
+                help='use this many processes (default: 1)')
+gr.add_argument('--limit',
+                metavar='N',
+                type=int,
+                help='evaluate this many models and then stop')
+gr.add_argument('--random-seed',
+                metavar='N',
+                type=int,
+                help='seed RNG with N')
+gr.add_argument('--profile-memory',
+                action='store_true',
+                help='dump a Meliae memory profile before exiting')
+gr.add_argument('--start-test',
+                metavar='N',
+                type=int,
+                help='start with test N, loading prior from disk (default = 1)')
+gr.add_argument('--profile-speed',
+                action='store_true',
+                help='profile for speed and dump results at the end')
+gr.add_argument('--verbose',
+                action='store_true',
+                help='give more verbose output')
+
+try:
+
+   args = u.parse_args(ap)
+   if (args.cores > 1 and (args.profile_memory or args.profile_speed)):
+      ap.error('cannot profile with --cores > 1')
+
+   # Type convert some arguments.
+   args.model_parms = dict(args.model_parms)
+   args.fields = set(args.fields)
+
+   if (args.profile_speed):
+      prof = cProfile.Profile()
+      prof.enable()
+
+   u.logging_init('motst')
+   model_test.Test_Sequence(args).main()
+
+   if (args.profile_speed):
+      prof.disable()
+      profile_basename = args.output_dir + '/speed'
+      prof.dump_stats(profile_basename + '.prof')
+      fp = open(profile_basename + '.txt', 'w')
+      p = pstats.Stats(profile_basename + '.prof', stream=fp)
+      p.sort_stats('cumulative')
+      p.print_stats()
+
+except testable.Unittests_Only_Exception:
+   testable.register('''
+
+# Make sure kv_parse is doing types right.
+>>> type(kv_parse('a:1')[1])
+<type 'int'>
+>>> type(kv_parse('a:1.0')[1])
+<type 'float'>
+>>> type(kv_parse('a:b')[1])
+<type 'str'>
+>>> type(kv_parse(u'a:b')[1])
+<type 'unicode'>
+
+# Make sure kv_parse only splits on the first colon.
+>>> kv_parse('a:b:c')
+('a', 'b:c')
+
+''')

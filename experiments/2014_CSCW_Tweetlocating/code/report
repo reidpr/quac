@@ -1,0 +1,152 @@
+#!/usr/bin/env python
+
+# docstring used for argparse too, which doesn't know how to remove the indent.
+'''
+This script reconstructs a Test_Sequence object from a details- or
+summary.pickle file and provides various reports on its content. If nothing
+else is specified, it reports all tweets and all tokens.'''
+
+from __future__ import division
+
+help_epilogue = '''
+Additional notes:
+
+* Options which expect a TSV parameter take either a filename in which to save
+  the results (in headered TSV format) or "-", in which case the TSV is
+  printed to standard output.
+
+* The INDICES parameters are a comma-separated union of standard Python list
+  slices. For example, to report results only for the third test (index 2):
+
+    --test-idx 2
+
+  For the third through fifth tests:
+
+    --test-idx 2:5
+
+  For the first 20 and last 20 tweets, unless there are 40 or fewer tweets, in
+  which case report all of them:
+
+    --tweet-idx :20,-20:
+
+  These options nest. For example, the following will report the 3rd tweet in
+  both the 1st and 2nd tests:
+
+    --test-idx :2 --tweet-idx 2
+
+  Note that reported averages apply to *all* items, not just reported ones.
+
+  The default for tests is everything and for tests and tokens nothing.
+
+* The --geofiles option dumps files about token and tweet models instead of
+  the TSV. Image files have the same basename as the TSV and include the
+  relevant sequence number. (Note that for some models, this option is a
+  no-op.)
+
+* If you dump geofiles for a tweet, geofiles for all tokens involved in
+  predicting that tweet are also dumped. For example, to dump all geofiles
+  related to tweet index 3 in test 0, say:
+
+    --geofiles --test-idx 0 --tweet-idx 3 --tweets twimg.tsv
+
+  In this case, if --tokens is not given, then --tweets plus '_tok' is used to
+  name the token files.
+'''
+
+import argparse
+from datetime import timedelta
+import os.path
+
+import geo.base
+import model_test
+import time_
+import u
+
+
+ap = argparse.ArgumentParser(description=__doc__,
+                             epilog=help_epilogue,
+                             formatter_class=argparse.RawTextHelpFormatter)
+ap._optionals.title = 'misc'  # see http://bugs.python.org/issue9694
+ap.add_argument('--verbose',
+                action='store_true',
+                help='give more verbose output')
+gr = ap.add_argument_group('input and output')
+gr.add_argument('pickle_file',
+                metavar='FILE',
+                help='pickled test results file')
+gr.add_argument('--tests',
+                metavar='TSV',
+                help='report test result summaries ordered by time')
+gr.add_argument('--test-idx',
+                metavar='INDICES',
+                default=':',
+                help='which tests to report')
+gr.add_argument('--tokens',
+                metavar='TSV',
+                help='report token summaries ordered by decreasing point count')
+gr.add_argument('--token-idx',
+                metavar='INDICES',
+                default='',
+                help='which tokens to report')
+gr.add_argument('--tweets',
+                metavar='TSV',
+                help='report tweet summaries ordered by increasing CAE')
+gr.add_argument('--tweet-idx',
+                metavar='INDICES',
+                default='',
+                help='which tweets to report')
+gr.add_argument('--tweet-tokens',
+                action='store_true',
+                help='report tokens used in reported tweets even w/o --tokens')
+gr.add_argument('--include-fails',
+                action='store_true',
+                help="include tweets that couldn't be located")
+gr = ap.add_argument_group('options')
+gr.add_argument('--geofiles',
+                action='store_true',
+                help='dump GIS files along with TSV rows')
+gr.add_argument('--geoimage-width',
+                metavar='PX',
+                type=int,
+                default=geo.base.GEOIMG_WIDTH,
+                help='horizontal width of geoimages in pixels')
+args = u.parse_args(ap)
+l = u.logging_init('reprt')
+
+
+l.info('starting')
+
+if (not args.tests and not args.tweets and not args.tokens):
+   l.info('using default output of all tokens and all tweets')
+   dir_ = os.path.dirname(os.path.abspath(args.pickle_file))
+   args.tweets = dir_ + '/tweets.tsv'
+   args.tweet_idx = ':'
+   args.tokens = dir_ + '/tokens.tsv'
+   args.token_idx = ':'
+
+ts = u.pickle_load(args.pickle_file)
+filesize = os.path.getsize(args.pickle_file)
+test_ct = len(ts.schedule)
+day_ct = time_.days_f(ts.schedule[-1].end - ts.schedule[0].start)
+l.info('loaded %s' % (args.pickle_file))
+# Rewrite output dir to the one containing summary.pkl.gz so we can analyze in
+# a different directory than the run was originally saved.
+ts.args.output_dir = os.path.abspath(os.path.dirname(args.pickle_file))
+l.debug('rewrote output_dir to %s' % (ts.args.output_dir))
+ts.log_parameters()
+if (len(ts.schedule) == 0):
+   u.abort('file contains zero tests')
+l.info('%d tests over %g days' % (test_ct, day_ct))
+test_indices = u.sl_union_fromtext(test_ct, args.test_idx)
+if (args.tests):
+   ts.tsv_save_tests(args.tests, test_indices)
+toks = {}
+if (args.tweets):
+   toks = ts.tsv_save_tweets(args.tweets, args.include_fails, args.geofiles,
+                             args.geoimage_width, test_indices, args.tweet_idx)
+if (args.tokens or (args.tweet_tokens and toks)):
+   tokfile = args.tokens or (u.without_ext(args.tweets) + '_tok')
+   ts.tsv_save_tokens(tokfile, args.geofiles, args.geoimage_width,
+                      test_indices, args.token_idx, toks)
+
+l.info('done')

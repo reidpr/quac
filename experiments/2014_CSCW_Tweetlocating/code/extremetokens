@@ -1,0 +1,26 @@
+#!/usr/bin/env python
+
+'''Given a model pickle file and a number N, find the N tokens with the
+   highest weight and the N with lowest weight (i.e., random sample of
+   0-weighted tokens), and print the results in a LaTeX table.'''
+
+import operator
+import random
+import sys
+
+import u
+
+u.logging_init('xtrem', verbose_=True)
+rand = random.Random(8675309)
+m = u.pickle_load(sys.argv[1])
+
+tokens = sorted(m.token_weights.iteritems(), reverse=True,
+                key=operator.itemgetter(1))
+
+howmany = int(sys.argv[2])
+winners = tokens[:howmany]
+losers_all = filter(lambda i: i[1] <= 0.001, tokens)
+print r'%% %d total losers' % (len(losers_all))
+losers = rand.sample(losers_all, howmany)
+for i in zip(winners, losers):
+   print >>u.utf8_stdout, r'%s & %s \\' % (i[0][0], i[1][0])

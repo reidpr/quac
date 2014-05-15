@@ -1,0 +1,21 @@
+Run a script with -h for help.
+
+Each file here is a shell script that runs an experiment. They take two
+arguments:
+
+1. Path to geodb.
+
+2. Job directory (should not exist).
+
+3. Number of cores per process.
+
+Conventions:
+
+* scripts named `.jex` use jexplode to create a job, while scripts named
+  `.imm` execute the experiment immediately.
+
+* comment at the top of the script says a little about the experiment.
+
+* put options one per line in the order specified by `model-test --help`.
+
+`model-test` and `jexplode` should be in your PATH.

@@ -1,0 +1,116 @@
+#!/usr/bin/env python
+
+'''Compute similarity of n-gram distributions between geotagged and
+non-geotagged tweets from a given directory of tsv files'''
+
+import argparse
+from collections import Counter
+import math
+import numpy as np
+import scipy.spatial.distance as scidist
+import sys
+import tok.unicode_props as tokuni
+import tweet
+import u
+
+ap = u.ArgumentParser(description=__doc__,
+                      formatter_class=argparse.RawTextHelpFormatter)
+ap.add_argument('--input',
+                metavar='FILES',
+                nargs='+',
+                required=True,
+                help='tweet day files to read')
+ap.add_argument('--sim',
+                metavar='SIM',
+                default='corr',
+                help='name of similarity function')
+ap.add_argument('--fraction',
+                metavar='FRACTION',
+                type=float,
+                default=0.015,
+                help='fraction of non geotagged tweets to sample')
+ap.add_argument('--ignore-rt',
+                action='store_true',
+                default=False)
+
+def cosine(ctr1, ctr2):
+   'Cosine similarity. See http://stackoverflow.com/questions/15173225'
+   intersection = set(ctr1.keys()) & set(ctr2.keys())
+   numerator = sum([ctr1[x] * ctr2[x] for x in intersection])
+   sum1 = sum([ctr1[x]**2 for x in ctr1.keys()])
+   sum2 = sum([ctr2[x]**2 for x in ctr2.keys()])
+   denominator = math.sqrt(sum1) * math.sqrt(sum2)
+   if not denominator:
+      return 0.0
+   else:
+      return float(numerator) / denominator
+
+def corr(ctr1, ctr2):
+   'Correlation coefficient.'
+   union = set(ctr1.keys()) | set(ctr2.keys())
+   v1 = [ctr1[x] for x in union]
+   v2 = [ctr2[x] for x in union]
+   return 1. - scidist.correlation(v1, v2)
+
+args = u.parse_args(ap)
+l = u.logging_init('bias')
+
+sim =  getattr(sys.modules[__name__], args.sim)
+tzer = tokuni.UP_Tiny(1)
+fields = ['tx']
+geo_counters = [Counter(), Counter()]
+non_geo_counters = [Counter(), Counter()]
+n_geo = 0
+n_non_geo = 0
+
+def rand_bool():
+   return bool(u.rand.getrandbits(1))
+
+def bernoulli():
+   return u.rand.random() < args.fraction
+
+def add_counts(ctr, tw):
+   'Tokenize tweet and add to running counter'
+   for tok in tw.tokenize(tzer, fields, unify=False):
+      ctr[tok] += 1
+
+'''Fill 4 Counters (word vectors). 2 each for geo-tagged and non-geotagged
+tweets. All geotagged tweets are retained. Non geotagged tweets are retained
+randomly according to fraction arg. For each retained tweet, randomly put it
+in one of two Counters (for within sample comparisons).'''
+
+for filename in args.input:
+   reader = tweet.Reader(filename)
+   l.debug('opened %s' % (filename))
+   for tw in reader:
+      if (args.ignore_rt
+          and tw.text is not None and tw.text[:3].lower().strip() == 'rt'):
+         continue
+      if tw.geom:
+         add_counts(geo_counters[rand_bool()], tw)
+         n_geo += 1
+      elif bernoulli():  # elif n_geo > n_non_geo:
+         add_counts(non_geo_counters[rand_bool()], tw)
+         n_non_geo += 1
+
+l.info('found %d geotagged and %d non geotagged tweets' %
+       (n_geo, n_non_geo))
+l.info('found %d unique geotagged and %d non geotagged tokens' %
+       (len(list(geo_counters[0])), len(list(non_geo_counters[1]))))
+l.info('most common geotagged tokens: %s' % geo_counters[0].most_common(20))
+l.info('most common non-geotagged tokens: %s'
+       % non_geo_counters[0].most_common(20))
+l.info('most common geotagged minus non-geotagged tokens: %s'
+       % ((geo_counters[0] - non_geo_counters[0]).most_common(20)))
+l.info('most common non-geotagged minus geotagged tokens: %s'
+       % ((non_geo_counters[0] - geo_counters[0]).most_common(20)))
+l.info('sim(geotagged1 , geotagged2)=%f' % sim(*geo_counters))
+l.info('sim(non-geotagged1 , non-geotagged2)=%f' % sim(*non_geo_counters))
+
+sims = []
+for i in range(0,len(geo_counters)):
+   for j in range(0,len(non_geo_counters)):
+      s = sim(geo_counters[i], non_geo_counters[j])
+      l.info('sim(geotagged%d , non-geotagged%d)=%f'% (i,j,s))
+      sims.append(s)
+l.info('average sim(geotagged, non_geotagged)=%f [std=%f]' % (np.mean(sims), np.std(sims)))

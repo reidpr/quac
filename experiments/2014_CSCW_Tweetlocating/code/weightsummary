@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+
+'''Given a run summary TSV file, emit on stdout a summary LaTeX table.'''
+
+import operator
+import sys
+
+import tsv_glue
+
+monikers = {
+              0: 'GMM-All-Tweets',
+              1: 'GMM-Opt-ID',
+              2: 'GMM-Opt-Attr',
+              3: 'GMM-Opt-Both',
+              4: 'Gaussian-Opt-ID',
+             # 5: 'Gaussian-Opt-Attr',
+             # 6: 'Gaussian-Opt-Both',
+              7: 'GMM-One',
+              8: 'GMM-Qpr-AIC',
+              9: 'GMM-Qpr-Covar-Sum-Prod',
+             10: 'GMM-Err-SAE2',
+             11: 'GMM-Err-SAE4',
+             12: 'GMM-Err-SAE10',
+             #13: 'GMM-Err-CAE2',
+             #14: 'GMM-Err-CAE4',
+             #15: 'GMM-Err-CAE10',
+           }
+
+def floatify(x):
+   try:
+      return float(x)
+   except (TypeError, ValueError):
+      return x
+
+rows = [map(floatify, row) for row in tsv_glue.Reader(sys.argv[1])][1:]
+rows.sort(key=operator.itemgetter(13))  # sort on MCAE
+
+for row in rows:
+   try:
+      row[0] = monikers[int(row[0])]
+      row[25] /= 1e3  # PRA, change units
+      row[26] /= 1e3  # PRA, change units
+      row[2] = (row[2] / 58) / 60  # Run time: per test, change to minutes
+      print r'{0}'.format(*row),                    # moniker
+      print r'& {13:.0f} & {14:.0f}'.format(*row),  # CAE
+      print r'& {16:.0f} & {17:.0f}'.format(*row),  # SAE
+      print r'& {25:.0f} & {26:.1f}'.format(*row),  # PRA_50
+      print r'& {35:.3f} & {36:.3f}'.format(*row),  # OC_50
+      print r'& {33:.3f} & {34:.3f}'.format(*row),  # OC_90
+      print r'& {2:.1f}'.format(*row),              # Run time
+      print r'\\'
+   except KeyError:
+      pass

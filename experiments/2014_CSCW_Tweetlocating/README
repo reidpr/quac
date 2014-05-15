@@ -1,0 +1,16 @@
+This directory contains code supporting the following paper:
+
+  Reid Priedhorsky, Aron Culotta, and Sara Y. Del Valle. Inferring the origin
+  locations of tweets with quantitative confidence. In Proc. CSCW 2014.
+
+  http://dl.acm.org/citation.cfm?id=2531602.2531607
+
+tests/ contains shell scripts to coordinate the experiments.
+code/ contains Python code supporting the experiments.
+
+I believe it depends on the icwsm2013 branch of QUAC.
+
+References to "geodb" refer to the database produced by the geotags-extract
+script.
+
+Contents copyright (c) Los Alamos National Security, LLC, and others.

@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# This script checks the health of a completed SLURM run. It reports the
+# status of each process (finished or not), any WARNING or higher log lines,
+# SLURM's stderr output, and other stuff.
+#
+# Run it with a single argument: the directory to examine.
+
+set -e
+
+VERBOSE=
+while getopts 'v' OPT; do
+    case $OPT in
+        v)
+            VERBOSE=1
+            ;;
+    esac
+    shift $((OPTIND-1))
+done
+
+if [ -n "$1" ]; then
+    cd $1
+fi
+
+echo '+++ slurm complaints'
+cat stderr
+
+echo '+++ total output size'
+du -sh .
+
+echo '+++ task completion'
+
+for i in [0-9]*; do
+    if [ -e $i/summary.pkl.gz ]; then
+        if [ $VERBOSE ]; then
+            printf '%3d ' $i
+            echo 'ok'
+        fi
+    else
+        printf '%3d ' $i
+        echo 'incomplete'
+    fi
+done | sort -n
+
+# don't do the rest if we're not verbose
+if [ ! $VERBOSE ]; then
+    exit
+fi
+
+echo '+++ log lines of concern'
+egrep 'WARNING|ERROR|FATAL' */out | sort -n -t/ --stable
