@@ -24,12 +24,12 @@ while current_date < end_date:
 		job_file.write('#!/bin/bash\n\n')
 		job_file.write('#MSUB -o %s\n' % (job_file_location % ('job_%s-%s.out' % (year, month))))
 		job_file.write('#MSUB -e %s\n' % (job_file_location % ('job_%s-%s.err' % (year, month))))
-		job_file.write('#MSUB -l nodes=32:ppn=8\n')
+		job_file.write('#MSUB -l nodes=15:ppn=24\n')
 		job_file.write('#MSUB -l walltime=0:45:00\n')
 		job_file.write('#MSUB -N index_%s-%s\n\n' % (year, month))
 		job_file.write('date\n\n')
 		job_file.write('cd /turquoise/usr/projects/infmodels/gfairchild/wikipedia/src\n')
-		job_file.write('mpirun -n 256 ./index_wiki_data.py %s %s\n\n' % (year, month))
+		job_file.write('mpirun -n 360 ./index_wiki_data.py %s %s\n\n' % (year, month))
 		job_file.write('date')	
 
 	current_date += increment

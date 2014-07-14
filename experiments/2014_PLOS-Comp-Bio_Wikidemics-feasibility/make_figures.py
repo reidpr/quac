@@ -21,6 +21,10 @@ import math
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from matplotlib.ticker import FormatStrFormatter, MultipleLocator, NullFormatter
+from matplotlib.font_manager import FontProperties
+import matplotlib.dates as mdates
+import subprocess
 
 argparser = argparse.ArgumentParser(description='Perform ±28 day lagged regressions to determine how Wikipedia and ground truth data are related.')
 argparser.add_argument('raw_wikipedia_counts_csv',
@@ -30,10 +34,8 @@ argparser.add_argument('ground_truth_csv',
                        type=argparse.FileType('rU'),
                        help='CSV file containing date,value ground truth data')
 argparser.add_argument('incidence_model_accesses_graph_pdf',
-                       type=argparse.FileType('w'),
                        help='PDF file to output graph showing incidence, model, and wiki accesses')
 argparser.add_argument('lag_graph_pdf',
-                       type=argparse.FileType('w'),
                        help='PDF file to output lagged model R^2')
 argparser.add_argument('-ap', '--aggregate-period',
                        type=str,
@@ -59,6 +61,15 @@ argparser.add_argument('--lagy',
 argparser.add_argument('--lagtitle',
                        type=str,
                        help='if present, text of lag plot title')
+argparser.add_argument('--incidencex',
+                       action='store_true',
+                       help="draw X axis label ('Date') on incidence plot")
+argparser.add_argument('--incidence-y1-label',
+                       type=str,
+                       default='Disease Incidence',
+                       help="label to use for the incidence plot's Y1 axis")
+argparser.add_argument('--strip-last-xlabel',
+                       action='store_true')
 args = argparser.parse_args()
 
 #first, read the raw wiki data and aggregate each article's counts by day since that's the resolution we want
@@ -201,7 +212,7 @@ for project, article in project_articles:
 	if not math.isnan(correlation):
 		article_correlations[(project, article)] = correlation
 
-article_correlations = sorted(article_correlations.iteritems(), key=lambda x: x[1], reverse=True)[:10]
+article_correlations = sorted(article_correlations.iteritems(), key=lambda x: abs(x[1]), reverse=True)[:10]
 
 #now we can do the lagged regression analysis
 lag_model = dict() #map lag to regression model
@@ -249,9 +260,14 @@ mpl.rcParams['mathtext.default'] = 'regular'
 
 mpl.rcParams['axes.linewidth'] = 0.5
 
+y_font = FontProperties(fname='../paper/Inconsolata.ttf')
+x_font = y_font
+
 fig = plt.figure(figsize=(6.3,1.8))  # note: height is an overestimate...
-ax2 = fig.add_subplot(111)
-ax1 = ax2.twinx()
+axwik = fig.add_subplot(111)
+axmod = axwik.twinx()
+#axmod = fig.add_subplot(111)
+#axwik = axmod.twinx()
 
 # The second list argument is so that we can normalize a paired sequence to
 # the larger of the two.
@@ -272,7 +288,7 @@ for index, ((project, article), correlation) \
 	date_normalized_wiki_count = get_date_normalized_wiki_count(project, article)
 
 	(wikipedia_accesses_plot,) = \
-           ax2.plot(date_normalized_wiki_count.keys(),
+           axwik.plot(date_normalized_wiki_count.keys(),
                     gnormalize(date_normalized_wiki_count.values()),
                     label='Wikipedia Accesses',
                     color=article_color(correlation),
@@ -281,61 +297,92 @@ for index, ((project, article), correlation) \
 
 #draw ground truth
 xs = ground_truth_date_count.keys()
-ys = gnormalize(ground_truth_date_count.values(), lag_results[0].predict())
+#ys = gnormalize(ground_truth_date_count.values(), lag_results[0].predict())
+ys = ground_truth_date_count.values()
 if (args.aggregate_period == 'after'):
         xs = xs[:-1]
         ys = ys[:-1]
 else:
         xs = xs[1:]
         ys = ys[1:]
-(ground_truth_plot,) = ax1.plot(xs,
-                                ys,
-                                label='Ground Truth',
-                                color='#377eb8',
-                                linestyle='-',
-                                linewidth=2.0)
+(ground_truth_plot,) = axmod.plot(xs,
+                                  ys,
+                                  label='Ground Truth',
+                                  color='#377eb8',
+                                  linestyle='-',
+                                  linewidth=2.0)
 
 #plot predicted values
 dates = get_date_normalized_wiki_count(article_correlations[0][0][0],
                                        article_correlations[0][0][1]).keys()
-(linear_model_plot,) = ax1.plot(dates,
-                                gnormalize(lag_results[0].predict(),
-                                           ground_truth_date_count.values()),
-                                label='Linear Model',
-                                color='#a65628',
-                                linestyle='-',
-                                linewidth=1.5)
+(linear_model_plot,) = axmod.plot(dates,
+                                  lag_results[0].predict(),
+                                  label='Linear Model',
+                                  color='#a65628',
+                                  linestyle='-',
+                                  linewidth=1.5)
 
 #left axis options
-ax1.set_ylim(bottom=0)
-ax1.tick_params(bottom='off', labelbottom='off',
-                top='off', labeltop='off',
-                left='off', labelleft='off',
-                right='off', labelright='off')
-#ax1.set_xlabel('Date')
-#ax1.set_ylabel('Disease Incidence')
+axmod.set_ylim(bottom=0)
+axmod.tick_params(bottom='on', labelbottom='on',
+                  top='off', labeltop='off',
+                  left='on', labelleft='on',
+                  right='off', labelright='off',
+                  labelsize=7)
+axmod.yaxis.tick_left()
+axmod.yaxis.set_label_position('left')
+axmod.yaxis.set_offset_position('left')
+axmod.set_ylabel(args.incidence_y1_label, fontsize=6)
+if args.incidencex:
+    axmod.set_xlabel('', fontsize=6)
+#if there are few enough cases, matplotlib will use fractional tick labels
+if max(ys) < 6:
+    axmod.yaxis.set_major_locator(MultipleLocator(base=1.0))
+axmod.set_yticklabels(axmod.get_yticks(), fontproperties=y_font)
+axmod.yaxis.set_major_formatter(FormatStrFormatter('%6d'))
+axmod.yaxis.set_tick_params(length=2)
+axmod.xaxis.set_visible(True)
+axmod.xaxis.set_major_locator(mdates.YearLocator())
+axmod.xaxis.set_minor_locator(mdates.MonthLocator([1, 4, 7, 10]))
+#axmod.set_xticklabels(axmod.get_xticks(), fontproperties=x_font)
+axmod.xaxis.set_major_formatter(mdates.DateFormatter('            %Y'))
+axmod.xaxis.set_minor_formatter(NullFormatter())
+axmod.xaxis.set_tick_params(which='major', direction='out', pad=-3, length=7)
+axmod.xaxis.set_tick_params(which='minor', direction='out', top='off', length=2)
+if (args.strip_last_xlabel):
+    axmod.xaxis.get_major_ticks()[-1].label1.set_visible(False)
 
 #right axis options
-ax2.set_ylim(bottom=0)
-ax2.tick_params(bottom='off', labelbottom='off',
-                top='off', labeltop='off',
-                left='off', labelleft='off',
-                right='off', labelright='off')
-#ax2.set_ylabel('Normalized Article Access') #, rotation=270)
+axwik.set_ylim(bottom=0)
+axwik.tick_params(bottom='on', labelbottom='off',
+                  top='off', labeltop='off',
+                  left='off', labelleft='off',
+                  right='off', labelright='off',
+                  labelsize=6)
+axwik.yaxis.tick_right()
+axwik.yaxis.set_label_position('right')
+axwik.yaxis.set_offset_position('right')
+axwik.set_ylabel('Article accesses', fontsize=6) #, rotation=270)
+axwik.yaxis.set_ticks([0, 1])
+axwik.set_yticklabels(axwik.get_yticks(), fontproperties=y_font)
+axwik.yaxis.set_tick_params(labelsize=6)
+axwik.xaxis.set_visible(False)
+#axwik.xaxis.set_minor_formatter(NullFormatter())
 
 #top/bottom axis options
-fig.autofmt_xdate()
+fig.autofmt_xdate(rotation=0, ha='center')
 
 # legend
 if (args.legend):
-        lgd = fig.legend([ground_truth_plot,
-                          linear_model_plot,
-                          wikipedia_accesses_plot],
-                         ['Official', 'Model', 'Wikipedia'],
-                         args.legend,
-                         ncol=3,
-                         prop={'size':   7,
-                               'weight': 'normal'},
+        lgd = axwik.legend([ground_truth_plot,
+                            linear_model_plot,
+                            wikipedia_accesses_plot],
+                           ['Official', 'Model', 'Wikipedia'],
+                           args.legend,
+                           ncol=3,
+                           prop={'size':   7,
+                                 'weight': 'normal'},
+                           bbox_to_anchor=(0.5, -0.35),
         )
 
         #set line with on legend border
@@ -374,64 +421,69 @@ if (args.title):
                 y = 0.99
                 ha='right'
                 va='top'
-        ax2.text(x, y, args.title,
-                 size=7,
-                 weight='bold',
-                 ha=ha,
-                 va=va,
-                 transform=ax2.transAxes)
+        axwik.text(x, y, args.title,
+                   size=7,
+                   weight='bold',
+                   ha=ha,
+                   va=va,
+                   transform=axwik.transAxes)
 
 
 #plt.show()
 fig.savefig(args.incidence_model_accesses_graph_pdf,
             transparent=True,
             bbox_inches='tight',
-            pad_inches=0,
+            pad_inches=0.05,
             format='pdf')
+del fig
+subprocess.check_call(['pdfcrop',
+                       args.incidence_model_accesses_graph_pdf,
+                       args.incidence_model_accesses_graph_pdf])
 
 #now draw the lagged R^2 figure
 fig = plt.figure(figsize=(3.35,2))
-ax1 = fig.add_subplot(111)
+axlag = fig.add_subplot(111)
 
 rsquareds = [lag_results[x].rsquared for x in sorted(lag_results)]
+rsquareds.reverse()
 
-ax1.plot(range(28, -29, -1),
-         rsquareds,
-         color='#377eb8',
-         linestyle='-',
-         linewidth=2.0)
+axlag.plot(range(-28, 29),
+           rsquareds,
+           color='#377eb8',
+           linestyle='-',
+           linewidth=2.0)
 # Really the vline should go on top of the plot because it's part of the axes,
 # but order doesn't seem to affect that.
-ax1.vlines(0, 0, 1, linestyles='dashed', linewidth=0.5)
-ax1.tick_params(labelbottom='off',
+axlag.vlines(0, 0, 1, linestyles='dashed', linewidth=0.5)
+axlag.tick_params(labelbottom='off',
                 labelleft='off')
 # FIXME: If the axis labels are hidden, then the subfigures don't line up in
 # the LaTeX file. One possible workaround is to draw the labels in white and
 # then crop them in LaTeX.
 if (args.lagx or True):
-        ax1.set_xlabel('Forecast (days)', size=8)
-        ax1.tick_params(labelbottom='on')
+        axlag.set_xlabel('Forecast (days)', size=8)
+        axlag.tick_params(labelbottom='on')
 if (args.lagy or True):
-        ax1.set_ylabel(r'$r^2$', size=8, rotation='horizontal')
-        ax1.tick_params(labelleft='on')
-ax1.set_ylim(bottom=0, top=1)
-ax1.set_xlim(left=28, right=-28)
-ax1.set_xticks([28, 21, 14, 7, 0, -7, -14, -21, -28])
-ax1.tick_params(axis='both', labelsize=7)
+        axlag.set_ylabel(r'$r^2$', size=8, rotation='horizontal')
+        axlag.tick_params(labelleft='on')
+axlag.set_ylim(bottom=0, top=1)
+axlag.set_xlim(left=-28, right=28)
+axlag.set_xticks([-28, -21, -14, -7, 0, 7, 14, 21, 28])
+axlag.tick_params(axis='both', labelsize=7)
 # This makes the plots different sizes depending on whether axes are shown.
 #fig.tight_layout()
 
 # title
 if (args.title):
-        ax1.text(0.96, 0.07, args.lagtitle,
-                 size=9,
-                 weight='bold',
-                 ha='right',
-                 va='bottom',
-                 transform=ax1.transAxes)
+        axlag.text(0.96, 0.07, args.lagtitle,
+                   size=9,
+                   weight='bold',
+                   ha='right',
+                   va='bottom',
+                   transform=axlag.transAxes)
 
 fig.savefig(args.lag_graph_pdf,
             transparent=True,
             bbox_inches='tight',
-            pad_inches=0.020,
+            pad_inches=0.02,
             format='pdf')
