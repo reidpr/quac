@@ -36,7 +36,7 @@ l = u.l
 TWEET_FILE_EXTENSION = '.json.gz'
 STATS_FILE_EXTENSION = '.stats'
 DEP_FILE_EXTENSION = '.json.d'
-LINE_COMBINE_LIMIT = 8  # combine up to this many lines to parse a tweet
+LINE_COMBINE_LIMIT = 16  # combine up to this many lines to parse a tweet
 
 
 ### Setup ###
