@@ -1,0 +1,16 @@
+Copyright (c) Los Alamos National Security, LLC, and others
+
+debs:
+  cmdtest
+  libgdal-dev
+  python-pip
+  python-virtualenv
+  virtualenvwrapper
+
+mkvirtualenv quac
+preactivate and postactivate hooks
+workon quac
+
+GDAL is broken
+  note: version must match system GDAL libraries or build will fail
+  CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install gdal==1.10.0
