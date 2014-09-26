@@ -964,15 +964,15 @@ TypeError: unhashable type: 'dict'
 
 # More unioned slices
 >>> pprint(sl_union(10))  # no slices
-set()
+set([])
 >>> pprint(sl_union(0, slp('1')))  # empty list
-set()
+set([])
 >>> pprint(sl_union(10, slp('1:4')))  # one slice
 set([1, 2, 3])
 >>> pprint(sl_union(10, slp('1:4'), slp('3')))  # overlapping slices
 set([1, 2, 3])
 >>> pprint(sl_union(10, slp('10')))  # fully out of bounds
-set()
+set([])
 >>> pprint(sl_union(10, slp('9:11')))  # partly out of bounds
 set([9])
 >>> pprint(sl_union(10, slp('9'), slp('10')))  # one in, one out

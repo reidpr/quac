@@ -68,7 +68,7 @@ def leading_dirs(path):
       >>> pprint(leading_dirs('/a/b/c'))
       set(['/a', '/a/b'])
       >>> pprint(leading_dirs('/a'))
-      set()
+      set([])
       >>> leading_dirs('')
       Traceback (most recent call last):
         ...

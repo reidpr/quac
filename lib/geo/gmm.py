@@ -559,9 +559,9 @@ class Geo_GMM(base.Location_Estimate, sklearn.mixture.GMM):
          >>> m = Geo_GMM.from_fit(mp, 2, 'foo')
          >>> c = Geo_GMM.combine([m], {'foo':1 }, 0.95)
          >>> c.likelihood_polygon(geos.Polygon.from_bbox((0.9,0.9,1.1,1.1)))
-         0.501
+         0.503
          >>> c.likelihood_polygon(geos.Polygon.from_bbox((0.95,0.95,1.05,1.05)))
-         0.399'''
+         0.385'''
       # returns proportion of samples contained in pg
       return sum(pg.contains(p[0]) for p in self.samples) / len(self.samples)
 
@@ -576,7 +576,7 @@ class Geo_GMM(base.Location_Estimate, sklearn.mixture.GMM):
          >>> big = geos.Polygon.from_bbox((0.9,0.9,1.1,1.1))
          >>> small = geos.Polygon.from_bbox((0.95,0.95,1.05,1.05))
          >>> combined.likelihood_polygons([big, small])
-         [(0, 0.501), (1, 0.392)]'''
+         [(0, 0.503), (1, 0.387)]'''
       scores = [(i, self.likelihood_polygon(p))
                 for (i,p) in enumerate(polygons)]
       return [(i, s) for (i,s) in scores if s >= threshold]

@@ -7,6 +7,8 @@ aawiki/latest/
 aawiki/latest/aawiki-latest-pagelinks.sql.gz
 aawiki/latest/aawiki-latest-stub-meta-history.xml.gz
 
+Number of files: 5 (reg: 2, dir: 3)
+Number of created files: 4 (reg: 2, dir: 2)
 $ cd wp-dumps/aawiki/latest
 $ (zcat aawiki-latest-pagelinks.sql.gz | egrep -v '^--' > aawiki-latest-pagelinks.sql)
 $ (zcat aawiki-latest-stub-meta-history.xml.gz | fgrep -v '<generator>' > aawiki-latest-stub-meta-history.xml)
@@ -17,11 +19,11 @@ $ head -5 aawiki-latest-pagelinks.sql
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8 */;
 $ head -5 aawiki-latest-stub-meta-history.xml
-<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.8/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.8/ http://www.mediawiki.org/xml/export-0.8.xsd" version="0.8" xml:lang="aa">
+<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.9/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.9/ http://www.mediawiki.org/xml/export-0.9.xsd" version="0.9" xml:lang="aa">
   <siteinfo>
     <sitename>Wikipedia</sitename>
+    <dbname>aawiki</dbname>
     <base>http://aa.wikipedia.org/wiki/Main_Page</base>
-    <case>first-letter</case>
 $ md5sum aawiki-latest-pagelinks.sql aawiki-latest-stub-meta-history.xml
-7bbd20042eb6379a5c64ec40c3beed51  aawiki-latest-pagelinks.sql
-0fa0f76bb2b390dc06fec0851fc7e797  aawiki-latest-stub-meta-history.xml
+886b13fc8928ae4ba02c636818e39258  aawiki-latest-pagelinks.sql
+dbad8d387c9cdb8753777f4a98e8a7cb  aawiki-latest-stub-meta-history.xml
