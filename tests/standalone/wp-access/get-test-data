@@ -1,42 +1,52 @@
 #!/bin/bash
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 # This script extracts a subset of the Wikimedia access logs. You probably
-# don't need to run it, since the data are included with QUAC.
+# don't need to run it, since the data are included with QUAC, and you don't
+# want to run it, since it takes several hours (to decompress and grep through
+# 140GB of data).
 #
-# It takes one argument: the directory containing the raw Wikimedia data you
-# want to pull from.
+# Note that files which appear to be already present are not re-copied.
+#
+# It takes two arguments:
+#
+# 1. The directory containing the raw Wikimedia data you want to pull from.
+# 2. A toggle; if present, the copy step (which is the long one) is not done.
 
 extract () {
     file=$(basename $1)
     month=$(basename $(dirname $1))
     year=$(echo $month | sed -e 's/...$//')
     echo $year/$month/$file
-    zcat $1 | egrep '^(en|ru) .*(Sandy|Halloween|%D0%A5%D1%8D%D0%BB%D0%BB%D0%BE%D1%83%D0%B8%D0%BD)' | gzip -9 > raw/$year/$month/$file
+    if [ ! -e raw/$year/$month/$file ]; then
+        zcat $1 | fgrep -i sandy | gzip -9 > raw/$year/$month/$file
+    fi
 }
 
-mkdir -p raw/2012/2012-10
-mkdir -p raw/2012/2012-11
-
+mkdir -p raw/2012/2012-{09,10,11}
 
 if [ -z "$2" ]; then  # give a 2nd argument to skip the lengthy copy
 
-    # Some normal, working data. Note the 1-day gap.
-    for file in $1/2012/2012-10/pagecounts-201210{26,28,29,30,31}-*.gz; do
-        extract $file
+    # Some normal, working data. We exclude a few files to create gaps in the
+    # time series we are going to test against later.
+    #
+    # Also, we want to make sure that November is almost, but not quite,
+    # closed (to test HDF5 repacking); to do so, we exclude the very last hour
+    # in the month. However, this is stamped 2012-12-01 00:00:00, so it's
+    # already implicitly excluded by the patterns below.
+    for file in $1/2012/2012-09/pagecounts-201209{28,29,30}-*.gz \
+                $1/2012/2012-{10,11}/pagecounts-*.gz; do
+        if [[    $file == *20121027*         # 1-day gap
+              || $file == *20121028-000000*  # 1-day gap off-by-one
+              || $file == *20121030-150000*  # 1-hour gap
+           ]]; then
+            echo "skipping $file"
+            continue
+        else
+            extract $file
+        fi
     done
-    for file in $1/2012/2012-11/pagecounts-201211{01,02,03,04}-*.gz; do
-        extract $file
-    done
-
-    # Timestamps are off by one, so remove a couple files from
-    # previous days.
-    rm raw/2012/2012-10/pagecounts-20121026-000000.gz
-    rm raw/2012/2012-10/pagecounts-20121028-000000.gz
-
-    # Create a 1-hour gap.
-    rm raw/2012/2012-10/pagecounts-20121030-150000.gz
 
 fi
 

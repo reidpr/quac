@@ -1,7 +1,12 @@
 Django==1.7
 GDAL==1.10.0
+Jinja2==2.7.3
+MarkupSafe==0.23
+Pygments==1.6
+Sphinx==1.2.3
 argparse==1.2.1
 dateutils==0.6.6
+docutils==0.12
 isodate==0.5.0
 ## FIXME: could not find svn URL in dependency_links for this package:
 joblib==0.8.3-r1
