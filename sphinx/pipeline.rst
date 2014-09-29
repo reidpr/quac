@@ -243,8 +243,8 @@ Overview
 --------
 
 The pipeline for Wikimedia data (Wikipedia and related projects) is simpler.
-We acquire them using the ``wp-get-access-logs`` script, and then build some
-metadata with the ``wp-metadata.mk`` makefile.
+We acquire them using the ``wp-get-access-logs`` script and then preprocess
+them into HDF5 time series files using the ``wp-preprocess.mk`` makefile.
 
 File organization
 -----------------
@@ -294,11 +294,8 @@ A fully populated data directory looks (in part) something like this:
 * :samp:`metadata.daily` --- A subset of the metadata file containing only
   daily data.
 
-File formats
-------------
-
-Pagecount files
-~~~~~~~~~~~~~~~
+Pagecount file format
+---------------------
 
 The file format of the pagecount files is `documented by WMF
 <http://dumps.wikimedia.org/other/pagecounts-raw/>`_. There are some quirks:
@@ -339,43 +336,113 @@ The file format of the pagecount files is `documented by WMF
    total traffic rather than raw hit counts, the effect should be minimal.
 
 
-Metadata files
-~~~~~~~~~~~~~~
+Time series files
+=================
 
-These are pickled Python dictionaries. Example content of ``metadata``::
+The time series files are HDF5 files containing hourly time series of
+occurrences of some item, for example occurrences of n-grams in Twitter
+messages or Wikipedia article hits.
 
-   { 'badfiles': set([ ... ]),
-     'projects': { 'en':   { date: { 'total': count,
-                                     'hours': {  0: count,
-                                                 1: count,
-                                                 ... ,
-                                                23: count }],
-                             ... }
-                   'en.b': ... ,
-                   'ru':   ... ,
-                   ... } }
+We have three main goals for these files:
 
-That is, there are two items in the dictionary.
+1. Provide a unified format for many types of things that can be counted over
+   time, to feed into a unified analysis framework.
 
-#. ``badfiles`` is a set of paths (starting with ``raw/``) which are the files
-   that had parse errors. These files are the ones excluded from ``hashed/``.
+2. Facilitate parallel access to the dataset without specialized I/O
+   techniques (such as MPI parallel I/O).
 
-#. ``projects``, keys are project codes from the pageview files (e.g.,
-   ``fr.b`` for French Wikibooks). Values are themselves dictionaries, mapping
-   ``datetime.date`` instances to the number of hits that day. The hits
-   consist of a dictionary. Item ``'total'`` gives the total number of hits on
-   that day, while item ``'hours'`` is a dictionary mapping hours (0 to 23) to
-   the number of hits in that hour.
+3. Facilitate reasonable performance for continually updated data written in
+   time-major order (e.g., each hour, a new Wikipedia access log file arrives
+   giving hits for all pages) as well as fast reading in item-major order
+   (e.g., quickly iterate through complete each Wikipedia article's time
+   series). That is, we want to accomplish a data transpose implicitly during
+   the preprocessing phase.
 
-   In both cases, the value ``0`` means no hits. A missing date or a missing
-   hour means no data (i.e., the ``'hours'`` dict would have only 23 entries
-   if one hour of data were missing on that day).
+The basic idea is that for each month, we have :math:`n` HDF5 data files, with
+items distributed across the files by hashing. A time series directory looks
+like this:
 
-Note that ``metadata`` is quite large, requiring over 10 GB of RAM to load.
+* :samp:`h5ts/` --- Root of time series
 
-The ``metadata.daily`` file omits the detailed hourly counts, replacing the
-``hours`` key with ``hours_len``, an integer saying how many hours of data
-were found for that day.
+  * :samp:`2007-12/` --- Items from December 2007.
 
+    * :samp:`0.h5` --- Items whose hash mod :math:`n` is 0.
+
+    * :samp:`1.h5` --- Items whose hash mod :math:`n` is 1.
+
+    * ...
+
+    * :samp:`{n-1}.h5` --- Items whose hash mode :math:`n` is :math:`n-1`.
+
+  * :samp:`2008-01/` --- Items from January 2008.
+
+  * ... (one for each month in the dataset)
+
+Note that datasets with different :math:`n` can be combined in the same
+computation. Care may be required for proper load balancing.
+
+Within each data file is the following HDF5 tree. This information has the
+notion of *namespace*; these are used for things like language in Wikipedia
+access logs. In the example, we use two namespaces: :samp:`en` and :samp:`ru`.
+Groups are indicated by trailing slashes, datsets by their absence (these HDF5
+concepts correspond roughly to POSIX directories and files), and attributes by
+italics.
+
+We use the term *time series* here to represent a vector of data points, one
+per hour, spanning the entire month. If an item is present, then it has a
+complete vector in the file regardless of how many data points are actually
+available (this is so vectors can be updated without moving them, which would
+leave holes that HDF5 cannot deal with well). Missing data points are
+represented as :samp:`NaN`. For example, for a file covering a 30-day month,
+every item will have a 720-element vector.
+
+* :samp:`/` --- Root of HDF5 file tree.
+
+  * :samp:`total/` --- Summary data.
+
+    * :samp:`en/` --- Summary data for the namespace *en*.
+
+      * *total_ct* --- Total month count for the entire namespace (float64).
+
+      * *min_hour* --- Minimum hour index with valid data (int32). For a full
+        month, this will be zero.
+
+      * *max_hour* --- Maximum hour index with valid data (int32). For a full
+        month, this will be the number of days in the month times 24 minus 1
+        (e.g., a 30-day month will yield 719).
+
+      * :samp:`totals` --- Vector of hourly totals for namespace *en* (float64).
+
+    * :samp:`ru/` --- Summary data for the namespace *ru*.
+
+      * ...
+
+  * :samp:`weirdal/` --- Item time series.
+
+    * :samp:`en/` --- Time series for namespace *en*.
+
+      * :samp:`Cat` --- Time series for item *Cat* (float32).
+
+        * *total_ct* --- Total month count for *Cat* (float64).
+
+      * :samp:`Dog` --- Time series for item *Dog* (float32).
+
+        * ... (attributes)
+
+      * ... (several million more items)
+
+    * :samp:`ru/` --- Time series for namespace *ru*.
+
+      * ...
+
+As for data types, we use floats for the vectors rather than integers, which
+would be more appropriate for counted data, because floats have :samp:`NaN`
+and integers do not. This brings into play all the difficulties of floating
+point math. A key gotcha in our case is summation: adding two numbers of
+differing magnitudes will lose precision in the smaller. This motivates use of
+double precision (64 bit) floats for totals; single precision (32 bit) is used
+for base time series in order to save space.
+
+HDF5 files can be compressed or otherwise filtered using standard filters.
 
 ..  LocalWords:  pagecount samp badfiles
