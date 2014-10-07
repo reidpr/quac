@@ -4,19 +4,23 @@ Jinja2==2.7.3
 MarkupSafe==0.23
 Pygments==1.6
 Sphinx==1.2.3
+anyjson==0.3.3
 argparse==1.2.1
-dateutils==0.6.6
 docutils==0.12
+httplib2==0.9
 isodate==0.5.0
 ## FIXME: could not find svn URL in dependency_links for this package:
 joblib==0.8.3-r1
+lockfile==0.10.2
 matplotlib==1.4.0
 mock==1.0.1
 nose==1.3.4
 numpy==1.9.0
+oauth2==1.5.211
 psutil==2.1.2
 pyparsing==2.0.2
 pyproj==1.9.3
+python-daemon-3K==1.5.8
 python-dateutil==2.2
 python-hostlist==1.14
 pytz==2014.7
