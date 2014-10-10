@@ -21,6 +21,6 @@ for line in sys.stdin:
       json.dump(json.loads(line), u.utf8_stdout,
                 indent=2, ensure_ascii=False, sort_keys=True)
       u.utf8_stdout.write("\n")
-   except ValueError, x:
+   except ValueError as x:
       u.utf8_stdout.write("%d *** parse error ***\n" % (line_number))
 u.utf8_stdout.write("total lines: %d" % (line_number))

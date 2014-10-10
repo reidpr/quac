@@ -170,7 +170,7 @@ SHELL=%s
             % (time_.nowstr_human(), shell))
    # everything
    fp.write('all: %s\n' % (' '.join('tmp/%d.reduced' % (i)
-                                    for i in xrange(args.partitions))))
+                                    for i in range(args.partitions))))
    # cleanup
    fp.write('''
 .PHONY: clean reallyclean
@@ -193,7 +193,7 @@ reallyclean: clean
         'pipefail': PIPEFAIL,
         'read_cmd': args.file_reader })
    # reducers
-   for rid in xrange(args.partitions):
+   for rid in range(args.partitions):
       input_bases = [os.path.basename(i) for i in args.inputs]
       cmd = args.reduce.replace('%(RID)', str(rid))
       fp.write('''

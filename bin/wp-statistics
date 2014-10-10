@@ -16,6 +16,6 @@ tsv.writerow(['date', 'missing hours'])
 
 en = md['projects']['en']
 
-for date in time_.dateseq(min(en.iterkeys()), max(en.iterkeys())):
+for date in time_.dateseq(min(en.keys()), max(en.keys())):
    good_hour_ct = len(en.get(date, {'hours': []})['hours'])
    tsv.writerow([time_.iso8601_date(date), 24 - good_hour_ct])

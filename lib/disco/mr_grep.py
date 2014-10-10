@@ -36,12 +36,12 @@ class Job(mr_base.Job, mr_base.TSV_Reader_Job):
          matches = list(matches)
          day_counts[day] = len(matches)
          for t in matches:
-            match_buf.write(u'\t'.join(t) + u'\n')
+            match_buf.write('\t'.join(t) + '\n')
       self.check_out_tags()
       # save to ddfs
       summary_buf = u.StringIO()
       for day in time_.dateseq_str(min(day_counts), max(day_counts)):
-         summary_buf.write(u'%s\t%d\n' % (day, day_counts[day]))
+         summary_buf.write('%s\t%d\n' % (day, day_counts[day]))
       summary_buf.seek(0)
       self.fs.push('%s:summary' % (self.name), ((summary_buf, 'a'),))
       match_buf.seek(0)

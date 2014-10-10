@@ -4,7 +4,7 @@
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
 
-from __future__ import division
+
 
 import io
 import json
@@ -41,7 +41,7 @@ class Magic_SRS_Dict(dict):
    '''
 
    def __init__(self):
-      for (srid, (name, proj4)) in CUSTOM_SRS.iteritems():
+      for (srid, (name, proj4)) in CUSTOM_SRS.items():
          # An explanation of the extreme fail here. SpatialReference objects
          # created from proj4 text get a name of "unnamed" and an SRID of
          # 4326, and there's nothing you can do about it (the relevant
@@ -285,7 +285,7 @@ def dump_geojson(basename, geoms):
                              'geometry': json.loads(geom.json) })
       # can't dump directly to file b/c "TypeError: must be unicode, not str"
       json_ = json.dumps(d, ensure_ascii=False, indent=2)
-      assert (isinstance(json_, unicode))
+      assert (isinstance(json_, str))
       fp = io.open(basename + '.geojson', mode='wt', encoding='utf8')
       fp.write(json_)
 

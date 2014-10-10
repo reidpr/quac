@@ -8,8 +8,8 @@ from django.contrib.gis import geos
 
 import u
 
-import base
-import srs
+from . import base
+from . import srs
 
 
 # Two noops for model parameter testing.

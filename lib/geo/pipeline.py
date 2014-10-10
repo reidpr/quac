@@ -3,7 +3,7 @@
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
 
-import base
+from . import base
 import u
 
 # FIXME: won't gmm.model_parms variable break pipeline? (can't have more than one model instance?)

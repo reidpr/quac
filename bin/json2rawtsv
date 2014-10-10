@@ -61,7 +61,7 @@ def main():
       filename_base = u.without_ext(filename_stats, STATS_FILE_EXTENSION)
       filename_json = filename_base + TWEET_FILE_EXTENSION
       filename_deps = filename_base + DEP_FILE_EXTENSION
-   except ValueError, x:
+   except ValueError as x:
       u.abort('bad .stats file: %s' % (x))
    global l
    l = u.logging_init('parse', file_=filename_base + '.log', truncate=True,
@@ -69,7 +69,7 @@ def main():
    l.info('starting')
    try:
       json_fp = gzip.open(filename_json)
-   except IOError, x:
+   except IOError as x:
       u.abort("can't open raw tweet file: %s" % (x))
    out_tsvs = TSV_Dict(filename_base)
    l.info('opened %s' % (filename_json))
@@ -103,10 +103,10 @@ def main():
             try:
                #print '\n\nTRYING %d <<<%s>>>' % (error_ct, line)
                po = tweet.from_json(line)
-            except ValueError, x:
+            except ValueError as x:
                #print 'BARF: %s' % (x)
                if (error_ct < LINE_COMBINE_LIMIT):
-                  line = line[:-1] + json_fp.next()  # StopIteration at EOF
+                  line = line[:-1] + next(json_fp)  # StopIteration at EOF
                   error_ct += 1
                   line_no += 1
                else:
@@ -115,7 +115,7 @@ def main():
                   raise x
             else:
                break
-      except tweet.Nothing_To_Parse_Error, x:
+      except tweet.Nothing_To_Parse_Error as x:
          # no content on this line, silently skip
          continue
       except (ValueError, StopIteration) as x:
@@ -137,10 +137,10 @@ def main():
       rawtsv = '%s.%s.raw.tsv' % (filename_base, date)
       alltsv = 'pre/%s.all.tsv' % (date)
       geotsv = 'pre/%s.geo.tsv' % (date)
-      print >>dep_fp, '%s : %s' % (rawtsv, filename_stats)
+      print('%s : %s' % (rawtsv, filename_stats), file=dep_fp)
       #print >>dep_fp, '.INTERMEDIATE : %s' % (rawtsv)
-      print >>dep_fp, '%s : %s %s' % (alltsv, rawtsv, filename_deps)
-      print >>dep_fp, 'pre/metadata: %s %s' % (alltsv, geotsv)
+      print('%s : %s %s' % (alltsv, rawtsv, filename_deps), file=dep_fp)
+      print('pre/metadata: %s %s' % (alltsv, geotsv), file=dep_fp)
    # done
    elapsed = time.time() - t_start
    l.info('done: %d objects in %s (%s/second); %d tweets, %d skips, %d parse failures'

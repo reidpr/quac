@@ -93,7 +93,7 @@ def leading_dirs(path):
       raise ValueError('path %s contains adjacent slashes' % (path))
    ldirs = set()
    dirs = path.split('/')[1:-1]
-   for di in xrange(len(dirs)):
+   for di in range(len(dirs)):
       ldirs.add('/' + '/'.join(dirs[:di+1]))
    return ldirs
 

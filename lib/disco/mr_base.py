@@ -22,7 +22,7 @@ l = u.l
 
 def run(jobclass, args):
    l.info('starting; args:')
-   for (arg, val) in sorted(vars(args).iteritems()):
+   for (arg, val) in sorted(vars(args).items()):
       l.info('  %-16s %s' % (arg, val))
    job = jobclass(args)
    job.run(input=['tag://' + args.input])

@@ -25,13 +25,13 @@ def hour_bizarro(x):
       (Yes, this is a strange, very specific function with a weird interface.
       It's what I need, though. It really belongs in wp-hashfiles, but that
       has no tests.)'''
-   if (isinstance(x, basestring)):
+   if (isinstance(x, str)):
       dt = timestamp_parse(x)
       return dt.toordinal() * 24 + dt.hour
    else:
       do = x[0].toordinal() * 24
-      return (do + min(x[1]['hours'].iterkeys()),
-              do + max(x[1]['hours'].iterkeys()))
+      return (do + min(x[1]['hours'].keys()),
+              do + max(x[1]['hours'].keys()))
 
 
 def timestamp_parse(text):

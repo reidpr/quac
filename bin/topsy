@@ -19,7 +19,7 @@
 #
 # * Should use center of bins, not beginning.
 
-from __future__ import division
+
 
 import argparse
 import csv
@@ -91,8 +91,8 @@ def csv_dump(results):
    w = csv.writer(open("%s.csv" % (args.output), "w"))
    w.writerow(["time_utc"] + [h.query for h in results])
    # FIXME: assumes bins are all the same
-   w.writerows(zip([t.strftime("%Y-%m-%d_%H:%M:%S") for t in results[0].bins],
-                   *[h.histogram for h in results]))
+   w.writerows(list(zip([t.strftime("%Y-%m-%d_%H:%M:%S") for t in results[0].bins],
+                   *[h.histogram for h in results])))
 
 def plot(results):
    plt.figure(figsize=(8,6))
@@ -102,7 +102,7 @@ def plot(results):
       # FIXME: The alignment of the bins is a guess. We are trying to mark the
       # begin time of each bin.
       plt.plot_date([matplotlib.dates.date2num(g_now + i*g_slice)
-                           for i in xrange(-len(hist), 0)],
+                           for i in range(-len(hist), 0)],
                     hist,
                     fmt="-",
                     label=query)
@@ -121,7 +121,7 @@ def searchhistogram(query):
           "slice":         g_slice.total_seconds() }
 
    # don't log apikey
-   for (k, v) in [i for i in kw.iteritems() if i[0] != "apikey"]:
+   for (k, v) in [i for i in kw.items() if i[0] != "apikey"]:
       l.debug("%s: %s" % (k, v))
 
    r = otter.Resource('searchhistogram', **kw)
@@ -140,7 +140,7 @@ class Histogram(object):
       self.query = query
       self.histogram = searchhistogram(query)
       self.bins = [(g_now + i*g_slice)
-                   for i in xrange(-len(self.histogram), 0)]
+                   for i in range(-len(self.histogram), 0)]
 
 
 if (__name__ == "__main__"):

@@ -34,7 +34,7 @@ class DB_Dict(collections.defaultdict):
       return self[key]
 
    def commit(self):
-      for db_ in self.itervalues():
+      for db_ in self.values():
          db_.commit()
          
 

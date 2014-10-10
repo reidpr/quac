@@ -30,7 +30,7 @@ import gzip
 import itertools
 import operator
 import sys
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 import numpy as np
 np.seterr(invalid='ignore')
@@ -57,7 +57,7 @@ class Build_Job(base.TSV_Internal_Job, base.KV_Pickle_Seq_Output_Job):
          first_day = min(first_day, date)
          last_day = max(last_day, date)
          cts[date] += count
-      total = sum(cts.itervalues())
+      total = sum(cts.values())
       if (total >= self.params['min_occur']):
          assert (first_day <= last_day)
          # use float32 for space efficiency at the expense of precision
@@ -65,7 +65,7 @@ class Build_Job(base.TSV_Internal_Job, base.KV_Pickle_Seq_Output_Job):
          last_dt = datetime.date.fromordinal(last_day)
          ct_series = math_.Date_Vector.zeros(first_dt, last_dt,
                                              dtype=np.float32)
-         for (date, ct) in cts.iteritems():
+         for (date, ct) in cts.items():
             ct_series[date - first_day] = ct
          yield (ngram, { 'ngram': ngram,
                          'total': total,
@@ -87,7 +87,7 @@ class Correlate_Job(base.KV_Pickle_Seq_Input_Job, base.TSV_Output_Job):
          mask = [tweet.is_enough(pdata['series'].date(i),
                                  pdata['series'][i],
                                  sample_rate=self.params['tw_sample_rate'])
-                 for i in xrange(len(pdata['series']))]
+                 for i in range(len(pdata['series']))]
          self.mask = math_.Date_Vector(pdata['series'].first_day,
                                        np.array(mask, dtype=np.bool))
       if (self.mask.sum() < 0.5 * len(self.mask)):
@@ -98,9 +98,9 @@ class Correlate_Job(base.KV_Pickle_Seq_Input_Job, base.TSV_Output_Job):
       short_names = u.without_common_prefix(self.params['input_sss'])
       for (sn, ln) in zip(short_names, self.params['input_sss']):
          e = ssheet.Excel(file_=ln)
-         for (name, (series, mask)) in e.data.iteritems():
-            name = '%s:%s' % (urllib.quote_plus(u.without_ext(sn, '.xls')),
-                              urllib.quote_plus(name))
+         for (name, (series, mask)) in e.data.items():
+            name = '%s:%s' % (urllib.parse.quote_plus(u.without_ext(sn, '.xls')),
+                              urllib.parse.quote_plus(name))
             self.targets.append({ 'name':   name,
                                   'series': series,
                                   'mask':   mask })

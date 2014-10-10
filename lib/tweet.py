@@ -2,11 +2,11 @@
 #
 # Copyright (c) 2012-2014 Los Alamos National Security, LLC, and others.
 
-from __future__ import division
+
 
 from datetime import date, datetime
 import dateutil.parser
-import HTMLParser
+import html.parser
 import json
 from pprint import pprint
 import re
@@ -19,7 +19,7 @@ import tsv_glue
 import u
 
 
-HTML_PARSER = HTMLParser.HTMLParser()
+HTML_PARSER = html.parser.HTMLParser()
 NON_ALPHANUMERICS_RE = re.compile(r'[\W_]+')
 WHITESPACES_RE = re.compile(r'[\s\0]+')
 
@@ -148,7 +148,7 @@ def text_clean(t):
    else:
       try:
          t = HTML_PARSER.unescape(t)
-      except Exception, x:
+      except Exception as x:
          # don't print the offending text because it could be arbitrary binary
          # goop, but that makes the problem hard to diagnose...
          u.l.warning('exception while HTML unescaping, will use None: %s' % (x))
@@ -173,7 +173,7 @@ class Limit_Notice(Ignored_Object): pass
 class Reader(tsv_glue.Reader):
    'Like a tsv_glue.Reader, except it emits Tweet objects, not lists.'
 
-   def next(self):
+   def __next__(self):
       return Tweet.from_list(tsv_glue.Reader.next(self))
 
 
@@ -242,7 +242,7 @@ class Tweet(object):
       o.text = text_clean(json['text'])
       o.user_screen_name = text_clean(json['user']['screen_name'])
       o.user_description = text_clean(json['user']['description'])
-      if (json['user'].has_key('lang')):
+      if ('lang' in json['user']):
          o.user_lang = text_clean(json['user']['lang'])
       else:
          o.user_lang = None
@@ -389,7 +389,7 @@ T_TW_JSON_CO = r'''{"text":"Guantes, bufanda, tenis y chamarra :) #Viena","id_st
 # FIXME: add test tweets for the other geotag sources
 
 
-testable.register(u'''
+testable.register('''
 
 # Make sure we don't drop anything through all the parsing and unparsing.
 >>> a = from_json(T_TW_JSON_CO)

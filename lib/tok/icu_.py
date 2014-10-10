@@ -13,7 +13,7 @@ import testable
 
 
 def is_japanese(text):
-   u'''Return true if text appears to contain Japanese.
+   '''Return true if text appears to contain Japanese.
 
        >>> is_japanese(base.T_JP2)
        True
@@ -25,13 +25,13 @@ def is_japanese(text):
        True'''
    # See http://stackoverflow.com/a/2857434
    # FIXME: The Kanji range (4E00-9FBF) may also catch Chinese.
-   return (re.search(u'[\u4E00-\u9FBF\u3040-\u309F\u30A0-\u30FF]', text)
+   return (re.search('[\u4E00-\u9FBF\u3040-\u309F\u30A0-\u30FF]', text)
            is not None)
 
 def is_latin(text):
    # FIXME: This function is likely overly restrictive, because there are
    # many "Latin" characters which can't be put in ISO 8859-1.
-   u'''
+   '''
    >>> is_latin(u'Hello')
    True
    >>> is_latin(u'àçúÈÑ')
@@ -52,7 +52,7 @@ def is_latin(text):
 
 
 class ICU(base.Tzer):
-   u'''A wrapper for the PyICU tokenizer, which is based on the International
+   '''A wrapper for the PyICU tokenizer, which is based on the International
       Components for Unicode (ICU):
       http://lucene.apache.org/core/old_versioned_docs/versions/3_1_0/api/contrib-icu/index.html
 
@@ -122,7 +122,7 @@ class ICU(base.Tzer):
 
 
 class Tiny_ICU(base.Tzer):
-   u'''Splits on whitespace, then uses ICU for Latin, Tiny for Japanese.
+   '''Splits on whitespace, then uses ICU for Latin, Tiny for Japanese.
        Ignores everything else. E.g.:
 
        >>> Tiny_ICU(1).tokenize(base.T_JP + ' ' + base.T_FR) == base.T_JP_TOKS + base.T_FR_TOKS
@@ -146,7 +146,7 @@ class Tiny_ICU(base.Tzer):
       return tokens
 
 
-testable.manualonly_register(u'''
+testable.manualonly_register('''
 
 >>> Tiny_ICU(1).tokenize(base.T_PUNCT) == base.T_PUNCT_TOKS
 True

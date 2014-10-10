@@ -43,7 +43,7 @@ class Reader(object):
    def close(self):
       self.fp.close()
 
-   def next(self):
+   def __next__(self):
       line = self.fp.readline()
       line = line.rstrip('\n')
       if (line == ''):
@@ -62,7 +62,7 @@ class Writer(object):
          latter case, create a new file if one does not already exist. If
          clobber is True, overwrite any existing contents, if False (the
          default), append.'''
-      if (isinstance(file_, basestring)):
+      if (isinstance(file_, str)):
          self.filename = file_
       if (clobber or file_ == 1):
          # io.open() on file descriptor 1 (stdout) with mode='at' crashes with
@@ -84,9 +84,9 @@ class Writer(object):
    def writerow(self, row):
       def _unicodify(s):
          if s is None:
-            return u''
+            return ''
          else:
-            return unicode(s)
+            return str(s)
       self.fp.write('\t'.join([_unicodify(i) for i in row]) + '\n')
 
 
@@ -113,12 +113,12 @@ class Dict(collections.defaultdict):
       return self[key]
 
    def close(self):
-      for f in self.itervalues():
+      for f in self.values():
          f.close()
 
    def filename_from_key(self, key):
       return (self.prefix + key + '.tsv')
 
    def iterfiles(self):
-      return [self.filename_from_key(i) for i in self.iterkeys()]
+      return [self.filename_from_key(i) for i in self.keys()]
 

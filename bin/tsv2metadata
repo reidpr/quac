@@ -83,7 +83,7 @@ def date_parse(fname):
       datetime.date(2012, 10, 1)
       '''
    p = r'.*(\d{4})-(\d\d)-(\d\d)'
-   return datetime.date(*map(int, re.search(p, fname).groups()))
+   return datetime.date(*list(map(int, re.search(p, fname).groups())))
 
 def metadata_pkl_open(filename):
    '''Read in the pickle file filename and return the data structure within,

@@ -14,7 +14,7 @@ BUGS / WARNINGS / FIXME:
 import argparse
 import codecs
 import collections
-import ConfigParser
+import configparser
 import cProfile
 from datetime import datetime, timedelta
 import distutils.spawn
@@ -27,7 +27,7 @@ import itertools
 import logging
 import os
 import os.path
-import cPickle as pickle
+import pickle as pickle
 from pprint import pprint
 import psutil
 import pytz
@@ -158,7 +158,7 @@ class ArgumentParser(argparse.ArgumentParser):
       return super(ArgumentParser, self).parse_args(args)
 
 
-class MyConfigParser(ConfigParser.SafeConfigParser):
+class MyConfigParser(configparser.SafeConfigParser):
 
    def getpath(self, section, key, rel_file=None):
       '''Return absolutized version of path at key; if specified, the path is
@@ -267,7 +267,7 @@ def class_by_name(name):
       for p in parts[1:]:
          m = getattr(m, p)
       return m
-   except (AttributeError, ValueError), x:
+   except (AttributeError, ValueError) as x:
       raise ValueError('Can\'t import "%s": %s' % (name, str(x)))
 
 def call_kw(f, *args, **kwargs):
@@ -286,7 +286,7 @@ def call_kw(f, *args, **kwargs):
    argspec = inspect.getargspec(f)
    valid_kwargs = set(argspec.args[-len(argspec.defaults):])
    return f(*args, **{ k:v
-                       for (k,v) in kwargs.iteritems()
+                       for (k,v) in kwargs.items()
                        if k in valid_kwargs } )
 
 def calling_module(frame_ct):
@@ -503,7 +503,7 @@ def logging_init(tag, file_=None, stderr_force=False, level=None,
          assert (file_ is None)
          assert (not truncate)
          file_ = file_c
-   except (No_Configuration_Read, ConfigParser.NoSectionError):
+   except (No_Configuration_Read, configparser.NoSectionError):
       # path.log not configured, but that's OK
       pass
    if (file_ is not None):
@@ -611,7 +611,7 @@ def module_dir(m=None):
 def mpi_available_p():
    '''Return True if MPI (including mpirun) is avilable in a SLURM allocation,
       False otherwise.'''
-   return bool(os.environ.has_key('SLURM_NODELIST')
+   return bool('SLURM_NODELIST' in os.environ
                and distutils.spawn.find_executable('mpirun'))
 
 def path_configured(path):
@@ -674,7 +674,7 @@ def parse_args(ap, args=sys.argv[1:]):
 
 def pickle_dump(file_, obj):
    t = time.time()
-   if (isinstance(file_, basestring)):
+   if (isinstance(file_, str)):
       filename = file_
       if (not filename.endswith(PICKLE_SUFFIX)):
          filename += PICKLE_SUFFIX
@@ -687,7 +687,7 @@ def pickle_dump(file_, obj):
 
 def pickle_load(file_):
    t = time.time()
-   if (isinstance(file_, basestring)):
+   if (isinstance(file_, str)):
       filename = file_
       if (os.path.exists(filename)):
          # bare filename exists, try that
@@ -730,7 +730,7 @@ def slp(text):
       >>> a[slp('')]
       []'''
    # see http://stackoverflow.com/questions/680826/
-   args = map(lambda s: (int(s) if s.strip() else None), text.split(':'))
+   args = [(int(s) if s.strip() else None) for s in text.split(':')]
    if (len(args) == 1 and args[0] is None):
       return slice(0)
    elif (len(args) == 1 and isinstance(args[0], int)):
@@ -751,7 +751,7 @@ def sl_union(len_, *slices):
       xrange() iterators don't support slicing).'''
    indexes = set()
    for sl in slices:
-      indexes.update(range(len_)[sl])
+      indexes.update(list(range(len_))[sl])
    return indexes
 
 def sl_union_fromtext(len_, slicetext):
@@ -759,7 +759,7 @@ def sl_union_fromtext(len_, slicetext):
 
       >>> pprint(sl_union_fromtext(10, '0,2:4,-2:'))
       set([0, 2, 3, 8, 9])"""
-   return sl_union(len_, *map(slp, slicetext.split(',')))
+   return sl_union(len_, *list(map(slp, slicetext.split(','))))
 
 def stdout_restore():
    global stdout_copy_fno

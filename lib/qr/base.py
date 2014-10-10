@@ -36,7 +36,7 @@
 
 from abc import ABCMeta, abstractmethod
 import base64
-import cPickle as pickle
+import pickle as pickle
 import io
 import itertools
 import operator
@@ -64,9 +64,7 @@ def encode(value):
 
 ### Classes ###
 
-class Job(object):
-   __metaclass__ = ABCMeta
-
+class Job(object, metaclass=ABCMeta):
    def __init__(self, params=None):
       # Note: Intepreting params involves a strange hack, because the user can
       # either pass a string-encoded dictionary or an arbitrary data structure
@@ -79,8 +77,8 @@ class Job(object):
       if (params is None):
          self.params = None
       else:
-         if (len(params) == 1 and params.values()[0] == ''):
-            self.params = decode(params.keys()[0])
+         if (len(params) == 1 and list(params.values())[0] == ''):
+            self.params = decode(list(params.keys())[0])
          else:
             self.params = params
       self.rid = None
@@ -140,7 +138,7 @@ class Job(object):
 
    def map_write(self, key, value):
       '''Write one key/value pair to the mapper output.'''
-      self.outfp.write(unicode(key).encode('utf8'))
+      self.outfp.write(str(key).encode('utf8'))
       self.outfp.write('\t')
       self.outfp.write(encode(value))
       self.outfp.write('\n')
@@ -215,9 +213,9 @@ class Line_Output_Job(Job):
 
    def reduce_write(self, item):
       'Items to be unicode objects with no trailing newline.'
-      assert (isinstance(item, unicode))
+      assert (isinstance(item, str))
       self.outfp.write(item)
-      self.outfp.write(u'\n')
+      self.outfp.write('\n')
 
 
 class KV_Pickle_Seq_Input_Job(Job):
@@ -247,7 +245,7 @@ class KV_Pickle_Seq_Output_Job(Job):
 
    def reduce_write(self, item):
       assert (len(item) == 2)
-      self.outfp.write(unicode(item[0]).encode('utf8'))
+      self.outfp.write(str(item[0]).encode('utf8'))
       self.outfp.write('\t')
       self.outfp.write(encode(item[1]))
       self.outfp.write('\n')

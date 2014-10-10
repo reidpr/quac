@@ -3,7 +3,7 @@
 
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
-from __future__ import division
+
 
 from collections import Counter, OrderedDict
 import operator
@@ -91,9 +91,9 @@ def gmm_fit_exhaustive(points):
 
    lowest_bic = np.infty
    bic = []
-   n_components_range = range(model_parms['component_ct_min'],
+   n_components_range = list(range(model_parms['component_ct_min'],
                               min(model_parms['component_ct_max'],
-                              len(points)))
+                              len(points))))
    for n_components in n_components_range:
       gmm = fit_gmm(points, n_components)
       bic.append(gmm.bic(np.array(points)))
@@ -180,7 +180,7 @@ def do_gmm_fit_ternary(data, n_min, n_max):
       NOTE: We considered mixture.DPGMM (which obviates need to pick N), but
       this module was not working at time of writing:
       http://sourceforge.net/mailarchive/message.php?msg_id=29984164'''
-   n_components_range = range(n_min, min(n_max, len(data)-1) + 1)
+   n_components_range = list(range(n_min, min(n_max, len(data)-1) + 1))
    min_gmm = fit_gmm(data, n_components_range[0])
    max_gmm = fit_gmm(data, n_components_range[-1])
    npdata = np.array(data)
@@ -231,7 +231,7 @@ def cae_opt(tms, tweets, tokenpoints):
    '''Optimize token_weights to minimize CAE over all training tweets'''
    l.debug('preparing token models')
    t_start = time.time()
-   for g in tms.values():
+   for g in list(tms.values()):
       g.populate_samples(100)
    l.debug('done preparing in %s' % (u.fmt_seconds(time.time() - t_start)))
    gmms_list = []
@@ -259,7 +259,7 @@ def sae_opt(tms, tweets, tokenpoints):
    l.debug('preparing token models')
    t_start = time.time()
    # FIXME: multicore?
-   for g in tms.values():
+   for g in list(tms.values()):
       g.populate_best_point()
    l.debug('done preparing in %s' % (u.fmt_seconds(time.time() - t_start)))
    gmms_list = []
@@ -297,7 +297,7 @@ def wt_inv_error(tms, tweets, tokenpts, errattr):
    t1 = time.time()
    # We work in chunks to keep memory use down. The chunk size is currently
    # not configurable, though we could make it so if needed.
-   models = tms.values()
+   models = list(tms.values())
    weights = dict()
    x = model_parms['wt_inv_error_exponent']
    for chunk in u.groupn(models, 20000):
@@ -317,7 +317,7 @@ def model_error(errattr, tokenpts, g):
    # FIXME: awkard to return (token, error) tuple? just return error and let
    # caller zip() it up?
    assert (len(g.explanation) == 1)
-   token = next(g.explanation.iterkeys())
+   token = next(iter(g.explanation.keys()))
    points = tokenpts[token]
    assert (points.geom_type == 'MultiPoint')
    if (len(points) < model_parms['wt_inv_min_tweets']):
@@ -343,10 +343,10 @@ def scale(token_weights):
       {'a': 0.135..., 'b': 1.0}
       >>> pprint(scale({'a':10,'b':5}))
       {'a': 10, 'b': 5}'''
-   if any(v < 0 for v in token_weights.itervalues()):
-      max_v = max(token_weights.itervalues())
+   if any(v < 0 for v in token_weights.values()):
+      max_v = max(token_weights.values())
       return {t:math.exp(v - max_v)
-              for (t,v) in token_weights.iteritems()}
+              for (t,v) in token_weights.items()}
    else:
       return token_weights
 
@@ -358,10 +358,10 @@ def inverse(token_weights):
       {'a': 3.0, 'b': 1.0}
       >>> pprint(inverse({'a':-100,'b':100}))
       {'a': 201.0, 'b': 1.0}'''
-   if any(v < 0 for v in token_weights.itervalues()):
-      max_v = max(token_weights.itervalues())
+   if any(v < 0 for v in token_weights.values()):
+      max_v = max(token_weights.values())
       return {t:max_v + 1. - v
-              for (t,v) in token_weights.iteritems()}
+              for (t,v) in token_weights.items()}
    else:
       return token_weights
 
@@ -370,7 +370,7 @@ def wt_neg_feature(tms, tweets, tokenpoints):
       that small weights become large, large weights become small, and all
       weights are positive in range (1,+Infty).'''
    m = { t: m.features()[model_parms['weight_feature']]
-         for (t, m) in tms.iteritems() }
+         for (t, m) in tms.items() }
    m = inverse(m)
    return m
 
@@ -379,7 +379,7 @@ def wt_inv_feature(tms, tweets, tokenpoints):
       weight_feature). If negative numbers exist, shift all values to be
       positive.'''
    m = { t: 1 / (1 + m.features()[model_parms['weight_feature']])
-         for (t, m) in tms.iteritems() }
+         for (t, m) in tms.items() }
    return scale(m)
 
 
@@ -451,7 +451,7 @@ class Geo_GMM(base.Location_Estimate, sklearn.mixture.GMM):
       covariance_type = gmms[0].covariance_type
       assert (srid is not None)
       def weight(g):
-         return weights[next(g.tokens.iterkeys())]
+         return weights[next(iter(g.tokens.keys()))]
       for g in gmms:
          assert (g.srid == srid)
          assert (g.covariance_type == covariance_type)
@@ -459,21 +459,21 @@ class Geo_GMM(base.Location_Estimate, sklearn.mixture.GMM):
          assert (weight(g) >= 0)
          # following aren't fundamental, just not yet supported
          assert (len(g.tokens) == 1)
-         assert (next(g.tokens.itervalues()) == 1.0)
+         assert (next(iter(g.tokens.values())) == 1.0)
       # remove GMMs that don't have enough weight
       max_weight = max([weight(g) for g in gmms])
       min_weight = max_weight * model_parms['weight_min']
-      gmms = filter(lambda g: weight(g) > min_weight, gmms)
+      gmms = [g for g in gmms if weight(g) > min_weight]
       # all weights are 0. cannot locate.
       if (max_weight == 0):
          return None
       assert (len(gmms) >= 1)
       # renormalize weights
       relevant_weights = { t: weights[t]
-                           for t in sum([g.tokens.keys() for g in gmms], []) }
-      total_weight = sum(relevant_weights.itervalues())
+                           for t in sum([list(g.tokens.keys()) for g in gmms], []) }
+      total_weight = sum(relevant_weights.values())
       weights = { t: w / total_weight
-                  for (t, w) in relevant_weights.iteritems() }
+                  for (t, w) in relevant_weights.items() }
       # build a skeleton GMM
       n_components = sum([g.n_components for g in gmms])
       new = class_(n_components=n_components, covariance_type=covariance_type)
@@ -506,7 +506,7 @@ class Geo_GMM(base.Location_Estimate, sklearn.mixture.GMM):
          >>> m.n_components
          1'''
       cts = Counter(m.predict(data))
-      tokeep = [idx for (idx,ct) in cts.items()
+      tokeep = [idx for (idx,ct) in list(cts.items())
                 if ct >= model_parms['component_sz_min']]
       if len(tokeep) == 0:
          m.n_components = 1
@@ -531,7 +531,7 @@ class Geo_GMM(base.Location_Estimate, sklearn.mixture.GMM):
       new.fit(data)
       new = Geo_GMM.filter_small_components(new, data)
       new.srid = mp.srid
-      if (isinstance(tokens, basestring)):
+      if (isinstance(tokens, str)):
          tokens = [tokens]
       new.tokens = { t:1 for t in tokens }
       new.n_points = mp.num_geom
@@ -705,7 +705,7 @@ class Geo_GMM(base.Location_Estimate, sklearn.mixture.GMM):
       if (identity):
          od['%s/%d' % (self.__class__.__name__, id(self))] = 1
       if (misc):
-         od.update({ t[:2]:1 for t in self.tokens.iterkeys() })  # tweet field
+         od.update({ t[:2]:1 for t in self.tokens.keys() })  # tweet field
          od['one'] = 1
          od['n_components'] = self.n_components
          od['n_points'] = self.n_points
@@ -735,8 +735,8 @@ class Geo_GMM(base.Location_Estimate, sklearn.mixture.GMM):
       bests = self.samples[:threshold_idx]
       # compute contours
       regions = []
-      for i in xrange(self.n_components):
-         points = filter(lambda j: j[2]==i, bests)
+      for i in range(self.n_components):
+         points = [j for j in bests if j[2]==i]
          if (len(points) < 3):
             # can't make a polygon with less than 3 vertices, skip
             continue
@@ -762,7 +762,7 @@ class Geo_GMM(base.Location_Estimate, sklearn.mixture.GMM):
       evals = self.score_samples([i.coords for i in sraw])
       logprobs = evals[0]
       component_is = [np.argmax(i) for i in evals[1]]
-      self.samples = zip(sraw, logprobs, component_is)
+      self.samples = list(zip(sraw, logprobs, component_is))
       self.samples.sort(reverse=True, key=operator.itemgetter(1))
       mp = geos.MultiPoint([i[0] for i in self.samples], srid=self.srid)
       self.samples_inbound_mp = srs.trim(mp)
@@ -825,7 +825,7 @@ class Token(Model):
 
    def build(self):
       self.token_gmms = dict(multicore.do(gmm_fit_tokenpoints,
-                                          (), self.tokens.items()))
+                                          (), list(self.tokens.items())))
       self.token_weights = model_parms['weight_f'](self.token_gmms,
                                                    self.tweets, self.tokens)
 
@@ -856,7 +856,7 @@ class All_Tweets(Model):
 
    def build(self):
       self.warn_if_parallel()
-      allpoints = geos.MultiPoint([pts for sublist in self.tokens.itervalues()
+      allpoints = geos.MultiPoint([pts for sublist in self.tokens.values()
                                    for pts in sublist],
                                   srid=self.srid)
       l.debug('fitting All_Tweets to %d points...' % len(allpoints))
@@ -918,12 +918,12 @@ def test_interactive_real():
    if (True):
       r = test_fitting(0.95, 1, sample_ct)
       plt.axhline(y=90)
-      plt.scatter(*zip(*r['all_xys']), s=5, color='b', marker='.')
-      plt.scatter(*zip(*r['g'].means_), s=40, color='r', marker='s')
-      plt.scatter(*zip(*[s[0].coords for s in r['g'].samples]),
+      plt.scatter(*list(zip(*r['all_xys'])), s=5, color='b', marker='.')
+      plt.scatter(*list(zip(*r['g'].means_)), s=40, color='r', marker='s')
+      plt.scatter(*list(zip(*[s[0].coords for s in r['g'].samples])),
                   s=5, color='g', marker='.')
       for polygon in r['g'].pred_region:
-         (xs, ys) = zip(*polygon[0].coords)
+         (xs, ys) = list(zip(*polygon[0].coords))
          plt.fill(xs, ys, 'k', lw=2, fill=False, edgecolor='r')
       plt.show()
       return
@@ -933,11 +933,11 @@ def test_interactive_real():
    for coverage in (0.50, 0.90, 0.95):
       l.info('COVERAGE = %g' % (coverage))
       all_[coverage] = list()
-      for seed in xrange(test_ct):
+      for seed in range(test_ct):
          l.info('SEED = %d' % (seed))
          all_[coverage].append(test_fitting(coverage, seed, sample_ct))
    l.info('RESULTS')
-   for (coverage, results) in all_.iteritems():
+   for (coverage, results) in all_.items():
       l.info('coverage = %g' % (coverage))
       l.info('  mean observed coverage (covers) = %g'
              % (np.mean([r['coverage_obs'] for r in results])))
@@ -969,14 +969,14 @@ def test_fitting(coverage, seed, sample_ct):
    # degrees north) as well as Los Alamos in order to test clamping for sampled
    # points that are too far north. The two places are roughly 5,447 km apart.
    ct = sample_ct
-   alert_xys = zip(-62.33 + rs.normal(scale=4.0, size=ct*1.5),
-                    82.50 + rs.normal(scale=8.0, size=ct*1.5))
+   alert_xys = list(zip(-62.33 + rs.normal(scale=4.0, size=ct*1.5),
+                    82.50 + rs.normal(scale=8.0, size=ct*1.5)))
    # make sure we are indeed slushing over the northern boundary of the world
-   assert (len(filter(lambda xy: xy[1] >= 90, alert_xys)) > 8)
-   la_xys = zip(-106.30 + rs.normal(scale=3.0, size=ct),
-                 35.89 + rs.normal(scale=2.0, size=ct))
+   assert (len([xy for xy in alert_xys if xy[1] >= 90]) > 8)
+   la_xys = list(zip(-106.30 + rs.normal(scale=3.0, size=ct),
+                 35.89 + rs.normal(scale=2.0, size=ct)))
    all_xys = alert_xys + la_xys
-   inbounds_xys = filter(lambda xy: xy[1] < 90, all_xys)
+   inbounds_xys = [xy for xy in all_xys if xy[1] < 90]
    l.info('true points in bounds = %d/%d = %g'
           % (len(inbounds_xys), len(all_xys), len(inbounds_xys)/len(all_xys)))
    result['all_xys'] = all_xys
@@ -1064,7 +1064,7 @@ def sample_points(rs, components, ct):
 def results_dict(coverages, fns):
    'initialize a 2d dict of results'
    results = dict.fromkeys(fns)
-   for k in results.iterkeys():
+   for k in results.keys():
       results[k] = dict.fromkeys(coverages,0)
    return results
 

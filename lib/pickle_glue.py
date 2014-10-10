@@ -8,7 +8,7 @@
 import errno
 import fcntl
 import io
-import cPickle as pickle
+import pickle as pickle
 
 import u
 import testable
@@ -29,7 +29,7 @@ class File(object):
       # load initial data
       try:
          self.data = pickle.load(io.open(self.filename, 'rb'))
-      except IOError, x:
+      except IOError as x:
          # If we failed because the file doesn't exist, that's OK if we're
          # writable (i.e., automagically create new files). Otherwise,
          # propagate the error.

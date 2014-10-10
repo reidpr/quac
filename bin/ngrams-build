@@ -130,8 +130,8 @@ class Tweet_Job(Job):
       args.inputs = glob.glob('%s/*.all.tsv' % (args.inputdir))
 
    def totals_build(self):
-      cts = [v['count'] for (k, v) in sorted(self.metadata['days'].iteritems())]
-      cts = math_.Date_Vector(min(self.metadata['days'].iterkeys()),
+      cts = [v['count'] for (k, v) in sorted(self.metadata['days'].items())]
+      cts = math_.Date_Vector(min(self.metadata['days'].keys()),
                               np.array(cts, dtype=np.float32))
       total = { 'projects': { 't@': { 'total': sum(cts), 'series': cts } } }
       u.pickle_dump('%s/out/total' % (args.jobdir), total)
@@ -158,7 +158,7 @@ class Wikimedia_Job(Job):
 if (__name__ == '__main__'):
    try:
       main()
-   except sp.CalledProcessError, x:
+   except sp.CalledProcessError as x:
       u.abort('subprocess failed with return code %d' % (x.returncode))
 
 

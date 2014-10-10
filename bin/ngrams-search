@@ -4,7 +4,7 @@
 
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
-from __future__ import division
+
 
 import io
 import sys
@@ -44,10 +44,10 @@ def main():
       u.abort('no input files in %s' % (args.inputdir))
    try:
       totals = u.pickle_load('%s/total.pkl.gz' % (args.inputdir))
-   except Exception, x:
+   except Exception as x:
       u.abort('cannot read total file: %s' % (x))
    tsv = tsv_glue.Writer(sys.stdout.fileno())
-   for i in xrange(file_ct):
+   for i in range(file_ct):
       if (args.query is not None and hash_.of(args.query) % file_ct != i):
          continue
       fp = io.open('%s/%d' % (args.inputdir, i), 'rb')
@@ -66,7 +66,7 @@ def main():
                                              ngram_vec.astype(np.int64),
                                              tot_vec.astype(np.int64),
                                              ngram_vec / tot_vec * 1e6)):
-                  if (totals.has_key('mask') and not totals['mask'][i]):
+                  if ('mask' in totals and not totals['mask'][i]):
                      # Print nothing instead of (invalid) masked data.
                      # FIXME: Does not work for Twitter. See issue #86.
                      tsv.writerow((row[0], None, None, None))

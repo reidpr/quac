@@ -86,16 +86,16 @@ def metadata_vector_dump(md):
    # Compute mask. If a day has more than 12 hours of data in English
    # Wikipedia, we call it a valid day's data.
    en = md['projects']['en']
-   date_min = min(en.iterkeys())
-   date_max = max(en.iterkeys())
+   date_min = min(en.keys())
+   date_max = max(en.keys())
    mask = math_.Date_Vector.zeros(date_min, date_max, dtype=np.bool)
    for (i, d) in enumerate(time_.dateseq(date_min, date_max)):
-      if (en.has_key(d) and len(en[d]['hours']) >= 12):
+      if (d in en and len(en[d]['hours']) >= 12):
          mask[i] = True
    totals['mask'] = mask
    # Compute totals for each project
    totals['projects'] = dict()
-   for (project, dates) in md['projects'].iteritems():
+   for (project, dates) in md['projects'].items():
       series = math_.Date_Vector.zeros(date_min, date_max, dtype=np.float32)
       for (i, d, _) in series.enumerated:
          series[i] = dates.get(d, {'total': 0})['total']
@@ -151,7 +151,7 @@ def pv_process(filename, md):
       l.warning('%s: %d lines with parse errors skipped (last was %d)'
                 % (filename, badline_ct, badline_last))
 
-   for (proj, count) in counts.iteritems():
+   for (proj, count) in counts.items():
       update(md['projects'], ts, proj, count)
 
 def update(md, timestamp, proj, count):
@@ -184,7 +184,7 @@ def update(md, timestamp, proj, count):
    md.setdefault(proj, dict())
    md[proj].setdefault(date, { 'total': None, 'hours': dict() })
    md[proj][date]['hours'][hour] = count
-   md[proj][date]['total'] = sum(md[proj][date]['hours'].itervalues())
+   md[proj][date]['total'] = sum(md[proj][date]['hours'].values())
 
 ### Bootstrap ###
 

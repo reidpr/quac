@@ -5,7 +5,7 @@
 
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
-from __future__ import division
+
 
 import math
 import numpy as np
@@ -67,7 +67,7 @@ def ellipses_n(gmm, confidence):
    # FIXME: need to consider weight of each component!
    assert False, 'untested'
    ells = []
-   for i in xrange(gmm.n_components):
+   for i in range(gmm.n_components):
       ells.append(ellipse_1(gmm.means_[i], gmm.covars_[i], confidence))
    return geos.MultiPolygon(ells).cascaded_union
 

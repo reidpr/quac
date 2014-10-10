@@ -59,7 +59,7 @@ GEOIMG_WIDTH = 1024  # y pixel size computed to make "square" pixels
 
 ### Classes ###
 
-class Location_Estimate(object):
+class Location_Estimate(object, metaclass=ABCMeta):
    '''An estimated location that contains a probability model of some kind.
 
         srid ........... ID of the SRS for geometries in the estimate.
@@ -81,11 +81,6 @@ class Location_Estimate(object):
       class can also compute several metrics for the accuracy, precision, and
       calibration of the estimate. Further details about these are available
       in our publications.'''
-
-   # FIXME: This class could probably be simplified with a memoization
-   # approach; e.g., see http://stackoverflow.com/questions/4431703/
-
-   __metaclass__ = ABCMeta
 
    def __init__(self, coverage=None, srid=None):
       self.pred_coverage = coverage
@@ -237,10 +232,8 @@ class Location_Estimate(object):
       self.prepared = False
 
 
-class Model(object):
+class Model(object, metaclass=ABCMeta):
    '''Base class for geometric models.'''
-
-   __metaclass__ = ABCMeta
 
    parms_default = { 'mc_sample_ct': 1000 }
    parms = None
@@ -264,7 +257,7 @@ class Model(object):
    @property
    def token_summary_keys(self):
       'List of keys for self.token_summary for an arbitrary token.'
-      return self.token_summary(next(self.tokens.iterkeys())).iterkeys()
+      return iter(self.token_summary(next(iter(self.tokens.keys()))).keys())
 
    @classmethod
    def parms_init(class_, parms, log_parms=False):
@@ -275,12 +268,12 @@ class Model(object):
          in the same process.'''
       parms = parms.copy()
       # check for bogus parameters
-      for k in parms.iterkeys():
+      for k in parms.keys():
          if (k not in class_.parms_default):
             raise ValueError('parameter %s is not supported' % (k))
       # munge in functions, if they exist
-      for (k, v) in parms.iteritems():
-         if (isinstance(v, basestring)):
+      for (k, v) in parms.items():
+         if (isinstance(v, str)):
             try:
                parms[k] = getattr(sys.modules[class_.__module__], v)
             except AttributeError:
@@ -291,10 +284,10 @@ class Model(object):
       if (log_parms):
          l.info('model parameters:')
          # note: spacing matches model_test.Test_Sequence.main()
-         for (k,v) in sorted(class_.parms.iteritems()):
+         for (k,v) in sorted(class_.parms.items()):
             l.info('  %s: %*s %s' % (k, 19 - len(k), ' ', str(v)))
       # check for missing parameters
-      if (None in class_.parms.itervalues()):
+      if (None in iter(class_.parms.values())):
          raise ValueError('model parameter with value None')
 
    @abstractmethod

@@ -21,14 +21,14 @@
 
 # If you edit this file, make sure tests match hashsplit.c.
 
-from __future__ import division
+
 
 import testable
 import u
 
 
 def byteify(byteme):
-   u'''Return a byte string representation of byteme. E.g.:
+   '''Return a byte string representation of byteme. E.g.:
 
        >>> byteify('abc').encode('hex')
        '616263'
@@ -39,7 +39,7 @@ def byteify(byteme):
        ValueError: cannot convert <type 'int'> to byte string'''
    if (isinstance(byteme, str)):
       return byteme
-   elif (isinstance(byteme, unicode)):
+   elif (isinstance(byteme, str)):
       return byteme.encode('utf8')
    else:
       raise ValueError('cannot convert %s to byte string' % (type(byteme)))
@@ -61,7 +61,7 @@ def consecutive(x, bin_ct, min_, max_):
    return int(min((x - min_) / per_bin, bin_ct - 1))
 
 def djb2(bytes_):
-   u'''Bernstein's DJB2 hash (http://www.cse.yorku.ca/~oz/hash.html), XOR
+   '''Bernstein's DJB2 hash (http://www.cse.yorku.ca/~oz/hash.html), XOR
        variant. For example:
 
        >>> djb2('b')
@@ -82,7 +82,7 @@ def djb2(bytes_):
    return hash_
 
 def fnv1a_32(bytes_):
-   u'''Bernstein's DJB2 hash (http://www.cse.yorku.ca/~oz/hash.html), XOR
+   '''Bernstein's DJB2 hash (http://www.cse.yorku.ca/~oz/hash.html), XOR
        variant. For example:
 
        >>> fnv1a_32('b')
@@ -115,13 +115,13 @@ def test_interactive():
    import matplotlib.pyplot as plt
    inputs = open(u.quacbase
                  + '/tests/standalone/wp-access/ls-R.fulldata').readlines()
-   for hashmod in [2**i for i in xrange(1, 13)] + [240, 251]:
-      buckets = { i: 0 for i in xrange(hashmod) }
+   for hashmod in [2**i for i in range(1, 13)] + [240, 251]:
+      buckets = { i: 0 for i in range(hashmod) }
       for i in inputs:
          buckets[of(i) % hashmod] += 1
-      plt.plot(buckets.values())
+      plt.plot(list(buckets.values()))
       plt.plot(sorted(buckets.values()))
       plt.axis([(hashmod - 1) * -0.02, (hashmod - 1) * 1.02,
-                0, max(buckets.itervalues()) * 1.02])
+                0, max(buckets.values()) * 1.02])
       plt.title('hashmod = %d' % (hashmod))
       plt.show()

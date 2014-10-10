@@ -30,7 +30,7 @@ def symlink(target, source):
       os.unlink(source)
    os.symlink(target, source)
 
-for h in xrange(hashmod):
+for h in range(hashmod):
    mkdir('hashed/%d' % (h))
    mkdir('hashed_small/%d' % (h))
    if (h % tinymod == 0):

@@ -5,7 +5,7 @@
 
 from django.contrib.gis import geos
 
-import base
+from . import base
 
 
 class Model(base.Model):

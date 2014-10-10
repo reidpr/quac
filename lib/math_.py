@@ -23,7 +23,7 @@
 # something to use in the future. (E.g., see
 # <http://www.compsci.wm.edu/SciClone/documentation/software/math/NumPy/html1.7/reference/arrays.maskna.html>.)
 
-from __future__ import division
+
 
 import datetime
 import numbers
@@ -272,7 +272,7 @@ class Date_Vector(np.ndarray):
           (2, datetime.date(2013, 6, 4), 4),
           (3, datetime.date(2013, 6, 5), 5),
           (4, datetime.date(2013, 6, 6), 6)]'''
-      for i in xrange(len(self)):
+      for i in range(len(self)):
          yield (i, self.date(i), self[i])
 
    @property

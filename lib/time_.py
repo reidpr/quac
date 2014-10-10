@@ -43,7 +43,7 @@ def date_hours(d):
        datetime.datetime(2013, 10, 31, 2, 0),
        ...
        datetime.datetime(2013, 10, 31, 23, 0)]'''
-   for hour in xrange(24):
+   for hour in range(24):
       yield datetime.datetime.combine(d, datetime.time(hour))
 
 def dateify(x):
@@ -71,7 +71,7 @@ def dateify(x):
       return x
    if (x is None):
       return x
-   if (isinstance(x, basestring)):
+   if (isinstance(x, str)):
       return iso8601_parse(x).date()
    raise ValueError("can't convert %s to a date" % (str(x)))
 

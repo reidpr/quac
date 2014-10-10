@@ -72,7 +72,7 @@ class UP_Tiny(base.Tzer):
       return tokens
 
 
-testable.register(u'''
+testable.register('''
 
 >>> all([s in unicodedata2.script_data['names']
 ...      for s in UP_Tiny.DISCARD_SCRIPTS])

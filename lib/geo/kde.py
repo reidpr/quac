@@ -4,8 +4,8 @@ from django.contrib.gis import geos
 import numpy as np
 import scipy.stats.kde as kde
 
-import base
-import pipeline
+from . import base
+from . import pipeline
 import u
 
 l = u.l

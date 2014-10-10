@@ -2,7 +2,7 @@
 
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
-from __future__ import division
+
 
 from datetime import datetime
 import os.path
@@ -52,14 +52,14 @@ class Excel(object):
             mask = math_.Date_Vector.zeros(min(dates), max(dates),
                                            dtype=np.bool)
             out_i = 0
-            for j in xrange(len(dates)):
+            for j in range(len(dates)):
                if (j+1 < len(dates)):
                   duration = time_.days_diff(dates[j+1], dates[j])
                else:
                   duration = 1
                assert (duration > 0)
                v = values[j] / duration if values[j] is not None else None
-               for k in xrange(out_i, out_i + duration):
+               for k in range(out_i, out_i + duration):
                   if (v is not None):
                      data[k] = v
                      mask[k] = True

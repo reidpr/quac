@@ -14,9 +14,7 @@ from pprint import pprint
 import testable
 
 
-class Tzer(object):
-   __metaclass__ = ABCMeta
-
+class Tzer(object, metaclass=ABCMeta):
    def __init__(self, ngram):
       if (ngram < 1):
          raise ValueError('ngram must be >= 1, but %d given' % (ngram))
@@ -29,7 +27,7 @@ class Tzer(object):
    def tokenize(self, s):
       if (s is None):
          return []
-      elif (isinstance(s, basestring)):
+      elif (isinstance(s, str)):
          # The basic approach here:
          # 1. Find the unigram sequence u and copy this to the output.
          # 2. Bigrams: append itertools.izip(u, u[1:])
@@ -38,9 +36,9 @@ class Tzer(object):
          unigrams = self.tokenize_real(s)
          tokens = list(unigrams)
          sources = [unigrams]
-         for i in xrange(1, self.ngram):
+         for i in range(1, self.ngram):
             sources.append(unigrams[i:])
-            tokens += (' '.join(j) for j in itertools.izip(*sources))
+            tokens += (' '.join(j) for j in zip(*sources))
          return tokens
       else:
          raise TypeError('expected unicode or None, got %s' % (type(s)))
@@ -54,7 +52,7 @@ class Tzer(object):
                                      'd': 'e f g!' }))
          [('a', 'b'), ('a', 'c'), ('d', 'e'), ('d', 'f'), ('d', 'g!')]'''
       result = []
-      for (key, s) in dict_.iteritems():
+      for (key, s) in dict_.items():
          tokens = self.tokenize(s)
          result += [(key, i) for i in tokens]
       return result
@@ -73,27 +71,27 @@ class Whitespace(Tzer):
 
 
 # These are some strings good for testing.
-T_CH = u'美加緊'  # Kanji
-T_EN = u"Fox didn't jump over dog."
-T_EN_TOKS = [u'fox', u'didn', u't', u'jump', u'over', u'dog']
-T_EN_TOKS_ICU = [u'fox', u"didn't", u'jump', u'over', u'dog']
-T_EN_TOKS_PUNC = [u'fox', u'didn', u"'", u't', u'jump', u'over', u'dog', u'.']
-T_EN_TOKS_PUNC_ICU = [u'fox', u"didn't", u'jump', u'over', u'dog', u'.']
-T_FR = u'Français est amusant'
-T_FR_TOKS = [u'français', u'est', u'amusant']
-T_JP2 = u'私の'
+T_CH = '美加緊'  # Kanji
+T_EN = "Fox didn't jump over dog."
+T_EN_TOKS = ['fox', 'didn', 't', 'jump', 'over', 'dog']
+T_EN_TOKS_ICU = ['fox', "didn't", 'jump', 'over', 'dog']
+T_EN_TOKS_PUNC = ['fox', 'didn', "'", 't', 'jump', 'over', 'dog', '.']
+T_EN_TOKS_PUNC_ICU = ['fox', "didn't", 'jump', 'over', 'dog', '.']
+T_FR = 'Français est amusant'
+T_FR_TOKS = ['français', 'est', 'amusant']
+T_JP2 = '私の'
 # Example from TinySegmenter documentation: "My name is Nakano"
-T_JP = u'私の名前は中野です'
-T_JP_TOKS = [u'私', u'の', u'名前',
-             u'は', u'中野',
-             u'です']
-T_KO = u'갰'
-T_PUNCT = u'!@#$%^&*(_+-=[]{}\|;,.<>/?'
+T_JP = '私の名前は中野です'
+T_JP_TOKS = ['私', 'の', '名前',
+             'は', '中野',
+             'です']
+T_KO = '갰'
+T_PUNCT = '!@#$%^&*(_+-=[]{}\|;,.<>/?'
 T_PUNCT_TOKS = []
-T_WEIRD = u'ℝ☺♀'  # math, emoji, etc.
+T_WEIRD = 'ℝ☺♀'  # math, emoji, etc.
 T_WEIRD_TOKS = []
 
-testable.register(u'''
+testable.register('''
 
 # FIXME: I haven't figured out how to print the actual Unicode characters in
 # order to test them in a natural way. For example, letting the doctest
@@ -135,7 +133,7 @@ def test_interactive():
    import os
 
    def time_test(class_, strings):
-      print class_, '...'
+      print(class_, '...')
       cmd = "python -m timeit --setup 'import tokenizers; tzer=tokenizers.%s(1)' 'tzer.tokenize(%s)'" % (class_.split()[0], " + \" \" + ".join(['tokenizers.' + s for s in strings]))
       #print cmd
       os.system(cmd)

@@ -81,7 +81,7 @@ class Weight(object):
       self.tweets = []
       self.hash = 0
       for (gmms,errors) in zip(gmms_list, errors_list):
-         self.tweets.append(zip(gmms, errors))
+         self.tweets.append(list(zip(gmms, errors)))
 
    def make_gmm_list(self):
       return sorted(list(set([g for sublist in self.gmms_list
@@ -93,12 +93,12 @@ class Weight(object):
       self.feature_alphabet = defaultdict(lambda: len(self.feature_alphabet))
       for g in self.all_gmms:
          g.feature_vector = defaultdict(lambda : 0)
-         for (f,v) in g.features(identity_feature, misc_feature).iteritems():
+         for (f,v) in g.features(identity_feature, misc_feature).items():
             g.feature_vector[self.feature_alphabet[f]] = v
 
    def dot(self, feature_vector, x):
       'Dot product of feature_vector (a dict) and x (dense array)'
-      return sum(x[fi] * v for (fi,v) in feature_vector.iteritems())
+      return sum(x[fi] * v for (fi,v) in feature_vector.items())
 
    def logistic(self, x):
       return 1.0 / (1.0 + np.exp(-x))
@@ -150,7 +150,7 @@ class Weight(object):
                part = (entropy * (error * self.weight_sums[ti] -
                                   self.weight_error_sums[ti]) /
                        (self.weight_sums[ti] * self.weight_sums[ti]))
-            for (feature_index,feature_value) in gmm.feature_vector.iteritems():
+            for (feature_index,feature_value) in gmm.feature_vector.items():
                self.deriv[feature_index] += part * feature_value
       self.reg_deriv(x)
       return self.deriv
@@ -164,7 +164,7 @@ class Weight(object):
    def initialize_from_feature(self):
       init_vals = np.ones(len(self.feature_alphabet))
       for g in self.all_gmms:
-         f = next(g.features(identity=True,misc=False).iterkeys())
+         f = next(iter(g.features(identity=True,misc=False).keys()))
          features = g.features(identity=False,misc=True)
          init_vals[self.feature_alphabet[f]] = \
              1 / (1 + features[self.init_by_feature]) - 0.5
@@ -192,13 +192,13 @@ class Weight(object):
                  self.n_deriv_calls, self.n_cache_hits))
       l.debug('final function value=%g' % self.func(res.x))
       self.score_gmms(res.x)
-      di = dict([(next(gmm.tokens.iterkeys()),
+      di = dict([(next(iter(gmm.tokens.keys())),
                   max(self.min_value, gmm.score))
                  for gmm in self.all_gmms])
       if self.verbose:
-         for (fv,fi) in self.feature_alphabet.iteritems():
+         for (fv,fi) in self.feature_alphabet.items():
             l.debug('feature weight %s=%g' % (fv,res.x[fi]))
-         for (t,w) in di.iteritems():
+         for (t,w) in di.items():
             l.debug('token weight %s=%s'%(t,str(w)))
       # clean up
       for g in self.all_gmms:

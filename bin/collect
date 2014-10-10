@@ -127,12 +127,12 @@ if (c.getboolean("coll", "no_proxy")):
 # which does the same thing at a different level.
 source_ip = c.get("coll", "source_ip")
 if (source_ip):
-   import httplib
-   HTTPSConnection_real = httplib.HTTPSConnection
+   import http.client
+   HTTPSConnection_real = http.client.HTTPSConnection
    class HTTPSConnection_monkey(HTTPSConnection_real):
       def __init__(*a, **kw):
          HTTPSConnection_real.__init__(*a, source_address=(source_ip, 0), **kw)
-   httplib.HTTPSConnection = HTTPSConnection_monkey
+   http.client.HTTPSConnection = HTTPSConnection_monkey
 
 
 ### Program ###
@@ -179,7 +179,7 @@ class Tweet_Collector(object):
    def main(self):
       if (args.daemon):
          d = daemon.DaemonContext()
-         d.umask=0007
+         d.umask=0o007
          if (args.daemon_debug):
             d.stderr=sys.stderr
             d.stdout=sys.stdout
@@ -207,7 +207,7 @@ class Tweet_Collector(object):
                self.collect()
             except ShutdownException:
                break
-            except ts.ReconnectError, x:
+            except ts.ReconnectError as x:
                l.warning("connection failed: %s" % (str(x)))
                if (not self.reconnect_barrier()):
                   u.abort("reconnect vetoed")
@@ -273,7 +273,7 @@ class Tweet_Collector(object):
       info_fp = open("%s/%s.stats" % (dumppath, self.filebase), "w")
       def p(msg):
          l.debug("  " + msg)
-         print >>info_fp, msg
+         print(msg, file=info_fp)
       p("seconds                %13.1f  %9s"
         % (seconds_ct, u.fmt_seconds(seconds_ct)))
       p("tweets                 %11d    %9s"
@@ -306,7 +306,7 @@ class Tweet_Collector(object):
       try:
          os.makedirs('%s/%s' % (dumppath, subdir))
          l.info('created subdirectory %s' % (subdir))
-      except OSError, x:
+      except OSError as x:
          if (x.errno != errno.EEXIST):
             raise
       self.filebase = '%s/%s' % (subdir, filebase)
