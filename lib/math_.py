@@ -644,7 +644,7 @@ def pearson(a, b, a_mask=None, b_mask=None, min_data=3):
 testable.register('''
 
 # test that Date_Vector objects can be pickled
->>> import cPickle as pickle
+>>> import pickle
 >>> a = Date_Vector('2013-06-02', np.arange(2, 7))
 >>> b = pickle.loads(pickle.dumps(a))
 >>> np.array_equal(a, b)
@@ -664,10 +664,10 @@ True
 >>> c.sum()
 20
 >>> type(c.sum())
-<type 'numpy.int64'>
+<class 'numpy.int64'>
 >>> a.sum()
 20
 >>> type(a.sum())
-<type 'numpy.int64'>
+<class 'numpy.int64'>
 
 ''')

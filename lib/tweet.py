@@ -7,11 +7,11 @@
 from datetime import date, datetime
 import dateutil.parser
 import html.parser
-import json
 from pprint import pprint
 import re
 
 from django.contrib.gis import geos
+import ujson as json
 
 import testable
 import time_
@@ -135,7 +135,7 @@ def text_clean(t):
       For example:
 
       >>> text_clean(u'A \\r\\n\\tB\\0C&gt;D')
-      u'A B C>D'
+      'A B C>D'
       >>> text_clean(u'null') is None
       True
 
@@ -350,10 +350,10 @@ class Tweet(object):
 
          >>> import tok.base
          >>> tzer = tok.base.Whitespace(1)
-         >>> pprint(T_TW_SIMPLE.tokenize(tzer, ['tx', 'tz'], False))
-         ['tz g', 'tx a', 'tx b']
-         >>> pprint(T_TW_SIMPLE.tokenize(tzer, ['tx', 'tz'], True))
-         ['g', 'a', 'b']'''
+         >>> sorted(T_TW_SIMPLE.tokenize(tzer, ['tx', 'tz'], False))
+         ['tx a', 'tx b', 'tz g']
+         >>> sorted(T_TW_SIMPLE.tokenize(tzer, ['tx', 'tz'], True))
+         ['a', 'b', 'g']'''
       raw = tker.tokenize_all({ f: getattr(self, f) for f in fields })
       self.tokens = []
       for (field, token) in raw:

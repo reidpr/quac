@@ -27,7 +27,7 @@ import itertools
 import logging
 import os
 import os.path
-import pickle as pickle
+import pickle
 from pprint import pprint
 import psutil
 import pytz
@@ -171,7 +171,7 @@ class MyConfigParser(configparser.SafeConfigParser):
    def getlist(self, section, key):
       return self.get(section, key).split()
 
-c = MyConfigParser()
+c = MyConfigParser(inline_comment_prefixes=['#'])
 
 
 class Profiler(object):

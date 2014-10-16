@@ -68,7 +68,7 @@ def main():
                       stderr_force=True)
    l.info('starting')
    try:
-      json_fp = gzip.open(filename_json)
+      json_fp = gzip.open(filename_json, mode='rt', encoding='utf8')
    except IOError as x:
       u.abort("can't open raw tweet file: %s" % (x))
    out_tsvs = TSV_Dict(filename_base)

@@ -88,14 +88,14 @@ def dateseq_str(start, end):
 def dateseq(start, end):
    '''E.g.:
 
-      >>> pprint(list(dateseq(datetime.date(2013, 03, 25),
-      ...                     datetime.date(2013, 03, 28))))
+      >>> pprint(list(dateseq(datetime.date(2013, 3, 25),
+      ...                     datetime.date(2013, 3, 28))))
       [datetime.date(2013, 3, 25),
        datetime.date(2013, 3, 26),
        datetime.date(2013, 3, 27),
        datetime.date(2013, 3, 28)]
-      >>> pprint(list(dateseq(datetime.datetime(2013, 03, 25, 1, 2, 3),
-      ...                     datetime.datetime(2013, 03, 28, 4, 5, 6))))
+      >>> pprint(list(dateseq(datetime.datetime(2013, 3, 25, 1, 2, 3),
+      ...                     datetime.datetime(2013, 3, 28, 4, 5, 6))))
       [datetime.date(2013, 3, 25),
        datetime.date(2013, 3, 26),
        datetime.date(2013, 3, 27),
