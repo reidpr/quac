@@ -192,9 +192,9 @@ class defaultdict_recursive(collections.defaultdict):
       >>> a[1][1] = 1
       >>> a[1][2][3] = 2
       >>> pprint(a.keys())
-      [1]
+      dict_keys([1])
       >>> pprint(a[1].keys())
-      [1, 2]
+      dict_keys([1, 2])
       >>> a[1][1]
       1
       >>> a[1][2][3]
@@ -293,7 +293,7 @@ def calling_module(frame_ct):
    '''Return the module object frame_ct levels up in the stack. For example:
 
       >>> calling_module(0)
-      <module '__main__' from '.../lib/u.py'>
+      <module 'u' from '.../lib/u.py'>
 
       Note that what is frame_ct levels up must be a module, not a function or
       something else. For example:
@@ -386,8 +386,8 @@ def groupn(iter_, n):
       iter_; the final chunk may have size less than n (but not 0). Patterned
       after <http://stackoverflow.com/a/3992918/396038>. E.g.:
 
-      >>> a = xrange(10)
-      >>> b = range(10)
+      >>> a = range(10)
+      >>> b = list(range(10))
       >>> [list(i) for i in groupn(a, 3)]
       [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]]
       >>> [list(i) for i in groupn(b, 3)]
@@ -475,8 +475,8 @@ def logging_init(tag, file_=None, stderr_force=False, level=None,
    if (level is None):
       level = logging.DEBUG if verbose else logging.INFO
 
-   # FIXME: filthy hack to print "FATAL" instead of "CRITICAL" in logs
-   logging._levelNames[50] = 'FATAL'
+   # Use "FATAL" instead of "CRITICAL" in logs
+   logging.addLevelName(50, 'FATAL')
 
    global l
    l = logging.getLogger('my_logger')
@@ -540,14 +540,14 @@ def memoize(f):
       >>> r = random.Random(1)
       >>> @memoize
       ... def f(x):
-      ...   return (x * r.randint(0, 99))
+      ...   return (x * r.randint(0, 10**9))
       >>> f(1)
-      13
+      144272509
       >>> f(1)
-      13
+      144272509
       >>> f.reset()
       >>> f(1)
-      84
+      611178002
 
       (Note that the above should work for plain functions too, but it's a
       class method because doctest is getting confused.)'''
@@ -744,11 +744,11 @@ def sl_union(len_, *slices):
    '''Given a sequence length and some slices, return the sequence of indexes
       which form the union of the given slices. For example:
 
-      >>> pprint(sl_union(10, slp('0'), slp('2:4'), slp('-2:')))
-      set([0, 2, 3, 8, 9])
+      >>> sorted(sl_union(10, slp('0'), slp('2:4'), slp('-2:')))
+      [0, 2, 3, 8, 9]
 
       Note that this function instantiates lists of length len_ (because
-      xrange() iterators don't support slicing).'''
+      range() iterators don't support slicing).'''
    indexes = set()
    for sl in slices:
       indexes.update(list(range(len_))[sl])
@@ -757,8 +757,8 @@ def sl_union(len_, *slices):
 def sl_union_fromtext(len_, slicetext):
    """e.g.:
 
-      >>> pprint(sl_union_fromtext(10, '0,2:4,-2:'))
-      set([0, 2, 3, 8, 9])"""
+      >>> sorted(sl_union_fromtext(10, '0,2:4,-2:'))
+      [0, 2, 3, 8, 9]"""
    return sl_union(len_, *list(map(slp, slicetext.split(','))))
 
 def stdout_restore():
@@ -963,20 +963,20 @@ TypeError: unhashable type: 'dict'
 >>> (a[slp('::-1')] == a[::-1]) and None
 
 # More unioned slices
->>> pprint(sl_union(10))  # no slices
-set([])
->>> pprint(sl_union(0, slp('1')))  # empty list
-set([])
->>> pprint(sl_union(10, slp('1:4')))  # one slice
-set([1, 2, 3])
->>> pprint(sl_union(10, slp('1:4'), slp('3')))  # overlapping slices
-set([1, 2, 3])
->>> pprint(sl_union(10, slp('10')))  # fully out of bounds
-set([])
->>> pprint(sl_union(10, slp('9:11')))  # partly out of bounds
-set([9])
->>> pprint(sl_union(10, slp('9'), slp('10')))  # one in, one out
-set([9])
+>>> sl_union(10)  # no slices
+set()
+>>> sl_union(0, slp('1'))  # empty list
+set()
+>>> sorted(sl_union(10, slp('1:4')))  # one slice
+[1, 2, 3]
+>>> sorted(sl_union(10, slp('1:4'), slp('3')))  # overlapping slices
+[1, 2, 3]
+>>> sl_union(10, slp('10'))  # fully out of bounds
+set()
+>>> sl_union(10, slp('9:11'))  # partly out of bounds
+{9}
+>>> sl_union(10, slp('9'), slp('10'))  # one in, one out
+{9}
 
 ''')
 

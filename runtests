@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 'Run QUAC tests. Return success if everything passed, failure otherwise.'
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 help_epilogue = '''
 This script is used to test QUAC. You can run all the tests, or those in a
@@ -63,9 +63,9 @@ for (i, t) in enumerate(args.target):
 # which we need for some tests.
 os.environ['TMPDIR'] = os.path.join(quacbase, 'tests/tmp')
 if (not args.noclean):
-   print '### removing old failed tests'
+   print('### removing old failed tests')
    for old_testdir in glob.glob('%s/tmp*' % (os.environ['TMPDIR'])):
-      print old_testdir
+      print(old_testdir)
       shutil.rmtree(old_testdir)
 
 # There is a bug in certain versions of the readline library which causes
@@ -97,7 +97,7 @@ def main():
    if (status['import_fail'] > 0):
       status['import_fail_alert'] = '<-- warning!'
       retval = 1
-   print '''\
+   print('''\
 
 ### summary:
 ###   succeeded:        %(win)3d
@@ -105,7 +105,7 @@ def main():
 ###   import failures:  %(import_fail)3d %(import_fail_alert)s
 ###   no tests:         %(notest)3d
 ###   disabled:         %(disabled)3d
-###   cmdtest skips:    %(cmdtest_skip)3d''' % (status)
+###   cmdtest skips:    %(cmdtest_skip)3d''' % (status))
    sys.exit(retval)
 
 
@@ -115,6 +115,7 @@ class Failure(Exception):
    def __init__(self, reason):
       self.reason = reason
 
+
 ### other functions ###
 
 def cmdtest_check_ready(filename):
@@ -123,15 +124,15 @@ def cmdtest_check_ready(filename):
       try:
          subprocess.check_call([os.path.join(suite, 'ready.sh')])
          ready_tried[suite] = True
-         print '...',
+         print('...', end=' ')
       except subprocess.CalledProcessError:
          ready_tried[suite] = False
-         print '... missing dependencies'
+         print('... missing dependencies')
          raise Failure('cmdtest_skip')
    elif (ready_tried[suite]):
-      print '...',
+      print('...', end=' ')
    else:
-      print 'missing dependencies (cached)'
+      print('missing dependencies (cached)')
       raise Failure('cmdtest_skip')
 
 def file_to_module(filename):
@@ -148,25 +149,27 @@ def import_test(filename, text):
    for line in text.splitlines(True):
       m = re.search(r'^([ >]*)((import|from) .+$)', line)
       if (m):
-         print >>imfp, m.group(2)
+         print(m.group(2), file=imfp)
    imfp.flush()
-   imout = subprocess.check_output(('python -m %s || true'
+   imout = subprocess.check_output(('python3 -m %s || true'
                                     % (file_to_module(imfname))),
-                                   stderr=subprocess.STDOUT, shell=True)
+                                   shell=True,
+                                   stderr=subprocess.STDOUT,
+                                   universal_newlines=True)
    imfp.close()
    os.unlink(imfname)  # comment to leave file for debugging
    if (len(imout) > 0):
-      print
-      print imout.splitlines()[-1]
-      raise Failure('import_test')
+      print()
+      print(imout, end=' ')
+      raise Failure('import_fail')
 
 def is_testable(text):
    m = re.search(r'testable\.(?P<manual>manualonly_)?register\(', text)
    if (m is None):
-      print 'no tests'
+      print('no tests')
       raise Failure('notest')
    if (m.group('manual') and not args.force):
-      print 'disabled'
+      print('disabled')
       raise Failure('disabled')
 
 def test_cmdtest(filename):
@@ -174,7 +177,7 @@ def test_cmdtest(filename):
    if (not re.search(r'\.script$', filename)):
       raise Failure('ignore')
    # Start test
-   print filename[2:],
+   print(filename[2:], end=' ')
    # Do we have the dependencies (is it "ready")?
    cmdtest_check_ready(filename)
    sys.stdout.flush()
@@ -186,20 +189,22 @@ def test_cmdtest(filename):
    testout = subprocess.check_output(
       ("cd %s && script -q -c 'cmdtest -k -t %s .' /dev/null || true"
        % (os.path.dirname(filename), os.path.basename(filename)[:-7])),
-      stderr=subprocess.STDOUT, shell=True)
+      shell=True,
+      stderr=subprocess.STDOUT,
+      universal_newlines=True)
    if (testout.find('0 failures') < 0):
-      print
-      print testout,
+      print()
+      print(testout, end=' ')
       raise Failure('fail')
    # Success!
-   print 'ok'
+   print('ok')
 
 def test_module(filename):
    # Silently return if it's not a Python module or not requested for testing
    if (not re.search(r'(?<!__init__)\.py$', filename)):
       raise Failure('ignore')
    # Start test
-   print filename[2:], '...',
+   print(filename[2:], '...', end=' ')
    sys.stdout.flush()
    module = file_to_module(filename)
    text = open(filename, 'rt').read()
@@ -208,16 +213,17 @@ def test_module(filename):
    import_test(filename, text)
    # Run tests
    if (args.interactive):
-      subprocess.call(['python', '-c',
+      subprocess.call(['python3', '-c',
                        'import %s ; %s.test_interactive()' % (module, module)])
    else:
-      testout = subprocess.check_output(['python', '-m', module])
+      testout = subprocess.check_output(['python3', '-m', module],
+                                        universal_newlines=True)
       if (len(testout) > 0):
-         print
-         print testout,
+         print()
+         print(testout, end=' ')
          raise Failure('fail')
    # Success!
-   print 'ok'
+   print('ok')
 
 def test_script(filename):
    # Is it a Python script? If not, ignore it.
@@ -225,34 +231,35 @@ def test_script(filename):
    if (not re.search(r'^#!.+python', text)):
       raise Failure('ignore')
    # Start test
-   print filename[2:], '...',
+   print(filename[2:], '...', end=' ')
    sys.stdout.flush()
    # Does it import quacpath?
    if (not re.search('^(import|from) quacpath', text, re.MULTILINE)):
-      print
-      print 'Does not import quacpath'
+      print()
+      print('Does not import quacpath')
       return Counter(fail=1)
    # Check prerequisites for testing
    is_testable(text)
    import_test(filename, text)
    # Run tests (check both old- and new-style capability)
-   testout = subprocess.check_output([filename, '--unittest'])
+   testout = subprocess.check_output([filename, '--unittest'],
+                                     universal_newlines=True)
    if (len(testout) > 0):
-      print
-      print testout,
+      print()
+      print(testout, end=' ')
       raise Failure('fail')
    # Success!
-   print 'ok'
+   print('ok')
 
 def testloop(name, dir_, test_func):
-   print '### testing %s' % (name)
+   print('### testing %s' % (name))
    status = Counter()
    oldcwd = os.getcwd()
    os.chdir(dir_)
    for filename in walk('.'):
       try:
          test_func(filename)
-      except Failure, x:
+      except Failure as x:
          status[x.reason] += 1
       else:
          status['win'] += 1

@@ -4,15 +4,14 @@
    with identical results in Python, C, and perhaps other places. The primary
    documentation is here.
 
-   Unless otherwise specified, these algorithms operate on byte strings, i.e.
-   str objects. They also accept unicode objects, which are converted to bytes
-   by encoding in UTF-8.
+   Unless otherwise specified, these algorithms operate on bytes objects. They
+   also accept str objects, which are converted to bytes by encoding in UTF-8.
 
    None of the Python implementations are optimized for speed.
 
    Run the interactive test for visualizations of hash quality.'''
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 # Implementation note: In principle, we could implement the algorithms once,
 # in C, and then access that implementation from Python (e.g., using ctypes).
@@ -30,14 +29,15 @@ import u
 def byteify(byteme):
    '''Return a byte string representation of byteme. E.g.:
 
-       >>> byteify('abc').encode('hex')
-       '616263'
-       >>> byteify(u'私の名前').encode('hex')
-       'e7a781e381aee5908de5898d'
+       >>> from binascii import hexlify
+       >>> hexlify(byteify('abc'))
+       b'616263'
+       >>> hexlify(byteify(u'私の名前'))
+       b'e7a781e381aee5908de5898d'
        >>> byteify(8675309)
        Traceback (most recent call last):
-       ValueError: cannot convert <type 'int'> to byte string'''
-   if (isinstance(byteme, str)):
+       ValueError: cannot convert <class 'int'> to byte string'''
+   if (isinstance(byteme, bytes)):
       return byteme
    elif (isinstance(byteme, str)):
       return byteme.encode('utf8')
@@ -49,13 +49,13 @@ def consecutive(x, bin_ct, min_, max_):
       to max_ inclusive, divide it into bin_ct bins of consecutive integers
       numbered 0 to bin_ct-1. Return the bin index containing x. E.g.:
 
-      >>> [consecutive(i, 3, 11, 24) for i in xrange(11, 25)]
+      >>> [consecutive(i, 3, 11, 24) for i in range(11, 25)]
       [0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2]
-      >>> [consecutive(i, 3, 0, 2) for i in xrange(3)]
+      >>> [consecutive(i, 3, 0, 2) for i in range(3)]
       [0, 1, 2]
-      >>> [consecutive(i, 3, 0, 3) for i in xrange(4)]
+      >>> [consecutive(i, 3, 0, 3) for i in range(4)]
       [0, 1, 2, 2]
-      >>> [consecutive(i, 3, 0, 4) for i in xrange(5)]
+      >>> [consecutive(i, 3, 0, 4) for i in range(5)]
       [0, 0, 1, 2, 2]'''
    per_bin = (max_ - min_) / bin_ct
    return int(min((x - min_) / per_bin, bin_ct - 1))
@@ -78,7 +78,7 @@ def djb2(bytes_):
    hash_ = 5381
    for b in bytes_:
       # mod operation simulates 32-bit unsigned int overflow
-      hash_ = ((hash_ * 33) % 2**32) ^ ord(b)
+      hash_ = ((hash_ * 33) % 2**32) ^ b
    return hash_
 
 def fnv1a_32(bytes_):
@@ -96,7 +96,7 @@ def fnv1a_32(bytes_):
    bytes_ = byteify(bytes_)
    hash_ = 2166136261
    for b in bytes_:
-      hash_ = hash_ ^ ord(b)
+      hash_ = hash_ ^ b
       hash_ = (hash_ * 16777619) % 2**32
    return hash_
 

@@ -76,7 +76,7 @@ manualonly_register = register
    collecting modules to test.'''
 
 def test(module):
-   options = doctest.ELLIPSIS | doctest.REPORT_ONLY_FIRST_FAILURE
+   options = doctest.ELLIPSIS #| doctest.REPORT_ONLY_FIRST_FAILURE
    doctest.testmod(module, optionflags=options)
 
 def test_interactive_null():
