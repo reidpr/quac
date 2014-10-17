@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,14 +6,14 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>3. Preprocessing data &mdash; QUAC documentation for commit 7a2a02b</title>
+    <title>3. Preprocessing data &mdash; QUAC documentation for commit bbb8e44</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -26,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="QUAC documentation for commit 7a2a02b" href="index.html" />
+    <link rel="top" title="QUAC documentation for commit bbb8e44" href="index.html" />
     <link rel="next" title="4. Map-Reduce with QUACreduce" href="map_reduce.html" />
     <link rel="prev" title="2. Collecting data" href="collecting.html" /> 
   </head>
@@ -40,7 +38,7 @@
         <li class="right" >
           <a href="collecting.html" title="2. Collecting data"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 7a2a02b</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit bbb8e44</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -64,13 +62,10 @@
 <li><a class="reference internal" href="#wikimedia-pageview-logs">3.2. Wikimedia pageview logs</a><ul>
 <li><a class="reference internal" href="#id2">3.2.1. Overview</a></li>
 <li><a class="reference internal" href="#id3">3.2.2. File organization</a></li>
-<li><a class="reference internal" href="#id5">3.2.3. File formats</a><ul>
-<li><a class="reference internal" href="#pagecount-files">3.2.3.1. Pagecount files</a></li>
-<li><a class="reference internal" href="#metadata-files">3.2.3.2. Metadata files</a></li>
+<li><a class="reference internal" href="#pagecount-file-format">3.2.3. Pagecount file format</a></li>
 </ul>
 </li>
-</ul>
-</li>
+<li><a class="reference internal" href="#time-series-files">3.3. Time series files</a></li>
 </ul>
 </li>
 </ul>
@@ -195,12 +190,14 @@ parsability of the JSON.</p>
 <ul>
 <li><p class="first">While the encoding of the output is ostensibly UTF-8, it appears that high
 characters are escaped with the &#8220;uXXXX&#8221; notation. For example:</p>
-<div class="highlight-python"><pre>"text":"\u2606\u2606\u2606\u2606\u2606#Cruzeiro"</pre>
+<div class="highlight-python"><div class="highlight"><pre>&quot;text&quot;:&quot;\u2606\u2606\u2606\u2606\u2606#Cruzeiro&quot;
+</pre></div>
 </div>
 </li>
 <li><p class="first">Some text has excessive escaping. For example, forward slashes do not need
 to be escaped, but they are anyway:</p>
-<div class="highlight-python"><pre>"source":"\u003Ca href=\"http:\/\/blackberry.com\/twitter"</pre>
+<div class="highlight-python"><div class="highlight"><pre>&quot;source&quot;:&quot;\u003Ca href=\&quot;http:\/\/blackberry.com\/twitter&quot;
+</pre></div>
 </div>
 </li>
 </ul>
@@ -318,8 +315,8 @@ key/value.</li>
 <div class="section" id="id2">
 <h3>3.2.1. Overview<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <p>The pipeline for Wikimedia data (Wikipedia and related projects) is simpler.
-We acquire them using the <tt class="docutils literal"><span class="pre">wp-get-access-logs</span></tt> script, and then build some
-metadata with the <tt class="docutils literal"><span class="pre">wp-metadata.mk</span></tt> makefile.</p>
+We acquire them using the <tt class="docutils literal"><span class="pre">wp-get-access-logs</span></tt> script and then preprocess
+them into HDF5 time series files using the <tt class="docutils literal"><span class="pre">wp-preprocess.mk</span></tt> makefile.</p>
 </div>
 <div class="section" id="id3">
 <h3>3.2.2. File organization<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
@@ -368,10 +365,8 @@ full dataset.</li>
 daily data.</li>
 </ul>
 </div>
-<div class="section" id="id5">
-<h3>3.2.3. File formats<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="pagecount-files">
-<h4>3.2.3.1. Pagecount files<a class="headerlink" href="#pagecount-files" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="pagecount-file-format">
+<h3>3.2.3. Pagecount file format<a class="headerlink" href="#pagecount-file-format" title="Permalink to this headline">¶</a></h3>
 <p>The file format of the pagecount files is <a class="reference external" href="http://dumps.wikimedia.org/other/pagecounts-raw/">documented by WMF</a>. There are some quirks:</p>
 <ol class="arabic">
 <li><p class="first">The timestamp in the filename is the <em>end</em> of the hour recorded in the
@@ -408,42 +403,106 @@ total traffic rather than raw hit counts, the effect should be minimal.</p>
 </li>
 </ol>
 </div>
-<div class="section" id="metadata-files">
-<h4>3.2.3.2. Metadata files<a class="headerlink" href="#metadata-files" title="Permalink to this headline">¶</a></h4>
-<p>These are pickled Python dictionaries. Example content of <tt class="docutils literal"><span class="pre">metadata</span></tt>:</p>
-<div class="highlight-python"><pre>{ 'badfiles': set([ ... ]),
-  'projects': { 'en':   { date: { 'total': count,
-                                  'hours': {  0: count,
-                                              1: count,
-                                              ... ,
-                                             23: count }],
-                          ... }
-                'en.b': ... ,
-                'ru':   ... ,
-                ... } }</pre>
 </div>
-<p>That is, there are two items in the dictionary.</p>
-<ol class="arabic">
-<li><p class="first"><tt class="docutils literal"><span class="pre">badfiles</span></tt> is a set of paths (starting with <tt class="docutils literal"><span class="pre">raw/</span></tt>) which are the files
-that had parse errors. These files are the ones excluded from <tt class="docutils literal"><span class="pre">hashed/</span></tt>.</p>
-</li>
-<li><p class="first"><tt class="docutils literal"><span class="pre">projects</span></tt>, keys are project codes from the pageview files (e.g.,
-<tt class="docutils literal"><span class="pre">fr.b</span></tt> for French Wikibooks). Values are themselves dictionaries, mapping
-<tt class="docutils literal"><span class="pre">datetime.date</span></tt> instances to the number of hits that day. The hits
-consist of a dictionary. Item <tt class="docutils literal"><span class="pre">'total'</span></tt> gives the total number of hits on
-that day, while item <tt class="docutils literal"><span class="pre">'hours'</span></tt> is a dictionary mapping hours (0 to 23) to
-the number of hits in that hour.</p>
-<p>In both cases, the value <tt class="docutils literal"><span class="pre">0</span></tt> means no hits. A missing date or a missing
-hour means no data (i.e., the <tt class="docutils literal"><span class="pre">'hours'</span></tt> dict would have only 23 entries
-if one hour of data were missing on that day).</p>
-</li>
+<div class="section" id="time-series-files">
+<h2>3.3. Time series files<a class="headerlink" href="#time-series-files" title="Permalink to this headline">¶</a></h2>
+<p>The time series files are HDF5 files containing hourly time series of
+occurrences of some item, for example occurrences of n-grams in Twitter
+messages or Wikipedia article hits.</p>
+<p>We have three main goals for these files:</p>
+<ol class="arabic simple">
+<li>Provide a unified format for many types of things that can be counted over
+time, to feed into a unified analysis framework.</li>
+<li>Facilitate parallel access to the dataset without specialized I/O
+techniques (such as MPI parallel I/O).</li>
+<li>Facilitate reasonable performance for continually updated data written in
+time-major order (e.g., each hour, a new Wikipedia access log file arrives
+giving hits for all pages) as well as fast reading in item-major order
+(e.g., quickly iterate through complete each Wikipedia article&#8217;s time
+series). That is, we want to accomplish a data transpose implicitly during
+the preprocessing phase.</li>
 </ol>
-<p>Note that <tt class="docutils literal"><span class="pre">metadata</span></tt> is quite large, requiring over 10 GB of RAM to load.</p>
-<p>The <tt class="docutils literal"><span class="pre">metadata.daily</span></tt> file omits the detailed hourly counts, replacing the
-<tt class="docutils literal"><span class="pre">hours</span></tt> key with <tt class="docutils literal"><span class="pre">hours_len</span></tt>, an integer saying how many hours of data
-were found for that day.</p>
-</div>
-</div>
+<p>The basic idea is that for each month, we have <span class="math">\(n\)</span> HDF5 data files, with
+items distributed across the files by hashing. A time series directory looks
+like this:</p>
+<ul class="simple">
+<li><tt class="samp docutils literal"><span class="pre">h5ts/</span></tt> &#8212; Root of time series<ul>
+<li><tt class="samp docutils literal"><span class="pre">2007-12/</span></tt> &#8212; Items from December 2007.<ul>
+<li><tt class="samp docutils literal"><span class="pre">0.h5</span></tt> &#8212; Items whose hash mod <span class="math">\(n\)</span> is 0.</li>
+<li><tt class="samp docutils literal"><span class="pre">1.h5</span></tt> &#8212; Items whose hash mod <span class="math">\(n\)</span> is 1.</li>
+<li>...</li>
+<li><tt class="samp docutils literal"><em><span class="pre">n-1</span></em><span class="pre">.h5</span></tt> &#8212; Items whose hash mode <span class="math">\(n\)</span> is <span class="math">\(n-1\)</span>.</li>
+</ul>
+</li>
+<li><tt class="samp docutils literal"><span class="pre">2008-01/</span></tt> &#8212; Items from January 2008.</li>
+<li>... (one for each month in the dataset)</li>
+</ul>
+</li>
+</ul>
+<p>Note that datasets with different <span class="math">\(n\)</span> can be combined in the same
+computation. Care may be required for proper load balancing.</p>
+<p>Within each data file is the following HDF5 tree. This information has the
+notion of <em>namespace</em>; these are used for things like language in Wikipedia
+access logs. In the example, we use two namespaces: <tt class="samp docutils literal"><span class="pre">en</span></tt> and <tt class="samp docutils literal"><span class="pre">ru</span></tt>.
+Groups are indicated by trailing slashes, datsets by their absence (these HDF5
+concepts correspond roughly to POSIX directories and files), and attributes by
+italics.</p>
+<p>We use the term <em>time series</em> here to represent a vector of data points, one
+per hour, spanning the entire month. If an item is present, then it has a
+complete vector in the file regardless of how many data points are actually
+available (this is so vectors can be updated without moving them, which would
+leave holes that HDF5 cannot deal with well). Missing data points are
+represented as <tt class="samp docutils literal"><span class="pre">NaN</span></tt>. For example, for a file covering a 30-day month,
+every item will have a 720-element vector.</p>
+<ul class="simple">
+<li><tt class="samp docutils literal"><span class="pre">/</span></tt> &#8212; Root of HDF5 file tree.<ul>
+<li><tt class="samp docutils literal"><span class="pre">total/</span></tt> &#8212; Summary data.<ul>
+<li><tt class="samp docutils literal"><span class="pre">en/</span></tt> &#8212; Summary data for the namespace <em>en</em>.<ul>
+<li><em>total_ct</em> &#8212; Total month count for the entire namespace (float64).</li>
+<li><em>min_hour</em> &#8212; Minimum hour index with valid data (int32). For a full
+month, this will be zero.</li>
+<li><em>max_hour</em> &#8212; Maximum hour index with valid data (int32). For a full
+month, this will be the number of days in the month times 24 minus 1
+(e.g., a 30-day month will yield 719).</li>
+<li><tt class="samp docutils literal"><span class="pre">totals</span></tt> &#8212; Vector of hourly totals for namespace <em>en</em> (float64).</li>
+</ul>
+</li>
+<li><tt class="samp docutils literal"><span class="pre">ru/</span></tt> &#8212; Summary data for the namespace <em>ru</em>.<ul>
+<li>...</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><tt class="samp docutils literal"><span class="pre">weirdal/</span></tt> &#8212; Item time series.<ul>
+<li><tt class="samp docutils literal"><span class="pre">en/</span></tt> &#8212; Time series for namespace <em>en</em>.<ul>
+<li><tt class="samp docutils literal"><span class="pre">Cat</span></tt> &#8212; Time series for item <em>Cat</em> (float32).<ul>
+<li><em>total_ct</em> &#8212; Total month count for <em>Cat</em> (float64).</li>
+</ul>
+</li>
+<li><tt class="samp docutils literal"><span class="pre">Dog</span></tt> &#8212; Time series for item <em>Dog</em> (float32).<ul>
+<li>... (attributes)</li>
+</ul>
+</li>
+<li>... (several million more items)</li>
+</ul>
+</li>
+<li><tt class="samp docutils literal"><span class="pre">ru/</span></tt> &#8212; Time series for namespace <em>ru</em>.<ul>
+<li>...</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>As for data types, we use floats for the vectors rather than integers, which
+would be more appropriate for counted data, because floats have <tt class="samp docutils literal"><span class="pre">NaN</span></tt>
+and integers do not. This brings into play all the difficulties of floating
+point math. A key gotcha in our case is summation: adding two numbers of
+differing magnitudes will lose precision in the smaller. This motivates use of
+double precision (64 bit) floats for totals; single precision (32 bit) is used
+for base time series in order to save space.</p>
+<p>HDF5 files can be compressed or otherwise filtered using standard filters.</p>
 </div>
 </div>
 
@@ -462,7 +521,7 @@ were found for that day.</p>
         <li class="right" >
           <a href="collecting.html" title="2. Collecting data"
              >previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 7a2a02b</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit bbb8e44</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,14 +6,14 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>1. Installing QUAC &mdash; QUAC documentation for commit 7a2a02b</title>
+    <title>1. Installing QUAC &mdash; QUAC documentation for commit bbb8e44</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -26,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="QUAC documentation for commit 7a2a02b" href="index.html" />
+    <link rel="top" title="QUAC documentation for commit bbb8e44" href="index.html" />
     <link rel="next" title="2. Collecting data" href="collecting.html" />
     <link rel="prev" title="Table of contents" href="index.html" /> 
   </head>
@@ -40,7 +38,7 @@
         <li class="right" >
           <a href="index.html" title="Table of contents"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 7a2a02b</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit bbb8e44</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -48,21 +46,8 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">1. Installing QUAC</a><ul>
-<li><a class="reference internal" href="#summary">1.1. Summary</a></li>
-<li><a class="reference internal" href="#installing-dependencies">1.2. Installing dependencies</a><ul>
-<li><a class="reference internal" href="#debian-ubuntu">1.2.1. Debian/Ubuntu</a><ul>
-<li><a class="reference internal" href="#debian-packages">1.2.1.1. Debian packages</a></li>
-<li><a class="reference internal" href="#pypi-python-packages">1.2.1.2. PyPI Python packages</a></li>
-<li><a class="reference internal" href="#other-python-packages">1.2.1.3. Other Python packages</a></li>
-<li><a class="reference internal" href="#scipy">1.2.1.4. SciPy</a></li>
-<li><a class="reference internal" href="#one-file-python-modules">1.2.1.5. One-file Python modules</a></li>
-<li><a class="reference internal" href="#qgis">1.2.1.6. QGIS</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#os-x">1.2.2. OS X</a></li>
-<li><a class="reference internal" href="#self-compile">1.2.3. Self-compile</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#pypi-and-virtualenv-recommended">1.1. PyPI and virtualenv (recommended)</a></li>
+<li><a class="reference internal" href="#self-compile-not-recommended">1.2. Self-compile (not recommended)</a></li>
 </ul>
 </li>
 </ul>
@@ -99,23 +84,87 @@
 <p>QUAC can be installed on most UNIX-based systems, though installation is
 easiest on OS X and Debian/Ubuntu. Patches to increase portability are very
 welcome.</p>
-<div class="section" id="summary">
-<h2>1.1. Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="pypi-and-virtualenv-recommended">
+<h2>1.1. PyPI and virtualenv (recommended)<a class="headerlink" href="#pypi-and-virtualenv-recommended" title="Permalink to this headline">¶</a></h2>
+<p>This method installs QUAC and its Python dependencies inside a virtual
+environment with its own Python binary and libraries. This isolates QUAC from
+other Python stuff you may have on your system, reducing conflicts.</p>
+<p>These instructions assume that virtualenvs are installed under
+<cite>~/.virtualenvs</cite> and QUAC will be installed in <cite>~/quac</cite>.</p>
 <ol class="arabic">
-<li><p class="first">Download the code using Git:</p>
-<div class="highlight-python"><pre>git clone https://github.com/reidpr/quac.git</pre>
+<li><p class="first">Install prerequisites. The following are required:</p>
+<ul class="simple">
+<li>Git.</li>
+<li>Python 3.4 including development libraries.</li>
+<li><cite>virtualenv</cite> and <cite>virtualenvwrapper</cite>.</li>
+<li>Libraries needed by Python packages (e.g., GEOS). Installation failures
+along the way should guide you here. Known <cite>.deb</cite> packages needed on
+Ubuntu Trusty:<ul>
+<li><cite>cmdtest</cite></li>
+<li><cite>libdgal-dev</cite></li>
+<li><cite>python-pip</cite></li>
+<li><cite>python-virtualenv</cite></li>
+<li><cite>virtualenvwrapper</cite></li>
+</ul>
+</li>
+</ul>
+<p>Installation of these things is outside the scope of this guide.</p>
+</li>
+<li><p class="first">Download QUAC using Git:</p>
+<div class="highlight-python"><div class="highlight"><pre>cd
+git clone https://github.com/reidpr/quac.git
+cd quac
+</pre></div>
 </div>
 </li>
-<li><p class="first">Install the dependencies using system-specific instructions below.</p>
+<li><p class="first">Create virtual environment:</p>
+<div class="highlight-python"><div class="highlight"><pre>mkvirtualenv --python=/usr/bin/python3 quac
+</pre></div>
+</div>
+</li>
+<li><p class="first">Add to virtualenv post-activate hook
+(<cite>~/.virtualenvs/quac/bin/postactivate</cite>):</p>
+<div class="highlight-python"><div class="highlight"><pre>OLD_PYTHONPATH=&quot;$PYTHONPATH&quot;
+export PYTHONPATH=~/quac/lib
+OLD_PATH=&quot;$PATH&quot;
+export PATH=~/tw/quac/bin:$PATH
+</pre></div>
+</div>
+</li>
+<li><p class="first">Add to virtualenv pre-deactivate hook
+(<cite>~/.virtualenvs/quac/bin/predeactivate</cite>):</p>
+<div class="highlight-python"><div class="highlight"><pre>export PYTHONPATH=&quot;$OLD_PYTHONPATH&quot;
+export PATH=&quot;$OLD_PATH&quot;
+</pre></div>
+</div>
+</li>
+<li><p class="first">Activate virtual environment:</p>
+<div class="highlight-python"><div class="highlight"><pre>workon quac
+</pre></div>
+</div>
+</li>
+<li><p class="first">Install GDAL Python bindings (adjust include paths if needed):</p>
+<div class="highlight-python"><div class="highlight"><pre>CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install gdal==1.10.0
+</pre></div>
+</div>
+<p>This must be done manually because the bindings have a buggy include path.
+Note also that the version must match the system GDAL libraries or the
+build will fail in strange ways.</p>
+</li>
+<li><p class="first">Install remaining Python dependencies:</p>
+<div class="highlight-python"><div class="highlight"><pre>pip install -r requirements.txt
+</pre></div>
+</div>
 </li>
 <li><p class="first">Build executables and the documentation:</p>
-<div class="highlight-python"><pre>cd quac
-make</pre>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">make</span>
+</pre></div>
 </div>
 </li>
 <li><p class="first">Run the tests (this is actually pretty important, as it tells you whether
 you&#8217;ve installed all the dependencies correctly):</p>
-<div class="highlight-python"><pre>./runtests</pre>
+<div class="highlight-python"><div class="highlight"><pre>./runtests
+</pre></div>
 </div>
 <p>Some tests require additional data or resources; if they are not available,
 then the tests are skipped.</p>
@@ -131,142 +180,22 @@ do two things differently. First, fork the repository on Github and
 clone your own fork instead. Second, the <tt class="docutils literal"><span class="pre">git</span></tt> wrapper <a class="reference external" href="https://github.com/defunkt/hub">hub</a> is recommended.</p>
 </div>
 </div>
-<div class="section" id="installing-dependencies">
-<h2>1.2. Installing dependencies<a class="headerlink" href="#installing-dependencies" title="Permalink to this headline">¶</a></h2>
-<p>Most dependencies are available through (a) either the Debian/Ubuntu (Linux)
-or Homebrew (OS X) package repositories and (b) PyPI Python package
-repository. Your life will be a lot easier if you use one of the options in
-(a), but if they is unavailable for some reason (e.g., you do not have root
-and can&#8217;t persuade your admins to install), there is a fall back method of
-compiling the core dependencies yourself.</p>
-<p>Note that there are some things, such as QGIS and profilers, which are not
-strictly dependencies but can come in handy. These things are not installed by
-all the methods below.</p>
-<p>If you are on a current UNIX system and QUAC does not pass its tests after
-dependency installation using the instructions below, that is a bug. Please
-report it!</p>
-<div class="section" id="debian-ubuntu">
-<h3>1.2.1. Debian/Ubuntu<a class="headerlink" href="#debian-ubuntu" title="Permalink to this headline">¶</a></h3>
-<p><cite>FIXME: This section is incomplete and out of date. Please improve it.</cite></p>
-<div class="section" id="debian-packages">
-<h4>1.2.1.1. Debian packages<a class="headerlink" href="#debian-packages" title="Permalink to this headline">¶</a></h4>
-<p>Install these first.</p>
-<ul class="simple">
-<li><tt class="docutils literal"><span class="pre">gdal-bin</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">gfortran</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">gnuplot</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">mercurial</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">libgeos-c1</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">python-anyjson</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">python-cmdtest</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">python-daemon</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">python-dateutil</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">python-dev</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">python-gdal</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">python-joblib</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">python-matplotlib</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">python-meliae</span></tt> (optional, for memory profiling, see <a class="reference external" href="http://jam-bazaar.blogspot.com/2010/08/step-by-step-meliae.html">blog post</a>)</li>
-<li><tt class="docutils literal"><span class="pre">python-numpy</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">python-oauth2</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">python-pip</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">python-psutil</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">python-pyicu</span></tt> (optional)</li>
-<li><tt class="docutils literal"><span class="pre">python-sphinx</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">python-tz</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">randomize-lines</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">runsnakerun</span></tt> (optional, for profiling)</li>
-</ul>
+<div class="section" id="self-compile-not-recommended">
+<h2>1.2. Self-compile (not recommended)<a class="headerlink" href="#self-compile-not-recommended" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p>This installation method should only be used if the normal way
+does not work. It is rarely tested and likely to be broken. In
+particular, it has not been updated since before the Python 3
+upgrade.</p>
+<p class="last">Essentially, it re-implements the most basic functionality of a
+package manager, and it does so rather poorly and without regard
+to what you already have installed.</p>
 </div>
-<div class="section" id="pypi-python-packages">
-<h4>1.2.1.2. PyPI Python packages<a class="headerlink" href="#pypi-python-packages" title="Permalink to this headline">¶</a></h4>
-<p>Install with <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">foo</span></tt>.</p>
-<ul class="simple">
-<li><a class="reference external" href="https://pypi.python.org/pypi/isodate">isodate</a> parsing and formatting
-of ISO dates, times, and intervals. Version 0.4.9 is required to avoid a
-bug. (A <tt class="docutils literal"><span class="pre">.deb</span></tt> (<tt class="docutils literal"><span class="pre">python-isodate</span></tt>) is available in <tt class="docutils literal"><span class="pre">wheezy</span></tt> and
-<tt class="docutils literal"><span class="pre">quetzal</span></tt>, but it is too old.)</li>
-<li><a class="reference external" href="https://www.djangoproject.com/">Django</a> contains a <a class="reference external" href="https://docs.djangoproject.com/en/dev/ref/contrib/gis/geos/">GEOS wrapper</a> which we
-use.</li>
-<li><a class="reference external" href="http://scikit-learn.org/stable/index.html">scikit-learn</a> (v0.13) is a
-machine learning library.</li>
-<li><tt class="docutils literal"><span class="pre">pyproj</span></tt> is an interface to the PROJ.4 library.</li>
-</ul>
-</div>
-<div class="section" id="other-python-packages">
-<h4>1.2.1.3. Other Python packages<a class="headerlink" href="#other-python-packages" title="Permalink to this headline">¶</a></h4>
-<ul class="simple">
-<li>A <a class="reference external" href="https://bitbucket.org/reidpr/tweetstream-reidpr">custom version</a> of
-<tt class="docutils literal"><span class="pre">tweetstream</span></tt> Twitter library (hacked by Reid)</li>
-</ul>
-</div>
-<div class="section" id="scipy">
-<h4>1.2.1.4. SciPy<a class="headerlink" href="#scipy" title="Permalink to this headline">¶</a></h4>
-<p>QUAC needs SciPy version 0.11 or better.</p>
-<p>Both Debian and Ubuntu only have 0.10, even in the bleeding-edge development
-releases (as of 2/20/2013). You can install it with <tt class="docutils literal"><span class="pre">pip</span></tt>. It&#8217;s worth
-looking at the <a class="reference external" href="http://www.scipy.org/Installing_SciPy/Linux">installation documentation for Linux</a>. Try:</p>
-<ol class="arabic simple">
-<li>Remove existing <tt class="docutils literal"><span class="pre">python-scipy</span></tt> package.</li>
-<li>Install ATLAS: <tt class="docutils literal"><span class="pre">libatlas-base-dev</span> <span class="pre">libatlas3-base</span></tt></li>
-<li>Remove old LAPACK: <tt class="docutils literal"><span class="pre">liblapack3</span></tt></li>
-</ol>
-<p>Note that this does not get you a (supposedly significantly faster, but
-probably not terribly important for us) optimized ATLAS. You can do that by
-building it from source; directions are in <tt class="docutils literal"><span class="pre">README.Debian</span></tt>.</p>
-</div>
-<div class="section" id="one-file-python-modules">
-<h4>1.2.1.5. One-file Python modules<a class="headerlink" href="#one-file-python-modules" title="Permalink to this headline">¶</a></h4>
-<p>Download the modules (they are single <tt class="docutils literal"><span class="pre">.py</span></tt> files) and place them somewhere
-in your Python path (e.g., <tt class="docutils literal"><span class="pre">/usr/local/lib/python2.7/dist-packages</span></tt>).</p>
-<ul class="simple">
-<li><a class="reference external" href="http://lilyx.net/tinysegmenter-in-python/">TinySegmenter</a> is a compact
-tokenization library for Japanese.</li>
-</ul>
-</div>
-<div class="section" id="qgis">
-<h4>1.2.1.6. QGIS<a class="headerlink" href="#qgis" title="Permalink to this headline">¶</a></h4>
-<p><a class="reference external" href="http://www.qgis.org/">QGIS</a> is an open source GIS system. While Ubuntu
-comes with QGIS, it is a little crusty. However, the QGIS project provides
-package repositories with new versions; see the <a class="reference external" href="http://hub.qgis.org/projects/quantum-gis/wiki/Download">download page</a>. You probably want
-the &#8220;release&#8221; one.</p>
-<p>You only need QGIS if you want to use it to visualize stuff. It&#8217;s not required
-for processing.</p>
-<p>Note: As of 1/2/2013, the <tt class="docutils literal"><span class="pre">qgis-plugin-grass</span></tt> package is not installable on
-Debian Wheezy because it depends on <tt class="docutils literal"><span class="pre">grass641</span></tt>, which is not available any
-more (<tt class="docutils literal"><span class="pre">grass642</span></tt> is). The workaround is to build the <tt class="docutils literal"><span class="pre">.deb</span></tt> from source as
-explained in this bug report: <a class="reference external" href="http://hub.qgis.org/issues/6438">http://hub.qgis.org/issues/6438</a></p>
-</div>
-</div>
-<div class="section" id="os-x">
-<h3>1.2.2. OS X<a class="headerlink" href="#os-x" title="Permalink to this headline">¶</a></h3>
-<p><cite>FIXME: section is pretty much useless</cite></p>
-<ul class="simple">
-<li>SpatialLite<ul>
-<li>brew install libspatialite</li>
-</ul>
-</li>
-<li>pysqlite<ul>
-<li>Must install pysqlite from source (pip won&#8217;t work): <a class="reference external" href="http://code.google.com/p/pysqlite/">http://code.google.com/p/pysqlite/</a></li>
-<li>Modify setup.cfg by commenting out the line
-define=SQLITE_OMIT_LOAD_EXTENSION</li>
-<li>python setup.py build_static (&lt;&#8212;Note the static part!)</li>
-<li>sudo python setup.py install</li>
-<li>See <a class="reference external" href="http://stackoverflow.com/a/1546162">http://stackoverflow.com/a/1546162</a></li>
-<li>EDIT db_glu.py with path to libspatialite  (e.g., if you installed from brew, /usr/local/lib/libspatialite.dylib )</li>
-</ul>
-</li>
-</ul>
-</div>
-<div class="section" id="self-compile">
-<h3>1.2.3. Self-compile<a class="headerlink" href="#self-compile" title="Permalink to this headline">¶</a></h3>
-<p>This method should only be used if one of the others does not work.
-Essentially, it re-implements the most basic functionality of a package
-manager, and it does so rather poorly and without regard to what you already
-have installed.</p>
-<p>It does not require root, and it will take a little while to run, since it has
-to download and compile a fair amount of stuff. There are separate scripts to
-download and install, in case you want to QUAC on a system that doesn&#8217;t have
-good access to the Internet.</p>
+<p>This method does not require root, and it will take a little while to run,
+since it has to download and compile a fair amount of stuff. There are
+separate scripts to download and install, in case you want to QUAC on a system
+that doesn&#8217;t have good access to the Internet.</p>
 <p>Prerequisites:</p>
 <ul class="simple">
 <li>Some basic dependencies such as GNU Make 3.81 and C/C++/Fortran compilers.
@@ -307,7 +236,6 @@ directory at <span class="math">\(B\)</span> so you can hack on it. If you simpl
 <span class="math">\(B\)</span>, unless you take measures to prevent this.)</p>
 </div>
 </div>
-</div>
 
 
           </div>
@@ -324,7 +252,7 @@ directory at <span class="math">\(B\)</span> so you can hack on it. If you simpl
         <li class="right" >
           <a href="index.html" title="Table of contents"
              >previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 7a2a02b</a> &raquo;</li> 
+        <li><a href="index.html">QUAC documentation for commit bbb8e44</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
