@@ -36,7 +36,7 @@ class Weight(object):
       This test compares the analytical and empirical gradient of the
       objective function. If the difference is small, we probably implemented
       func and func_deriv correctly.
-      >>> import gmm
+      >>> from . import gmm
       >>> gmm.Token.parms_init({})
       >>> mp = geos.MultiPoint(geos.Point(1,2), geos.Point(3,4), srid=4326)
       >>> m1 = gmm.Geo_GMM.from_fit(mp, 1, 'a')
@@ -206,9 +206,10 @@ class Weight(object):
       return di
 
 # test that self.all_gmms has stable order
-testable.register('''
->>> import gmm
+# disabled for now (see issue #100)
+testable.manualonly_register('''
 >>> import random
+>>> from . import gmm
 >>> def test_random():
 ...   u.rand = random.Random(123)
 ...   gmm.Token.parms_init({})
@@ -220,6 +221,6 @@ testable.register('''
 ...            [[100, 50], [50, 200], [80, 400]], identity_feature=True,
 ...            misc_feature=False)
 ...   return list(m.all_gmms)
->>> all((test_random()[0].tokens == test_random()[0].tokens for i in xrange(100)))
+>>> all((test_random()[0].tokens == test_random()[0].tokens for i in range(100)))
 True
 ''')

@@ -25,5 +25,5 @@ $ head -5 aawiki-latest-stub-meta-history.xml
     <dbname>aawiki</dbname>
     <base>http://aa.wikipedia.org/wiki/Main_Page</base>
 $ md5sum aawiki-latest-pagelinks.sql aawiki-latest-stub-meta-history.xml
-886b13fc8928ae4ba02c636818e39258  aawiki-latest-pagelinks.sql
-dbad8d387c9cdb8753777f4a98e8a7cb  aawiki-latest-stub-meta-history.xml
+c09541c752627b1485ade2cd3b2bdd13  aawiki-latest-pagelinks.sql
+c0f559df40e6bcfaff14761e7afb4067  aawiki-latest-stub-meta-history.xml

@@ -48,7 +48,7 @@ class Tzer(object, metaclass=ABCMeta):
          return a sequence of (key, token) pairs. For example:
 
          >>> t = Whitespace(1)
-         >>> pprint(t.tokenize_all({ 'a': 'b c', \
+         >>> sorted(t.tokenize_all({ 'a': 'b c', \
                                      'd': 'e f g!' }))
          [('a', 'b'), ('a', 'c'), ('d', 'e'), ('d', 'f'), ('d', 'g!')]'''
       result = []

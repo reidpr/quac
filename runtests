@@ -227,14 +227,14 @@ def test_module(filename):
 
 def test_script(filename):
    # Is it a Python script? If not, ignore it.
-   text = open(filename, 'rt').read()
-   if (not re.search(r'^#!.+python', text)):
+   bytes_ = open(filename, 'rb').read()
+   if (not re.search(rb'^#!.+python', bytes_)):
       raise Failure('ignore')
    # Start test
-   print(filename[2:], '...', end=' ')
-   sys.stdout.flush()
+   text = bytes_.decode('utf8')
+   print(filename[2:], '...', end=' ', flush=True)
    # Does it import quacpath?
-   if (not re.search('^(import|from) quacpath', text, re.MULTILINE)):
+   if (not re.search(r'^(import|from) quacpath', text, re.MULTILINE)):
       print()
       print('Does not import quacpath')
       return Counter(fail=1)

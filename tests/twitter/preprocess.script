@@ -21,4 +21,5 @@ $parsesh 1 . > /dev/null 2>&1
 x ls -R .
 
 y 'wc -l pre/*.tsv'
-y 'md5sum pre/*.tsv pre/metadata'
+y 'md5sum pre/*.tsv'
+x pickle-dump pre/metadata

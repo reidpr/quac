@@ -1,4 +1,4 @@
-*** u.glob_maxnatural()
+*** u.glob_maxnumeric()
 $ touch a b
 None
 $ touch 0

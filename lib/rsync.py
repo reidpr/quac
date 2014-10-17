@@ -65,10 +65,10 @@ def leading_dirs(path):
    '''Return a set containing each directory in absolute path path, except for
       the root directory. For example:
 
-      >>> pprint(leading_dirs('/a/b/c'))
-      set(['/a', '/a/b'])
+      >>> sorted(leading_dirs('/a/b/c'))
+      ['/a', '/a/b']
       >>> pprint(leading_dirs('/a'))
-      set([])
+      set()
       >>> leading_dirs('')
       Traceback (most recent call last):
         ...

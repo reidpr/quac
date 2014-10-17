@@ -3,8 +3,8 @@
 # Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
 
 
-from . import base
 import u
+from . import base
 
 # FIXME: won't gmm.model_parms variable break pipeline? (can't have more than one model instance?)
 # FIXME: figure out how to pass model_parms for each submodel here

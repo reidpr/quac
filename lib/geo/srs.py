@@ -35,9 +35,9 @@ class Magic_SRS_Dict(dict):
         >>> srs[540036].srid
         540036
         >>> srs[540036].name
-        u'Miller_Mm'
+        'Miller_Mm'
         >>> srs[540036].proj
-        u'+proj=mill +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +R_A +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +to_meter=1000000 +no_defs '
+        '+proj=mill +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +R_A +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +to_meter=1000000 +no_defs '
    '''
 
    def __init__(self):

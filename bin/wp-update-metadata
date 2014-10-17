@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 'Given a set of pageview files, update a metadata file.'
 

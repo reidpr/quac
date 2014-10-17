@@ -31,7 +31,7 @@
       mixins aren't implemented correctly; patches welcome. Or, they're not
       really mixins (inheriting from :class:`Job` isn't actually required)?'''
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 
 from abc import ABCMeta, abstractmethod
@@ -54,8 +54,8 @@ OUTPUT_BUFSIZE = 4194304
 
 ### Helper functions ###
 
-def decode(text):
-   return pickle.loads(base64.b64decode(text))
+def decode(bytes_):
+   return pickle.loads(base64.b64decode(bytes_))
 
 def encode(value):
    return base64.b64encode(pickle.dumps(value, -1))
@@ -65,6 +65,7 @@ def encode(value):
 ### Classes ###
 
 class Job(object, metaclass=ABCMeta):
+
    def __init__(self, params=None):
       # Note: Intepreting params involves a strange hack, because the user can
       # either pass a string-encoded dictionary or an arbitrary data structure
@@ -139,9 +140,9 @@ class Job(object, metaclass=ABCMeta):
    def map_write(self, key, value):
       '''Write one key/value pair to the mapper output.'''
       self.outfp.write(str(key).encode('utf8'))
-      self.outfp.write('\t')
+      self.outfp.write(b'\t')
       self.outfp.write(encode(value))
-      self.outfp.write('\n')
+      self.outfp.write(b'\n')
 
    @abstractmethod
    def reduce(self, key, values):
@@ -157,7 +158,7 @@ class Job(object, metaclass=ABCMeta):
       '''Generator which yields, for each key in the reducer input, a pair
          containing that key and an iterator of one or more corresponding
          values.'''
-      for grp in itertools.groupby((l.partition('\t') for l in self.infp),
+      for grp in itertools.groupby((l.partition(b'\t') for l in self.infp),
                                    key=operator.itemgetter(0)):
          key = grp[0].decode('utf8')
          values = (decode(i[2]) for i in grp[1])
@@ -201,7 +202,7 @@ class Line_Input_Job(Job):
       :meth:`map_inputs()` yields Unicode objects.'''
 
    def map_open_input(self):
-      self.infp = io.open(sys.stdin.fileno(), 'r', encoding='utf8')
+      self.infp = io.open(sys.stdin.fileno(), 'rt', encoding='utf8')
 
 
 class Line_Output_Job(Job):
@@ -312,17 +313,18 @@ class TSV_Output_Job(Job):
 testable.register(r'''
 
 # Test data passing from mapper to reducer.
->>> from cStringIO import StringIO
->>> buf = StringIO()
+>>> import io
+>>> buf = io.BytesIO()
 >>> job = Test_Job()
 >>> job.outfp = buf
 >>> for kv in [(1, -1), (2, -2), (2, -3), (3, -4), (3, -5), (3, -6)]:
 ...    job.map_write(*kv)
 >>> buf.getvalue()
-'1\tgAJK/////y4=\n2\tgAJK/v///y4=\n2\tgAJK/f///y4=\n3\tgAJK/P///y4=\n3\tgAJK+////y4=\n3\tgAJK+v///y4=\n'
+b'1\tgASVBgAAAAAAAABK/////y4=\n2\tgASVBgAAAAAAAABK/v///y4=\n2\tgASVBgAAAAAAAABK/f///y4=\n3\tgASVBgAAAAAAAABK/P///y4=\n3\tgASVBgAAAAAAAABK+////y4=\n3\tgASVBgAAAAAAAABK+v///y4=\n'
 >>> buf.seek(0)
+0
 >>> job.infp = buf
 >>> [(k, list(v)) for (k, v) in job.reduce_inputs()]
-[(u'1', [-1]), (u'2', [-2, -3]), (u'3', [-4, -5, -6])]
+[('1', [-1]), ('2', [-2, -3]), ('3', [-4, -5, -6])]
 
 ''')

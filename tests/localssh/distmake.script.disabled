@@ -61,7 +61,7 @@ x sshrot --muxstop
 # Same working directory test. Note that Python's os.getcwd() can give
 # different results than pwd if symlinks are involved (though we use pwd under
 # sshrot as it's already passed through os.getcwd() at that point).
-y "python -c 'import os; print os.getcwd()' > pwd_local"
+y "python -c 'import os; print(os.getcwd())' > pwd_local"
 y 'sshrot pwd > pwd_sshrot'
 y 'diff -u pwd_local pwd_sshrot'
 

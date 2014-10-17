@@ -68,24 +68,60 @@ $ (wc -l pre/*.tsv)
     59 pre/2012-11-05.geo.tsv
      9 pre/summary.tsv
   2191 total
-$ (md5sum pre/*.tsv pre/metadata)
-3312dd29baf26a26b3ea3179fc4061e9  pre/2012-10-28.all.tsv
-a501143092df4f5a336b033536afa80d  pre/2012-10-28.geo.tsv
-ddbc477e4fee73b54bb5a2ed381a69af  pre/2012-10-29.all.tsv
-3c2eb0f3519a804bd9083037b152b67d  pre/2012-10-29.geo.tsv
-3e7d8c61658fa8e034ffe7e7b03cddf8  pre/2012-10-30.all.tsv
-6fbdbf3f308478413b0ef750a7e58fe4  pre/2012-10-30.geo.tsv
-4c1079e41e12fa0aaa5af0ef80110dcc  pre/2012-10-31.all.tsv
-026e711b5da13bef904a8045ba1853ff  pre/2012-10-31.geo.tsv
-4ad9a548eb489fefa2878a4263a78a36  pre/2012-11-01.all.tsv
-1e538e2d70eb5f9dd3b296def31c71c5  pre/2012-11-01.geo.tsv
-cc798427f480947e73a8cbb32e2d848f  pre/2012-11-02.all.tsv
-3e02474b6957eaf4ec058ffb593f4b41  pre/2012-11-02.geo.tsv
-546a7c5c3da7b7bf60af50590cda3935  pre/2012-11-03.all.tsv
-2193eee8a20eea87f4e09d0328b7c6ed  pre/2012-11-03.geo.tsv
-40aeea0f090259cc9e5bd146afeaddc1  pre/2012-11-04.all.tsv
-fa19db1a388588d5015db6e4f3376145  pre/2012-11-04.geo.tsv
-f039b45a9778f987ca9906bcec6233b0  pre/2012-11-05.all.tsv
-ca908e5f6ab22fa1cd17a7b51e45e231  pre/2012-11-05.geo.tsv
+$ (md5sum pre/*.tsv)
+09e4490cdbeb2ca7aa7ed9ae73820d47  pre/2012-10-28.all.tsv
+395b06b6fbf486900c5533a62a3d2820  pre/2012-10-28.geo.tsv
+1aeb8249f0ea7b872401b3ba65d9f0d7  pre/2012-10-29.all.tsv
+eadcab7158fa4665f58db5569fd7be5c  pre/2012-10-29.geo.tsv
+2341e5921d1c63066e5d0e19028cc20e  pre/2012-10-30.all.tsv
+fd728343ff9edd44c9e6be7a9293c7c2  pre/2012-10-30.geo.tsv
+934740aafbbbf60bec5e9ddd209ddbf8  pre/2012-10-31.all.tsv
+a48937f2579c11688dda9ed314de95d1  pre/2012-10-31.geo.tsv
+528d113dd848ded52b4faa025c19771c  pre/2012-11-01.all.tsv
+9e62d5198d158c45fa6460cf63f85f07  pre/2012-11-01.geo.tsv
+5dc07db0dd0761ca21cbdbb736b6daf0  pre/2012-11-02.all.tsv
+4705997bca3ccb6159a325a53aa3f124  pre/2012-11-02.geo.tsv
+aff978531ff0b2569fe9176a6ef6b62b  pre/2012-11-03.all.tsv
+da2f250bb6fd9f1abed8e0a1c119f2e0  pre/2012-11-03.geo.tsv
+c75787bb7d6386f273f3f3731ed5517a  pre/2012-11-04.all.tsv
+161687a3a4fb67a150db39c1cb6ddd6b  pre/2012-11-04.geo.tsv
+fd6dcf3d69292abb0d7c05563eca18aa  pre/2012-11-05.all.tsv
+8a9f29e08badd2f8f09a8b5355369a2f  pre/2012-11-05.geo.tsv
 ef397f1b339718a8c323bf13757cb5f8  pre/summary.tsv
-f26634b97649aed415c45a313f398af8  pre/metadata
+$ pickle-dump pre/metadata
+{'days': {datetime.date(2012, 10, 28): {'count': 102,
+                                        'count_geotag': 89,
+                                        'max_id': 262705164329287680,
+                                        'min_id': 262441476850581504},
+          datetime.date(2012, 10, 29): {'count': 158,
+                                        'count_geotag': 134,
+                                        'max_id': 263059826312085504,
+                                        'min_id': 262707005641347073},
+          datetime.date(2012, 10, 30): {'count': 157,
+                                        'count_geotag': 135,
+                                        'max_id': 263429919097384960,
+                                        'min_id': 263067950678958080},
+          datetime.date(2012, 10, 31): {'count': 119,
+                                        'count_geotag': 108,
+                                        'max_id': 263784102887567360,
+                                        'min_id': 263430544036098048},
+          datetime.date(2012, 11, 1): {'count': 144,
+                                       'count_geotag': 135,
+                                       'max_id': 264152123716009985,
+                                       'min_id': 263794534138384384},
+          datetime.date(2012, 11, 2): {'count': 128,
+                                       'count_geotag': 114,
+                                       'max_id': 264516696830787584,
+                                       'min_id': 264156297061089280},
+          datetime.date(2012, 11, 3): {'count': 142,
+                                       'count_geotag': 123,
+                                       'max_id': 264877088203497472,
+                                       'min_id': 264520266154143744},
+          datetime.date(2012, 11, 4): {'count': 145,
+                                       'count_geotag': 120,
+                                       'max_id': 265240323310104577,
+                                       'min_id': 264880737247952896},
+          datetime.date(2012, 11, 5): {'count': 70,
+                                       'count_geotag': 59,
+                                       'max_id': 265395911016984576,
+                                       'min_id': 265243192201474049}}}

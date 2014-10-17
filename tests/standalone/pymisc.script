@@ -2,21 +2,21 @@
 
 # Test some Python stuff that needs a specific external environment.
 #
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 . ./environment.sh
 
 cd $DATADIR
 
 
-echo '*** u.glob_maxnatural()'
+echo '*** u.glob_maxnumeric()'
 
 x touch a b
-python -c 'import u; print u.glob_maxnumeric(".")'
+python -c 'import u; print(u.glob_maxnumeric("."))'
 x touch 0
-python -c 'import u; print u.glob_maxnumeric(".")'
+python -c 'import u; print(u.glob_maxnumeric("."))'
 x touch 00
-python -c 'import u; print u.glob_maxnumeric(".")'
+python -c 'import u; print(u.glob_maxnumeric("."))'
 x touch 1 9
-python -c 'import u; print u.glob_maxnumeric(".")'
+python -c 'import u; print(u.glob_maxnumeric("."))'
 

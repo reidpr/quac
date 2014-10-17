@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Pretty-print the sequence of JSON objects (separated by newlines) presented
 # on stdin, with line numbers. This is a good way to look at the raw tweet

@@ -6,6 +6,7 @@ copyright missing: ./lib/disco/README
 tab(s) present:    ./lib/qr/scripting.py:6
 tab(s) present:    ./lib/u.py:1
 copyright missing: ./lib/unicodedata2.py
+copyright missing: ./requirements.txt
 copyright missing: ./sphinx/Makefile
 copyright missing: ./sphinx/conf.py
 tab(s) present:    ./sphinx/map_reduce.rst:1

@@ -32,10 +32,11 @@ import sys
 from django.contrib.gis import geos
 import numpy as np
 
-from . import srs
 import multicore
 import testable
 import u
+
+from . import srs
 
 l = u.l
 

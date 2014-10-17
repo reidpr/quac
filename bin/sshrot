@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''\
 Run a command on an intelligently-selected other host. If mpirun is available,
