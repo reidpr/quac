@@ -226,7 +226,7 @@ class Tweet_Collector(object):
             #if (u.rand.random() < 0.01):
             #   self.stream.close()
             #   raise ts.ReconnectExponentiallyError("test")
-      except (requests.exceptions.ConnectionError):
+      except (requests.exceptions.RequestException):
          # The connection failed somehow. Close out this collection session;
          # we'll let the caller deal with reconnection issues if needed.
          self.file_rotate_maybe(0, 0, stopping=True)
@@ -379,7 +379,8 @@ class Tweet_Collector(object):
                                      c.get("coll", "consumer_secret"),
                                      c.get("coll", "access_token"),
                                      c.get("coll", "access_secret"))
-         self.stream = api.request('statuses/sample')
+         self.stream = api.request('statuses/sample',
+                                   { 'stall_warnings': True })
       else:
          assert False, "unimplemented (need to update to TwitterAPI module)"
          self.keywords = Keywords(u.path_configured(keywords_file))
