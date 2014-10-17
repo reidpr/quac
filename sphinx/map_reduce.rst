@@ -249,67 +249,32 @@ is that the master node runs a Make job which farms tasks out to compute nodes
 manager environment variables (e.g., ``$SLURM_NODELIST``). Each node must
 therefore have access to the job directory at the same path.
 
+.. warning:: You probably should point ``--sortdir`` to node-local storage for
+             jobs of non-trivial size. Otherwise, you might attract the wrath
+             of your operators for overly-aggressive use of the shared
+             filesystem.
 
-SSH gotchas & quirks
---------------------
 
 QUACreduce uses an SSH wrapper script called ``sshrot`` to distribute jobs
-(say ``sshrot --help`` for more details on using the script). There are a
-number of quirks you need to be aware of.
+(say ``sshrot --help`` for more details on using the script). If ``mpirun`` is
+available, that is used to distribute jobs; otherwise, it falls back to SSH.
 
-Batch mode
-~~~~~~~~~~
+The script has a few quirks you need to be aware of:
 
-``sshrot`` invokes ``ssh`` with ``-o BatchMode=yes``, i.e., don't try to ask
-the user for authentication information, just fail instead if they would have
-to supply anything. This means that you need something set up for
-non-interactive, passwordless login to the compute nodes (and ``localhost`` if
-you want to run the tests). For example, SSH keys and a running SSH agent will
-work.
+#. ``sshrot`` may not work as expected if your login shell is not ``bash``,
+   and simply invoking your desired shell as part of the command may not work
+   because shell quoting rules are really complicated.
 
-Multiplexing
-~~~~~~~~~~~~
+#. ``ssh`` is invoked with ``-o BatchMode=yes``, i.e., don't try to ask the
+   user for authentication information, just fail instead if they would have
+   to supply anything. This means that you need something set up for
+   non-interactive, passwordless login to the compute nodes (and ``localhost``
+   if you want to run the tests). For example, SSH keys and a running SSH
+   agent will work.
 
-Optionally, you can use SSH multiplexing [5]_ to put multiple SSH sessions in
-the same TCP connection, thereby conserving the latter resource. To do so, say
-``sshrot --muxstart`` before your job and ``--muxstop`` afterwards.
-
-SSH daemons are configured with a limit on the number of sessions that can be
-multiplexed over one TCP connection; the option is ``MaxSessions`` and it
-defaults to 10. ``sshrot`` doesn't do anything to try to avoid this limit. If
-you exceed ``MaxSessions`` per compute node, the job may still work, but you
-will no longer be conserving TCP sessions and you will get warnings. That is,
-if you have :math:`n` jobs per compute node, you will use :math:`\max(1, n-9)`
-TCP connections per node, not :math:`\lceil \frac{n}{10} \rceil`.
-
-(``sshrot`` could track the number of connections in its state file and start
-a new multiplexed session when needed, but this would require knowing when
-each session ends, which is nontrivial and complicates the API.)
-
-In principle, ``sshrot`` should be able to use opportunistic multiplexing
-(``ControlMaster=auto``) and thus avoid the need for ``--muxstop`` and
-``--muxstop``, but this has multiple bugs:
-
-1. Frequent ``muxclient: master hello exchange failed`` errors.
-
-2. Race condition. If you create multiple ``ControlMaster=auto`` sessions
-   simultaneously, each will conclude that they are the master and try to
-   create the control socket, but one will get there first and the others will
-   fail with "ControlSocket [...] already exists, disabling multiplexing".
-   This is a `known bug <https://bugzilla.mindrot.org/show_bug.cgi?id=1349>`_,
-   supposedly fixed a long time ago, but it sure fails for me on Ubuntu 13.04.
-
-Neither of these cause the connection to fail, but you get noise on stderr and
-TCP connections are no longer conserved. Therefore, we don't do it.
-
-
-Miscellaneous
-~~~~~~~~~~~~~
-
-``sshrot`` may not work as expected if your login shell is not ``bash``. And
-simply invoking your desired shell as part of the command may not work because
-shell quoting rules are really complicated.
-
+#. No special effort is made to either conserve TCP connections with SSH
+   multiplexing or (conversely) avoid the ``MaxSessions`` multiplexing limit.
+   These issues may limit scaling.
 
 Example
 -------
@@ -340,7 +305,7 @@ be fixed, and others are more fundamental.
 * Line-oriented I/O. You are responsible for serializing your data to
   something without newlines, which is kind of annoying and wastes spacetime.
 
-* Scaling is not as good. If you need to run 10,000 mappers in parallel,
+* Scaling is not optimized. If you need to run 10,000 mappers in parallel,
   QUACreduce is probably not for you.
 
 * As mentioned earlier, input filenames must be unique even if they came from
@@ -353,7 +318,6 @@ be fixed, and others are more fundamental.
 FIXME
 =====
 
-- sort tmpdir
 - parallel sorts
 
 
@@ -374,7 +338,3 @@ Footnotes
 
 .. [4] Note that this contrasts with Hadoop Streaming, where a null key is
        permitted but a null value isn't.
-
-.. [5] See the options ``ControlMaster``, ``ControlPath``, and
-       ``ControlPersist`` in the `ssh_config man page
-       <http://www.openbsd.org/cgi-bin/man.cgi?query=ssh_config>`_.

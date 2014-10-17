@@ -17,21 +17,11 @@ The rules for host selection are:
 
 Warnings/notes/quirks:
 
-* --muxstart does have some security considerations. Until --muxstop (or you
-  kill the ssh masters manually), you, or someone successfully posing as you,
-  can ssh to the hosts involved without invoking the usual ssh authentication
-  mechanisms. In the case of sshrot, this isn't normally much of a problem
-  because you can ssh without entering a password or passphrase to these hosts
-  anyway. However, this can change (e.g., your key times out in ssh-agent), so
-  you should be aware of this persistence. Currently, the master times out 24
-  hours after --muxstart.
-
 * sshrot doesn't do anything to limit the number of jobs on any given host.
 
 * This script drops state files in /tmp. Because they are needed for
   subsequent invocations, and sshrot doesn't know how many of these there will
-  be, some of the files must be cleaned up manually when you are done (unless
-  you use --muxstop).
+  be, some of the files must be cleaned up with --cleanup when you are done.
 
 * If the state file names a host that is not in the node list, then we
   silently start over from the beginning of the host list.
@@ -69,7 +59,7 @@ if (u.mpi_available_p()):
    CMD_BASE = ['mpirun', '-np', '1', '-H']
 else:
    MPI_MODE = False
-   CMD_BASE = ['ssh', '-o', 'BatchMode=yes', '-S', SOCKFILE]
+   CMD_BASE = ['ssh', '-o', 'BatchMode=yes']
 
 
 ### Setup ###
@@ -82,15 +72,12 @@ gr.add_argument('-c',
 gr.add_argument('-e',
                 action='store_true',
                 help='exit with error as soon as command component fails')
+gr.add_argument('--cleanup',
+                action='store_true',
+                help='remove state files')
 gr.add_argument('--info',
                 action='store_true',
                 help='print transport mechanism (ssh or mpi) and exit')
-gr.add_argument('--muxstart',
-                action='store_true',
-                help='set up session multiplexing for all nodes')
-gr.add_argument('--muxstop',
-                action='store_true',
-                help='tear down session multiplexing')
 gr.add_argument('cmds',
                 metavar='WORD',
                 nargs='*',
@@ -112,24 +99,9 @@ def main():
    # we exit (--muxstart and --muxstop) or explicitly release it.
    fcntl.lockf(statef.fileno(), fcntl.LOCK_EX)
 
-   if (args.muxstart):
-      for node in nodes:
-         # When we start the SSH master, we need it to persist in order for us
-         # to re-use the multiplexed connection. The right way to do this is
-         # with "-o ControlPersist=5m -N", which sets the master to exit after
-         # 5 minutes of no activity (either master or client) and run no
-         # command. However, this is not supported until OpenSSH 5.6, and we
-         # need to support 5.3. The workaround is to run sleep for a generous
-         # time period (jobs should complete within this time) and add -f to
-         # run in the background (so sshrot returns immediately).
-         subprocess.check_call(CMD_BASE + ['-Mf', node, 'sleep 86400'])
-   elif (args.muxstop):
-      for node in nodes:
-         subprocess.check_call(CMD_BASE + ['-O', 'exit', node])
+   if (args.cleanup):
       os.unlink(STATEFILE)
    else:
-      # run a command
-
       # read state
       try:
          statef.seek(0)
@@ -149,6 +121,11 @@ def main():
       cmd_args = args.cmds
       if (args.e):
          cmd_args = ['set', '-e', ';'] + cmd_args
+      try:
+         venv = os.path.basename(os.environ['VIRTUAL_ENV'])
+         cmd_args = ['workon', venv, ';'] + cmd_args
+      except KeyError:
+         pass
       if (MPI_MODE):
          # mpirun appears to invoke our command without use of the shell.
          # Therefore, we construct our own shell invocation. Also, mpirun will
@@ -167,9 +144,6 @@ try:
 
    if (__name__ == '__main__'):
       args = u.parse_args(ap)
-
-      if (MPI_MODE and (args.muxstart or args.muxstop)):
-         ap.error('SSH session multiplexing is not supported in MPI mode')
 
       if (args.info):
          if (MPI_MODE):

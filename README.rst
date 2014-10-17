@@ -40,7 +40,6 @@ the chances of your bug being understood and fixed, take a look at `"Three
 parts to every good bug report"
 <http://www.joelonsoftware.com/articles/fog0000000029.html>`_ (scroll down).
 
-
 **That said, note that unlike many open source projects, we make a point of
 being friendly to bug reporters, even newbies.** Therefore, please don't
 hesitate to report a bug, even if you're inexperienced with QUAC or feel

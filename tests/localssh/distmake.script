@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Test that distributed make over ssh works.
+
+# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+
+. ./environment.sh
+
+cd $DATADIR
+exec 2>&1
+
+# Can we ssh to localhost without a password? That's a prerequisite for all
+# the fancy stuff below...
+y "sshrot echo a"
+
+# Should be using SSH (not MPI)
+x sshrot --info
+
+# Same working directory test. Note that Python's os.getcwd() can give
+# different results than pwd if symlinks are involved (though we use pwd under
+# sshrot as it's already passed through os.getcwd() at that point).
+y "python -c 'import os; print(os.getcwd())' > pwd_local"
+y 'sshrot pwd > pwd_sshrot'
+y 'diff -u pwd_local pwd_sshrot'
+
+# QUACreduce over ssh test
+echo -e 'foo bar baz\nfoo foo' > foo1.txt
+echo -e 'bar' > foo2.txt
+quacreduce --dist \
+           --map 'tr "[:blank:]" "\n"' \
+           --reduce 'uniq -c > out/%(RID)' \
+           --partitions 3 \
+           foo*.txt
+x make -j3 --quiet
+y 'cat out/* | sort'
+x sshrot --cleanup
