@@ -23,6 +23,14 @@ List of releases
 Improvements in each release are below. Key changes are listed, while full
 details are available in GitHub.
 
+v0.6 (October 20, 2014)
+-----------------------
+
+* Python 3.4 is now required.
+* Remove dependencies on Python libraries that cannot be installed with ``pip``.
+* Simplify installation.
+* `Full details <https://github.com/reidpr/quac/issues?q=milestone%3Av0.6+is%3Aclosed+sort%3Acreated-asc>`__
+
 v0.5 (November 13, 2013)
 ------------------------
 
