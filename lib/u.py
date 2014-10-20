@@ -9,7 +9,7 @@ BUGS / WARNINGS / FIXME:
   and then uses them, so the caller should take care to not somehow acquire
   different ones.'''
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 import argparse
 import codecs

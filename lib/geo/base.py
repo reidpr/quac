@@ -21,7 +21,7 @@
    >>> le.best_point.coords
    (-73.994..., 40.728...)'''
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict

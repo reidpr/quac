@@ -3,7 +3,7 @@
    "ellipse" we mean "polygon approximating an ellipse".) See
    <http://sites.stat.psu.edu/~ajw13/stat505/fa06/06_multnorm/06_multnorm_revist.html>.'''
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 
 

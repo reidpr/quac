@@ -1,6 +1,6 @@
 # Classes to represent objects found in tweet streams.
 #
-# Copyright (c) 2012-2014 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 
 

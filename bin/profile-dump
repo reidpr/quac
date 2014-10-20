@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 import pstats
 import sys

@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 # -*- coding: utf-8 -*-
 
 '''For each input n-gram occurring more than min_occur number of times,

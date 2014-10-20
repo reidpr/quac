@@ -3,7 +3,7 @@
 # Search Topsy for the given query strings; then, create a graph comparing the
 # number of mentions over time of the queries.
 #
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 #
 # FIXME/TODO:
 #

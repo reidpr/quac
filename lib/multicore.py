@@ -2,7 +2,7 @@
 # spawn a few large jobs instead of many small jobs, repacking small jobs into
 # bigger ones if needed.
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 
 

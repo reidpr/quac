@@ -4,7 +4,7 @@
 # there is a special place in hell for the people who designed Python time
 # handling -- why are simple things so hard?
 #
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 import datetime
 from pprint import pprint

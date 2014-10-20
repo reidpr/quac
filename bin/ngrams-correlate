@@ -5,7 +5,7 @@ Compute correlation of each n-gram time series with each input time series.
 For each input time series, output a TSV file with the most-correlated (either
 positively or negatively) n-grams.'''
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 
 

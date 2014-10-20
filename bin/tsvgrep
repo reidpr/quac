@@ -9,7 +9,7 @@
 # Note: This operation is entirely disk-bound. We assume a serial filesystem
 # and do not parallelize. The search takes approximately 10 seconds per day.
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 
 while getopts "v" opt; do

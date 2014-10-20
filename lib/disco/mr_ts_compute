@@ -2,7 +2,7 @@
 
 'Compute time series for each token that appears in the input tweets.'
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 help_epilogue = '''
 Output is placed in DDFS under the given tag. Each output blob is a binary

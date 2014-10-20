@@ -1,6 +1,7 @@
 copyright missing: ./.gitignore
 copyright missing: ./COPYRIGHT.rst
 copyright missing: ./LICENSE
+copyright missing: ./README.rst
 tab(s) present:    ./bin/tsvgrep:1
 copyright missing: ./lib/disco/README
 tab(s) present:    ./lib/qr/scripting.py:6

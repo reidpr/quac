@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 # Make sure the Twitter test data have been acquired and preprocessed
 # correctly.

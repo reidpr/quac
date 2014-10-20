@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 '''Functions and classes to facilitate scripts that set up, run, and clean up
    after QUACreduce jobs.'''

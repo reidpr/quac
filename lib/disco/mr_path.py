@@ -26,7 +26,7 @@
    There is a bug for (perhaps part of) this problem:
    <https://github.com/discoproject/disco/issues/328>'''
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 import os
 import sys

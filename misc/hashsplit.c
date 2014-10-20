@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others. See
+/* Copyright (c) Los Alamos National Security, LLC, and others. See
    the file COPYRIGHT for details. */
 
 /* Note: Make sure hash output exactly matches hash_.py. */

@@ -28,7 +28,7 @@ package for acquiring and analyzing social internet content. Features:
 * Parallel processing using various combinations of Make, ``joblib``, and a
   simple map-reduce framework called QUACreduce which is included.
 
-QUAC is copyright © 2012-2013 Los Alamos National Security, LLC, and others.
+QUAC is copyright © 2012-2014 Los Alamos National Security, LLC, and others.
 It is open source under the Apache license and was formerly known as Twepi
 ("Twitter for epidemic analysis").
 

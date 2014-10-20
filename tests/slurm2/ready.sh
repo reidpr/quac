@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 # We need a SLURM allocation with at least 2 nodes and MPI.
    test "$SLURM_NODELIST" != "" \

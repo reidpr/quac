@@ -9,13 +9,13 @@
 # The output of this script is files which violate these guidelines; this is
 # compared against the list of known exceptions in the .stdout file.
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others
+# Copyright (c) Los Alamos National Security, LLC, and others
 
 . ./environment.sh
 
 cd ../..  # don't use $QUACBASE because it's an absolute path
 
-C='Copyright (\(c\)|©)( 2012-201(3|4))? Los Alamos National Security, LLC, and others'
+C='Copyright (\(c\)|©) Los Alamos National Security, LLC, and others'
 
 # We use find rather than git ls-files so that we catch problems even in files
 # not yet added to git. We skip some directories:

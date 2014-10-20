@@ -1,6 +1,6 @@
 'Handy stuff for Wikimedia and Wikipedia data.'
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 import datetime
 import re

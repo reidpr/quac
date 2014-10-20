@@ -1,7 +1,7 @@
 '''Count the number of occurrences of each word in the input. Not very smart;
    mostly useful as example/testing.'''
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 
 from . import base

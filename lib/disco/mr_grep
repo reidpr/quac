@@ -6,7 +6,7 @@ in DDFS, under tags ending in :summary (the number of hits per day) and
 :matches (the actual matching tweets). The script will tell you which specific
 tags were used. Output data are not chunked.'''
 
-# Copyright (c) 2012-2013 Los Alamos National Security, LLC, and others.
+# Copyright (c) Los Alamos National Security, LLC, and others.
 
 help_epilogue = '''
 Note: If you want to restrict the search to whole-word matches, you must
