@@ -32,12 +32,8 @@ quacr FATAL    cannot specify all of --python, --map, --reduce
 1
 *** Check that job fails if the map or reduce commands fail
 $ quacreduce --notimes --map false --reduce true /dev/null
-$ (make || true)
-cat /dev/null | false | hashsplit 1 tmp/null && if [ ${PIPESTATUS[1]} -ne 0 ]; then false; fi
+$ (make --quiet || true)
 make: *** [tmp/null.mapped] Error 1
 $ quacreduce --notimes --map true --reduce false /dev/null
-$ (make || true)
-cat /dev/null | true | hashsplit 1 tmp/null && if [ ${PIPESTATUS[1]} -ne 0 ]; then false; fi
-touch tmp/null.mapped
-LC_ALL=C sort -s -k1,1 -t'	' -S 64M -T tmp tmp/null/0 | false && if [ ${PIPESTATUS[1]} -ne 0 ]; then false; fi
+$ (make --quiet || true)
 make: *** [tmp/0.reduced] Error 1

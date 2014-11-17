@@ -43,6 +43,6 @@ echo $?
 
 echo '*** Check that job fails if the map or reduce commands fail'
 x quacreduce --notimes --map false --reduce true /dev/null
-y "make || true"
+y "make --quiet || true"
 x quacreduce --notimes --map true --reduce false /dev/null
-y "make || true"
+y "make --quiet || true"

@@ -183,10 +183,11 @@ reallyclean: clean
    for filename in args.inputs:
       fp.write('''
 %(mapdone)s: %(input)s
-	%(read_cmd)s %(input)s | %(map_cmd)s | hashsplit %(nparts)d tmp/%(ibase)s && %(pipefail)s
+	%(read_cmd)s %(input)s | %(map_cmd)s | %(hashsplit)s %(nparts)d tmp/%(ibase)s && %(pipefail)s
 	touch %(mapdone)s
 ''' % { 'ibase': os.path.basename(filename),
         'input': filename,
+        'hashsplit': '%s/bin/hashsplit' % u.quacbase,
         'map_cmd': args.map,
         'mapdone': 'tmp/%s.mapped' % (os.path.basename(filename)),
         'nparts': args.partitions,
