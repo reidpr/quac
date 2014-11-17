@@ -362,21 +362,22 @@ The basic idea is that for each month, we have :math:`n` HDF5 data files, with
 items distributed across the files by hashing. A time series directory looks
 like this:
 
-* :samp:`h5ts/` --- Root of time series
+* :samp:`h5/` --- Time series directory
 
-  * :samp:`2007-12/` --- Items from December 2007.
+  * :samp:`200712.0.h5` --- Items from December 2007 whose hash mod :math:`n`
+    is 0.
 
-    * :samp:`0.h5` --- Items whose hash mod :math:`n` is 0.
+  * :samp:`200712.1.h5` --- Items from December 2007 whose hash mod :math:`n`
+    is 1.
 
-    * :samp:`1.h5` --- Items whose hash mod :math:`n` is 1.
+  * ...
 
-    * ...
+  * :samp:`200712.{n-1}.h5` --- Items from December 2007 hash mode :math:`n`
+    is :math:`n-1`.
 
-    * :samp:`{n-1}.h5` --- Items whose hash mode :math:`n` is :math:`n-1`.
+  * :samp:`200801.0.h5` --- Items from January 2008...
 
-  * :samp:`2008-01/` --- Items from January 2008.
-
-  * ... (one for each month in the dataset)
+  * ... (:math:`n` files for each month in the dataset)
 
 Note that datasets with different :math:`n` can be combined in the same
 computation. Care may be required for proper load balancing.

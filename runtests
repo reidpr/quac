@@ -61,12 +61,12 @@ for (i, t) in enumerate(args.target):
 # We want to use a temporary directory within the QUAC checkout because
 # typical default TMPDIR settings are not shared between nodes in a cluster,
 # which we need for some tests.
-os.environ['TMPDIR'] = os.path.join(quacbase, 'tests/tmp')
+tmpdir = os.path.join(quacbase, 'tests/tmp')
 if (not args.noclean):
-   print('### removing old failed tests')
-   for old_testdir in glob.glob('%s/tmp*' % (os.environ['TMPDIR'])):
-      print(old_testdir)
-      shutil.rmtree(old_testdir)
+   print('### removing old test temporary data')
+   shutil.rmtree(tmpdir)
+   os.mkdir(tmpdir)
+os.environ['TMPDIR'] = tmpdir
 
 # There is a bug in certain versions of the readline library which causes
 # terminal escape codes to be printed on "import readline". This messes up the

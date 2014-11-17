@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+
+# Copyright © Los Alamos National Security, LLC, and others.
+
+# Print a makefile on stdout to build HDF5 time series files from the
+# pagecount files in the given directory.
+
+import quacpath
+
+from collections import defaultdict
+import datetime
+import glob
+from pprint import pprint
+import sys
+
+from dateutil.relativedelta import relativedelta
+
+import wikimedia
+
+
+PC_ROOT = sys.argv[1]
+print('# pagecount root=%s' % PC_ROOT)
+
+files = glob.glob(PC_ROOT + '/*/*/pagecounts-*.gz')
+print('# found %d files' % len(files))
+
+deps = defaultdict(set)
+for file_ in files:
+   ts = wikimedia.timestamp_parse(file_).replace(day=1, hour=0, second=0,
+                                                 microsecond=0)
+   deps[ts].add(file_)
+
+# Note that the dependencies pass through the hash=0 file only. All other hash
+# values are a side effect.
+for (ts, files) in deps.items():
+   month = ts.strftime('%Y%m')
+   next_month = (ts + relativedelta(months=1)).strftime('%Y%m')
+   # We want to compress the HDF5 file if we do not expect to modify it again.
+   # The heuristic: if the last hour in the month is in the prerequisites, we
+   # assume the month is "closed". To determine this, we take advantage of the
+   # quirky timestamp scheme of the pagecount files: the last file in the
+   # month will have a timestamp falling in the first few seconds of the
+   # following month, and this will be the only file in that month. Thus, we
+   # use a simple text search to see if that file is present.
+   if (any((next_month in i) for i in files)):
+      compress = '--compress'
+   else:
+      compress = ''
+   print()
+   print('# %s, this month=%s, next month=%s' % (ts, month, next_month))
+   print('h5files: h5/%s.0.h5' % month)
+   print('h5/%s.0.h5: %s' % (month, ' '.join(sorted(files))))
+   print('\t@echo h5-update %s on %d files for month %s ...'
+         % (compress, len(files), month))
+   print('\t@h5-update %s $?' % compress)  # $? is all newer prerequisites

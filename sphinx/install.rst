@@ -25,11 +25,12 @@ These instructions assume that virtualenvs are installed under
 
    * `virtualenv` and `virtualenvwrapper`.
 
-   * Libraries needed by Python packages (e.g., GEOS). Installation failures
-     along the way should guide you here. Known `.deb` packages needed on
-     Ubuntu Trusty:
+   * Programs and libraries needed by Python packages (e.g., HDF5 command-line
+     tools, GEOS). Installation failures along the way should guide you here.
+     Known `.deb` packages needed on Ubuntu Trusty:
 
      * `cmdtest`
+     * `hdf5-tools`
      * `libdgal-dev`
      * `python-pip`
      * `python-virtualenv`
