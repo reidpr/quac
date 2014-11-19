@@ -154,6 +154,46 @@ def ddfs_parse(text):
       datetime.datetime(2013, 3, 20, 15, 58, 22)'''
    return datetime.datetime.strptime(text, '%Y/%m/%d %H:%M:%S')
 
+def hour_offset(dt):
+   '''Return the number of hours between the given datetime and the beginning of
+      its month. Time zone must be UTC. Minutes, seconds, and microseconds
+      must be zero.
+
+        >>> hour_offset(iso8601_parse('2014-09-01 00:00:00'))
+        0
+        >>> hour_offset(iso8601_parse('2014-09-01 01:00:00'))
+        1
+        >>> hour_offset(iso8601_parse('2014-09-30 22:00:00'))
+        718
+        >>> hour_offset(iso8601_parse('2014-09-30 23:00:00'))
+        719
+
+      Error conditions:
+
+        >>> hour_offset(iso8601_parse('2014-09-26 09:33:00'))
+        Traceback (most recent call last):
+           ...
+        ValueError: minutes, seconds, and microseconds must be zero
+        >>> hour_offset(iso8601_parse('2014-09-26 09:00:33'))
+        Traceback (most recent call last):
+           ...
+        ValueError: minutes, seconds, and microseconds must be zero
+        >>> hour_offset(datetime.datetime(2014, 9, 26, 9, 0, 0, 1, pytz.utc))
+        Traceback (most recent call last):
+           ...
+        ValueError: minutes, seconds, and microseconds must be zero
+        >>> hour_offset(iso8601_parse('2014-09-26 09:00:00+01:00'))
+        Traceback (most recent call last):
+           ...
+        ValueError: time zone must be UTC'''
+   if (dt.tzinfo != pytz.utc):
+      raise ValueError('time zone must be UTC')
+   if (not (dt.minute == dt.second == dt.microsecond)):
+      raise ValueError('minutes, seconds, and microseconds must be zero')
+   start = datetime.datetime(dt.year, dt.month, 1, tzinfo=dt.tzinfo)
+   delta = relativedelta.relativedelta(dt, start)
+   return int(round(delta.days * 24 + delta.hours))
+
 def hours_in_month(dt):
    '''Return the number of hours in the month of the given datetime, which must
       be in UTC.
@@ -212,8 +252,8 @@ def iso8601utc_parse(text):
       datetime.datetime(2012, 10, 26, 9, 33, tzinfo=<UTC>)
       >>> iso8601utc_parse('2012-10-26 09:33:00+00:00')
       datetime.datetime(2012, 10, 26, 9, 33, tzinfo=<UTC>)'''
-   # This function is here because it's faster than relying on isodate, though
-   # I haven't actually tested that.
+   # This function is here because I belive it's faster than relying on
+   # isodate, though I haven't actually tested that.
    text = ISO8601_SPACE_SEP.sub(r'\1T\3', text)
    return utcify(datetime.datetime.strptime(text, '%Y-%m-%dT%H:%M:%S+00:00'))
 
