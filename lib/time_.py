@@ -12,7 +12,7 @@ import pytz
 import re
 import time
 
-from dateutil import rrule
+from dateutil import rrule, relativedelta
 import isodate
 
 import testable
@@ -154,20 +154,52 @@ def ddfs_parse(text):
       datetime.datetime(2013, 3, 20, 15, 58, 22)'''
    return datetime.datetime.strptime(text, '%Y/%m/%d %H:%M:%S')
 
-def localify(dt):
-   'Convert a native datetime object into aware one in local time.'
-   return dt.replace(tzinfo=local_tz)
+def hours_in_month(dt):
+   '''Return the number of hours in the month of the given datetime, which must
+      be in UTC.
 
-def twitter_timestamp_parse(text):
-   'Parse a Twitter timestamp string and return a datetime object.'
-   #
-   # Previously, we used dateutils.parser.parse() for this, as it's able to
-   # deal with time zones and requires no format string. However, (a) it's
-   # slow, and (b) all Twitter timestamps seem to be in UTC (i.e., timezone
-   # string is a constant "+0000"). Therefore, we use this technique, which is
-   # approximately 5x faster. (If assumption (b) fails, you'll get a
-   # ValueError.)
-   return utcify(datetime.datetime.strptime(text, '%a %b %d %H:%M:%S +0000 %Y'))
+      A standard, straightforward month of 30 days:
+
+        >>> hours_in_month(iso8601_parse('2014-09-26 09:33:00'))
+        720
+
+      Leap year February (2000 was indeed a leap year):
+
+        >>> hours_in_month(iso8601_parse('2000-02-26 09:33:00'))
+        696
+
+      Non leap year February:
+
+        >>> hours_in_month(iso8601_parse('2100-02-26 09:33:00'))
+        672
+
+      UTC does not have DST (October contains the DST to standard time
+      transition in the US):
+
+        >>> hours_in_month(iso8601_parse('2014-10-26 09:33:00'))
+        744
+
+      Non-UTC datetime fails:
+
+        >>> hours_in_month(iso8601_parse('2014-10-26 09:33:00+01:00'))
+        Traceback (most recent call last):
+           ...
+        ValueError: time zone must be UTC
+
+      This really should work, since an offset of 0 is UTC by definition, but
+      it doesn't because time zone comparison is hard for some reason.
+
+        >>> hours_in_month(iso8601_parse('2014-10-26 09:33:00+00:00'))
+        Traceback (most recent call last):
+           ...
+        ValueError: time zone must be UTC'''
+
+   if (dt.tzinfo != pytz.utc):
+      raise ValueError('time zone must be UTC')
+   start_inclusive = datetime.datetime(dt.year, dt.month, 1)
+   end_exclusive = start_inclusive + relativedelta.relativedelta(months=1)
+   delta = end_exclusive - start_inclusive
+   return int(round(delta.days * 24 + delta.seconds / 3600))
 
 def iso8601_date(d):
    return d.strftime('%Y-%m-%d')
@@ -201,10 +233,25 @@ def iso8601_parse(text):
       dt = utcify(dt)
    return dt
 
+def localify(dt):
+   'Convert a native datetime object into aware one in local time.'
+   return dt.replace(tzinfo=local_tz)
+
 def nowstr_human():
    '''Return a human-readable string representing the current time, including
       time zone.'''
    return time.strftime('%c %Z')
+
+def twitter_timestamp_parse(text):
+   'Parse a Twitter timestamp string and return a datetime object.'
+   #
+   # Previously, we used dateutils.parser.parse() for this, as it's able to
+   # deal with time zones and requires no format string. However, (a) it's
+   # slow, and (b) all Twitter timestamps seem to be in UTC (i.e., timezone
+   # string is a constant "+0000"). Therefore, we use this technique, which is
+   # approximately 5x faster. (If assumption (b) fails, you'll get a
+   # ValueError.)
+   return utcify(datetime.datetime.strptime(text, '%a %b %d %H:%M:%S +0000 %Y'))
 
 def utcify(dt):
    'Convert a native datetime object into aware one in UTC.'
