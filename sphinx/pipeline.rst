@@ -399,7 +399,7 @@ every item will have a 720-element vector.
 
 * :samp:`/` --- Root of HDF5 file tree.
 
-  * :samp:`total/` --- Summary data.
+  * :samp:`total/` --- Summary data, including all shards.
 
     * :samp:`en/` --- Summary data for the namespace *en*.
 

@@ -115,3 +115,4 @@ tests/twitter/tweets/geo
 
 # derived test wikimedia data
 tests/standalone/wp-access/h5.mk
+tests/standalone/wp-access/h5/*

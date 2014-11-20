@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
 
-'Update an HDF5 time series file with content from Wikipedia pageview files.'
+'Update an HDF5 time series shard cluster with Wikipedia pageview files.'
 
 # Copyright © Los Alamos National Security, LLC, and others.
 
+import gzip
+import os
+import time
+
+import numpy as np
+
 import quacpath
+import h5
 import u
+import time_
 import testable
 import wikimedia
 
@@ -18,28 +26,106 @@ ap = u.ArgumentParser(description=__doc__)
 gr = ap.default_group
 gr.add_argument('--compress',
                 action='store_true',
-                help='Rewrite and compress file after updating')
+                help='Rewrite and compress shards after updating')
 gr.add_argument('outfile',
                 metavar='OUTFILE',
-                help='HDF5 file cluster to create or update')
+                help='HDF5 sharded file cluster to create or update')
+gr.add_argument('shard_total_ct',
+                metavar='SHARDS_TOTAL',
+                type=int,
+                help='total number of shards in cluster')
+gr.add_argument('shard_offset',
+                metavar='SHARD_OFFSET',
+                type=int,
+                help='index of first shard to process on this pass')
+gr.add_argument('shard_ct',
+                metavar='SHARD_COUNT',
+                type=int,
+                help='numver of shards to process on this pass')
 gr.add_argument('pv_files',
                 metavar='PAGECOUNT',
                 nargs='+',
-                help='pagecount files to add to metadata')
+                help='pagecount files to add')
 
 
 ### Script ###
 
 def main():
-   h5c = h5.Sharded(args.outfile, shard_ct=c['wkpd']['hashmod'])
-   h5c.close(args.compress)
+   l.info('starting')
+   args.pv_files.sort()
+   month = wikimedia.timestamp_parse(args.pv_files[0]).strftime('%Y%m')
+   for file_ in args.pv_files:
+      if (not os.path.isfile(file_)):
+         u.abort('%s is not a file' % file_)
+      if (month != wikimedia.timestamp_parse(file_).strftime('%Y%m')):
+         u.abort('not from month %s: %s' % (month, file_))
+   h5s = h5.Sharded(args.outfile, shard_ct=args.shard_total_ct,
+                    filter_ = range(args.shard_offset, args.shard_ct))
+   l.info('opened %s with %d shards, filter=%s'
+          % (h5s.filename, h5s.shard_ct, h5s.filter_))
+   for file_ in args.pv_files:
+      process_file(h5s, file_)
+   h5s.flush()
+   update_metadata(h5s)
+   h5s.close()
+   if (args.compress):
+      l.info('compressing')
+      h5s.compress()
+   l.info('done')
+
+def process_file(h5s, file_):
+   ts = wikimedia.timestamp_parse(file_)
+   vector_len = time_.hours_in_month(ts)
+   hour_offset = time_.hour_offset(ts)
+   filter_ = set(h5s.filter_)
+   for (proj, url, count) in read_file(file_):
+      (i, sh) = h5s.shard_get(url)
+      if (i in filter_):
+         pass
+      #(_, sh) = h5s.shard_get(url)
+      #ds = sh.require_dataset('/weirdal/%s/%s' % (proj, url), (vector_len,),
+      #                        np.float32, fillvalue=np.nan, exact=True)
+      #ds[hour_offset] = count
+
+def read_file(file_):
+   try:
+      byte_ct = os.stat(file_).st_size
+      fp = u.zcat(file_)
+      l.info('opened %s' % file_)
+      badline_ct = 0
+      badline_last = None
+      start = time.time()
+      for (i, line) in enumerate(fp):
+         try:
+            #if (i % 10000 == 0):
+            #   l.debug('read %d lines' % i)
+            (proj, url, count, _) = line.split(b' ')
+            yield (proj, url, int(count))
+         except ValueError as x:
+            # Ignore lines that don't parse. Some files have thousands of
+            # these (pagecounts-20130201-010000.gz), and many files have at
+            # least one (all of February 2013).
+            badline_ct += 1
+            badline_last = i + 1
+      if (badline_ct > 0):
+         l.warning('%s: %d lines with parse errors skipped (last was %d)'
+                   % (file_, badline_ct, badline_last))
+      time_used = time.time() - start
+      l.info('read %d lines and %s in %s (%d lines/s, %s/s)'
+             % (i + 1, u.fmt_seconds(time_used), u.fmt_bytes(byte_ct),
+                (i + 1) / time_used, u.fmt_bytes(byte_ct / time_used)))
+   except (EOFError, IOError) as x:
+      l.warning('%s: error reading file, skipped: %s' % (file_, str(x)))
+
+def update_metadata(h5c):
+   pass
 
 
 ### Bootstrap ###
 
 try:
    args = u.parse_args(ap)
-   u.configure(None)
+   u.logging_init('h5upd')
    if (__name__ == '__main__'):
       main()
 except testable.Unittests_Only_Exception:

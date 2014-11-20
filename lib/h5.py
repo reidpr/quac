@@ -21,17 +21,23 @@ DUMP_INDENT = '  '
 class Sharded(object):
 
    __slots__ = ('filename',
+                'filter_',
                 'shard_ct',
                 'shards')
 
-   def __init__(self, filename, shard_ct=None, mode='a'):
+   def __init__(self, filename, shard_ct=None, filter_=None, mode='a'):
+      '''If non-None, shard_filter is a promise that only shard indexes in that
+         collection will be accessed.'''
       self.filename = self.filename_base(filename)
       self.shard_ct = self.count_shards(shard_ct)
+      self.filter_ = filter_
       self.shards = list()
       for i in range(self.shard_ct):
-         self.shards.append(h5py.File(self.filename_shard(i),
-                                      mode=mode,
-                                      libver='latest'))
+         if (self.filter_ is None or i in self.filter_):
+            self.shards.append(h5py.File(self.filename_shard(i),
+                                         mode=mode, libver='latest'))
+         else:
+            self.shards.append(None)
 
    @staticmethod
    def filename_base(filename):
@@ -47,6 +53,12 @@ class Sharded(object):
          'foo.0.h5.bar'
       '''
       return re.sub(r'\.\d+\.h5$', '', filename)
+
+   @property
+   def shards_valid(self):
+      for (i, s) in enumerate(self.shards):
+         if (s is not None):
+            yield (i, s)
 
    def count_shards(self, proposed_shard_ct):
       existing_shard_ct = len(glob.glob('%s.*.h5' % self.filename))
@@ -65,19 +77,19 @@ class Sharded(object):
 
    def close(self, compress=False):
       l.debug('closing %d shards under %s' % (self.shard_ct, self.filename))
-      for s in self.shards:
+      for (_, s) in self.shards_valid:
          s.close()
 
    def compress(self):
-      # Since we call an external program, we cannot compress the shards until
-      # they're closed.
-      if (self.shards[0].name is not None):
-         raise ValueError('cannot compress an open shard set')
       # Note that we compress all datasets, not just ones that are large
       # enough (--minimum parameter). This simplifies testing but may increase
       # file size if there are lots of small datasets.
-      for i in range(self.shard_ct):
-         filename = self.filename_shard(i)
+      for (i, s) in self.shards_valid:
+         # Because we call an external program, we cannot compress the shards
+         # until they're closed.
+         if (s.name is not None):
+            raise ValueError('cannot compress an open shard set')
+         filename = self.filename_shard(i)  # s.filename is invalid b/c closed
          tmpfile = filename + '_tmp'
          os.rename(filename, tmpfile)
          subprocess.check_call(['h5repack',
@@ -92,7 +104,7 @@ class Sharded(object):
       args = ['h5dump']
       if (verbose):
          args.append('-p')
-      for (i, s) in enumerate(self.shards):
+      for (i, s) in self.shards_valid:
          print(subprocess.check_output(args + [self.filename_shard(i)],
                                        universal_newlines=True), end='')
 
@@ -101,7 +113,7 @@ class Sharded(object):
 
    def flush(self):
       l.debug('flushing %d shards under %s' % (self.shard_ct, self.filename))
-      for s in self.shards:
+      for (_, s) in self.shards_valid:
          s.flush()
 
    def hash(self, name):
@@ -121,10 +133,8 @@ def dump(filename, verbose=False):
    fp.dump(verbose)
    fp.close()
 
-testable.register('''
 
-# WARNING: Dump results in these tests contain ellipses to cover file paths
-# and data types that may change on 32- vs. 64-bit platforms.
+testable.register('''
 
 >>> import numpy as np
 >>> import os
@@ -143,13 +153,13 @@ GROUP "/" {
 >>> a = Sharded(tmp + '/full.0.h5', shard_ct=1, mode='w')
 >>> root = a.shards[0]
 >>> root.attrs['a'] = 'hello'
->>> root.attrs['b'] = 8675309
+>>> root.attrs['b'] = np.int32(8675309)
 >>> root.attrs['c'] = np.arange(4, dtype=np.int32)
 >>> root.create_dataset('data1', (6,), dtype=np.float32, fillvalue=np.NaN)
 <HDF5 dataset "data1": shape (6,), type "<f4">
 >>> root['data1'][:4] = np.arange(4, 8)
 >>> g = root.create_group('/foo/bar')
->>> g.attrs['d'] = 1
+>>> g.attrs['d'] = np.int32(1)
 >>> g['data2'] = np.arange(8, 12, dtype=np.int16)
 >>> a.close()
 >>> dump(tmp + '/full.0.h5')
@@ -168,7 +178,7 @@ GROUP "/" {
       }
    }
    ATTRIBUTE "b" {
-      DATATYPE  H5T_STD_I...LE
+      DATATYPE  H5T_STD_I32LE
       DATASPACE  SCALAR
       DATA {
       (0): 8675309
@@ -191,7 +201,7 @@ GROUP "/" {
    GROUP "foo" {
       GROUP "bar" {
          ATTRIBUTE "d" {
-            DATATYPE  H5T_STD_I...LE
+            DATATYPE  H5T_STD_I32LE
             DATASPACE  SCALAR
             DATA {
             (0): 1
@@ -231,7 +241,7 @@ GROUP "/" {
       }
    }
    ATTRIBUTE "b" {
-      DATATYPE  H5T_STD_I...LE
+      DATATYPE  H5T_STD_I32LE
       DATASPACE  SCALAR
       DATA {
       (0): 8675309
@@ -254,7 +264,7 @@ GROUP "/" {
    GROUP "foo" {
       GROUP "bar" {
          ATTRIBUTE "d" {
-            DATATYPE  H5T_STD_I...LE
+            DATATYPE  H5T_STD_I32LE
             DATASPACE  SCALAR
             DATA {
             (0): 1
@@ -466,5 +476,28 @@ ValueError: invalid number of shards: 0
 Traceback (most recent call last):
    ...
 ValueError: 3 shards requested, but 2 already exist
+
+# shard_filter
+>>> a = Sharded(tmp + '/filter', shard_ct=2, shard_filter=(0,), mode='w')
+>>> a.shards[0].attrs['a'] = np.int32(1)
+>>> a.shards[1].attrs['a'] = np.int32(1)
+Traceback (most recent call last):
+   ...
+AttributeError: 'NoneType' object has no attribute 'attrs'
+>>> a.flush()
+>>> a.close()
+>>> a.compress()
+>>> a.dump()
+HDF5 ".../filter.0.h5" {
+GROUP "/" {
+   ATTRIBUTE "a" {
+      DATATYPE  H5T_STD_I32LE
+      DATASPACE  SCALAR
+      DATA {
+      (0): 1
+      }
+   }
+}
+}
 
 ''')
