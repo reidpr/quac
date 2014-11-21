@@ -869,15 +869,18 @@ def without_ext(filename, ext):
       raise ValueError('%s does not have extension %s' % (filename, ext))
    return fn_new
 
-def zcat(filename):
+def zcat(filename, pipeline="zcat '%s'"):
    '''Return an open file descriptor containing the uncompressed content of the
       given gzipped file. This is very roughly up to 10× faster than
       gzip.open() (in one informal test) but costs an extra process that
       consumes some CPU.
 
-      This function leaves a zombie zcat process until the Popen object is
-      garbage collected.'''
-   return subprocess.Popen(['zcat', filename], stdout=subprocess.PIPE).stdout
+      Warning: Because this uses shell pipelines, it should not be given
+      untrusted input.
+
+      Zombie processes are reaped when Popen object is garbage collected.'''
+   return subprocess.Popen(pipeline % filename, shell=True,
+                           stdout=subprocess.PIPE).stdout
 
 def zero_attrs(obj, attrs):
    '''e.g.:

@@ -5,7 +5,10 @@
 # Copyright © Los Alamos National Security, LLC, and others.
 
 import gzip
+import itertools
+import heapq
 import os
+import sys
 import time
 
 import numpy as np
@@ -17,6 +20,7 @@ import time_
 import testable
 import wikimedia
 
+c = u.c
 l = u.l
 
 
@@ -27,21 +31,20 @@ gr = ap.default_group
 gr.add_argument('--compress',
                 action='store_true',
                 help='Rewrite and compress shards after updating')
+gr.add_argument('--config',
+                metavar='FILE',
+                help='Configuration file')
+gr.add_argument('--limit',
+                metavar='N',
+                type=int,
+                default=sys.maxsize,
+                help='Stop processing after this many articles')
+gr.add_argument('--nomonthcheck',
+                action='store_true',
+                help="Don't verify that all files are from the same month")
 gr.add_argument('outfile',
                 metavar='OUTFILE',
                 help='HDF5 sharded file cluster to create or update')
-gr.add_argument('shard_total_ct',
-                metavar='SHARDS_TOTAL',
-                type=int,
-                help='total number of shards in cluster')
-gr.add_argument('shard_offset',
-                metavar='SHARD_OFFSET',
-                type=int,
-                help='index of first shard to process on this pass')
-gr.add_argument('shard_ct',
-                metavar='SHARD_COUNT',
-                type=int,
-                help='numver of shards to process on this pass')
 gr.add_argument('pv_files',
                 metavar='PAGECOUNT',
                 nargs='+',
@@ -53,54 +56,90 @@ gr.add_argument('pv_files',
 def main():
    l.info('starting')
    args.pv_files.sort()
-   month = wikimedia.timestamp_parse(args.pv_files[0]).strftime('%Y%m')
+   month_last = None
    for file_ in args.pv_files:
       if (not os.path.isfile(file_)):
          u.abort('%s is not a file' % file_)
-      if (month != wikimedia.timestamp_parse(file_).strftime('%Y%m')):
+      try:
+         ts = wikimedia.timestamp_parse(file_)
+         month = ts.strftime('%Y%m')
+      except ValueError:
+         u.abort('%s is not named like a Wikimedia pagecount file' % file_)
+      if (not args.nomonthcheck
+          and month_last is not None
+          and month != month_last):
          u.abort('not from month %s: %s' % (month, file_))
-   h5s = h5.Sharded(args.outfile, shard_ct=args.shard_total_ct,
-                    filter_ = range(args.shard_offset, args.shard_ct))
-   l.info('opened %s with %d shards, filter=%s'
-          % (h5s.filename, h5s.shard_ct, h5s.filter_))
-   for file_ in args.pv_files:
-      process_file(h5s, file_)
-   h5s.flush()
-   update_metadata(h5s)
+      month_last = month
+   h5s = h5.Sharded(args.outfile, shard_ct=int(c['wkpd']['hashmod']))
+   l.info('opened %s with %d shards; %d hours in %s'
+          % (h5s.filename, h5s.shard_ct, time_.hours_in_month(ts), month))
+   process_files(h5s, args.pv_files)
    h5s.close()
    if (args.compress):
       l.info('compressing')
       h5s.compress()
    l.info('done')
 
-def process_file(h5s, file_):
-   ts = wikimedia.timestamp_parse(file_)
-   vector_len = time_.hours_in_month(ts)
-   hour_offset = time_.hour_offset(ts)
-   filter_ = set(h5s.filter_)
-   for (proj, url, count) in read_file(file_):
-      (i, sh) = h5s.shard_get(url)
-      if (i in filter_):
-         pass
-      #(_, sh) = h5s.shard_get(url)
-      #ds = sh.require_dataset('/weirdal/%s/%s' % (proj, url), (vector_len,),
-      #                        np.float32, fillvalue=np.nan, exact=True)
-      #ds[hour_offset] = count
+def process_files(h5s, files):
+   vector_len = time_.hours_in_month(wikimedia.timestamp_parse(files[0]))
+   start = time.time()
+   line_ct = 0
+   valids = h5s.shards[0].require_dataset(b'/valid', (vector_len,), np.float32,
+                                          fillvalue=np.nan, exact=True)
+   for ((proj, url), gr) in itertools.groupby(heapq.merge(*(read_file(f)
+                                                            for f in files)),
+                                              key=lambda i: i[:2]):
+      (_, sh) = h5s.shard_get(url)
+      ds = sh.require_dataset(b'/weirdal/' + proj + b'/' + url, (vector_len,),
+                              np.float32, fillvalue=0, exact=True)
+      for (_, _, hour_offset, count) in gr:
+         #valids[hour_offset] = 1
+         ds[hour_offset] = count
+         line_ct += 1
+      #print(ds[:].sum(), b'/weirdal/' + proj + b'/' + url)
+      if (line_ct >= args.limit - 1):
+         break
+   time_used = time.time() - start
+   l.info('read %s lines in %s (%d lines/s)'
+          % (line_ct + 1, u.fmt_seconds(time_used), (line_ct + 1) / time_used))
 
 def read_file(file_):
    try:
       byte_ct = os.stat(file_).st_size
-      fp = u.zcat(file_)
-      l.info('opened %s' % file_)
+      ts = wikimedia.timestamp_parse(file_)
+      hour_offset = time_.hour_offset(ts)
+      # Note that we filter out URLs:
+      #
+      # 1. In non-Wikipedia projects (Wiktionary, Wikibooks, etc.). Such
+      #    projects have a dot in their project code.
+      #
+      # 2. With "funny" characters. This is everything except:
+      #
+      #      - ASCII alphanumeric
+      #      - the rest of the unreserved set: -_.~
+      #      - some of the reserved set: !*();@,
+      #      - percent (to allow encoded URLs through)
+      #
+      #    Notably, this excludes articles:
+      #
+      #      - in non-main namespaces (title contains a colon)
+      #      - with a slash in the title, such as "Input/output"
+      #      - accessed with non-percent-encoded high Unicode characters
+      #
+      #    See:
+      #
+      #      http://en.wikipedia.org/wiki/Percent-encoding
+      #      http://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_%28technical_restrictions%29
+      fp = u.zcat(file_,
+                  r"zcat '%s' | egrep '^[a-z]+ [-A-Za-z0-9_.~!*();@,%%]+ '")
+      #l.info('opened %s' % file_)
       badline_ct = 0
       badline_last = None
       start = time.time()
       for (i, line) in enumerate(fp):
          try:
-            #if (i % 10000 == 0):
-            #   l.debug('read %d lines' % i)
             (proj, url, count, _) = line.split(b' ')
-            yield (proj, url, int(count))
+            yield (proj, url, hour_offset, int(count))
          except ValueError as x:
             # Ignore lines that don't parse. Some files have thousands of
             # these (pagecounts-20130201-010000.gz), and many files have at
@@ -111,9 +150,9 @@ def read_file(file_):
          l.warning('%s: %d lines with parse errors skipped (last was %d)'
                    % (file_, badline_ct, badline_last))
       time_used = time.time() - start
-      l.info('read %d lines and %s in %s (%d lines/s, %s/s)'
-             % (i + 1, u.fmt_seconds(time_used), u.fmt_bytes(byte_ct),
-                (i + 1) / time_used, u.fmt_bytes(byte_ct / time_used)))
+      #l.debug('read %d lines and %s in %s (%d lines/s, %s/s)'
+      #        % (i + 1, u.fmt_seconds(time_used), u.fmt_bytes(byte_ct),
+      #           (i + 1) / time_used, u.fmt_bytes(byte_ct / time_used)))
    except (EOFError, IOError) as x:
       l.warning('%s: error reading file, skipped: %s' % (file_, str(x)))
 
@@ -125,6 +164,7 @@ def update_metadata(h5c):
 
 try:
    args = u.parse_args(ap)
+   u.configure(args.config)
    u.logging_init('h5upd')
    if (__name__ == '__main__'):
       main()
