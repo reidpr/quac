@@ -4,6 +4,82 @@
 
 # Copyright © Los Alamos National Security, LLC, and others.
 
+# Data facts related to performance:
+#
+#   * The Wikipedia datafiles contain about 8M lines each.
+#   * There are 720 data files in a 30-day month.
+#   * About 25% of the lines in each data file are removed by egrep before
+#     they get to the Python code.
+#   * Therefore, we need to process about 4.3G lines per month of data.
+#   * To do so in 24 hours, we need to move 50,000 lines per second.
+#
+# It turns out that HDF5 via h5py has at least two significant bottlenecks.
+#
+#   1. Setting a single element in a dataset (e.g., dataset[i] = x) is,
+#      despite assertions to the contrary in the documentation, rather slow. I
+#      believe this is because h5py reads the entire dataset into a NumPy
+#      array (of about 4KB in our case), sets the data point, and writes the
+#      dataset back.
+#
+#      We largely mitigate this problem by reading out an article's complete
+#      vector, updating all new data points, and writing it back as a unit.
+#
+#   2. Retrieving and creating datasets is relatively slow. Some very
+#      preliminary testing yields on the order of 10K such operations per
+#      second.
+#
+# To make the latter problem tractable, we leverage the fact that article hits
+# follow a long-tail distribution. Most articles have only a handful of hits
+# in a month (perhaps because they are not real articles) and can therefore be
+# safely discarded; even if such articles carried a useful signal, relying on
+# them would be risky due to noise and the opportunity for manipulation. (The
+# threshold is configured at wkpd.keep_threshold.) In the bulk-loading
+# situation, which is of the most concern for performance, these monthly hit
+# counts are known without needing to reference any data from the HDF5 file,
+# and article vectors which do not pass the threshold can be discarded without
+# writing them at all.
+#
+# Thus, we use the following HDF5 write strategies. Recall that the --compress
+# switch indicates an HDF5 data file is complete (i.e., the month is closed).
+#
+#   Is --compress specified?
+#   |   Was the data file empty when opened?
+#   |   |
+#   |   |    Strategy
+#   |   |    |  Write cycle
+#   |   |    |  |                  Pruning
+#   --- ---  -  -----------------  -----------------------------------------
+#
+#   no  no   0  read-modify-write  none
+#   no  yes  1  write-only         none
+#   yes no   2  read-modify-write  visit whole data file, delete pruned rows
+#   yes yes  3  write-only         discard pruned rows before writing
+#
+# When is each strategy used? (Note that ordering differs.)
+#
+#   3. This is the fastest data path, used for bulk loading of full months. It
+#      avoids both HDF5 lookups/reads and writing most article vectors (which,
+#      due to the long-tail distribution of traffic, do not pass the
+#      threshold).
+#
+#   0. This is the standard daily incremental update strategy. This operates
+#      at around 10K articles per second, enough to process one day's worth of
+#      data in a few hours.
+#
+#   1. This happens for the daily update the first time it is run each month.
+#      Again, performance is acceptable due to the small number of input data.
+#
+#      This strategy is also important for bulk loading, in that it is used
+#      for the last, incomplete month of the bulk load. This month should not
+#      be included in a synchronized parallel bulk loading job, because it
+#      will be much slower than the other months that can use strategy 3.
+#
+#   2. This happens for the daily update the last time it is run each month.
+#      Because it must process the entire file, it takes significantly longer
+#      than most daily updates. Care must be taken that subsequent day's
+#      updates do not overlap, causing corruption.
+
+
 import gzip
 import itertools
 import heapq
@@ -84,24 +160,56 @@ def process_files(h5s, files):
    vector_len = time_.hours_in_month(wikimedia.timestamp_parse(files[0]))
    start = time.time()
    line_ct = 0
-   valids = h5s.shards[0].require_dataset(b'/valid', (vector_len,), np.float32,
-                                          fillvalue=np.nan, exact=True)
+   valid_hours = np.empty(vector_len, dtype=np.float32)
+   valid_hours_ds = h5s.shards[0].require_dataset(b'/metadata/valid',
+                                                  (vector_len,), np.float32,
+                                                  fillvalue=np.nan, exact=True)
+   valid_hours_ds.read_direct(valid_hours)
+   args.file_empty_p = (np.nansum(valid_hours) == 0)
+   args.eager_prune_p = args.compress
+   keep_threshold = int(c['wkpd']['keep_threshold'])
+   l.info('write strategy is %d, keep threshold is %d'
+          % (args.eager_prune_p * 2 + args.file_empty_p, keep_threshold))
+   write_ct = 0
+   prune_ct = 0
    for ((proj, url), gr) in itertools.groupby(heapq.merge(*(read_file(f)
                                                             for f in files)),
                                               key=lambda i: i[:2]):
       (_, sh) = h5s.shard_get(url)
-      ds = sh.require_dataset(b'/weirdal/' + proj + b'/' + url, (vector_len,),
-                              np.float32, fillvalue=0, exact=True)
+      av = np.zeros(vector_len, dtype=np.float32)
+      av_ds = None
+      av_ds_path = b'/weirdal/' + proj + b'/' + url
+      if (not args.file_empty_p):
+         av_ds = sh.require_dataset(av_ds_path, (vector_len,), np.float32,
+                                    fillvalue=0, exact=True)
+         av_ds.read_direct(av)
       for (_, _, hour_offset, count) in gr:
-         #valids[hour_offset] = 1
-         ds[hour_offset] = count
+         valid_hours[hour_offset] = 1
+         av[hour_offset] = count
          line_ct += 1
-      #print(ds[:].sum(), b'/weirdal/' + proj + b'/' + url)
+      if (args.eager_prune_p and av.sum() < keep_threshold):
+         prune_ct += 1
+         if (av_ds is not None):
+            del av_ds.parent[url]
+      else:
+         write_ct += 1
+         if (av_ds is None):
+            try:
+               av_ds = sh.create_dataset(av_ds_path, data=av)
+            except RuntimeError as x:
+               u.abort("Can't create %s: %s" % (av_ds_path, x))
+         else:
+            av_ds = av
       if (line_ct >= args.limit - 1):
          break
+   valid_hours_ds = valid_hours
    time_used = time.time() - start
    l.info('read %s lines in %s (%d lines/s)'
           % (line_ct + 1, u.fmt_seconds(time_used), (line_ct + 1) / time_used))
+   l.info('%d of %d URLs saved (%.1f%%, %d total/s)'
+          % (write_ct, write_ct + prune_ct,
+             100 * write_ct / (write_ct + prune_ct),
+             (write_ct + prune_ct) / time_used))
 
 def read_file(file_):
    try:
@@ -116,7 +224,7 @@ def read_file(file_):
       # 2. With "funny" characters. This is everything except:
       #
       #      - ASCII alphanumeric
-      #      - the rest of the unreserved set: -_.~
+      #      - the rest of the unreserved set, except for dot: -_~
       #      - some of the reserved set: !*();@,
       #      - percent (to allow encoded URLs through)
       #
@@ -131,7 +239,7 @@ def read_file(file_):
       #      http://en.wikipedia.org/wiki/Percent-encoding
       #      http://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_%28technical_restrictions%29
       fp = u.zcat(file_,
-                  r"zcat '%s' | egrep '^[a-z]+ [-A-Za-z0-9_.~!*();@,%%]+ '")
+                  r"zcat '%s' | egrep '^[a-z]+ [-A-Za-z0-9_~!*();@,%%]+ '")
       #l.info('opened %s' % file_)
       badline_ct = 0
       badline_last = None
