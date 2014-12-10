@@ -80,6 +80,7 @@
 #      updates do not overlap, causing corruption.
 
 
+from collections import defaultdict
 import gzip
 import itertools
 import heapq
@@ -162,21 +163,46 @@ def main():
       h5s.close_and_compress()
    l.info('done')
 
+def metadata_read(h5s):
+   sh = h5s.shards[0]
+   meta = dict()
+   ds = sh.require_dataset('/metadata/valid', (args.vector_len,),
+                           np.float32, fillvalue=np.nan, exact=True)
+   meta['valid'] = ds[:]
+   meta['weirdal'] = defaultdict(lambda: np.zeros(args.vector_len,
+                                                   dtype=np.float64))
+   totes = sh.require_group('/metadata/weirdal')
+   for (proj, ds) in totes.items():
+      meta['weirdal'][proj] = ds[:]
+   return meta
+
+def metadata_write(h5s, meta):
+   sh0 = h5s.shards[0]
+   sh0['metadata']['valid'][:] = meta['valid']
+   for (proj, vec) in meta['weirdal'].items():
+      ds = sh0.require_dataset('/metadata/weirdal/' + proj,
+                               (args.vector_len,), np.float64, exact=True)
+      ds[:] = vec
+   # all shards get same metadata
+   shards = h5s.shards_valid
+   next(shards)  # skip shard 0
+   for (i, sh) in shards:
+      if ('metadata' in sh):
+         del sh['metadata']
+      sh0.copy(sh0['metadata'], sh, 'metadata')
+
+
 def process_files(h5s, files):
-   start = time.time()
-   line_ct = 0
-   valid_hours = np.empty(args.vector_len, dtype=np.float32)
-   valid_hours_ds = h5s.shards[0].require_dataset(b'/metadata/valid',
-                                                  (args.vector_len,), np.float32,
-                                                  fillvalue=np.nan, exact=True)
-   valid_hours_ds.read_direct(valid_hours)
-   args.file_empty_p = (np.nansum(valid_hours) == 0)
+   meta = metadata_read(h5s)
+   args.file_empty_p = (np.nansum(meta['valid']) == 0)
    args.eager_prune_p = args.compress
    l.info('write strategy %d (eager prune=%d, empty=%d), keep threshold %d'
           % (args.eager_prune_p * 2 + args.file_empty_p,
              args.eager_prune_p, args.file_empty_p, args.keep_threshold))
+   line_ct = 0
    write_ct = 0
    total_ct = 0
+   start = time.time()
    for ((proj, url), gr) in itertools.groupby(heapq.merge(*(read_file(f)
                                                             for f in files)),
                                               key=lambda i: i[:2]):
@@ -184,14 +210,15 @@ def process_files(h5s, files):
       (_, sh) = h5s.shard_get(url)
       av = np.zeros(args.vector_len, dtype=np.float32)
       av_ds = None
-      av_ds_path = b'/weirdal/' + proj + b'/' + url
+      av_ds_path = '/weirdal/' + proj + '/' + url
       if (not args.file_empty_p):
          av_ds = sh.require_dataset(av_ds_path, (args.vector_len,), np.float32,
                                     fillvalue=0, exact=True)
          av_ds.read_direct(av)
       for (_, _, hour_offset, count) in gr:
-         valid_hours[hour_offset] = 1
          av[hour_offset] = count
+         meta['valid'][hour_offset] = 1
+         meta['weirdal'][proj][hour_offset] += count
          line_ct += 1
       if (args.eager_prune_p and av.sum() < args.keep_threshold):
          if (av_ds is not None):
@@ -207,13 +234,13 @@ def process_files(h5s, files):
             av_ds[:] = av
       if (write_ct >= args.limit):
          break
-   valid_hours_ds[:] = valid_hours
    time_used = time.time() - start
    l.info('read %s lines in %s (%d lines/s)'
-          % (line_ct + 1, u.fmt_seconds(time_used), (line_ct + 1) / time_used))
+          % (line_ct, u.fmt_seconds(time_used), (line_ct) / time_used))
    l.info('%d of %d URLs saved (%.1f%%, %d total/s)'
           % (write_ct, total_ct, 100 * write_ct / total_ct,
              total_ct / time_used))
+   metadata_write(h5s, meta)
 
 def prune(h5s):
    if (args.file_empty_p and args.eager_prune_p):
@@ -269,14 +296,13 @@ def read_file(file_):
       #
       #      - in non-main namespaces (title contains a colon)
       #      - with a slash in the title, such as "Input/output"
-      #      - accessed with non-percent-encoded high Unicode characters
+      #      - accessed with non-percent-encoded high characters (over 127)
       #
       #    See:
       #
       #      http://en.wikipedia.org/wiki/Percent-encoding
       #      http://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_%28technical_restrictions%29
-      fp = u.zcat(file_,
-                  r"zcat '%s' | egrep '^[a-z]+ [-A-Za-z0-9_~!*();@,%%]+ '")
+      fp = u.zcat(file_, r"zcat '%s' | LC_ALL=C egrep '^[a-z]+ [-A-Za-z0-9_~!*();@,%%]+ '")
       #l.info('opened %s' % file_)
       badline_ct = 0
       badline_last = None
@@ -284,20 +310,25 @@ def read_file(file_):
       for (i, line) in enumerate(fp):
          try:
             (proj, url, count, _) = line.split(b' ')
-            yield (proj, url, hour_offset, int(count))
+            yield (proj.decode('ascii'), url.decode('ascii'),
+                   hour_offset, int(count))
          except ValueError as x:
             # Ignore lines that don't parse. Some files have thousands of
             # these (pagecounts-20130201-010000.gz), and many files have at
-            # least one (all of February 2013).
+            # least one (all of February 2013). However, decoding errors
+            # should never happen, because we filter out any potential
+            # problems with egrep.
+            if (isinstance(x, UnicodeDecodeError)):
+               raise x
             badline_ct += 1
             badline_last = i + 1
       if (badline_ct > 0):
          l.warning('%s: %d lines with parse errors skipped (last was %d)'
                    % (file_, badline_ct, badline_last))
       time_used = time.time() - start
-      #l.debug('read %d lines and %s in %s (%d lines/s, %s/s)'
-      #        % (i + 1, u.fmt_seconds(time_used), u.fmt_bytes(byte_ct),
-      #           (i + 1) / time_used, u.fmt_bytes(byte_ct / time_used)))
+      l.debug('read %d lines and %s in %s (%d lines/s, %s/s)'
+              % (i + 1, u.fmt_seconds(time_used), u.fmt_bytes(byte_ct),
+                 (i + 1) / time_used, u.fmt_bytes(byte_ct / time_used)))
    except (EOFError, IOError) as x:
       l.warning('%s: error reading file, skipped: %s' % (file_, str(x)))
 
