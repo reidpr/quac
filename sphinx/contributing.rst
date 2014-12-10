@@ -113,6 +113,28 @@ Cutting a release
 #. Close the relevant milestone.
 
 
+Simplifying cmdtest updates with meld
+=====================================
+
+You can use Meld to help evaluate :samp:`cmdtest` failures and update
+expected output if necessary. Workflow:
+
+#. Open expected and actual output: :samp:`meld foo.stdout foo.stdout-actual`.
+
+#. Meld will show you a visual diff between expected (left) and actual (right)
+   output.
+
+#. If a difference is not expected, fix stuff and re-run the test. Choose
+   *File*, *Revert* when done to update the diff.
+
+#. If the difference is expected:
+
+   * Click the arrow to move it over to the expected file (:samp:`.output`).
+
+   * Click *Save*. (You may need to click on the expected area to enable the
+     button.)
+
+
 Code style
 ==========
 

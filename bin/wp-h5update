@@ -114,7 +114,7 @@ gr.add_argument('--limit',
                 metavar='N',
                 type=int,
                 default=sys.maxsize,
-                help='Stop processing after this many articles')
+                help='Stop processing after saving this many time series')
 gr.add_argument('--nomonthcheck',
                 action='store_true',
                 help="Don't verify that all files are from the same month")
@@ -132,6 +132,10 @@ gr.add_argument('pv_files',
 def main():
    l.info('starting')
    args.pv_files.sort()
+   args.keep_threshold = int(c['wkpd']['keep_threshold'])
+   if (len(args.pv_files) > 0):
+      ts = wikimedia.timestamp_parse(args.pv_files[0])
+      args.vector_len = time_.hours_in_month(ts)
    month_last = None
    for file_ in args.pv_files:
       if (not os.path.isfile(file_)):
@@ -150,45 +154,46 @@ def main():
    l.info('opened %s with %d shards; %d hours in %s'
           % (h5s.filename, h5s.shard_ct, time_.hours_in_month(ts), month))
    process_files(h5s, args.pv_files)
-   h5s.close()
-   if (args.compress):
+   if (not args.compress):
+      h5s.close()
+   else:
+      prune(h5s)
       l.info('compressing')
-      h5s.compress()
+      h5s.close_and_compress()
    l.info('done')
 
 def process_files(h5s, files):
-   vector_len = time_.hours_in_month(wikimedia.timestamp_parse(files[0]))
    start = time.time()
    line_ct = 0
-   valid_hours = np.empty(vector_len, dtype=np.float32)
+   valid_hours = np.empty(args.vector_len, dtype=np.float32)
    valid_hours_ds = h5s.shards[0].require_dataset(b'/metadata/valid',
-                                                  (vector_len,), np.float32,
+                                                  (args.vector_len,), np.float32,
                                                   fillvalue=np.nan, exact=True)
    valid_hours_ds.read_direct(valid_hours)
    args.file_empty_p = (np.nansum(valid_hours) == 0)
    args.eager_prune_p = args.compress
-   keep_threshold = int(c['wkpd']['keep_threshold'])
-   l.info('write strategy is %d, keep threshold is %d'
-          % (args.eager_prune_p * 2 + args.file_empty_p, keep_threshold))
+   l.info('write strategy %d (eager prune=%d, empty=%d), keep threshold %d'
+          % (args.eager_prune_p * 2 + args.file_empty_p,
+             args.eager_prune_p, args.file_empty_p, args.keep_threshold))
    write_ct = 0
-   prune_ct = 0
+   total_ct = 0
    for ((proj, url), gr) in itertools.groupby(heapq.merge(*(read_file(f)
                                                             for f in files)),
                                               key=lambda i: i[:2]):
+      total_ct += 1
       (_, sh) = h5s.shard_get(url)
-      av = np.zeros(vector_len, dtype=np.float32)
+      av = np.zeros(args.vector_len, dtype=np.float32)
       av_ds = None
       av_ds_path = b'/weirdal/' + proj + b'/' + url
       if (not args.file_empty_p):
-         av_ds = sh.require_dataset(av_ds_path, (vector_len,), np.float32,
+         av_ds = sh.require_dataset(av_ds_path, (args.vector_len,), np.float32,
                                     fillvalue=0, exact=True)
          av_ds.read_direct(av)
       for (_, _, hour_offset, count) in gr:
          valid_hours[hour_offset] = 1
          av[hour_offset] = count
          line_ct += 1
-      if (args.eager_prune_p and av.sum() < keep_threshold):
-         prune_ct += 1
+      if (args.eager_prune_p and av.sum() < args.keep_threshold):
          if (av_ds is not None):
             del av_ds.parent[url]
       else:
@@ -199,17 +204,49 @@ def process_files(h5s, files):
             except RuntimeError as x:
                u.abort("Can't create %s: %s" % (av_ds_path, x))
          else:
-            av_ds = av
-      if (line_ct >= args.limit - 1):
+            av_ds[:] = av
+      if (write_ct >= args.limit):
          break
-   valid_hours_ds = valid_hours
+   valid_hours_ds[:] = valid_hours
    time_used = time.time() - start
    l.info('read %s lines in %s (%d lines/s)'
           % (line_ct + 1, u.fmt_seconds(time_used), (line_ct + 1) / time_used))
    l.info('%d of %d URLs saved (%.1f%%, %d total/s)'
-          % (write_ct, write_ct + prune_ct,
-             100 * write_ct / (write_ct + prune_ct),
-             (write_ct + prune_ct) / time_used))
+          % (write_ct, total_ct, 100 * write_ct / total_ct,
+             total_ct / time_used))
+
+def prune(h5s):
+   if (args.file_empty_p and args.eager_prune_p):
+      l.info('no pruning pass needed for write strategy 3')
+      return
+   l.info('pruning, keep threshold %d' % args.keep_threshold)
+   keep_ct = 0
+   total_ct = 0
+   start = time.time()
+   # If we keep a buffer instead of allocating a new array each time we
+   # compute a sum, that's about 60% faster than the simpler approach. Keeping
+   # the sum in an attribute would save up to 40% on top of that, at the
+   # expense of keeping it up to date. That's with the attribute already in
+   # memory; I didn't test fetching it from the file. My guess is that the
+   # actual deletion will dominate, so I didn't pursue this more deeply,
+   # though I didn't profile that.
+   buf = np.empty(args.vector_len, dtype=np.float32)
+   for (i, shard) in h5s.shards_valid:
+      if (b'weirdal' not in shard):
+         l.warning("shard %d is empty; can't prune it" % i)
+      else:
+         for (proj, gr) in shard[b'weirdal'].items():
+            for (url, ds) in list(gr.items()):
+               total_ct += 1
+               ds.read_direct(buf)
+               if (buf.sum() >= args.keep_threshold):
+                  keep_ct += 1
+               else:
+                  del gr[url]
+   time_used = time.time() - start
+   l.info('%d of %d URLs kept in %s (%.1f%%, %d analyzed/s)'
+          % (keep_ct, total_ct, u.fmt_seconds(time_used),
+             100 * keep_ct / total_ct, total_ct / time_used))
 
 def read_file(file_):
    try:

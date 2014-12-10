@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# Test that wp-h5update is using the correct write strategies.
+
+# Copyright © Los Alamos National Security, LLC, and others.
+
+. ./environment.sh
+
+cd $DATADIR
+ln -s $QUACBASE/tests/standalone/wp-access/raw .
+ln -s $QUACBASE/tests/standalone/wp-access/test.cfg .
+
+LIMIT=5
+WP_H5UPDATE="wp-h5update --notimes --config test.cfg --limit=$LIMIT"
+
+echo
+echo '*** Strategy 1 -- erroneous globbing gives multiple months'
+x $WP_H5UPDATE a raw/2012/2012-10/pagecounts-20121001-*.gz || true
+
+echo
+echo '*** Strategy 1 -- first update of month (one day)'
+x $WP_H5UPDATE a \
+    $(ls raw/2012/2012-10/pagecounts-20121001-*.gz | tail -n +2) \
+    raw/2012/2012-10/pagecounts-20121002-000000.gz
+x h5dump a.*
+
+echo
+echo '*** Strategy 0 -- first ~29 days, test overwrite too'
+x $WP_H5UPDATE a $(ls raw/2012/2012-10/pagecounts-201210[012]*.gz | tail -n +2)
+x h5dump a.*
+
+echo
+echo '*** Strategy 2 -- close out month (2 days + 1 hour)'
+x $WP_H5UPDATE --compress a raw/2012/2012-10/pagecounts-2012103*.gz \
+                            raw/2012/2012-11/pagecounts-20121101-000000.gz
+x h5dump a.*
+
+echo
+echo '*** Strategy 3 -- bulk load a whole month'
+x $WP_H5UPDATE --compress b $(ls raw/2012/2012-10/*.gz | tail -n +2) \
+                            raw/2012/2012-11/pagecounts-20121101-000000.gz
+x h5dump b.*
+

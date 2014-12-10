@@ -75,10 +75,14 @@ class Sharded(object):
          raise ValueError('%d shards requested, but %d already exist'
                           % (proposed_shard_ct, existing_shard_ct))
 
-   def close(self, compress=False):
+   def close(self):
       l.debug('closing %d shards under %s' % (self.shard_ct, self.filename))
       for (_, s) in self.shards_valid:
          s.close()
+
+   def close_and_compress(self):
+      self.close()
+      self.compress()
 
    def compress(self):
       # Note that we compress all datasets, not just ones that are large

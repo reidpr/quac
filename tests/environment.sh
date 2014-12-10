@@ -24,16 +24,28 @@ export LC_ALL=en_US.UTF-8
 # stop test if any command fails
 set -e
 
+# Strip out things that vary in output:
+#
+# - timestamps (e.g., 1:23:45)
+# - rates (e.g., 100 elephants/s)
+#
+# The regular expressions look like line noise because I'm trying to be
+# portable.
+cleanup () {
+    sed -e 's/[0-9]\{1,2\}:[0-9][0-9]:[0-9][0-9]/[TIME]/g' \
+        -e 's/[0-9.]\{1,\} \([a-zA-Z]\{1,\}\/s\)/[RATE] \1/'
+}
+
 # echo key commands
 x () {
     echo "\$ $@"
-    eval "$@"
+    eval "$@" 2>&1 | cleanup
 }
 
 # echo key pipelines (executed in a subshell)
 y () {
     echo "$ ($1)"
-    bash -c "$1"
+    bash -c "$1" 2>&1 | cleanup
 }
 
 # Decide how to call netstat. The problem is that Red Hat and everyone else
