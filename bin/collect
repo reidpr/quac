@@ -188,7 +188,9 @@ class Tweet_Collector(object):
                self.collect()
             except ShutdownException:
                break
-            except (requests.exceptions.RequestException, ConnectionError) as x:
+            except (requests.exceptions.RequestException,
+                    requests.packages.urllib3.exceptions.ProtocolError,
+                    ConnectionError) as x:
                l.warning("connection failed: %s" % (str(x)))
                if (not self.reconnect_barrier()):
                   u.abort("reconnect vetoed")
@@ -226,7 +228,7 @@ class Tweet_Collector(object):
             #if (u.rand.random() < 0.01):
             #   self.stream.close()
             #   raise ts.ReconnectExponentiallyError("test")
-      except (requests.exceptions.RequestException, ConnectionError):
+      except Exception:
          # The connection failed somehow. Close out this collection session;
          # we'll let the caller deal with reconnection issues if needed.
          self.file_rotate_maybe(0, 0, stopping=True)
