@@ -189,7 +189,9 @@ class Tweet_Collector(object):
             except ShutdownException:
                break
             except (requests.exceptions.RequestException,
-                    requests.packages.urllib3.exceptions.ProtocolError,
+                    requests.packages.urllib3.exceptions.HTTPError,
+                    requests.packages.urllib3.exceptions.HTTPWarning,
+                    ValueError,
                     ConnectionError) as x:
                l.warning("connection failed: %s" % (str(x)))
                if (not self.reconnect_barrier()):
