@@ -50,6 +50,7 @@ for (ts, files) in deps.items():
    print('# %s, this month=%s, next month=%s' % (ts, month, next_month))
    print('h5files: h5/%s.0.h5' % month)
    print('h5/%s.0.h5: %s' % (month, ' '.join(sorted(files))))
-   print('\t@echo h5-update %s on %d files for month %s ...'
+   print('\t@echo wp-h5update %s on %d files for month %s ...'
          % (compress, len(files), month))
-   print('\t@h5-update %s $?' % compress)  # $? is all newer prerequisites
+   # command printing suppressed because it is so huge
+   print('\t@wp-h5update %s $@ $?' % compress)  # $? is all newer prerequisites

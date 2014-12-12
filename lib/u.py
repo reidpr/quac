@@ -348,6 +348,11 @@ def configure(config_path):
       specified in the files."""
    global cpath
    config_read(abspath("../misc/default.cfg", __file__))  # 1. default.cfg
+   if (config_path is None):
+      try:
+         config_path = os.environ['QUACCONFIG']
+      except KeyError:
+         pass
    if (config_path is not None):
       # this need to be an absolute path in case we change directories later
       cpath = os.path.abspath(config_path)

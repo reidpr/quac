@@ -33,18 +33,19 @@ set -e
 # portable.
 cleanup () {
     sed -e 's/[0-9]\{1,2\}:[0-9][0-9]:[0-9][0-9]/[TIME]/g' \
-        -e 's/[0-9.]\{1,\} \([a-zA-Z]\{1,\}\/s\)/[RATE] \1/'
+        -e 's/[0-9.]\{1,\} \([a-zA-Z]\{1,\}\/s\)/[RATE] \1/g' \
+        -e "s|$QUACBASE|[QUACBASE]|g"
 }
 
 # echo key commands
 x () {
-    echo "\$ $@"
+    echo "\$ $@" | cleanup
     eval "$@" 2>&1 | cleanup
 }
 
 # echo key pipelines (executed in a subshell)
 y () {
-    echo "$ ($1)"
+    echo "$ ($1)" | cleanup
     bash -c "$1" 2>&1 | cleanup
 }
 

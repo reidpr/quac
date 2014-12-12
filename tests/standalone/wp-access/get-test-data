@@ -64,8 +64,8 @@ zcat $1/2008/2008-10/pagecounts-20081021-090000.gz | tail -1 | gzip -9 > raw/200
 # This file is named .gz but is not gzipped (real)
 cp $1/2011/2011-10/pagecounts-20111008-180001.gz raw/2011/2011-10
 
-# This file contains 100 unparseable lines (synthetic)
-(for i in {1..100}; do echo a; done) | gzip -9 > raw/2099/2099-01/pagecounts-20990101-010000.gz
+# This file contains 100 unparseable lines (synthetic) that pass egrep
+(for i in {1..100}; do echo 'a a a a'; done) | gzip -9 > raw/2099/2099-01/pagecounts-20990101-010000.gz
 
 # This file ends in a way that breaks the gzip decompression (real, but with a
 # synthetic truncation added).

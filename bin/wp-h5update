@@ -237,9 +237,12 @@ def process_files(h5s, files):
    time_used = time.time() - start
    l.info('read %s lines in %s (%d lines/s)'
           % (line_ct, u.fmt_seconds(time_used), (line_ct) / time_used))
-   l.info('%d of %d URLs saved (%.1f%%, %d total/s)'
-          % (write_ct, total_ct, 100 * write_ct / total_ct,
-             total_ct / time_used))
+   try:
+      l.info('%d of %d URLs saved (%.1f%%, %d total/s)'
+             % (write_ct, total_ct, 100 * write_ct / total_ct,
+                total_ct / time_used))
+   except ZeroDivisionError:
+      pass
    metadata_write(h5s, meta)
 
 def prune(h5s):
@@ -307,6 +310,7 @@ def read_file(file_):
       badline_ct = 0
       badline_last = None
       start = time.time()
+      i = -1
       for (i, line) in enumerate(fp):
          try:
             (proj, url, count, _) = line.split(b' ')
@@ -327,7 +331,7 @@ def read_file(file_):
                    % (file_, badline_ct, badline_last))
       time_used = time.time() - start
       l.debug('read %d lines and %s in %s (%d lines/s, %s/s)'
-              % (i + 1, u.fmt_seconds(time_used), u.fmt_bytes(byte_ct),
+              % (i + 1, u.fmt_bytes(byte_ct), u.fmt_seconds(time_used),
                  (i + 1) / time_used, u.fmt_bytes(byte_ct / time_used)))
    except (EOFError, IOError) as x:
       l.warning('%s: error reading file, skipped: %s' % (file_, str(x)))
