@@ -41,3 +41,4 @@ x $WP_H5UPDATE --compress b $(ls raw/2012/2012-10/*.gz | tail -n +2) \
                             raw/2012/2012-11/pagecounts-20121101-000000.gz
 x h5dump b.*
 
+# FIXME -- delete shard 0, should start over

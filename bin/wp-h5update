@@ -191,7 +191,6 @@ def metadata_write(h5s, meta):
          del sh['metadata']
       sh0.copy(sh0['metadata'], sh, 'metadata')
 
-
 def process_files(h5s, files):
    meta = metadata_read(h5s)
    args.file_empty_p = (np.nansum(meta['valid']) == 0)
@@ -203,6 +202,7 @@ def process_files(h5s, files):
    write_ct = 0
    total_ct = 0
    start = time.time()
+   rss_last = 0
    for ((proj, url), gr) in itertools.groupby(heapq.merge(*(read_file(f)
                                                             for f in files)),
                                               key=lambda i: i[:2]):
@@ -225,6 +225,14 @@ def process_files(h5s, files):
             del av_ds.parent[url]
       else:
          write_ct += 1
+         if (write_ct % 5000 == 0):
+            u.memory_use_log(str(write_ct))
+            rss = u.memory_use()[1]
+            rss_new = max(0, rss - rss_last)
+            l.debug('%s new, %s per write'
+                    % (u.fmt_bytes(rss_new), u.fmt_bytes((rss_new)/5000)))
+            rss_last = rss
+            l.debug('HDF5 cache: %s' % str(h5s.shards[0].id.get_mdc_size()))
          if (av_ds is None):
             try:
                av_ds = sh.create_dataset(av_ds_path, data=av)
@@ -335,9 +343,6 @@ def read_file(file_):
                  (i + 1) / time_used, u.fmt_bytes(byte_ct / time_used)))
    except (EOFError, IOError) as x:
       l.warning('%s: error reading file, skipped: %s' % (file_, str(x)))
-
-def update_metadata(h5c):
-   pass
 
 
 ### Bootstrap ###

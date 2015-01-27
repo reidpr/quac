@@ -53,4 +53,4 @@ for (ts, files) in deps.items():
    print('\t@echo wp-h5update %s on %d files for month %s ...'
          % (compress, len(files), month))
    # command printing suppressed because it is so huge
-   print('\t@wp-h5update %s $@ $?' % compress)  # $? is all newer prerequisites
+   print('\t@wp-h5update %s --verbose $@ $?' % compress)  # $? is all newer prerequisites

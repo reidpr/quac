@@ -576,22 +576,28 @@ def memoize(f):
    return wrapper
 
 def memory_use():
-   '''Return the amount of virtual memory currently allocated to this process,
-      in bytes. For example (note flexibility in results to accomodate
-      different operating systems):
+   '''Return the amount of memory currently allocated to this process, in bytes,
+      as a tuple of virtual memory (VMS), real memory (RSS). For example (note
+      flexibility in results to accomodate different operating systems):
 
       >>> a = 'a' * int(2e9)  # string 2 billion chars long
-      >>> 2e9 < memory_use() < 5e9
+      >>> 2e9 < memory_use()[0] < 5e9
+      True
+      >>> 2e9 < memory_use()[1] < 3e9
       True
       >>> del a
 
       Note: This used to have an option to get peak usage, in addition to
       current usage. However, Macs seem not to be able to do this, and since
       it's not critical information for our uses, that feature was removed.'''
-   return psutil.Process(os.getpid()).get_memory_info().vms
+   info = psutil.Process(os.getpid()).get_memory_info()
+   return (info.vms, info.rss)
 
-def memory_use_log():
-   l.debug('virtual memory in use: %s' % (fmt_bytes(memory_use())))
+def memory_use_log(detail=''):
+   if (detail):
+      detail = ' %s: ' % (detail)
+   (vms, rss) = memory_use()
+   l.debug('memory:%s vms=%s rss=%s' % (detail, fmt_bytes(vms), fmt_bytes(rss)))
 
 def mkdir_f(path):
    '''Ensure that directory path exists. That is, if path already exists and

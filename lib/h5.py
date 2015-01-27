@@ -34,8 +34,13 @@ class Sharded(object):
       self.shards = list()
       for i in range(self.shard_ct):
          if (self.filter_ is None or i in self.filter_):
-            self.shards.append(h5py.File(self.filename_shard(i),
-                                         mode=mode, libver='latest'))
+            fp = h5py.File(self.filename_shard(i), mode=mode, libver='latest')
+            cc = fp.id.get_mdc_config()
+            cc.min_size = 2*1024*1024
+            cc.max_size = 2*1024*1024
+            fp.id.set_mdc_config(cc)
+            self.shards.append(fp)
+            print(fp.id.get_mdc_config().max_size)
          else:
             self.shards.append(None)
 
