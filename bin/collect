@@ -244,10 +244,8 @@ class Tweet_Collector(object):
             self.file_rotate_maybe(byte_ct, 1, stopping=g_shutdown)
             if (g_shutdown):
                raise ShutdownException
-            # error injection
-            #if (u.rand.random() < 0.01):
-            #   self.stream.close()
-            #   raise ts.ReconnectExponentiallyError("test")
+         # The loop should never end, so if it does, raise an exception.
+         raise ConnectionError('stream iteration stopped')
       except Exception:
          # The connection failed somehow. Close out this collection session;
          # we'll let the caller deal with reconnection issues if needed.
