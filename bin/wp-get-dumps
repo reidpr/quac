@@ -47,7 +47,9 @@ def main():
       for pattern in c.getlist('wkpd', 'dumps'):
          includes.append('/%s/latest/%s-latest-%s'
                          % (project, project, pattern))
-   rsync.byinclude(mirror_url, dump_dir, bwlimit, includes, args.verbose)
+   if (not rsync.byinclude(mirror_url, dump_dir, bwlimit,
+                           includes, args.verbose)):
+      u.abort('rsync failed')
    l.info('done')
 
 
