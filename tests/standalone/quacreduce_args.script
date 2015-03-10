@@ -12,6 +12,9 @@ set +e
 exec 2>&1  # send stderr to stdout to make output more readable
 #set -x    # safe because we have no pipelines in this script
 
+# Pipe make output through this because GNU Make 4.0 introduced additional
+# error messages that we don't care about and can't be turned off.
+MAKEFIX="egrep -v '^Makefile:[0-9]+: recipe for target .+ failed$'"
 
 echo '*** Check input files for unique names'
 x quacreduce --map cat --reduce cat foo/bar.txt baz/qux.txt
@@ -43,6 +46,6 @@ echo $?
 
 echo '*** Check that job fails if the map or reduce commands fail'
 x quacreduce --notimes --map false --reduce true /dev/null
-y "make || true"
+y "make 2>&1 | $MAKEFIX || true"
 x quacreduce --notimes --map true --reduce false /dev/null
-y "make || true"
+y "make 2>&1 | $MAKEFIX || true"
