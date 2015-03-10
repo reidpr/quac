@@ -19,11 +19,11 @@ $ head -5 aawiki-latest-pagelinks.sql
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8 */;
 $ head -5 aawiki-latest-stub-meta-history.xml
-<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.9/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.9/ http://www.mediawiki.org/xml/export-0.9.xsd" version="0.9" xml:lang="aa">
+<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.10/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.10/ http://www.mediawiki.org/xml/export-0.10.xsd" version="0.10" xml:lang="aa">
   <siteinfo>
     <sitename>Wikipedia</sitename>
     <dbname>aawiki</dbname>
     <base>http://aa.wikipedia.org/wiki/Main_Page</base>
 $ md5sum aawiki-latest-pagelinks.sql aawiki-latest-stub-meta-history.xml
-c09541c752627b1485ade2cd3b2bdd13  aawiki-latest-pagelinks.sql
-c0f559df40e6bcfaff14761e7afb4067  aawiki-latest-stub-meta-history.xml
+d759676ad9e767fb06d35f6ab53022a8  aawiki-latest-pagelinks.sql
+6b84e7087d6c82084f5acce7da8e502f  aawiki-latest-stub-meta-history.xml
