@@ -143,7 +143,7 @@ def dump(filename, verbose=False):
    fp.close()
 
 
-testable.register('''
+testable.manualonly_register('''
 
 >>> import numpy as np
 >>> import os
