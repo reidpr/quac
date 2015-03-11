@@ -86,8 +86,8 @@ TE_CHUNK_HEADER = re.compile(r'^[0-9a-f\s]*$')
 ap = argparse.ArgumentParser(
    description="Save unparsed tweets from streaming API into files.")
 ap.add_argument("--config",
-                required=True,
                 help="location of config file",
+                default=u.CONFIG_DEFAULT,
                 metavar="FILE")
 ap.add_argument("--daemon",
                 action="store_true",
