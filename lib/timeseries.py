@@ -32,6 +32,7 @@
 
 import datetime
 import enum
+import glob
 import os
 import os.path
 import sys
@@ -45,8 +46,8 @@ import time_
 import u
 
 l = u.l
-u.logging_init('test', verbose_=True)
-l.debug('')
+#u.logging_init('test', verbose_=True)
+#l.debug('')
 
 
 # Storage schema version
@@ -83,10 +84,17 @@ class Dataset(object):
       self.filename = filename
       self.hashmod = hashmod
 
+   @property
+   def fragment_tags(self):
+      for g in glob.iglob('%s/*.db' % self.filename):
+         yield os.path.split(os.path.splitext(g)[0])[1]
+
    def dump(self):
-      for sid in range(self.hashmod):
-         for ts in self.fetch_all():
-            print(ts)
+      for ft in self.fragment_tags:
+         print('fragment %s' % ft)
+         fg = Fragment_Group(self, self.filename, ft)
+         fg.open(False)
+         fg.dump()
 
    def fetch_all(self):
       return list()  # FIXME
@@ -124,7 +132,7 @@ class Fragment_Group(object):
                 'tag',
                 'writeable')
 
-   def __init__(self, dataset, filename, tag, length):
+   def __init__(self, dataset, filename, tag, length=None):
       self.dataset = dataset
       self.filename = '%s/%s.db' % (filename, tag)
       self.tag = tag
@@ -160,16 +168,31 @@ class Fragment_Group(object):
    def create_indexes(self):
       pass
 
-   def fetch(self, namespace, name):
-      (dtype, total, data) \
-         = self.db.get_one(("""SELECT dtype, total, data FROM data%d
-                              WHERE namespace=? AND name=?"""
-                            % self.dataset.shard(namespace, name)),
-                           (namespace, name))
+   def deserialize(self, namespace, name, dtype, total, data):
       ar = np.frombuffer(data, dtype=dtype)
       f = Fragment(self, namespace, name, ar, Fragment_Source.UNCOMPRESSED)
       f.total = total
       return f
+
+   def dump(self):
+      for shard in range(self.dataset.hashmod):
+         print('shard %d' % shard)
+         for f in self.fetch_all(shard):
+            print(' ', f)
+
+   def fetch(self, namespace, name):
+      (dtype, total, data) \
+         = self.db.get_one(("""SELECT dtype, total, data FROM data%d
+                               WHERE namespace=? AND name=?"""
+                            % self.dataset.shard(namespace, name)),
+                           (namespace, name))
+      return self.deserialize(namespace, name, dtype, total, data)
+
+   def fetch_all(self, shard):
+      for i in self.db.get("""SELECT namespace, name, dtype, total, data
+                              FROM data%d
+                              ORDER BY namespace, name""" % shard):
+         yield self.deserialize(*i)
 
    def fetch_or_create(self, namespace, name, dtype=TYPE_DEFAULT):
       '''dtype is only used on create; if fetch is successful, the fragment is
@@ -180,29 +203,33 @@ class Fragment_Group(object):
          return self.create(namespace, name, dtype)
 
    def initialize_db(self):
-      if (not self.writeable):
-         l.debug('not writeable, skipping init')
-         return
       if (self.db.exists('sqlite_master', "type='table' AND name='metadata'")):
-         l.debug('metadata table exists, skipping init')
-         return
-      l.debug('initializing')
-      self.db.sql("""PRAGMA encoding='UTF-8';
-                     PRAGMA page_size = 65536; """)
-      self.db.begin()
-      self.db.sql("""CREATE TABLE metadata (
-                        key    TEXT NOT NULL PRIMARY KEY,
-                        value  TEXT NOT NULL )""")
-      self.db.sql_many("INSERT INTO metadata VALUES (?, ?)",
-                       self.metadata.items())
-      for i in range(self.dataset.hashmod):
-         self.db.sql("""CREATE TABLE data%d (
-                           namespace  TEXT NOT NULL,
-                           name       TEXT NOT NULL,
-                           dtype      TEXT NOT NULL,
-                           total      REAL NOT NULL,
-                           data       BLOB NOT NULL) """ % i)
-      self.db.commit()
+         l.debug('found metadata table, assuming already initalized')
+         if (self.length is None):
+            self.length = self.db.get_one("""SELECT value FROM metadata
+                                             WHERE key = 'length'""")[0]
+            self.metadata['length'] = self.length
+      else:
+         if (not self.writeable):
+            raise db.Invalid_DB_Error('cannot initalize in read-only mode')
+         l.debug('initializing')
+         assert (self.length is not None)
+         self.db.sql("""PRAGMA encoding='UTF-8';
+                        PRAGMA page_size = 65536; """)
+         self.db.begin()
+         self.db.sql("""CREATE TABLE metadata (
+                          key    TEXT NOT NULL PRIMARY KEY,
+                          value  TEXT NOT NULL )""")
+         self.db.sql_many("INSERT INTO metadata VALUES (?, ?)",
+                          self.metadata.items())
+         for i in range(self.dataset.hashmod):
+            self.db.sql("""CREATE TABLE data%d (
+                             namespace  TEXT NOT NULL,
+                             name       TEXT NOT NULL,
+                             dtype      TEXT NOT NULL,
+                             total      REAL NOT NULL,
+                             data       BLOB NOT NULL) """ % i)
+         self.db.commit()
 
    def open(self, writeable):
       l.debug('opening %s, writeable=%s' % (self.filename, writeable))
@@ -219,15 +246,14 @@ class Fragment_Group(object):
       db_meta = dict(self.db.get('SELECT key, value FROM metadata'))
       for (k, v) in self.metadata.items():
          if (str(v) != db_meta[k]):
-            raise ValueError('Metadata mismatch at key %s: expected %s, found %s'
-                             % (k, v, db_meta[k]))
+            raise db.Invalid_DB_Error(
+               'Metadata mismatch at key %s: expected %s, found %s'
+               % (k, v, db_meta[k]))
       if (set(db_meta.keys()) != set(self.metadata.keys())):
-         raise ValueError('Metadata mismatch: key sets differ')
+         raise db.Invalid_DB_Error('Metadata mismatch: key sets differ')
       l.debug('validated %d metadata items' % len(self.metadata))
 
 # compact(minimum)
-# create_fragment(namespace, name)
-# fetch_or_create_fragment(namespace, name)
 
 
 class Fragment(object):
@@ -331,10 +357,20 @@ Traceback (most recent call last):
 ValueError: month must have day=1, not 2
 
 # Really open; should be empty so far
+>>> d.dump()
 >>> jan = d.open_month(january, writeable=True)
-
-#>>> feb = d.open_month(february, writeable=True)
-#>>> d.dump()
+>>> feb = d.open_month(february, writeable=True)
+>>> d.dump()
+fragment 2015-01-01
+shard 0
+shard 1
+shard 2
+shard 3
+fragment 2015-02-01
+shard 0
+shard 1
+shard 2
+shard 3
 
 # Add first time series
 >>> jan.begin()
@@ -349,6 +385,18 @@ aboth/abov11 N 0.0 [(0, 11.0)]
 aboth/abov11 N 0.0 [(0, 11.0), (2, 22.0)]
 >>> a.save()
 >>> jan.commit()
+>>> d.dump()
+fragment 2015-01-01
+shard 0
+  aboth/abov11 U 33.0 [(0, 11.0), (2, 22.0)]
+shard 1
+shard 2
+shard 3
+fragment 2015-02-01
+shard 0
+shard 1
+shard 2
+shard 3
 
 # Try some fetching
 >>> jan.fetch('aboth', 'abov11')

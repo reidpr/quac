@@ -37,6 +37,7 @@ import apsw
 
 class Not_Enough_Rows_Error(Exception): pass
 class Too_Many_Rows_Error(Exception): pass
+class Invalid_DB_Error(Exception): pass
 
 
 class SQLite(object):
