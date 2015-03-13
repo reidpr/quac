@@ -106,6 +106,7 @@ def main():
 ###   no tests:         %(notest)3d
 ###   disabled:         %(disabled)3d
 ###   cmdtest skips:    %(cmdtest_skip)3d''' % (status))
+   print('###\n### tmpdir: %s' % tmpdir)
    sys.exit(retval)
 
 
@@ -147,7 +148,7 @@ def import_test(filename, text):
    imfname = os.path.join(os.path.dirname(filename), 'IMPORTTEST.py')
    imfp = open(imfname, 'wt')
    for line in text.splitlines(True):
-      m = re.search(r'^([ >]*)((import|from) .+$)', line)
+      m = re.search(r'^([ >]*)((import|from \w+ import) .+$)', line)
       if (m):
          print(m.group(2), file=imfp)
    imfp.flush()
