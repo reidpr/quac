@@ -36,9 +36,9 @@ import os
 import os.path
 import sys
 
-import apsw
 import numpy as np
 
+import db
 import hash_
 import testable
 import time_
@@ -60,16 +60,18 @@ SCHEMA_VERSION = 1
 # The value here is a random guess and is not supported by evidence.
 FRAGMENT_TOTAL_ZMAX = 2
 
-# Data types for different vectors. We use floating-point types, even though
-# they represent counts, for convenience in processing and the NaN value.
-TIMESERIES_TYPE = np.float32
-NAMESPACE_TOTAL_TYPE = np.float64
+# Default data type
+TYPE_DEFAULT = np.float32
+
+# Which hash algorithm to use?
+HASH = 'fnv1a_32'
+hashf = getattr(hash_, HASH)
 
 class Fragment_Source(enum.Enum):
-   'Where did a fragment come from? True values indicate from storage.'
-   usv = 0; unsaved = 0       # created from scratch
-   uco = 1; uncompressed = 1  # retrieved without compression from the database
-   cps = 2; compressed = 2    # decompressed from the database
+   'Where did a fragment come from?'
+   N = 1; NEW = 1           # created from scratch
+   U = 2; UNCOMPRESSED = 2  # retrieved without compression from the database
+   Z = 3; COMPRESSED = 3    # decompressed from the database
 
 
 class Dataset(object):
@@ -97,10 +99,14 @@ class Dataset(object):
                                       or month.second != 0
                                       or month.microsecond != 0)):
          raise ValueError('month must have all sub-day attributes equal to zero')
-      f = Fragment_Group(self.filename, time_.iso8601_date(month),
+      f = Fragment_Group(self, self.filename, time_.iso8601_date(month),
                          time_.hours_in_month(month))
       f.open(writeable)
       return f
+
+   def shard(self, namespace, name):
+      return hashf(namespace + '/' + name) % self.hashmod
+
 
 # fetch(namespace, name) - error if nonexistent
 # fetch_all(shard_id)
@@ -110,6 +116,7 @@ class Dataset(object):
 class Fragment_Group(object):
 
    __slots__ = ('curs',
+                'dataset',
                 'db',
                 'filename',
                 'length',
@@ -117,57 +124,99 @@ class Fragment_Group(object):
                 'tag',
                 'writeable')
 
-   def __init__(self, filename, tag, length):
+   def __init__(self, dataset, filename, tag, length):
+      self.dataset = dataset
       self.filename = '%s/%s.db' % (filename, tag)
       self.tag = tag
       self.length = length
-      self.metadata = { 'schema_version': SCHEMA_VERSION,
-                        'fragment_total_zmax': FRAGMENT_TOTAL_ZMAX,
-                        'timeseries_type': str(TIMESERIES_TYPE),
-                        'namespace_total_type': str(NAMESPACE_TOTAL_TYPE),
-                        'hashmod': 'FIXME',  # should be from Dataset
-                        'length': self.length }
+      self.metadata = { 'fragment_total_zmax': FRAGMENT_TOTAL_ZMAX,
+                        'hash': HASH,
+                        'hashmod': self.dataset.hashmod,
+                        'length': self.length,
+                        'schema_version': SCHEMA_VERSION }
+
+   def begin(self):
+      self.db.begin()
 
    def close(self):
+      self.create_indexes()
       self.db.close()
       self.writeable = None
 
-   def open(self, writeable):
-      l.debug('opening %s, writeable=%s' % (self.filename, writeable))
-      self.connect(writeable)
-      self.initialize_db()
-      self.validate_db()
+   def commit(self):
+      self.db.commit()
 
    def connect(self, writeable):
       self.writeable = writeable
       if (writeable):
-         flags = apsw.SQLITE_OPEN_READWRITE | apsw.SQLITE_OPEN_CREATE
          os.makedirs(os.path.dirname(self.filename), exist_ok=True)
-      else:
-         flags = apsw.SQLITE_OPEN_READONLY
-      self.db = apsw.Connection(self.filename, flags=flags)
-      self.curs = self.db.cursor()
+      self.db = db.SQLite(self.filename, writeable)
+
+   def create(self, namespace, name, dtype=TYPE_DEFAULT):
+      'Create and return a fragment initialized to zero.'
+      return Fragment(self, namespace, name, np.zeros(self.length, dtype=dtype),
+                      Fragment_Source.NEW)
+
+   def create_indexes(self):
+      pass
+
+   def fetch(self, namespace, name):
+      (dtype, total, data) \
+         = self.db.get_one(("""SELECT dtype, total, data FROM data%d
+                              WHERE namespace=? AND name=?"""
+                            % self.dataset.shard(namespace, name)),
+                           (namespace, name))
+      ar = np.frombuffer(data, dtype=dtype)
+      f = Fragment(self, namespace, name, ar, Fragment_Source.UNCOMPRESSED)
+      f.total = total
+      return f
+
+   def fetch_or_create(self, namespace, name, dtype=TYPE_DEFAULT):
+      '''dtype is only used on create; if fetch is successful, the fragment is
+         returned unchanged.'''
+      try:
+         return self.fetch(namespace, name)
+      except db.Not_Enough_Rows_Error:
+         return self.create(namespace, name, dtype)
 
    def initialize_db(self):
       if (not self.writeable):
          l.debug('not writeable, skipping init')
          return
-      # FIXME - PRAGMAs
-      if (next(self.x("""SELECT COUNT(*)
-                         FROM sqlite_master
-                         WHERE type='table' AND name='metadata'"""))[0] != 0):
+      if (self.db.exists('sqlite_master', "type='table' AND name='metadata'")):
          l.debug('metadata table exists, skipping init')
          return
       l.debug('initializing')
-      self.curs.execute("""CREATE TABLE metadata (
-                             key    TEXT NOT NULL PRIMARY KEY,
-                             value  TEXT NOT NULL
-                           )""")
-      self.curs.executemany("INSERT INTO metadata VALUES (?, ?)",
-                            self.metadata.items())
+      self.db.sql("""PRAGMA encoding='UTF-8';
+                     PRAGMA page_size = 65536; """)
+      self.db.begin()
+      self.db.sql("""CREATE TABLE metadata (
+                        key    TEXT NOT NULL PRIMARY KEY,
+                        value  TEXT NOT NULL )""")
+      self.db.sql_many("INSERT INTO metadata VALUES (?, ?)",
+                       self.metadata.items())
+      for i in range(self.dataset.hashmod):
+         self.db.sql("""CREATE TABLE data%d (
+                           namespace  TEXT NOT NULL,
+                           name       TEXT NOT NULL,
+                           dtype      TEXT NOT NULL,
+                           total      REAL NOT NULL,
+                           data       BLOB NOT NULL) """ % i)
+      self.db.commit()
+
+   def open(self, writeable):
+      l.debug('opening %s, writeable=%s' % (self.filename, writeable))
+      self.connect(writeable)
+      # We use journal_mode = PERSIST to avoid metadata operations and
+      # re-allocation, which can be expensive on parallel filesystems.
+      self.db.sql("""PRAGMA cache_size = -1048576;
+                     PRAGMA journal_mode = PERSIST;
+                     PRAGMA synchronous = OFF; """)
+      self.initialize_db()
+      self.validate_db()
 
    def validate_db(self):
-      db_meta = dict(self.curs.execute('SELECT key, value FROM metadata'))
+      db_meta = dict(self.db.get('SELECT key, value FROM metadata'))
       for (k, v) in self.metadata.items():
          if (str(v) != db_meta[k]):
             raise ValueError('Metadata mismatch at key %s: expected %s, found %s'
@@ -176,32 +225,59 @@ class Fragment_Group(object):
          raise ValueError('Metadata mismatch: key sets differ')
       l.debug('validated %d metadata items' % len(self.metadata))
 
-   def x(self, sql, bindings=None):
-      return self.curs.execute(sql, bindings)
-
 # compact(minimum)
 # create_fragment(namespace, name)
-# fetch_fragment(namespace, name)
 # fetch_or_create_fragment(namespace, name)
-# begin()
-# commit()
-# close()
 
 
 class Fragment(object):
 
    __slots__ = ('data',      # time series vector fragment itself
+                'group',
                 'namespace',
                 'name',
-                'start',     # timestamp of fragment start
                 'source',    # where the fragment came from
-                'total')     # total of data (updated automatically on save)
+                'total')     # total of data (not updated when data changes)
 
-   def __str__(self):
-      pass
+   def __init__(self, group, namespace, name, data, source):
+      self.group = group
+      self.namespace = namespace
+      self.name = name
+      self.data = data
+      self.source = source
+      self.total = 0.0
+
+   @property
+   def shard(self):
+      return self.group.dataset.shard(self.namespace, self.name)
+
+   def __repr__(self):
+      'Mostly for testing; output is inefficient for non-sparse fragments.'
+      return '%s/%s %s %s %s' % (self.namespace, self.name,
+                                 self.source.name, self.total,
+                                 [i for i in enumerate(self.data) if i[1] != 0])
 
    def save(self):
-      pass
+      self.total_update()
+      data = self.data.data
+      if (self.source == Fragment_Source.NEW):
+         self.group.db.sql("""INSERT INTO data%d
+                                     (namespace, name, dtype, total, data)
+                              VALUES (?, ?, ?, ?, ?)""" % self.shard,
+                           (self.namespace, self.name, self.data.dtype.char,
+                            self.total, self.data))
+      else:
+         self.group.db.sql("""UPDATE data%d
+                              SET dtype=?, total=?, data=?
+                              WHERE namespace=? AND name=?""" % self.shard,
+                           (self.data.dtype.char, self.total, data,
+                            self.namespace, self.name))
+
+   def total_update(self):
+      # np.sum() returns a NumPy data type, which confuses SQLite somehow.
+      # Therefore, use a plain Python float. Also np.sum() is about 30 times
+      # faster than Python sum() on a 1000-element array.
+      self.total = float(self.data.sum())
 
 
 testable.register('''
@@ -215,6 +291,7 @@ testable.register('''
 #   - metadata does not match (items differ, different number of items)
 # - timing of create_indexes()
 # - duplicate namespace/name pair
+# - save already existing fragment (can fail at save or create_index time)
 
 >>> import pytz
 >>> tmp = os.environ['TMPDIR']
@@ -255,35 +332,55 @@ ValueError: month must have day=1, not 2
 
 # Really open; should be empty so far
 >>> jan = d.open_month(january, writeable=True)
->>> feb = d.open_month(february, writeable=True)
->>> d.dump()
+
+#>>> feb = d.open_month(february, writeable=True)
+#>>> d.dump()
 
 # Add first time series
-#>>> a.begin()
-#>>> a = jan.create('aboth', 'abov11')
-#>>> a.data[0] = 99.0
-#>>> a.save()
-#>>> a.commit()
+>>> jan.begin()
+>>> a = jan.create('aboth', 'abov11')
+>>> a
+aboth/abov11 N 0.0 []
+>>> a.data[0] = 11
+>>> a
+aboth/abov11 N 0.0 [(0, 11.0)]
+>>> a.data[2] = 22.0
+>>> a
+aboth/abov11 N 0.0 [(0, 11.0), (2, 22.0)]
+>>> a.save()
+>>> jan.commit()
+
+# Try some fetching
+>>> jan.fetch('aboth', 'abov11')
+aboth/abov11 U 33.0 [(0, 11.0), (2, 22.0)]
+>>> jan.fetch('aboth', 'nonexistent')
+Traceback (most recent call last):
+  ...
+db.Not_Enough_Rows_Error: no such row
+>>> jan.fetch('nonexistent', 'abov11')
+Traceback (most recent call last):
+  ...
+db.Not_Enough_Rows_Error: no such row
+>>> jan.fetch_or_create('aboth', 'abov11')
+aboth/abov11 U 33.0 [(0, 11.0), (2, 22.0)]
+>>> jan.fetch_or_create('aboth', 'nonexistent')
+aboth/nonexistent N 0.0 []
 
 # Add remaining time series
 
 # Compact
 
+# Close
+>>> jan.close()
+
+# different data type
 # create time series that would be compressed
 # update time series
 #   uncompressed -> uncompressed
 #   uncompressed -> compressed
 #   compressed -> compressed
 #   compressed -> uncompressed
-# fetch
-#   existent
-#   nonexistent
-# fetch_or_create
-#   existent
-#   nonexistent
-# create already existing fragment fails at save time
 # test commit visibility to readers
-# fetch nonexistent fragment
 # auto-prune save()
 # close and re-open
 
