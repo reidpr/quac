@@ -70,9 +70,9 @@ hashf = getattr(hash_, HASH)
 
 class Fragment_Source(enum.Enum):
    'Where did a fragment come from?'
-   N = 1; NEW = 1           # created from scratch
-   U = 2; UNCOMPRESSED = 2  # retrieved without compression from the database
-   Z = 3; COMPRESSED = 3    # decompressed from the database
+   n = 1; NEW = 1           # created from scratch
+   u = 2; UNCOMPRESSED = 2  # retrieved without compression from the database
+   z = 3; COMPRESSED = 3    # decompressed from the database
 
 
 class Dataset(object):
@@ -279,9 +279,9 @@ class Fragment(object):
 
    def __repr__(self):
       'Mostly for testing; output is inefficient for non-sparse fragments.'
-      return '%s/%s %s %s %s' % (self.namespace, self.name,
-                                 self.source.name, self.total,
-                                 [i for i in enumerate(self.data) if i[1] != 0])
+      return '%s/%s %s%s %s %s' % (self.namespace, self.name, self.source.name,
+                                   self.data.dtype.char, self.total,
+                                   [i for i in enumerate(self.data) if i[1] != 0])
 
    def save(self):
       self.total_update()
@@ -318,9 +318,12 @@ testable.register('''
 # - timing of create_indexes()
 # - duplicate namespace/name pair
 # - save already existing fragment (can fail at save or create_index time)
+# - writing beyond array limits
+# - mixed data types in different fragments
 
 >>> import pytz
 >>> tmp = os.environ['TMPDIR']
+>>> PRUNE_THRESHOLD = 10
 >>> january = time_.iso8601_parse('2015-01-01')
 >>> february = time_.iso8601_parse('2015-02-01')
 >>> january_nonutc = datetime.datetime(2015, 1, 1, tzinfo=pytz.timezone('GMT'))
@@ -329,44 +332,37 @@ testable.register('''
 
 # create some data over 2 months
 #
-#   ns     name    description
-#   -----  ----    -----------
+#   ns    name  description
+#   ----  ----  -----------
 #
-#   aboth  abov11  above threshold in both months
-#   bboth  abov00  below threshold in both months
-#   full   abov11  above threshold in both months
-#   full   abov01  above threshold in second month only
-#   full   abov10  above threshold in first month only
-#   full   abov00  below threshold in both months
+#   prun  a00   below threshold in both months
+#   full  a11   above threshold in both months
+#   full  a01   above threshold in second month only, float64
+#   full  a10   above threshold in first month only
+#   full  a00   below threshold in both months
 
 # Create time series dataset
->>> d = Dataset(tmp + '/foo', 4)
+>>> ds = Dataset(tmp + '/foo', 4)
 
 # Try to open some bogus months
->>> jan = d.open_month(january_nonutc, writeable=True)
+>>> jan = ds.open_month(january_nonutc, writeable=True)
 Traceback (most recent call last):
   ...
 ValueError: time zone must be UTC
->>> jan = d.open_month(mid_january1, writeable=True)
+>>> jan = ds.open_month(mid_january1, writeable=True)
 Traceback (most recent call last):
   ...
 ValueError: month must have all sub-day attributes equal to zero
->>> jan = d.open_month(mid_january2, writeable=True)
+>>> jan = ds.open_month(mid_january2, writeable=True)
 Traceback (most recent call last):
   ...
 ValueError: month must have day=1, not 2
 
 # Really open; should be empty so far
->>> d.dump()
->>> jan = d.open_month(january, writeable=True)
->>> feb = d.open_month(february, writeable=True)
->>> d.dump()
+>>> ds.dump()
+>>> jan = ds.open_month(january, writeable=True)
+>>> ds.dump()
 fragment 2015-01-01
-shard 0
-shard 1
-shard 2
-shard 3
-fragment 2015-02-01
 shard 0
 shard 1
 shard 2
@@ -374,49 +370,114 @@ shard 3
 
 # Add first time series
 >>> jan.begin()
->>> a = jan.create('aboth', 'abov11')
+>>> a = jan.create('full', 'a11')
 >>> a
-aboth/abov11 N 0.0 []
+full/a11 nf 0.0 []
 >>> a.data[0] = 11
 >>> a
-aboth/abov11 N 0.0 [(0, 11.0)]
+full/a11 nf 0.0 [(0, 11.0)]
 >>> a.data[2] = 22.0
 >>> a
-aboth/abov11 N 0.0 [(0, 11.0), (2, 22.0)]
+full/a11 nf 0.0 [(0, 11.0), (2, 22.0)]
 >>> a.save()
 >>> jan.commit()
->>> d.dump()
+>>> ds.dump()
 fragment 2015-01-01
 shard 0
-  aboth/abov11 U 33.0 [(0, 11.0), (2, 22.0)]
 shard 1
 shard 2
+  full/a11 uf 33.0 [(0, 11.0), (2, 22.0)]
+shard 3
+
+# Try some fetching
+>>> jan.fetch('full', 'a11')
+full/a11 uf 33.0 [(0, 11.0), (2, 22.0)]
+>>> jan.fetch('full', 'nonexistent')
+Traceback (most recent call last):
+  ...
+db.Not_Enough_Rows_Error: no such row
+>>> jan.fetch('nonexistent', 'a11')
+Traceback (most recent call last):
+  ...
+db.Not_Enough_Rows_Error: no such row
+>>> jan.fetch_or_create('full', 'a11')
+full/a11 uf 33.0 [(0, 11.0), (2, 22.0)]
+>>> jan.fetch_or_create('full', 'nonexistent')
+full/nonexistent nf 0.0 []
+
+# Add rest of full/a11
+>>> feb = ds.open_month(february, writeable=True)
+>>> feb.begin()
+>>> a = feb.create('full', 'a11')
+>>> a.data[671] = 44
+>>> a.save()
+>>> feb.commit()
+>>> ds.dump()
+fragment 2015-01-01
+shard 0
+shard 1
+shard 2
+  full/a11 uf 33.0 [(0, 11.0), (2, 22.0)]
 shard 3
 fragment 2015-02-01
 shard 0
 shard 1
 shard 2
+  full/a11 uf 44.0 [(671, 44.0)]
 shard 3
 
-# Try some fetching
->>> jan.fetch('aboth', 'abov11')
-aboth/abov11 U 33.0 [(0, 11.0), (2, 22.0)]
->>> jan.fetch('aboth', 'nonexistent')
-Traceback (most recent call last):
-  ...
-db.Not_Enough_Rows_Error: no such row
->>> jan.fetch('nonexistent', 'abov11')
-Traceback (most recent call last):
-  ...
-db.Not_Enough_Rows_Error: no such row
->>> jan.fetch_or_create('aboth', 'abov11')
-aboth/abov11 U 33.0 [(0, 11.0), (2, 22.0)]
->>> jan.fetch_or_create('aboth', 'nonexistent')
-aboth/nonexistent N 0.0 []
-
 # Add remaining time series
+>>> jan.begin()
+>>> a = jan.create('prun', 'a00')
+>>> a.data[0] = 1
+>>> a.save()
+>>> b = jan.create('full', 'a01', dtype=np.float64)
+>>> b.data[0] = 1
+>>> b.save()
+>>> c = jan.create('full', 'a10')
+>>> c.data[0] = 66
+>>> c.save()
+>>> d = jan.create('full', 'a00')
+>>> d.data[0] = 0
+>>> d.save()
+>>> jan.commit()
+>>> feb.begin()
+>>> a = feb.create('prun', 'a00')
+>>> a.data[0] = 1
+>>> a.save()
+>>> b = feb.create('full', 'a01', dtype=np.float64)
+>>> b.data[0] = 55
+>>> b.save()
+>>> c = feb.create('full', 'a10')
+>>> c.data[0] = 1
+>>> c.save()
+>>> d = feb.create('full', 'a00')
+>>> d.data[0] = 0
+>>> d.save()
+>>> feb.commit()
+>>> ds.dump()
+fragment 2015-01-01
+shard 0
+  full/a00 uf 0.0 []
+  prun/a00 uf 1.0 [(0, 1.0)]
+shard 1
+  full/a10 uf 66.0 [(0, 66.0)]
+shard 2
+  full/a11 uf 33.0 [(0, 11.0), (2, 22.0)]
+shard 3
+  full/a01 ud 1.0 [(0, 1.0)]
+fragment 2015-02-01
+shard 0
+  full/a00 uf 0.0 []
+  prun/a00 uf 1.0 [(0, 1.0)]
+shard 1
+  full/a10 uf 1.0 [(0, 1.0)]
+shard 2
+  full/a11 uf 44.0 [(671, 44.0)]
+shard 3
+  full/a01 ud 55.0 [(0, 55.0)]
 
-# Compact
+# Prune
 
 # Close
 >>> jan.close()
