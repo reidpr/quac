@@ -36,6 +36,7 @@ import glob
 import os
 import os.path
 import sys
+import zlib
 
 import numpy as np
 
@@ -59,7 +60,11 @@ SCHEMA_VERSION = 1
 # basis, but the API does not currently support that.
 #
 # The value here is a random guess and is not supported by evidence.
-FRAGMENT_TOTAL_ZMAX = 2
+FRAGMENT_TOTAL_ZMAX = 5
+
+# Compression level, 1-9. Changing this will not affect the readability of
+# existing files.
+ZLEVEL = 9
 
 # Default data type
 TYPE_DEFAULT = np.float32
@@ -168,9 +173,20 @@ class Fragment_Group(object):
    def create_indexes(self):
       pass
 
+   def delete(self, namespace, name):
+      self.db.sql(("DELETE FROM data%d WHERE namespace=? AND name=?"
+                    % self.dataset.shard(namespace, name)),
+                   (namespace, name))
+
    def deserialize(self, namespace, name, dtype, total, data):
+      if (total <= FRAGMENT_TOTAL_ZMAX):
+         #print(namespace, name, dtype, total, data, file=sys.stderr)
+         data = zlib.decompress(data)
+         source = Fragment_Source.COMPRESSED
+      else:
+         source = Fragment_Source.UNCOMPRESSED
       ar = np.frombuffer(data, dtype=dtype)
-      f = Fragment(self, namespace, name, ar, Fragment_Source.UNCOMPRESSED)
+      f = Fragment(self, namespace, name, ar, source)
       f.total = total
       return f
 
@@ -180,7 +196,7 @@ class Fragment_Group(object):
          for f in self.fetch_all(shard):
             print(' ', f)
 
-   def fetch(self, namespace, name):
+   def fetch(self, namespace, name, write=False):
       (dtype, total, data) \
          = self.db.get_one(("""SELECT dtype, total, data FROM data%d
                                WHERE namespace=? AND name=?"""
@@ -194,7 +210,7 @@ class Fragment_Group(object):
                               ORDER BY namespace, name""" % shard):
          yield self.deserialize(*i)
 
-   def fetch_or_create(self, namespace, name, dtype=TYPE_DEFAULT):
+   def fetch_or_create(self, namespace, name, dtype=TYPE_DEFAULT, write=False):
       '''dtype is only used on create; if fetch is successful, the fragment is
          returned unchanged.'''
       try:
@@ -285,13 +301,16 @@ class Fragment(object):
 
    def save(self):
       self.total_update()
-      data = self.data.data
+      if (self.total <= FRAGMENT_TOTAL_ZMAX):
+         data = zlib.compress(self.data.data, ZLEVEL)
+      else:
+         data = self.data.data
       if (self.source == Fragment_Source.NEW):
          self.group.db.sql("""INSERT INTO data%d
                                      (namespace, name, dtype, total, data)
                               VALUES (?, ?, ?, ?, ?)""" % self.shard,
                            (self.namespace, self.name, self.data.dtype.char,
-                            self.total, self.data))
+                            self.total, data))
       else:
          self.group.db.sql("""UPDATE data%d
                               SET dtype=?, total=?, data=?
@@ -323,7 +342,7 @@ testable.register('''
 
 >>> import pytz
 >>> tmp = os.environ['TMPDIR']
->>> PRUNE_THRESHOLD = 10
+>>> PRUNE_THRESHOLD = 20
 >>> january = time_.iso8601_parse('2015-01-01')
 >>> february = time_.iso8601_parse('2015-02-01')
 >>> january_nonutc = datetime.datetime(2015, 1, 1, tzinfo=pytz.timezone('GMT'))
@@ -335,11 +354,12 @@ testable.register('''
 #   ns    name  description
 #   ----  ----  -----------
 #
-#   prun  a00   below threshold in both months
+#   prun  a00   below threshold in both months, above compression threshold
 #   full  a11   above threshold in both months
 #   full  a01   above threshold in second month only, float64
-#   full  a10   above threshold in first month only
+#   full  a10   above threshold in first month only, at compression threshold
 #   full  a00   below threshold in both months
+#   comp  foo   for testing compression/decompression cycles
 
 # Create time series dataset
 >>> ds = Dataset(tmp + '/foo', 4)
@@ -405,6 +425,13 @@ full/a11 uf 33.0 [(0, 11.0), (2, 22.0)]
 >>> jan.fetch_or_create('full', 'nonexistent')
 full/nonexistent nf 0.0 []
 
+# Fetched fragments are read-only unless otherwise specified.
+create - writeable
+fetch_or_create from file - read-only
+fetch_or_create new - read-only
+fetch - read-only
+>>> FIXME
+
 # Add rest of full/a11
 >>> feb = ds.open_month(february, writeable=True)
 >>> feb.begin()
@@ -426,10 +453,25 @@ shard 2
   full/a11 uf 44.0 [(671, 44.0)]
 shard 3
 
+# Compression cycle test.
+# >>> feb.begin()
+# >>> a = feb.create('comp', 'foo')
+# >>> a.save()
+# >>> a = feb.fetch('comp', 'foo')
+# >>> a
+# comp/foo zf 0.0 []
+# >>> a.data[0] = 1
+# >>> a.save()
+# >>> a = feb.fetch('comp', 'foo')
+# >>> a
+# comp/foo zf 1.0 [(0, 1.0)]
+# >>> feb.delete('comp', 'foo')
+# >>> feb.commit()
+
 # Add remaining time series
 >>> jan.begin()
 >>> a = jan.create('prun', 'a00')
->>> a.data[0] = 1
+>>> a.data[0] = 6
 >>> a.save()
 >>> b = jan.create('full', 'a01', dtype=np.float64)
 >>> b.data[0] = 1
@@ -443,13 +485,13 @@ shard 3
 >>> jan.commit()
 >>> feb.begin()
 >>> a = feb.create('prun', 'a00')
->>> a.data[0] = 1
+>>> a.data[0] = 6
 >>> a.save()
 >>> b = feb.create('full', 'a01', dtype=np.float64)
 >>> b.data[0] = 55
 >>> b.save()
 >>> c = feb.create('full', 'a10')
->>> c.data[0] = 1
+>>> c.data[0] = 5
 >>> c.save()
 >>> d = feb.create('full', 'a00')
 >>> d.data[0] = 0
@@ -458,20 +500,20 @@ shard 3
 >>> ds.dump()
 fragment 2015-01-01
 shard 0
-  full/a00 uf 0.0 []
-  prun/a00 uf 1.0 [(0, 1.0)]
+  full/a00 zf 0.0 []
+  prun/a00 uf 6.0 [(0, 6.0)]
 shard 1
   full/a10 uf 66.0 [(0, 66.0)]
 shard 2
   full/a11 uf 33.0 [(0, 11.0), (2, 22.0)]
 shard 3
-  full/a01 ud 1.0 [(0, 1.0)]
+  full/a01 zd 1.0 [(0, 1.0)]
 fragment 2015-02-01
 shard 0
-  full/a00 uf 0.0 []
-  prun/a00 uf 1.0 [(0, 1.0)]
+  full/a00 zf 0.0 []
+  prun/a00 uf 6.0 [(0, 6.0)]
 shard 1
-  full/a10 uf 1.0 [(0, 1.0)]
+  full/a10 zf 5.0 [(0, 5.0)]
 shard 2
   full/a11 uf 44.0 [(671, 44.0)]
 shard 3
@@ -483,12 +525,6 @@ shard 3
 >>> jan.close()
 
 # different data type
-# create time series that would be compressed
-# update time series
-#   uncompressed -> uncompressed
-#   uncompressed -> compressed
-#   compressed -> compressed
-#   compressed -> uncompressed
 # test commit visibility to readers
 # auto-prune save()
 # close and re-open
