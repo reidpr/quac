@@ -26,13 +26,12 @@ For example, consider the following time series:
    d01   above threshold in second month only, float64
    f10   above threshold in first month only, at compression threshold in 2nd
    f00   below threshold in both months, above compression threshold
-   foo   for testing compression/decompression cycles
 
 Test setup:
 
    >>> import pytz
    >>> tmp = os.environ['TMPDIR']
-   >>> PRUNE_THRESHOLD = 20
+   >>> KEEP_THRESHOLD = 20
    >>> january = time_.iso8601_parse('2015-01-01')
    >>> february = time_.iso8601_parse('2015-02-01')
 
@@ -205,24 +204,149 @@ A fragment is compressed if its total is below a threshold:
    >>> feb.delete('foo')
    >>> feb.commit()
 
-Duplicate fragments are rejected if you have an index. Indexes are created
-during close(), or you can create them explicitly.
+Duplicate fragments are rejected:
 
-If you don't have an index, then duplicate fragments are not rejected until
-you create one:
+   >>> jan.begin()
+   >>> a = jan.create('foo')
+   >>> b = jan.create('foo')
+   >>> a.save()
+   >>> b.save()
+   Traceback (most recent call last):
+     ...
+   apsw.ConstraintError: ConstraintError: UNIQUE constraint failed: ...
+   >>> jan.db.rollback()
 
-  FIXME
+Calling prune() will remove all fragments with a total below a certain
+threshold, as well as compact the database.
 
-Prune - FIXME
+   >>> jan.prune(KEEP_THRESHOLD)
+   >>> feb.prune(KEEP_THRESHOLD)
+   >>> ds.dump()
+   fragment 2015-01-01
+   shard 0
+     f10 uf 66.0 [(0, 66.0)]
+   shard 1
+   shard 2
+   shard 3
+     f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+   fragment 2015-02-01
+   shard 0
+     d01 ud 55.0 [(0, 55.0)]
+   shard 1
+   shard 2
+   shard 3
+     f11 uf 44.0 [(671, 44.0)]
 
-auto-prune save() - FIXME
+You can also prune at save time, in which case pruned data will never touch
+the database:
+
+   >>> jan.begin()
+   >>> a = jan.create('pruneme')
+   >>> a.save(ignore=KEEP_THRESHOLD)
+   >>> a = jan.create('keepme')
+   >>> a.data[0] = 77
+   >>> a.save(ignore=KEEP_THRESHOLD)
+   >>> jan.commit()
+   >>> ds.dump()
+   fragment 2015-01-01
+   shard 0
+     f10 uf 66.0 [(0, 66.0)]
+   shard 1
+   shard 2
+     keepme uf 77.0 [(0, 77.0)]
+   shard 3
+     f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+   fragment 2015-02-01
+   shard 0
+     d01 ud 55.0 [(0, 55.0)]
+   shard 1
+   shard 2
+   shard 3
+     f11 uf 44.0 [(671, 44.0)]
+
+Note, however, that pruning during save time can leave erroneous data if the
+fragment already exists.
+
+   >>> jan.begin()
+   >>> a = jan.fetch('f10')
+   >>> a.data[0] = 1                  # change will be lost
+   >>> a                              # total not updated yet
+   f10 uf 66.0 [(0, 1.0)]
+   >>> a.save(ignore=KEEP_THRESHOLD)
+   >>> jan.commit()
+   >>> ds.dump()                      # note old value of f10
+   fragment 2015-01-01
+   shard 0
+     f10 uf 66.0 [(0, 66.0)]
+   shard 1
+   shard 2
+     keepme uf 77.0 [(0, 77.0)]
+   shard 3
+     f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+   fragment 2015-02-01
+   shard 0
+     d01 ud 55.0 [(0, 55.0)]
+   shard 1
+   shard 2
+   shard 3
+     f11 uf 44.0 [(671, 44.0)]
 
 Uncommitted changes are not visible to simultaneous readers:
+
+   >>> jan.begin()
+   >>> a = jan.fetch('f10')
+   >>> a.data[1] = 88
+   >>> a
+   f10 uf 66.0 [(0, 66.0), (1, 88.0)]
+   >>> a.save()
+   >>> ds.dump()                      # note old value of f10
+   fragment 2015-01-01
+   shard 0
+     f10 uf 66.0 [(0, 66.0)]
+   shard 1
+   shard 2
+     keepme uf 77.0 [(0, 77.0)]
+   shard 3
+     f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+   fragment 2015-02-01
+   shard 0
+     d01 ud 55.0 [(0, 55.0)]
+   shard 1
+   shard 2
+   shard 3
+     f11 uf 44.0 [(671, 44.0)]
+   >>> jan.commit()
+   >>> ds.dump()                      # f10 now has updated value
+   fragment 2015-01-01
+   shard 0
+     f10 uf 154.0 [(0, 66.0), (1, 88.0)]
+   shard 1
+   shard 2
+     keepme uf 77.0 [(0, 77.0)]
+   shard 3
+     f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+   fragment 2015-02-01
+   shard 0
+     d01 ud 55.0 [(0, 55.0)]
+   shard 1
+   shard 2
+   shard 3
+     f11 uf 44.0 [(671, 44.0)]
 
 Close the fragments:
 
    >>> jan.close()
    >>> feb.close()
+
+Complete time series can be queried. Note that missing fragments are filled
+with zeroes, but series where all fragments have been pruned return not found.
+
+FIXME
+
+Shards can be iterated through:
+
+FIXME - one shard
+FIXME - two shards
 
 Tests not implemented:
 
@@ -234,11 +358,13 @@ Tests not implemented:
    - timing of create_indexes()
    - writing beyond array limits
    - mixed data types in different fragments
+   - data less than zero
 '''
 
 # FIXME to document
 #
 # - when to create indexes
+#   - no indexes, use WITHOUT ROWID instead (http://www.sqlite.org/withoutrowid.html)
 # - update docs for installing apsw
 #   - installing at system level invisible in virtualenv)
 #   - http://rogerbinns.github.io/apsw/download.html#easy-install-pip-pypi
@@ -247,7 +373,7 @@ Tests not implemented:
 #   - python setup.py fetch --all build --enable-all-extensions install test
 #   - --missing-checksum-ok after --all
 #   - tests take a while (5-10 minutes), omit if you want to live dangerously; but you can import the module and keep going while the tests run
-# - document reason for no setting complete vector
+# - document reason for no API call to set complete vector
 
 import datetime
 import enum
@@ -266,8 +392,8 @@ import time_
 import u
 
 l = u.l
-#u.logging_init('test', verbose_=True)
-#l.debug('')
+u.logging_init('test', verbose_=True)
+l.debug('')
 
 
 # Storage schema version
@@ -370,7 +496,6 @@ class Fragment_Group(object):
       self.db.begin()
 
    def close(self):
-      self.create_indexes()
       self.db.close()
       self.writeable = None
 
@@ -387,9 +512,6 @@ class Fragment_Group(object):
       'Create and return a fragment initialized to zero.'
       return Fragment(self, name, np.zeros(self.length, dtype=dtype),
                       Fragment_Source.NEW)
-
-   def create_indexes(self):
-      pass
 
    def delete(self, name):
       self.db.sql(("DELETE FROM data%d WHERE name=?"
@@ -462,10 +584,11 @@ class Fragment_Group(object):
                           self.metadata.items())
          for i in range(self.dataset.hashmod):
             self.db.sql("""CREATE TABLE data%d (
-                             name       TEXT NOT NULL,
+                             name       TEXT NOT NULL PRIMARY KEY,
                              dtype      TEXT NOT NULL,
                              total      REAL NOT NULL,
-                             data       BLOB NOT NULL) """ % i)
+                             data       BLOB NOT NULL)
+                           WITHOUT ROWID""" % i)
          self.db.commit()
 
    def open(self, writeable):
@@ -479,6 +602,21 @@ class Fragment_Group(object):
       self.initialize_db()
       self.validate_db()
 
+   def prune(self, keep_thr):
+      l.debug('pruning with threshold = %d' % keep_thr)
+      for si in range(self.dataset.hashmod):
+         # I originally planned to do this with CREATE TABLE AS SELECT into a
+         # temporary table, to put everything in order, but one can't do that
+         # and retain the WITHOUT ROWID property.
+         self.db.sql("DELETE FROM data%d WHERE total < ?" % si, (keep_thr,))
+      l.debug('deleted pruneable rows')
+      self.db.sql("VACUUM");
+      page_size = self.db.get_one("PRAGMA page_size")[0]
+      free_ct = self.db.get_one("PRAGMA freelist_count")[0]
+      total_ct = self.db.get_one("PRAGMA page_count")[0]
+      l.debug('vacuumed: %s used; %d total, %d free pages'
+              % (u.fmt_bytes(page_size * total_ct), total_ct, free_ct))
+
    def validate_db(self):
       db_meta = dict(self.db.get('SELECT key, value FROM metadata'))
       for (k, v) in self.metadata.items():
@@ -489,8 +627,6 @@ class Fragment_Group(object):
       if (set(db_meta.keys()) != set(self.metadata.keys())):
          raise db.Invalid_DB_Error('Metadata mismatch: key sets differ')
       l.debug('validated %d metadata items' % len(self.metadata))
-
-# FIXME compact(minimum)
 
 
 class Fragment(object):
@@ -518,8 +654,10 @@ class Fragment(object):
                                 self.data.dtype.char, self.total,
                                 [i for i in enumerate(self.data) if i[1] != 0])
 
-   def save(self):
+   def save(self, ignore=-1):
       self.total_update()
+      if (self.total < ignore):
+         return
       if (self.total <= FRAGMENT_TOTAL_ZMAX):
          data = zlib.compress(self.data.data, ZLEVEL)
       else:
@@ -538,7 +676,7 @@ class Fragment(object):
       # np.sum() returns a NumPy data type, which confuses SQLite somehow.
       # Therefore, use a plain Python float. Also np.sum() is about 30 times
       # faster than Python sum() on a 1000-element array.
-      self.total = float(self.data.sum())
+      self.total = float(abs(self.data).sum())
 
 
 testable.register()
