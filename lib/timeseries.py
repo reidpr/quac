@@ -105,14 +105,6 @@ Try some fetching:
    >>> jan.fetch_or_create('nonexistent')
    nonexistent nf 0.0 []
 
-Fetched fragments are read-only unless otherwise specified.
-
-  create - writeable
-  fetch_or_create from file - read-only
-  fetch_or_create new - read-only
-  fetch - read-only
-  FIXME
-
 Add the rest of uf11:
 
    >>> feb = ds.open_month(february, writeable=True)
@@ -330,9 +322,8 @@ class Dataset(object):
       return hashf(name) % self.hashmod
 
 
-# fetch(name) - error if nonexistent
-# fetch_all(shard_id)
-# fragment_tags_all()
+# FIXME - fetch(name) - error if nonexistent
+# FIXME - fetch_all(shard_ids)
 
 
 class Fragment_Group(object):
@@ -396,6 +387,12 @@ class Fragment_Group(object):
       ar = np.frombuffer(data, dtype=dtype)
       f = Fragment(self, name, ar, source)
       f.total = total
+      # np.frombuffer() sets writeable=False by default. I am guessing that it
+      # is safe to set it True instead, because we can do so without barfing,
+      # but one should be cautious. If this causes problems, we could change
+      # the API to make all fetched fragments read-only unless otherwise
+      # specified, and make a copy if writing is desired.
+      f.data.flags.writeable = True
       return f
 
    def dump(self):
@@ -404,7 +401,7 @@ class Fragment_Group(object):
          for f in self.fetch_all(shard):
             print(' ', f)
 
-   def fetch(self, name, write=False):
+   def fetch(self, name):
       (dtype, total, data) \
          = self.db.get_one("""SELECT dtype, total, data FROM data%d
                                WHERE name=?""" % self.dataset.shard(name),
@@ -417,7 +414,7 @@ class Fragment_Group(object):
                               ORDER BY name""" % shard):
          yield self.deserialize(*i)
 
-   def fetch_or_create(self, name, dtype=TYPE_DEFAULT, write=False):
+   def fetch_or_create(self, name, dtype=TYPE_DEFAULT):
       '''dtype is only used on create; if fetch is successful, the fragment is
          returned unchanged.'''
       try:
@@ -475,7 +472,7 @@ class Fragment_Group(object):
          raise db.Invalid_DB_Error('Metadata mismatch: key sets differ')
       l.debug('validated %d metadata items' % len(self.metadata))
 
-# compact(minimum)
+# FIXME compact(minimum)
 
 
 class Fragment(object):
