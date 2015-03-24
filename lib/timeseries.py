@@ -173,19 +173,37 @@ Add remaining time series:
 
 A fragment is compressed if its total is below a threshold:
 
-   # >>> feb.begin()
-   # >>> a = feb.create('foo')
-   # >>> a.save()
-   # >>> a = feb.fetch('foo')
-   # >>> a
-   # foo zf 0.0 []
-   # >>> a.data[0] = 1
-   # >>> a.save()
-   # >>> a = feb.fetch('foo')
-   # >>> a
-   # foo zf 1.0 [(0, 1.0)]
-   # >>> feb.delete('foo')
-   # >>> feb.commit()
+   >>> feb.begin()
+   >>> a = feb.create('foo')
+   >>> a
+   foo nf 0.0 []
+   >>> a.save()  # new to compressed
+   >>> a = feb.fetch('foo')
+   >>> a
+   foo zf 0.0 []
+   >>> a.data[0] = 5
+   >>> a.save()  # compressed to compressed
+   >>> a = feb.fetch('foo')
+   >>> a
+   foo zf 5.0 [(0, 5.0)]
+   >>> a.data[0] = 6
+   >>> a.save()  # compressed to uncompressed
+   >>> a = feb.fetch('foo')
+   >>> a
+   foo uf 6.0 [(0, 6.0)]
+   >>> a.data[0] = 7
+   >>> a.save()  # uncompressed to uncompressed
+   >>> a = feb.fetch('foo')
+   >>> a
+   foo uf 7.0 [(0, 7.0)]
+   >>> a.data[0] = 2
+   >>> a.data[1] = 3
+   >>> a.save()  # uncompressed to compressed
+   >>> a = feb.fetch('foo')
+   >>> a
+   foo zf 5.0 [(0, 2.0), (1, 3.0)]
+   >>> feb.delete('foo')
+   >>> feb.commit()
 
 Duplicate fragments are rejected if you have an index. Indexes are created
 during close(), or you can create them explicitly.
@@ -374,7 +392,7 @@ class Fragment_Group(object):
       pass
 
    def delete(self, name):
-      self.db.sql(("DELETE FROM data%d WHERE AND name=?"
+      self.db.sql(("DELETE FROM data%d WHERE name=?"
                    % self.dataset.shard(name)), (name,))
 
    def deserialize(self, name, dtype, total, data):
