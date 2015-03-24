@@ -1,24 +1,233 @@
 # Copyright © Los Alamos National Security, LLC, and others.
 
-'''Functionality for reading and manipulating time series vectors.
+'''
+Functionality for reading and manipulating time series vectors.
 
-   We refer to "shards" in the namespace/name dimension and "fragments" in the
-   time dimenstion. That is, two time series with different namespaces and/or
-   names might fall in different shards, and different elements in the same
-   time series might fall in different fragments, but all elements in the same
-   time series will be in the same shard, and all elements for the same time
-   will be in the same fragment. Fragments are tagged with arbitrary,
-   contiguously ordered strings and shards are tagged with contiguous integers
-   from 0 to a maximum specified at open time.
+We refer to "shards" in the name dimension and "fragments" in the time
+dimension. That is, two time series with different names might fall in
+different shards, and different elements in the same time series might fall in
+different fragments, but all elements in the same time series will be in the
+same shard, and all elements for the same time will be in the same fragment.
+Fragments are tagged with arbitrary, contiguously ordered strings and shards
+are tagged with contiguous integers from 0 to a maximum specified at open
+time.
 
-   Currently, time series must be hourly (i.e., one element per hour),
-   start/end on month boundaries, and have fragments equal to calendar months.
-   I have attempted to make the API extensible to remove this limitation
-   without disrupting existing code.'''
+Currently, time series must be hourly (i.e., one element per hour), start/end
+on month boundaries, and have fragments equal to calendar months. I have
+attempted to make the API extensible to remove this limitation without
+disrupting existing code.
+
+For example, consider the following time series:
+
+   name  description
+   ----  -----------
+
+   f11   above threshold in both months
+   d01   above threshold in second month only, float64
+   f10   above threshold in first month only, at compression threshold in 2nd
+   f00   below threshold in both months, above compression threshold
+   foo   for testing compression/decompression cycles
+
+Test setup:
+
+   >>> import pytz
+   >>> tmp = os.environ['TMPDIR']
+   >>> PRUNE_THRESHOLD = 20
+   >>> january = time_.iso8601_parse('2015-01-01')
+   >>> february = time_.iso8601_parse('2015-02-01')
+
+Create time series dataset with four shards:
+
+   >>> ds = Dataset(tmp + '/foo', 4)
+
+Try to open some bogus months:
+
+   >>> january_nonutc = datetime.datetime(2015, 1, 1,
+   ...                                    tzinfo=pytz.timezone('GMT'))
+   >>> mid_january1 = time_.iso8601_parse('2015-01-01 00:00:01')
+   >>> mid_january2 = time_.iso8601_parse('2015-01-02')
+   >>> jan = ds.open_month(january_nonutc, writeable=True)
+   Traceback (most recent call last):
+     ...
+   ValueError: time zone must be UTC
+   >>> jan = ds.open_month(mid_january1, writeable=True)
+   Traceback (most recent call last):
+     ...
+   ValueError: month must have all sub-day attributes equal to zero
+   >>> jan = ds.open_month(mid_january2, writeable=True)
+   Traceback (most recent call last):
+     ...
+   ValueError: month must have day=1, not 2
+
+Open January:
+
+   >>> ds.dump()
+   >>> jan = ds.open_month(january, writeable=True)
+   >>> ds.dump()
+   fragment 2015-01-01
+   shard 0
+   shard 1
+   shard 2
+   shard 3
+
+Add the first time series fragment:
+
+   >>> jan.begin()
+   >>> a = jan.create('f11')
+   >>> a
+   f11 nf 0.0 []
+   >>> a.data[0] = 11
+   >>> a
+   f11 nf 0.0 [(0, 11.0)]
+   >>> a.data[2] = 22.0
+   >>> a
+   f11 nf 0.0 [(0, 11.0), (2, 22.0)]
+   >>> a.save()
+   >>> jan.commit()
+   >>> ds.dump()
+   fragment 2015-01-01
+   shard 0
+   shard 1
+   shard 2
+   shard 3
+     f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+
+Try some fetching:
+
+   >>> jan.fetch('f11')
+   f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+   >>> jan.fetch('nonexistent')
+   Traceback (most recent call last):
+     ...
+   db.Not_Enough_Rows_Error: no such row
+   >>> jan.fetch_or_create('f11')
+   f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+   >>> jan.fetch_or_create('nonexistent')
+   nonexistent nf 0.0 []
+
+Fetched fragments are read-only unless otherwise specified.
+
+  create - writeable
+  fetch_or_create from file - read-only
+  fetch_or_create new - read-only
+  fetch - read-only
+  FIXME
+
+Add the rest of uf11:
+
+   >>> feb = ds.open_month(february, writeable=True)
+   >>> feb.begin()
+   >>> a = feb.create('f11')
+   >>> a.data[671] = 44
+   >>> a.save()
+   >>> feb.commit()
+   >>> ds.dump()
+   fragment 2015-01-01
+   shard 0
+   shard 1
+   shard 2
+   shard 3
+     f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+   fragment 2015-02-01
+   shard 0
+   shard 1
+   shard 2
+   shard 3
+     f11 uf 44.0 [(671, 44.0)]
+
+Add remaining time series:
+
+   >>> jan.begin()
+   >>> b = jan.create('d01', dtype=np.float64)
+   >>> b.data[0] = 1
+   >>> b.save()
+   >>> c = jan.create('f10')
+   >>> c.data[0] = 66
+   >>> c.save()
+   >>> d = jan.create('f00')
+   >>> d.data[0] = 0
+   >>> d.save()
+   >>> jan.commit()
+   >>> feb.begin()
+   >>> b = feb.create('d01', dtype=np.float64)
+   >>> b.data[0] = 55
+   >>> b.save()
+   >>> c = feb.create('f10')
+   >>> c.data[0] = 5
+   >>> c.save()
+   >>> d = feb.create('f00')
+   >>> d.data[0] = 0
+   >>> d.save()
+   >>> feb.commit()
+   >>> ds.dump()
+   fragment 2015-01-01
+   shard 0
+     d01 zd 1.0 [(0, 1.0)]
+     f10 uf 66.0 [(0, 66.0)]
+   shard 1
+     f00 zf 0.0 []
+   shard 2
+   shard 3
+     f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+   fragment 2015-02-01
+   shard 0
+     d01 ud 55.0 [(0, 55.0)]
+     f10 zf 5.0 [(0, 5.0)]
+   shard 1
+     f00 zf 0.0 []
+   shard 2
+   shard 3
+     f11 uf 44.0 [(671, 44.0)]
+
+A fragment is compressed if its total is below a threshold:
+
+   # >>> feb.begin()
+   # >>> a = feb.create('foo')
+   # >>> a.save()
+   # >>> a = feb.fetch('foo')
+   # >>> a
+   # foo zf 0.0 []
+   # >>> a.data[0] = 1
+   # >>> a.save()
+   # >>> a = feb.fetch('foo')
+   # >>> a
+   # foo zf 1.0 [(0, 1.0)]
+   # >>> feb.delete('foo')
+   # >>> feb.commit()
+
+Duplicate fragments are rejected if you have an index. Indexes are created
+during close(), or you can create them explicitly.
+
+If you don't have an index, then duplicate fragments are not rejected until
+you create one:
+
+  FIXME
+
+Prune - FIXME
+
+auto-prune save() - FIXME
+
+Uncommitted changes are not visible to simultaneous readers:
+
+Close the fragments:
+
+   >>> jan.close()
+   >>> feb.close()
+
+Tests not implemented:
+
+   - DB does not validate
+     - missing metadata or data tables
+     - table columns do not match
+     - wrong number of data tables (too few, too many)
+     - metadata does not match (items differ, different number of items)
+   - timing of create_indexes()
+   - writing beyond array limits
+   - mixed data types in different fragments
+'''
 
 # FIXME to document
 #
-# - namespace cannot contain space character
 # - when to create indexes
 # - update docs for installing apsw
 #   - installing at system level invisible in virtualenv)
@@ -117,11 +326,11 @@ class Dataset(object):
       f.open(writeable)
       return f
 
-   def shard(self, namespace, name):
-      return hashf(namespace + '/' + name) % self.hashmod
+   def shard(self, name):
+      return hashf(name) % self.hashmod
 
 
-# fetch(namespace, name) - error if nonexistent
+# fetch(name) - error if nonexistent
 # fetch_all(shard_id)
 # fragment_tags_all()
 
@@ -165,28 +374,27 @@ class Fragment_Group(object):
          os.makedirs(os.path.dirname(self.filename), exist_ok=True)
       self.db = db.SQLite(self.filename, writeable)
 
-   def create(self, namespace, name, dtype=TYPE_DEFAULT):
+   def create(self, name, dtype=TYPE_DEFAULT):
       'Create and return a fragment initialized to zero.'
-      return Fragment(self, namespace, name, np.zeros(self.length, dtype=dtype),
+      return Fragment(self, name, np.zeros(self.length, dtype=dtype),
                       Fragment_Source.NEW)
 
    def create_indexes(self):
       pass
 
-   def delete(self, namespace, name):
-      self.db.sql(("DELETE FROM data%d WHERE namespace=? AND name=?"
-                    % self.dataset.shard(namespace, name)),
-                   (namespace, name))
+   def delete(self, name):
+      self.db.sql(("DELETE FROM data%d WHERE AND name=?"
+                   % self.dataset.shard(name)), (name,))
 
-   def deserialize(self, namespace, name, dtype, total, data):
+   def deserialize(self, name, dtype, total, data):
       if (total <= FRAGMENT_TOTAL_ZMAX):
-         #print(namespace, name, dtype, total, data, file=sys.stderr)
+         #print(name, dtype, total, data, file=sys.stderr)
          data = zlib.decompress(data)
          source = Fragment_Source.COMPRESSED
       else:
          source = Fragment_Source.UNCOMPRESSED
       ar = np.frombuffer(data, dtype=dtype)
-      f = Fragment(self, namespace, name, ar, source)
+      f = Fragment(self, name, ar, source)
       f.total = total
       return f
 
@@ -196,27 +404,26 @@ class Fragment_Group(object):
          for f in self.fetch_all(shard):
             print(' ', f)
 
-   def fetch(self, namespace, name, write=False):
+   def fetch(self, name, write=False):
       (dtype, total, data) \
-         = self.db.get_one(("""SELECT dtype, total, data FROM data%d
-                               WHERE namespace=? AND name=?"""
-                            % self.dataset.shard(namespace, name)),
-                           (namespace, name))
-      return self.deserialize(namespace, name, dtype, total, data)
+         = self.db.get_one("""SELECT dtype, total, data FROM data%d
+                               WHERE name=?""" % self.dataset.shard(name),
+                           (name,))
+      return self.deserialize(name, dtype, total, data)
 
    def fetch_all(self, shard):
-      for i in self.db.get("""SELECT namespace, name, dtype, total, data
+      for i in self.db.get("""SELECT name, dtype, total, data
                               FROM data%d
-                              ORDER BY namespace, name""" % shard):
+                              ORDER BY name""" % shard):
          yield self.deserialize(*i)
 
-   def fetch_or_create(self, namespace, name, dtype=TYPE_DEFAULT, write=False):
+   def fetch_or_create(self, name, dtype=TYPE_DEFAULT, write=False):
       '''dtype is only used on create; if fetch is successful, the fragment is
          returned unchanged.'''
       try:
-         return self.fetch(namespace, name)
+         return self.fetch(name)
       except db.Not_Enough_Rows_Error:
-         return self.create(namespace, name, dtype)
+         return self.create(name, dtype)
 
    def initialize_db(self):
       if (self.db.exists('sqlite_master', "type='table' AND name='metadata'")):
@@ -240,7 +447,6 @@ class Fragment_Group(object):
                           self.metadata.items())
          for i in range(self.dataset.hashmod):
             self.db.sql("""CREATE TABLE data%d (
-                             namespace  TEXT NOT NULL,
                              name       TEXT NOT NULL,
                              dtype      TEXT NOT NULL,
                              total      REAL NOT NULL,
@@ -276,14 +482,12 @@ class Fragment(object):
 
    __slots__ = ('data',      # time series vector fragment itself
                 'group',
-                'namespace',
                 'name',
                 'source',    # where the fragment came from
                 'total')     # total of data (not updated when data changes)
 
-   def __init__(self, group, namespace, name, data, source):
+   def __init__(self, group, name, data, source):
       self.group = group
-      self.namespace = namespace
       self.name = name
       self.data = data
       self.source = source
@@ -291,13 +495,13 @@ class Fragment(object):
 
    @property
    def shard(self):
-      return self.group.dataset.shard(self.namespace, self.name)
+      return self.group.dataset.shard(self.name)
 
    def __repr__(self):
       'Mostly for testing; output is inefficient for non-sparse fragments.'
-      return '%s/%s %s%s %s %s' % (self.namespace, self.name, self.source.name,
-                                   self.data.dtype.char, self.total,
-                                   [i for i in enumerate(self.data) if i[1] != 0])
+      return '%s %s%s %s %s' % (self.name, self.source.name,
+                                self.data.dtype.char, self.total,
+                                [i for i in enumerate(self.data) if i[1] != 0])
 
    def save(self):
       self.total_update()
@@ -306,17 +510,14 @@ class Fragment(object):
       else:
          data = self.data.data
       if (self.source == Fragment_Source.NEW):
-         self.group.db.sql("""INSERT INTO data%d
-                                     (namespace, name, dtype, total, data)
-                              VALUES (?, ?, ?, ?, ?)""" % self.shard,
-                           (self.namespace, self.name, self.data.dtype.char,
-                            self.total, data))
+         self.group.db.sql("""INSERT INTO data%d (name, dtype, total, data)
+                              VALUES (?, ?, ?, ?)""" % self.shard,
+                           (self.name, self.data.dtype.char, self.total, data))
       else:
          self.group.db.sql("""UPDATE data%d
                               SET dtype=?, total=?, data=?
-                              WHERE namespace=? AND name=?""" % self.shard,
-                           (self.data.dtype.char, self.total, data,
-                            self.namespace, self.name))
+                              WHERE name=?""" % self.shard,
+                           (self.data.dtype.char, self.total, data, self.name))
 
    def total_update(self):
       # np.sum() returns a NumPy data type, which confuses SQLite somehow.
@@ -325,208 +526,4 @@ class Fragment(object):
       self.total = float(self.data.sum())
 
 
-testable.register('''
-
-# Tests not implemented
-#
-# - DB does not validate
-#   - missing metadata or data tables
-#   - table columns do not match
-#   - wrong number of data tables (too few, too many)
-#   - metadata does not match (items differ, different number of items)
-# - timing of create_indexes()
-# - duplicate namespace/name pair
-# - save already existing fragment (can fail at save or create_index time)
-# - writing beyond array limits
-# - mixed data types in different fragments
-
->>> import pytz
->>> tmp = os.environ['TMPDIR']
->>> PRUNE_THRESHOLD = 20
->>> january = time_.iso8601_parse('2015-01-01')
->>> february = time_.iso8601_parse('2015-02-01')
->>> january_nonutc = datetime.datetime(2015, 1, 1, tzinfo=pytz.timezone('GMT'))
->>> mid_january1 = time_.iso8601_parse('2015-01-01 00:00:01')
->>> mid_january2 = time_.iso8601_parse('2015-01-02')
-
-# create some data over 2 months
-#
-#   ns    name  description
-#   ----  ----  -----------
-#
-#   prun  a00   below threshold in both months, above compression threshold
-#   full  a11   above threshold in both months
-#   full  a01   above threshold in second month only, float64
-#   full  a10   above threshold in first month only, at compression threshold
-#   full  a00   below threshold in both months
-#   comp  foo   for testing compression/decompression cycles
-
-# Create time series dataset
->>> ds = Dataset(tmp + '/foo', 4)
-
-# Try to open some bogus months
->>> jan = ds.open_month(january_nonutc, writeable=True)
-Traceback (most recent call last):
-  ...
-ValueError: time zone must be UTC
->>> jan = ds.open_month(mid_january1, writeable=True)
-Traceback (most recent call last):
-  ...
-ValueError: month must have all sub-day attributes equal to zero
->>> jan = ds.open_month(mid_january2, writeable=True)
-Traceback (most recent call last):
-  ...
-ValueError: month must have day=1, not 2
-
-# Really open; should be empty so far
->>> ds.dump()
->>> jan = ds.open_month(january, writeable=True)
->>> ds.dump()
-fragment 2015-01-01
-shard 0
-shard 1
-shard 2
-shard 3
-
-# Add first time series
->>> jan.begin()
->>> a = jan.create('full', 'a11')
->>> a
-full/a11 nf 0.0 []
->>> a.data[0] = 11
->>> a
-full/a11 nf 0.0 [(0, 11.0)]
->>> a.data[2] = 22.0
->>> a
-full/a11 nf 0.0 [(0, 11.0), (2, 22.0)]
->>> a.save()
->>> jan.commit()
->>> ds.dump()
-fragment 2015-01-01
-shard 0
-shard 1
-shard 2
-  full/a11 uf 33.0 [(0, 11.0), (2, 22.0)]
-shard 3
-
-# Try some fetching
->>> jan.fetch('full', 'a11')
-full/a11 uf 33.0 [(0, 11.0), (2, 22.0)]
->>> jan.fetch('full', 'nonexistent')
-Traceback (most recent call last):
-  ...
-db.Not_Enough_Rows_Error: no such row
->>> jan.fetch('nonexistent', 'a11')
-Traceback (most recent call last):
-  ...
-db.Not_Enough_Rows_Error: no such row
->>> jan.fetch_or_create('full', 'a11')
-full/a11 uf 33.0 [(0, 11.0), (2, 22.0)]
->>> jan.fetch_or_create('full', 'nonexistent')
-full/nonexistent nf 0.0 []
-
-# Fetched fragments are read-only unless otherwise specified.
-create - writeable
-fetch_or_create from file - read-only
-fetch_or_create new - read-only
-fetch - read-only
->>> FIXME
-
-# Add rest of full/a11
->>> feb = ds.open_month(february, writeable=True)
->>> feb.begin()
->>> a = feb.create('full', 'a11')
->>> a.data[671] = 44
->>> a.save()
->>> feb.commit()
->>> ds.dump()
-fragment 2015-01-01
-shard 0
-shard 1
-shard 2
-  full/a11 uf 33.0 [(0, 11.0), (2, 22.0)]
-shard 3
-fragment 2015-02-01
-shard 0
-shard 1
-shard 2
-  full/a11 uf 44.0 [(671, 44.0)]
-shard 3
-
-# Compression cycle test.
-# >>> feb.begin()
-# >>> a = feb.create('comp', 'foo')
-# >>> a.save()
-# >>> a = feb.fetch('comp', 'foo')
-# >>> a
-# comp/foo zf 0.0 []
-# >>> a.data[0] = 1
-# >>> a.save()
-# >>> a = feb.fetch('comp', 'foo')
-# >>> a
-# comp/foo zf 1.0 [(0, 1.0)]
-# >>> feb.delete('comp', 'foo')
-# >>> feb.commit()
-
-# Add remaining time series
->>> jan.begin()
->>> a = jan.create('prun', 'a00')
->>> a.data[0] = 6
->>> a.save()
->>> b = jan.create('full', 'a01', dtype=np.float64)
->>> b.data[0] = 1
->>> b.save()
->>> c = jan.create('full', 'a10')
->>> c.data[0] = 66
->>> c.save()
->>> d = jan.create('full', 'a00')
->>> d.data[0] = 0
->>> d.save()
->>> jan.commit()
->>> feb.begin()
->>> a = feb.create('prun', 'a00')
->>> a.data[0] = 6
->>> a.save()
->>> b = feb.create('full', 'a01', dtype=np.float64)
->>> b.data[0] = 55
->>> b.save()
->>> c = feb.create('full', 'a10')
->>> c.data[0] = 5
->>> c.save()
->>> d = feb.create('full', 'a00')
->>> d.data[0] = 0
->>> d.save()
->>> feb.commit()
->>> ds.dump()
-fragment 2015-01-01
-shard 0
-  full/a00 zf 0.0 []
-  prun/a00 uf 6.0 [(0, 6.0)]
-shard 1
-  full/a10 uf 66.0 [(0, 66.0)]
-shard 2
-  full/a11 uf 33.0 [(0, 11.0), (2, 22.0)]
-shard 3
-  full/a01 zd 1.0 [(0, 1.0)]
-fragment 2015-02-01
-shard 0
-  full/a00 zf 0.0 []
-  prun/a00 uf 6.0 [(0, 6.0)]
-shard 1
-  full/a10 zf 5.0 [(0, 5.0)]
-shard 2
-  full/a11 uf 44.0 [(671, 44.0)]
-shard 3
-  full/a01 ud 55.0 [(0, 55.0)]
-
-# Prune
-
-# Close
->>> jan.close()
-
-# different data type
-# test commit visibility to readers
-# auto-prune save()
-# close and re-open
-
-''')
+testable.register()
