@@ -52,11 +52,11 @@ Try to open some bogus months:
    >>> jan = ds.open_month(mid_january1, writeable=True)
    Traceback (most recent call last):
      ...
-   ValueError: month must have all sub-day attributes equal to zero
+   ValueError: must have all sub-day attributes equal to zero
    >>> jan = ds.open_month(mid_january2, writeable=True)
    Traceback (most recent call last):
      ...
-   ValueError: month must have day=1, not 2
+   ValueError: must have day=1, not 2
 
 Open January:
 
@@ -451,12 +451,12 @@ class Dataset(object):
 
    def open_month(self, month, writeable=False):
       if (month.day != 1):
-         raise ValueError('month must have day=1, not %d' % month.day)
+         raise ValueError('must have day=1, not %d' % month.day)
       if (hasattr(month, 'hour') and (   month.hour != 0
                                       or month.minute != 0
                                       or month.second != 0
                                       or month.microsecond != 0)):
-         raise ValueError('month must have all sub-day attributes equal to zero')
+         raise ValueError('must have all sub-day attributes equal to zero')
       f = Fragment_Group(self, self.filename, time_.iso8601_date(month),
                          time_.hours_in_month(month))
       f.open(writeable)
