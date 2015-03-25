@@ -377,20 +377,6 @@ Tests not implemented:
    - inferring hashmod from existing Dataset
 '''
 
-# FIXME to document
-#
-# - when to create indexes
-#   - no indexes, use WITHOUT ROWID instead (http://www.sqlite.org/withoutrowid.html)
-# - update docs for installing apsw
-#   - installing at system level invisible in virtualenv)
-#   - http://rogerbinns.github.io/apsw/download.html#easy-install-pip-pypi
-#   - unzip apsw-3.8.8.2-r1.zip
-#   - cd apsw-3.8.8.2-r1
-#   - python setup.py fetch --all build --enable-all-extensions install test
-#   - --missing-checksum-ok after --all
-#   - tests take a while (5-10 minutes), omit if you want to live dangerously; but you can import the module and keep going while the tests run
-# - document reason for no API call to set complete vector
-
 import datetime
 import enum
 import glob

@@ -48,9 +48,11 @@ These instructions assume that virtualenvs are installed under
      $ git clone https://github.com/reidpr/quac.git
      $ cd quac
 
-#. Create virtual environment::
+#. Create virtual environment, and then deactivate it because you are going to
+   be messing with it::
 
      $ mkvirtualenv --python=/usr/bin/python3 quac
+     $ deactivate
 
 #. Add to virtualenv post-activate hook
    (`~/.virtualenvs/quac/bin/postactivate`):
@@ -74,13 +76,32 @@ These instructions assume that virtualenvs are installed under
 
      $ workon quac
 
-#. Install GDAL Python bindings (adjust include paths if needed)::
+#. Install GDAL Python bindings (adjust include paths and version if needed)::
 
      $ CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install gdal==1.10.0
 
    This must be done manually because the bindings have a buggy include path.
    Note also that the version must match the system GDAL libraries or the
    build will fail in strange ways.
+
+#. Install `APSW <http://rogerbinns.github.io/apsw/>`_ (alternate SQLite
+   bindings). This cannot be done using :samp:`pip` because the install script
+   requires options, and :samp:`pip` `cannot provide them
+   <http://rogerbinns.github.io/apsw/download.html#easy-install-pip-pypi>`_.
+   For example (the latest version is probably the best choice)::
+
+     $ pushd /usr/local/src
+     $ wget https://github.com/rogerbinns/apsw/releases/download/3.8.8.2-r1/apsw-3.8.8.2-r1.zip
+     $ unzip apsw-3.8.8.2-r1.zip
+     $ cd apsw-3.8.8.2-r1
+     $ python setup.py fetch --all --missing-checksum-ok build --enable-all-extensions install test
+     $ popd
+
+   The tests take 5-10 minutes to run; you can omit if you want to live
+   dangerously, or proceed in another terminal while they run.
+
+   You can also install APSW at the system level and configure your virtualenv
+   to pass system modules through.
 
 #. Install remaining Python dependencies::
 
