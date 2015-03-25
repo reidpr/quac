@@ -338,10 +338,24 @@ Close the fragments:
    >>> jan.close()
    >>> feb.close()
 
-Complete time series can be queried. Note that missing fragments are filled
-with zeroes, but series where all fragments have been pruned return not found.
+Complete time series can be queried. This returns a tuple of (first fragment
+tag, vector). Note that missing fragments are filled with zeroes, but series
+where all fragments have been pruned return not found.
 
-FIXME
+   >>> a = ds.fetch('f11')
+   >>> a[:-1]
+   ('2015-01-01',)
+   >>> u.fmt_sparsearray(a[-1])
+   [(0, 11.0), (2, 22.0), (1415, 44.0)]
+   >>> a = ds.fetch('d01')
+   >>> a[:-1]
+   ('2015-01-01',)
+   >>> u.fmt_sparsearray(a[-1])
+   [(744, 55.0)]
+   >>> ds.fetch('nonexistent')
+   Traceback (most recent call last):
+     ...
+   db.Not_Enough_Rows_Error: no non-zero fragments found
 
 Shards can be iterated through:
 
@@ -442,9 +456,19 @@ class Dataset(object):
    def dump(self):
       for ft in self.fragment_tags:
          print('fragment %s' % ft)
-         fg = Fragment_Group(self, self.filename, ft)
-         fg.open(False)
+         fg = self.open_tag(ft)
          fg.dump()
+
+   def fetch(self, name):
+      ft1 = next(self.fragment_tags)
+      fs = list()
+      for t in self.fragment_tags:
+         fg = self.open_tag(t)
+         fs.append(fg.fetch_or_create(name))
+      if (not any(f.total for f in fs)):
+         raise db.Not_Enough_Rows_Error('no non-zero fragments found')
+      a = np.concatenate([f.data for f in fs])
+      return (ft1, a)
 
    def fetch_all(self):
       return list()  # FIXME
@@ -462,12 +486,13 @@ class Dataset(object):
       f.open(writeable)
       return f
 
+   def open_tag(self, tag, writeable=False):
+      fg = Fragment_Group(self, self.filename, tag)
+      fg.open(writeable)
+      return fg
+
    def shard(self, name):
       return hashf(name) % self.hashmod
-
-
-# FIXME - fetch(name) - error if nonexistent
-# FIXME - fetch_all(shard_ids)
 
 
 class Fragment_Group(object):
@@ -566,8 +591,8 @@ class Fragment_Group(object):
       if (self.db.exists('sqlite_master', "type='table' AND name='metadata'")):
          l.debug('found metadata table, assuming already initalized')
          if (self.length is None):
-            self.length = self.db.get_one("""SELECT value FROM metadata
-                                             WHERE key = 'length'""")[0]
+            self.length = int(self.db.get_one("""SELECT value FROM metadata
+                                                 WHERE key = 'length'""")[0])
             self.metadata['length'] = self.length
       else:
          if (not self.writeable):
@@ -652,7 +677,7 @@ class Fragment(object):
       'Mostly for testing; output is inefficient for non-sparse fragments.'
       return '%s %s%s %s %s' % (self.name, self.source.name,
                                 self.data.dtype.char, self.total,
-                                [i for i in enumerate(self.data) if i[1] != 0])
+                                u.fmt_sparsearray(self.data))
 
    def save(self, ignore=-1):
       self.total_update()

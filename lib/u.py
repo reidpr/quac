@@ -917,6 +917,9 @@ def fmt_seconds(num):
 def fmt_si(num):
    return fmt_real(num, 1000, ["", "k", "M", "G", "T", "P"])
 
+def fmt_sparsearray(a):
+   return [i for i in enumerate(a) if i[1] != 0]
+
 def fmt_bytes(num):
    return fmt_real(num, 1024, ["B", "KiB", "MiB", "GiB", "TiB", "PiB"])
 
