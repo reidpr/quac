@@ -35,33 +35,15 @@ Test setup:
    >>> january = time_.iso8601_parse('2015-01-01')
    >>> february = time_.iso8601_parse('2015-02-01')
 
-Create time series dataset with four shards:
+Create read-write and read-only time series datasets with four shards:
 
-   >>> ds = Dataset(tmp + '/foo', 4)
-
-Try to open some bogus months:
-
-   >>> january_nonutc = datetime.datetime(2015, 1, 1,
-   ...                                    tzinfo=pytz.timezone('GMT'))
-   >>> mid_january1 = time_.iso8601_parse('2015-01-01 00:00:01')
-   >>> mid_january2 = time_.iso8601_parse('2015-01-02')
-   >>> jan = ds.open_month(january_nonutc, writeable=True)
-   Traceback (most recent call last):
-     ...
-   ValueError: time zone must be UTC
-   >>> jan = ds.open_month(mid_january1, writeable=True)
-   Traceback (most recent call last):
-     ...
-   ValueError: must have all sub-day attributes equal to zero
-   >>> jan = ds.open_month(mid_january2, writeable=True)
-   Traceback (most recent call last):
-     ...
-   ValueError: must have day=1, not 2
+   >>> ds = Dataset(tmp + '/foo', 4, writeable=True)
+   >>> ds2 = Dataset(tmp + '/foo', 4)
 
 Open January:
 
    >>> ds.dump()
-   >>> jan = ds.open_month(january, writeable=True)
+   >>> jan = ds.open_month(january)
    >>> ds.dump()
    fragment 2015-01-01
    shard 0
@@ -106,7 +88,7 @@ Try some fetching:
 
 Add the rest of uf11:
 
-   >>> feb = ds.open_month(february, writeable=True)
+   >>> feb = ds.open_month(february)
    >>> feb.begin()
    >>> a = feb.create('f11')
    >>> a.data[671] = 44
@@ -299,7 +281,7 @@ Uncommitted changes are not visible to simultaneous readers:
    >>> a
    f10 uf 66.0 [(0, 66.0), (1, 88.0)]
    >>> a.save()
-   >>> ds.dump()                      # note old value of f10
+   >>> ds2.dump()                     # note old value of f10
    fragment 2015-01-01
    shard 0
      f10 uf 66.0 [(0, 66.0)]
@@ -316,7 +298,7 @@ Uncommitted changes are not visible to simultaneous readers:
    shard 3
      f11 uf 44.0 [(671, 44.0)]
    >>> jan.commit()
-   >>> ds.dump()                      # f10 now has updated value
+   >>> ds2.dump()                     # f10 now has updated value
    fragment 2015-01-01
    shard 0
      f10 uf 154.0 [(0, 66.0), (1, 88.0)]
@@ -333,34 +315,53 @@ Uncommitted changes are not visible to simultaneous readers:
    shard 3
      f11 uf 44.0 [(671, 44.0)]
 
-Close the fragments:
+Complete time series can be queried. Note that missing fragments are filled
+with zeroes, but series where all fragments have been pruned return not found.
 
-   >>> jan.close()
-   >>> feb.close()
-
-Complete time series can be queried. This returns a tuple of (first fragment
-tag, vector). Note that missing fragments are filled with zeroes, but series
-where all fragments have been pruned return not found.
-
-   >>> a = ds.fetch('f11')
-   >>> a[:-1]
-   ('2015-01-01',)
-   >>> u.fmt_sparsearray(a[-1])
+   >>> u.fmt_sparsearray(ds.fetch('f11'))
    [(0, 11.0), (2, 22.0), (1415, 44.0)]
-   >>> a = ds.fetch('d01')
-   >>> a[:-1]
-   ('2015-01-01',)
-   >>> u.fmt_sparsearray(a[-1])
+   >>> u.fmt_sparsearray(ds.fetch('d01'))
    [(744, 55.0)]
    >>> ds.fetch('nonexistent')
    Traceback (most recent call last):
      ...
    db.Not_Enough_Rows_Error: no non-zero fragments found
 
-Shards can be iterated through:
+One or more shards can be iterated through:
 
-FIXME - one shard
-FIXME - two shards
+   >>> for ts in ds.fetch_all(0):
+   ...    print(ts[0], ts[1].dtype, len(ts[1]), u.fmt_sparsearray(ts[1]))
+   d01 float64 1416 [(744, 55.0)]
+   f10 float32 1416 [(0, 66.0), (1, 88.0)]
+   >>> for ts in ds.fetch_all(3, 1, 0):
+   ...    print(ts[0], ts[1].dtype, len(ts[1]), u.fmt_sparsearray(ts[1]))
+   f11 float32 1416 [(0, 11.0), (2, 22.0), (1415, 44.0)]
+   d01 float64 1416 [(744, 55.0)]
+   f10 float32 1416 [(0, 66.0), (1, 88.0)]
+
+Opening bogus months fails:
+
+   >>> january_nonutc = datetime.datetime(2015, 1, 1,
+   ...                                    tzinfo=pytz.timezone('GMT'))
+   >>> mid_january1 = time_.iso8601_parse('2015-01-01 00:00:01')
+   >>> mid_january2 = time_.iso8601_parse('2015-01-02')
+   >>> jan = ds.open_month(january_nonutc)
+   Traceback (most recent call last):
+     ...
+   ValueError: time zone must be UTC
+   >>> jan = ds.open_month(mid_january1)
+   Traceback (most recent call last):
+     ...
+   ValueError: must have all sub-day attributes equal to zero
+   >>> jan = ds.open_month(mid_january2)
+   Traceback (most recent call last):
+     ...
+   ValueError: must have day=1, not 2
+
+Close the datasets:
+
+   >>> ds.close()
+   >>> ds2.close()
 
 Tests not implemented:
 
@@ -373,6 +374,7 @@ Tests not implemented:
    - writing beyond array limits
    - mixed data types in different fragments
    - data less than zero
+   - inferring hashmod from existing Dataset
 '''
 
 # FIXME to document
@@ -392,6 +394,8 @@ Tests not implemented:
 import datetime
 import enum
 import glob
+import itertools
+import heapq
 import os
 import os.path
 import sys
@@ -406,8 +410,8 @@ import time_
 import u
 
 l = u.l
-u.logging_init('test', verbose_=True)
-l.debug('')
+#u.logging_init('test', verbose_=True)
+#l.debug('')
 
 
 # Storage schema version
@@ -442,38 +446,60 @@ class Fragment_Source(enum.Enum):
 class Dataset(object):
 
    __slots__ = ('filename',
-                'hashmod')
+                'groups',
+                'hashmod',
+                'writeable')
 
-   def __init__(self, filename, hashmod):
+   def __init__(self, filename, hashmod, writeable=False):
       self.filename = filename
       self.hashmod = hashmod
+      self.writeable = writeable
+      self.groups = dict()
+
+   @property
+   def fragment_tag_first(self):
+      return next(self.fragment_tags)
 
    @property
    def fragment_tags(self):
       for g in glob.iglob('%s/*.db' % self.filename):
          yield os.path.split(os.path.splitext(g)[0])[1]
 
+   def assemble(self, fragments):
+      fmap = { tag: None for tag in self.fragment_tags }
+      fmap.update({ f.group.tag: f for f in fragments })
+      for (tag, f) in fmap.items():
+         if (f is None):
+            fmap[tag] = self.group_get(tag).create(None)
+      return np.concatenate([f.data for (tag, f) in sorted(fmap.items())])
+
+   def close(self):
+      for g in self.groups.values():
+         g.close()
+
    def dump(self):
       for ft in self.fragment_tags:
          print('fragment %s' % ft)
-         fg = self.open_tag(ft)
+         fg = self.group_get(ft)
          fg.dump()
 
    def fetch(self, name):
-      ft1 = next(self.fragment_tags)
       fs = list()
       for t in self.fragment_tags:
-         fg = self.open_tag(t)
+         fg = self.group_get(t)
          fs.append(fg.fetch_or_create(name))
       if (not any(f.total for f in fs)):
          raise db.Not_Enough_Rows_Error('no non-zero fragments found')
-      a = np.concatenate([f.data for f in fs])
-      return (ft1, a)
+      return self.assemble(fs)
 
-   def fetch_all(self):
-      return list()  # FIXME
+   def fetch_all(self, *shards):
+      for sh in shards:
+         fgs = [self.group_get(t).fetch_all(sh) for t in self.fragment_tags]
+         for (name, fragments) in itertools.groupby(heapq.merge(*fgs),
+                                                    lambda x: x.name):
+            yield (name, self.assemble(fragments))
 
-   def open_month(self, month, writeable=False):
+   def open_month(self, month):
       if (month.day != 1):
          raise ValueError('must have day=1, not %d' % month.day)
       if (hasattr(month, 'hour') and (   month.hour != 0
@@ -481,15 +507,15 @@ class Dataset(object):
                                       or month.second != 0
                                       or month.microsecond != 0)):
          raise ValueError('must have all sub-day attributes equal to zero')
-      f = Fragment_Group(self, self.filename, time_.iso8601_date(month),
-                         time_.hours_in_month(month))
-      f.open(writeable)
-      return f
+      return self.group_get(time_.iso8601_date(month),
+                            time_.hours_in_month(month))
 
-   def open_tag(self, tag, writeable=False):
-      fg = Fragment_Group(self, self.filename, tag)
-      fg.open(writeable)
-      return fg
+   def group_get(self, tag, length=None):
+      if (not tag in self.groups):
+         fg = Fragment_Group(self, self.filename, tag, length)
+         fg.open(self.writeable)
+         self.groups[tag] = fg
+      return self.groups[tag]
 
    def shard(self, name):
       return hashf(name) % self.hashmod
@@ -668,6 +694,12 @@ class Fragment(object):
       self.data = data
       self.source = source
       self.total = 0.0
+
+   # Compare on the name attribute, to faciliate sorting. Note that equality
+   # is not defined, since it seems odd to have two fragments compare equal
+   # merely because they share a name.
+   def __lt__(self, other):
+      return self.name < other.name
 
    @property
    def shard(self):
