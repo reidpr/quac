@@ -95,7 +95,7 @@ nosetests.xml
 
 deps
 doc
-sphinx/_build
+doc-src/_build
 
 bin/hashsplit
 
