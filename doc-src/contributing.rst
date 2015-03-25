@@ -3,7 +3,9 @@
 How to contribute
 *****************
 
-.. note:: This section is definitely a work in progress.
+.. contents::
+   :depth: 2
+   :local:
 
 
 Basic workflow
@@ -38,7 +40,7 @@ Doing actual work
 
 #. Create (and switch to) a branch to do your work on::
 
-     git checkout -b foo-branch
+     $ git checkout -b foo-branch
 
    Name the branch after the issue, including issue number, if that will be
    helpful.
@@ -62,8 +64,9 @@ Doing actual work
    have to be ready to merge. However, in this case say clearly in the pull
    request comments that you don't want a merge yet.)
 
-   Core contributors should transform the lead issue into a pull request with
-   :samp:`hub pull-request -i {ISSUENUM}`.
+   Core contributors should transform the lead issue into a pull request with::
+
+     $ hub pull-request -i $ISSUENUM
 
    Others should comment on the lead issue with a pointer to the pull request;
    the pull request should in turn have a pointer to the issue.
@@ -84,7 +87,7 @@ Merging to ``master``
 
 #. Merge the relevant branch::
 
-     git merge --no-ff --no-commit remote/foo-branch
+     $ git merge --no-ff --no-commit remote/foo-branch
 
    (Note that you don't need to create a local branch; you can merge a remote
    branch directly.)
@@ -99,7 +102,7 @@ Merging to ``master``
 
 #. Remove the branch::
 
-     git push origin --delete {branch}
+     $ git push origin --delete $BRANCH
 
 Cutting a release
 -----------------
@@ -113,8 +116,8 @@ Cutting a release
 #. Close the relevant milestone.
 
 
-Simplifying cmdtest updates with meld
-=====================================
+Simplifying :samp:`cmdtest` updates with :samp:`meld`
+=====================================================
 
 You can use Meld to help evaluate :samp:`cmdtest` failures and update
 expected output if necessary. Workflow:
@@ -151,7 +154,9 @@ nice about it.
 Docstrings
 ----------
 
-Example (note extra indent)::
+Example (note extra indent):
+
+.. code-block:: python
 
    def whois(number):
       '''Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer ac
@@ -182,9 +187,9 @@ building, try::
 Conventions
 -----------
 
-```FIXME``` (i.e., interpreted text containing the word "FIXME", all caps)
+:samp:`FIXME` (i.e., interpreted text containing the word "FIXME", all caps)
 
-::
+.. code-block:: text
 
    Chapter title (once per file)
    *****************************
@@ -210,9 +215,7 @@ Prerequisites
 Normally, HTML documentation is copied to ``doc/``, which is a regular old
 directory that is ignored by Git. To publish to the web, that directory needs
 to contain a Git checkout of the ``gh-pages`` branch (*not* a submodule). To
-set that up:
-
-::
+set that up::
 
    $ rm -Rf doc
    $ git clone git@github.com:reidpr/quac.git doc

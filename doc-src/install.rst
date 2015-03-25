@@ -7,6 +7,10 @@ QUAC can be installed on most UNIX-based systems, though installation is
 easiest on OS X and Debian/Ubuntu. Patches to increase portability are very
 welcome.
 
+.. contents::
+   :depth: 2
+   :local:
+
 PyPI and virtualenv (recommended)
 =================================
 
@@ -40,16 +44,18 @@ These instructions assume that virtualenvs are installed under
 
 #. Download QUAC using Git::
 
-     cd
-     git clone https://github.com/reidpr/quac.git
-     cd quac
+     $ cd
+     $ git clone https://github.com/reidpr/quac.git
+     $ cd quac
 
 #. Create virtual environment::
 
-     mkvirtualenv --python=/usr/bin/python3 quac
+     $ mkvirtualenv --python=/usr/bin/python3 quac
 
 #. Add to virtualenv post-activate hook
-   (`~/.virtualenvs/quac/bin/postactivate`)::
+   (`~/.virtualenvs/quac/bin/postactivate`):
+
+   .. code-block:: sh
 
      OLD_PYTHONPATH="$PYTHONPATH"
      export PYTHONPATH=~/quac/lib
@@ -57,18 +63,20 @@ These instructions assume that virtualenvs are installed under
      export PATH=~/tw/quac/bin:$PATH
 
 #. Add to virtualenv pre-deactivate hook
-   (`~/.virtualenvs/quac/bin/predeactivate`)::
+   (`~/.virtualenvs/quac/bin/predeactivate`):
+
+   .. code-block:: sh
 
      export PYTHONPATH="$OLD_PYTHONPATH"
      export PATH="$OLD_PATH"
 
 #. Activate virtual environment::
 
-     workon quac
+     $ workon quac
 
 #. Install GDAL Python bindings (adjust include paths if needed)::
 
-     CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install gdal==1.10.0
+     $ CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install gdal==1.10.0
 
    This must be done manually because the bindings have a buggy include path.
    Note also that the version must match the system GDAL libraries or the
@@ -76,16 +84,16 @@ These instructions assume that virtualenvs are installed under
 
 #. Install remaining Python dependencies::
 
-     pip install -r requirements.txt
+     $ pip install -r requirements.txt
 
 #. Build executables and the documentation::
 
-     make
+     $ make
 
 #. Run the tests (this is actually pretty important, as it tells you whether
    you've installed all the dependencies correctly)::
 
-     ./runtests
+     $ ./runtests
 
    Some tests require additional data or resources; if they are not available,
    then the tests are skipped.
@@ -96,7 +104,7 @@ These instructions assume that virtualenvs are installed under
 
 .. note:: If you plan to :doc:`contribute to QUAC <contributing>`, you should
           do two things differently. First, fork the repository on Github and
-          clone your own fork instead. Second, the ``git`` wrapper `hub
+          clone your own fork instead. Second, the Git wrapper `hub
           <https://github.com/defunkt/hub>`_ is recommended.
 
 
@@ -129,14 +137,12 @@ Prerequisites:
 
 The below assumes that you have unpacked QUAC into ``$QUACBASE``.
 
-First, install the dependencies:
+First, install the dependencies::
 
-.. code-block:: sh
-
-   mkdir $QUACBASE/deps
-   cd $QUACBASE/deps
-   ../misc/manual-download  # creates $QUACBASE/deps/src
-   ../misc/manual-install
+   $ mkdir $QUACBASE/deps
+   $ cd $QUACBASE/deps
+   $ ../misc/manual-download  # creates $QUACBASE/deps/src
+   $ ../misc/manual-install
 
 Optional:
 
@@ -146,12 +152,10 @@ Optional:
 * You can run ``manual-download`` anywhere and move the resulting ``src``
   directory into ``$QUACBASE/deps`` manually.
 
-Second, configure your environment. Add following to your ``.bashrc``.
+Second, configure your environment. Add following to your ``.bashrc``::
 
-.. code-block:: sh
-
-   module use --append $QUACBASE/misc
-   module load quac-module
+   $ module use --append $QUACBASE/misc
+   $ module load quac-module
 
 Note that in addition to making all the dependencies available, this module
 adds the QUAC libraries and binaries themselves to your various paths. Be

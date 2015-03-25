@@ -3,6 +3,10 @@
 Citing QUAC
 ***********
 
+.. contents::
+   :depth: 2
+   :local:
+
 How to cite QUAC depends on what exactly you are doing. If you...
 
 * Use or extend the geographic analysis components, please cite:

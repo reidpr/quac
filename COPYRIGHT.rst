@@ -1,7 +1,7 @@
 Copyright
 =========
 
-QUAC is copyright © 2013 Los Alamos National Security, LLC and others.
+QUAC is copyright © 2012-2015 Los Alamos National Security, LLC and others.
 
 This material was produced under U.S. Government contract DE-AC52-06NA25396
 for Los Alamos National Laboratory (LANL), which is operated by Los Alamos

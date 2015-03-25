@@ -3,6 +3,10 @@
 Configuration
 *************
 
+.. contents::
+   :depth: 2
+   :local:
+
 QUAC uses ``.ini``-style configuration files; some scripts require a
 ``--config`` argument pointing to the main configuration file.
 

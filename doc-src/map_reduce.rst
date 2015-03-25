@@ -3,6 +3,10 @@
 Map-Reduce with QUACreduce
 **************************
 
+.. contents::
+   :depth: 2
+   :local:
+
 Introduction
 ============
 

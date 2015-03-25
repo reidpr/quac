@@ -7,7 +7,13 @@ Typically, raw data direct from collection is not too useful. QUAC implements
 a preprocessing step to translate it into more pleasant formats as well as do
 some preliminary analysis. This section describes the steps to do that.
 
-*All times and dates are in UTC except as otherwise noted.*
+.. contents::
+   :depth: 2
+   :local:
+
+.. note::
+
+   All times and dates are in UTC except as otherwise noted.
 
 Twitter
 =======
@@ -115,12 +121,16 @@ Firefox, and my Python code.) These quirks do not appear to affect the
 parsability of the JSON.
 
 * While the encoding of the output is ostensibly UTF-8, it appears that high
-  characters are escaped with the "\uXXXX" notation. For example::
+  characters are escaped with the "\uXXXX" notation. For example:
+
+  .. code-block:: text
 
      "text":"\u2606\u2606\u2606\u2606\u2606#Cruzeiro"
 
 * Some text has excessive escaping. For example, forward slashes do not need
-  to be escaped, but they are anyway::
+  to be escaped, but they are anyway:
+
+  .. code-block:: text
 
      "source":"\u003Ca href=\"http:\/\/blackberry.com\/twitter"
 
@@ -169,12 +179,6 @@ files for each day:
 There are also intermediate TSV files (``.raw.tsv``) which are in the above
 format but have not yet had de-duplication and re-ordering. Downstream
 applications should ignore them.
-
-`FIXME`:
-
-* Try gzipping the TSV files. Some quick and dirty tests suggest that
-  processing time (with ``gzip -1``) will roughly double and file sizes will
-  roughly halve.
 
 Preprocessing metadata file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -322,9 +326,9 @@ The file format of the pagecount files is `documented by WMF
    * (UTF-8) http://ru.wikipedia.org/wiki/%D0%9B%D1%8E%D0%B4%D0%B8_%D0%98%D0%BA%D1%81
    * (Windows-1251) http://ru.wikipedia.org/wiki/%CB%FE%E4%E8_%C8%EA%F1
 
-   Other encodings (e.g., ISO 8859-5, %BB%EE%D4%D8_%B8%DA%E1 and KOI8-R,
-   %EC%C0%C4%C9_%E9%CB%D3) do not work. Figuring out this mess is something
-   I'm not very interested in. How WMF does it, I have no idea.
+   Other encodings (e.g., ISO 8859-5, :code:`%BB%EE%D4%D8_%B8%DA%E1` and
+   KOI8-R, :code:`%EC%C0%C4%C9_%E9%CB%D3`) do not work. Figuring out this mess
+   is something I'm not very interested in. How WMF does it, I have no idea.
 
    We do, however, normalize spaces into underscores. I believe this may be
    incomplete (see issue #77).

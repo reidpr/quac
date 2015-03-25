@@ -9,6 +9,10 @@ QUAC can do some neat things with time series; see the scripts:
 * ``ngrams-search``
 * ``ngrams-correlate``
 
+.. contents::
+   :depth: 2
+   :local:
+
 Input file format
 =================
 
