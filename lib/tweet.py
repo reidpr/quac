@@ -27,7 +27,7 @@ WHITESPACES_RE = re.compile(r'[\s\0]+')
 class Nothing_To_Parse_Error(Exception):
    pass
 
-class Unknown_Object_Error(ValueError):
+class Unknown_Object_Error(Exception):
    def __str__(self):
       return 'unknown object parsed'
 
@@ -94,14 +94,16 @@ def from_json(text):
    j = json.loads(text)  # raises ValueError on parse failure
    if ('delete' in j):
       return Deletion_Notice.from_json(j)
+   elif ('limit' in j):
+      return Limit_Notice.from_json(j)
    elif ('scrub_geo' in j):
       return Scrub_Geo_Notice.from_json(j)
    elif ('status_withheld' in j):
       return Status_Withheld.from_json(j)
-   elif ('limit' in j):
-      return Limit_Notice.from_json(j)
    elif ('text' in j):
       return Tweet.from_json(j)
+   elif ('warning' in j):
+      return Warning.from_json(j)
    else:
       raise Unknown_Object_Error()
 
@@ -165,9 +167,10 @@ class Ignored_Object(object):
       return o
 
 class Deletion_Notice(Ignored_Object): pass
+class Limit_Notice(Ignored_Object): pass
 class Scrub_Geo_Notice(Ignored_Object): pass
 class Status_Withheld(Ignored_Object): pass
-class Limit_Notice(Ignored_Object): pass
+class Warning(Ignored_Object): pass
 
 
 class Reader(tsv_glue.Reader):
