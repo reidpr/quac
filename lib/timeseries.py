@@ -322,7 +322,7 @@ with zeroes, but series where all fragments have been pruned return not found.
    [(0, 11.0), (2, 22.0), (1415, 44.0)]
    >>> u.fmt_sparsearray(ds.fetch('d01'))
    [(744, 55.0)]
-   >>> ds.fetch('nonexistent')
+   >>> ds.fetch('f00')
    Traceback (most recent call last):
      ...
    db.Not_Enough_Rows_Error: no non-zero fragments found
