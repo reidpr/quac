@@ -496,6 +496,9 @@ class Dataset(object):
       return self.group_get(time_.iso8601_date(month),
                             time_.hours_in_month(month))
 
+   def put(self, name, tag_first, ts):
+      assert False, 'unimplemented'
+
    def group_get(self, tag, length=None):
       if (not tag in self.groups):
          fg = Fragment_Group(self, self.filename, tag, length)
