@@ -260,43 +260,24 @@ A fully populated data directory looks (in part) something like this:
 
   * :samp:`2012/`
 
-    * :samp:`2012-04/` --- Article access counts ("pageviews") from April
-      2012. Each month gets its own subdirectory.
+    * :samp:`2012-04/` --- Article access counts ("pageviews") of intervals
+      ending in April 2012. Each month gets its own subdirectory.
 
       * :samp:`pagecounts-20120428-130001.gz` --- Number of times each URL was
-        served.
+        served during 12:00:00 through 12:59:59 on April 28.
 
-      * :samp:`projectcounts-20120428-130001` --- Total number of URLs served
-        from each project (e.g., Norwegian Wiktionary) for the same hour.
-        These files have a number of problems, so we don't use them (see issue
-        `#81 <https://github.com/reidpr/quac/issues/81>`_).
+      * ... (one file for each hour starting March 31, 23:00:00 through April
+        30, 22:00:00)
 
-* :samp:`hashed/` --- Text files in an improved hierarchy. All of these files
-  will parse correctly.
+* :samp:`timeseries/` --- Time series files as described below.
 
-  * :samp:`185/` --- Pageviews whose filenames hashed to 185. Currently, we
-    use the DJB2 hash algorithm mod 256 (the modulus is configurable). QUAC
-    Wikimedia processing code is directory-parallel, so by doing this we can
-    operate with wider parallelism (there are currently 71 months in the data
-    set).
+.. note::
 
-    * :samp:`pagecounts-20120428-130001.gz` --- Symlink to the corresponding
-      pagecount file in the raw directory.
+   We do not download or use the :samp:`projectcounts` files, which contain
+   the total number of URLs served from each project (e.g., Norwegian
+   Wiktionary), because many of them are broken and must be re-generated
+   anyway. (See issue `#81 <https://github.com/reidpr/quac/issues/81>`_.)
 
-* :samp:`hashed_small/` --- Subset of the above, retaining only the midnight
-  to 1am data for each day; this sampling strategy avoids introducing new gaps
-  in the data. This is for testing and yields a dataset somewhat less than 4%
-  the size of the full dataset.
-
-* :samp:`hashed_tiny/` --- An even tinier subset (not necessarily a subset of
-  the small subset). Sampling strategy varies, but the goal is about 2-3 GB of
-  compressed pageview data. Note that available parallelism is less than the
-  full dataset.
-
-* :samp:`metadata` --- The metadata file.
-
-* :samp:`metadata.daily` --- A subset of the metadata file containing only
-  daily data.
 
 Pagecount file format
 ---------------------
@@ -343,9 +324,8 @@ The file format of the pagecount files is `documented by WMF
 Time series files
 =================
 
-The time series files are HDF5 files containing hourly time series of
-occurrences of some item, for example occurrences of n-grams in Twitter
-messages or Wikipedia article hits.
+These files store hourly time series of some event count, for example n-gram
+occurences in Twitter messages or Wikpedia article hits.
 
 We have three main goals for these files:
 
@@ -358,96 +338,91 @@ We have three main goals for these files:
 3. Facilitate reasonable performance for continually updated data written in
    time-major order (e.g., each hour, a new Wikipedia access log file arrives
    giving hits for all pages) as well as fast reading in item-major order
-   (e.g., quickly iterate through complete each Wikipedia article's time
+   (e.g., quickly iterate through each Wikipedia article's complete time
    series). That is, we want to accomplish a data transpose implicitly during
    the preprocessing phase.
 
-The basic idea is that for each month, we have :math:`n` HDF5 data files, with
-items distributed across the files by hashing. A time series directory looks
-like this:
 
-* :samp:`h5/` --- Time series directory
+Raw file format
+---------------
 
-  * :samp:`200712.0.h5` --- Items from December 2007 whose hash mod :math:`n`
-    is 0.
+Named time series are stored in SQLite3 database files. A directory contains
+multiple databases *fragmented* by time (month); within each file are multiple
+tables *sharded* by time series name (by hashing).
 
-  * :samp:`200712.1.h5` --- Items from December 2007 whose hash mod :math:`n`
-    is 1.
+Currently, time series must be hourly, and fragments are one per month. We
+have attempted to make the API extensible to remove these limitations without
+excessive disruption to existing code.
 
-  * ...
+Time series vectors can be any NumPy data type. If any time series fragment is
+present in a fragment file, it is complete (i.e., a value is present for each
+hour in the month.)
 
-  * :samp:`200712.{n-1}.h5` --- Items from December 2007 hash mode :math:`n`
-    is :math:`n-1`.
+Functionality is provided for pruning (and replacing with zeroes on fetch)
+fragments with small magnitude.
 
-  * :samp:`200801.0.h5` --- Items from January 2008...
+For example:
 
-  * ... (:math:`n` files for each month in the dataset)
+* :samp:`ts/` --- Time series directory (can be named arbitrarily)
 
-Note that datasets with different :math:`n` can be combined in the same
-computation. Care may be required for proper load balancing.
+  * :samp:`2007-12-01.db` --- Data for the month of December 2007.
 
-Within each data file is the following HDF5 tree. This information has the
-notion of *namespace*; these are used for things like language in Wikipedia
-access logs. In the example, we use two namespaces: :samp:`en` and :samp:`ru`.
-Groups are indicated by trailing slashes, datsets by their absence (these HDF5
-concepts correspond roughly to POSIX directories and files), and attributes by
-italics.
+    * :samp:`data0` --- Table containing data for time series whose name
+      hashed mode :math:`n` is 0.
 
-We use the term *time series* here to represent a vector of data points, one
-per hour, spanning the entire month. If an item is present, then it has a
-complete vector in the file regardless of how many data points are actually
-available (this is so vectors can be updated without moving them, which would
-leave holes that HDF5 cannot deal with well). Missing data points are
-represented as :samp:`NaN`. For example, for a file covering a 30-day month,
-every item will have a 720-element vector.
+    * :samp:`data1` --- Table containing data for time series whose name
+      hashed mode :math:`n` is 1.
 
-* :samp:`/` --- Root of HDF5 file tree.
+    * ... (additional shards)
 
-  * :samp:`total/` --- Summary data, including all shards.
+  * :samp:`2008-01-01.db` --- Data for the month of January 2008.
 
-    * :samp:`en/` --- Summary data for the namespace *en*.
+    * ... (shards)
 
-      * *total_ct* --- Total month count for the entire namespace (float64).
+  * ... (one file for each month in the dataset)
 
-      * *min_hour* --- Minimum hour index with valid data (int32). For a full
-        month, this will be zero.
+A data table has the following columns. All are :samp:`NOT NULL`.
 
-      * *max_hour* --- Maximum hour index with valid data (int32). For a full
-        month, this will be the number of days in the month times 24 minus 1
-        (e.g., a 30-day month will yield 719).
+* :samp:`name`: Time series name (text, primary key).
 
-      * :samp:`totals` --- Vector of hourly totals for namespace *en* (float64).
+* :samp:`dtype`: NumPy data type character code (text).
 
-    * :samp:`ru/` --- Summary data for the namespace *ru*.
+* :samp:`total`: Sum of element absolute values in the time series fragment
+  (double, regardless of fragment data type).
 
-      * ...
+* :samp:`data`: Content of time series fragment. This is either a memory dump
+  of the corresponding NumPy object (i.e., a C array), or the same memory dump
+  compressed with zlib (if :samp:`total` is below a threshold).
 
-  * :samp:`weirdal/` --- Item time series.
+Each database also contains a :samp:`metadata` table with various parameters.
 
-    * :samp:`en/` --- Time series for namespace *en*.
+.. note::
 
-      * :samp:`Cat` --- Time series for item *Cat* (float32).
+   Data tables do not use explicit indexes, instead relying on SQLite's
+   `WITHOUT ROWID <http://www.sqlite.org/withoutrowid.html>`_ feature coupled
+   with maximum-size 64kB pages. Back-of-the-envelope calculations suggest
+   this is the right choice performance-wise, but it has not been tested.
 
-        * *total_ct* --- Total month count for *Cat* (float64).
+Use for Wikipedia article hits
+------------------------------
 
-      * :samp:`Dog` --- Time series for item *Dog* (float32).
+Time series names for Wikipedia articles are the language concatenated with a
+slash and the article URL, for example :samp:`en/Fever` or
+:samp:`fr/Fi%C3%A8vre`. These time series are :samp:`np.float32` to save
+space. Elements with the value 0 indicate *either* a zero value or no data.
 
-        * ... (attributes)
+For normalization and to resolve this ambiguity, language total time series
+are also stored under the language code (e.g., :samp:`en` or :samp:`fr`, no
+trailing slash) as :samp:`np.float64` to avoid floating-point summation
+problems. Elements of these total vectors are either the total of all time
+series of that language for that hour, or :samp:`NaN` if no hits at all in
+that language were recorded. Under this system, it is still ambiguous whether
+a given language did not exist or recorded no traffic, but these two
+situations are close enough that we believe this is not a concern.
 
-      * ... (several million more items)
+Typical analysis will divide an article time series by the language total time
+series to obtain a fraction of total traffic with :samp:`NaN` elements for
+missing data.
 
-    * :samp:`ru/` --- Time series for namespace *ru*.
-
-      * ...
-
-As for data types, we use floats for the vectors rather than integers, which
-would be more appropriate for counted data, because floats have :samp:`NaN`
-and integers do not. This brings into play all the difficulties of floating
-point math. A key gotcha in our case is summation: adding two numbers of
-differing magnitudes will lose precision in the smaller. This motivates use of
-double precision (64 bit) floats for totals; single precision (32 bit) is used
-for base time series in order to save space.
-
-HDF5 files can be compressed or otherwise filtered using standard filters.
 
 ..  LocalWords:  pagecount samp badfiles
