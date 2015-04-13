@@ -399,8 +399,7 @@ class Tweet_Collector(object):
       if (not keywords_file):
          endpoint = 'statuses/sample'
          self.keywords = None
-         self.stream = api.request(endpoint,
-                                   { 'stall_warnings': True })
+         self.stream = api.request(endpoint, { 'stall_warnings': True })
          l.info("connected to %s" % endpoint)
       else:
          endpoint = 'statuses/filter'
@@ -408,8 +407,9 @@ class Tweet_Collector(object):
          self.stream = api.request(endpoint,
                                    { 'track': ','.join(self.keywords),
                                      'stall_warnings': True })
-         l.info("connected to %s with %d of %d keywords" % (endpoint,
-                len(self.keywords), c.getint("coll", "keywords_limit")))
+         l.info("connected to %s with %d of %d keywords"
+                % (endpoint, len(self.keywords),
+                   c.getint("coll", "keywords_limit")))
       # Requests response objects must be told explicitly to raise an
       # exception on HTTP error.
       self.stream.response.raise_for_status()
