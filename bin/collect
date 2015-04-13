@@ -391,32 +391,28 @@ class Tweet_Collector(object):
       return True
 
    def stream_init(self):
+      api = TwitterAPI.TwitterAPI(c.get("coll", "consumer_key"),
+                                  c.get("coll", "consumer_secret"),
+                                  c.get("coll", "access_token"),
+                                  c.get("coll", "access_secret"))
       keywords_file = c.get("coll", "keywords_file")
       if (not keywords_file):
          endpoint = 'statuses/sample'
          self.keywords = None
-         api = TwitterAPI.TwitterAPI(c.get("coll", "consumer_key"),
-                                     c.get("coll", "consumer_secret"),
-                                     c.get("coll", "access_token"),
-                                     c.get("coll", "access_secret"))
-         self.stream = api.request('statuses/sample',
-                                   { 'stall_warnings': True })
+         self.stream = api.request(endpoint, { 'stall_warnings': True })
+         l.info("connected to %s" % endpoint)
       else:
-         assert False, "unimplemented (need to update to TwitterAPI module)"
+         endpoint = 'statuses/filter'
          self.keywords = Keywords(u.path_configured(keywords_file))
-         self.stream = ts.FilterStream(
-            c.get("coll", "consumer_key"),
-            c.get("coll", "consumer_secret"),
-            c.get("coll", "access_token"),
-            c.get("coll", "access_secret"),
-            raw=True,
-            track=iter(self.keywords))
-         l.info("connected to statuses/filter with %d of %d keywords"
-                % (len(self.keywords), c.getint("coll", "keywords_limit")))
+         self.stream = api.request(endpoint,
+                                   { 'track': ','.join(self.keywords),
+                                     'stall_warnings': True })
+         l.info("connected to %s with %d of %d keywords"
+                % (endpoint, len(self.keywords),
+                   c.getint("coll", "keywords_limit")))
       # Requests response objects must be told explicitly to raise an
       # exception on HTTP error.
       self.stream.response.raise_for_status()
-      l.info("connected to %s" % endpoint)
 
 
 class Keywords(object):
