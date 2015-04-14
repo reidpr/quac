@@ -278,6 +278,51 @@ A fully populated data directory looks (in part) something like this:
    Wiktionary), because many of them are broken and must be re-generated
    anyway. (See issue `#81 <https://github.com/reidpr/quac/issues/81>`_.)
 
+Article filtering
+-----------------
+
+Three classes of articles are excluded from the time series files:
+
+#. Articles with anything other than lowercase A to Z in the language
+   (project) code. This excludes invalid project codes as well as
+   non-Wikipedia wikis (e.g., Wiktionary and Wikibooks) and mobile requests
+   for Wikipedia articles (e.g., requests to :samp:`en.m.wikipedia.org`).
+
+   I'm not very happy about the latter; the reason has to do with how the
+   files are sorted. See `issue #108
+   <https://github.com/reidpr/quac/issues/108>`_.
+
+#. Articles with "funny" characters in their URLs. Specifically, only the
+   following URL characters are passed through:
+
+   * ASCII alphanumeric (A--Z upper and lower case, plus digits 0--9).
+   * The rest of the "unreserved set", except for dot: :samp:`-_~`
+   * Some of the reserved set: :samp:`!*();@,`
+   * Percent (:samp:`%`), to allow encoded URLs through.
+
+   For example, this excludes articles:
+
+   * In non-main namespaces (these titles contain a colon).
+   * With a slash in the title (e.g., "Input/output").
+   * Accessed with non-percent-encoded high characters (code point ≥128).
+
+   See:
+
+   * http://en.wikipedia.org/wiki/Percent-encoding
+   * http://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_%28technical_restrictions%29
+
+   This is done to make downstream processing easier and whilshoulde excluding
+   a minimal set of articles.
+
+#. Articles with less than a threshold number of requests in a given month.
+   The zero vector is inferred for such months. This avoids storing
+   low-traffic article time series fragments that are too rarely accessed or
+   noisy to be useful in analysis.
+
+   The threshold is configurable at :samp:`wkpd.keep_threshold`.
+
+Note that this does not categorically exclude non-Wikipedia wikis such as
+Wiktionary or Wikibooks, nor mobile requests for Wikipedia.
 
 Pagecount file format
 ---------------------

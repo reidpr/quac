@@ -1,0 +1,279 @@
+#!/usr/bin/env python3
+
+# Copyright © Los Alamos National Security, LLC, and others.
+
+'''Update a time series dataset containing Wikipedia pageview data
+
+Summary statistics related to performance:
+
+  * The Wikipedia datafiles contain about 8M lines each.
+  * There are 720 data files in a 30-day month.
+  * Therefore, we need to process about 5.7G lines per month of data.
+  * To do so in 24 hours, we need to move 65,000 lines per second.
+
+This is well beyond the capacity of a naive read-modify-write write strategy.
+Thus, we have four different write strategies depending on the update desired.
+
+A key observation is that article hits follow a long-tail distribution. Most
+articles have only a handful of hits in a month (perhaps because they are not
+real articles) and can therefore be safely discarded; even if such articles
+carried a useful signal, relying on them would be risky due to noise and the
+opportunity for manipulation. (The threshold is configured at
+wkpd.keep_threshold.) In the bulk-loading situation, which is of the most
+concern for performance, these monthly hit counts are known without needing to
+reference any data from the existing file, and article vectors which do not
+pass the threshold can be discarded without writing them at all.
+
+Thus, we use the following write strategies. Recall that the --prune switch
+indicates an fragment file is complete (i.e., the month is closed).
+
+  Is --prune specified?
+  |   Was the data file empty when opened?
+  |   |
+  |   |    Strategy
+  |   |    |  Write strategy
+  |   |    |  |                  Prune strategy
+  --- ---  -  -----------------  -----------------------------------------
+
+  no  no   0  read-modify-write  none
+  no  yes  1  write-only         none
+  yes no   2  read-modify-write  eager + batch
+  yes yes  3  write-only         eager
+
+Write strategies:
+
+  read-modify-write -- If a fragment already exists on disk, fetch it, update
+     it with all available new data, and save it again. If not, create it from
+     scratch as a zero vector instead of fetching.
+
+  write-only -- Create all fragments as zero vectors from scratch, ignoring
+     any existing on-disk fragments. This will cause primary key errors if any
+     such fragments really do exist, so it must only be used on empty files.
+
+Prune strategies:
+
+  eager -- Do not write fragments below the threshold; insead, discard them.
+     This means that existing saved fragments which do not meet the threshold
+     will be left stale in the dataset.
+
+  batch -- After fragment writing is done, remove all saved fragments which do
+     not meet the threshold. When combined with eager, this will remove stale
+     eager-pruned fragments, which are guaranteed to have a smaller total than
+     the updated version which was not saved.
+
+When is each strategy used?
+
+  0. This is the standard daily incremental update strategy. This operates at
+     several thousand articles per second, enough to process one day's worth
+     of data in a few hours.
+
+  1. This happens for the daily update the first time it is run each month.
+     Again, performance is acceptable due to the small number of input data.
+
+     This strategy is also important for bulk loading, in that it is used for
+     the last, incomplete month of the bulk load. This month should not be
+     included in a synchronized parallel bulk loading job, because it will be
+     much slower than the other months that can use strategy 3.
+
+  2. This happens for the daily update the last time it is run each month.
+     Because it must process the entire file, it takes significantly longer
+     than most daily updates.
+
+  3. This is the fastest data path, used for bulk loading of full months. It
+     avoids both lookup/read I/O and writing most article vectors (which, due
+     to the long-tail distribution of traffic, do not pass the threshold).
+
+Note that if subsequent days' updates overlap, this script will fail, which
+may risk corruption on some filesystems. This is most likely to happen on the
+first update of the month (i.e., the update after strategy 2).'''
+
+import datetime
+import heapq
+import itertools
+import os
+import sys
+import time
+
+import numpy as np
+import pytz
+
+import quacpath
+import time_
+import timeseries
+import testable
+import u
+import wikimedia
+
+c = u.c
+l = u.l
+
+
+### Setup ###
+
+ap = u.ArgumentParser(description=__doc__)
+gr = ap.default_group
+gr.add_argument('--warn-duplicates',
+                action='store_true',
+                help='Warn if article found more than once (lots of memory!)')
+gr.add_argument('--config',
+                metavar='FILE',
+                help='Configuration file')
+gr.add_argument('--limit',
+                metavar='N',
+                type=int,
+                default=sys.maxsize,
+                help='Stop processing after saving this many time series')
+gr.add_argument('--prune',
+                action='store_true',
+                help='Prune and compact the dataset')
+gr.add_argument('outfile',
+                metavar='OUTFILE',
+                help='Time series dataset to create or update')
+gr.add_argument('pv_files',
+                metavar='PAGECOUNT',
+                nargs='+',
+                help='pagecount files to add')
+
+
+### Script ###
+
+def main():
+   l.info('starting')
+   args.keep_threshold = int(c['wkpd']['keep_threshold'])
+   (month, pv_files) = pv_files_validated(args.pv_files)
+   ds = timeseries.Dataset(args.outfile, int(c['wkpd']['hashmod']),
+                           writeable=True)
+   fg = ds.open_month(month)
+   l.info('opened %s/%s length %d hours' % (args.outfile, fg.tag, fg.length))
+   args.file_empty_p = fg.empty_p()
+   args.eager_prune_p = args.prune
+   fg.begin()
+   files_process(fg, pv_files)
+   fg.commit()
+   if (args.prune and not args.file_empty_p):
+      start = time.time()
+      fg.prune(args.keep_threshold)
+      l.info('pruned to %d in %s' % (args.keep_threshold,
+                                     u.fmt_seconds(time.time() - start)))
+   ds.close()
+   l.info('done')
+
+def file_read(file_):
+   try:
+      ts = wikimedia.timestamp_parse(file_)
+      hour_offset = time_.hour_offset(ts)
+      # FIXME: See issue #108 before changing the project code filter.
+      fp = u.zcat(file_, r"zcat '%s' | LC_ALL=C egrep '^[a-z]+ [-A-Za-z0-9_~!*();@,%%]+ '")
+      badline_ct = 0
+      badline_last = None
+      for (i, line) in enumerate(fp):
+         try:
+            (proj, url, count, _) = line.split(b' ')
+            yield (proj.decode('ascii'), url.decode('ascii'),
+                   hour_offset, int(count))
+         except ValueError as x:
+            # Ignore lines that don't parse. Some files have thousands of
+            # these (pagecounts-20130201-010000.gz), and many files have at
+            # least one (all of February 2013). However, decoding errors
+            # should never happen, because we filter out any potential
+            # problems with egrep.
+            if (isinstance(x, UnicodeDecodeError)):
+               raise x
+            badline_ct += 1
+            badline_last = i + 1
+      if (badline_ct > 0):
+         l.warning('%s: %d lines with parse errors skipped (last was %d)'
+                   % (file_, badline_ct, badline_last))
+   except (EOFError, IOError) as x:
+      l.warning('%s: error reading file, skipped: %s' % (file_, str(x)))
+
+def files_process(fg, files):
+   def fetch_or_create(proj, dtype, fill=None):
+      if (args.file_empty_p):
+         return fg.create(proj, dtype=dtype, fill=fill)
+      else:
+         return fg.fetch_or_create(proj, dtype=dtype, fill=fill)
+   keep_threshold = args.keep_threshold if args.eager_prune_p else -1
+   l.info('write strategy %d (eager prune=%d, empty=%d), keep threshold %d'
+          % (args.eager_prune_p * 2 + args.file_empty_p, args.eager_prune_p,
+             args.file_empty_p, keep_threshold))
+   line_ct = 0
+   url_total_ct = 0
+   url_write_ct = 0
+   start = time.time()
+   proj_totals = None
+   proj_last = None
+   articles_seen = set()
+   for ((proj, url), gr) in itertools.groupby(heapq.merge(*(file_read(f)
+                                                            for f in files)),
+                                              key=lambda i: i[:2]):
+      url_total_ct += 1
+      if (args.warn_duplicates):
+         if ((proj, url) in articles_seen):
+            l.warn('duplicate article found: %s/%s' % (proj, url))
+         articles_seen.add((proj, url))
+      if (proj != proj_last):
+         if (proj_last is not None):
+            proj_totals.save()
+         proj_totals = fetch_or_create(proj, np.float64, fill=np.nan)
+      url_v = fetch_or_create('%s/%s' % (proj, url), np.float32)
+      for (_, _, hour_offset, count) in gr:
+         line_ct += 1
+         url_v.data[hour_offset] = count
+         if (np.isnan(proj_totals.data[hour_offset])):
+            proj_totals.data[hour_offset] = count
+         else:
+            proj_totals.data[hour_offset] += count
+      if (url_v.save(keep_threshold)):
+         url_write_ct += 1
+      if (url_write_ct >= args.limit):
+         break
+   if (proj_last is not None):
+      proj_totals.save()
+   time_used = time.time() - start
+   l.info('read %s lines in %s (%d lines/s)'
+          % (line_ct, u.fmt_seconds(time_used), (line_ct) / time_used))
+   try:
+      l.info('%d of %d URLs saved (%.1f%%, %d total/s)'
+             % (url_write_ct, url_total_ct, 100 * url_write_ct / url_total_ct,
+                url_total_ct / time_used))
+   except ZeroDivisionError:
+      pass
+
+def pv_files_validated(pv_files):
+   # Check month consistency in reverse order because the most common cause of
+   # the same-month warning is a glob expression like "pagecounts-201210*",
+   # where the outlier is the first item in the list. In this case, we want
+   # one warning/skip rather than hundreds.
+   ts_wanted = None
+   month_wanted = None
+   pv_files_checked = list()
+   for file_ in reversed(pv_files):
+      if (not os.path.isfile(file_)):
+         u.abort('%s is not a file' % file_)
+      try:
+         ts = wikimedia.timestamp_parse(file_)
+         month = ts.strftime('%Y%m')
+      except ValueError:
+         u.abort('%s is not named like a Wikimedia pagecount file' % file_)
+      if (month_wanted is not None and month != month_wanted):
+         l.warning('not from month %s, skipping: %s' % (month_wanted, file_))
+      else:
+         pv_files_checked.append(file_)
+         ts_wanted = ts
+         month_wanted = month
+   month_dt = datetime.datetime(ts_wanted.year, ts_wanted.month, 1,
+                                tzinfo=pytz.utc)
+   return (month_dt, sorted(pv_files_checked))
+
+
+### Bootstrap ###
+
+try:
+   args = u.parse_args(ap)
+   u.configure(args.config)
+   u.logging_init('wptsu')
+   if (__name__ == '__main__'):
+      main()
+except testable.Unittests_Only_Exception:
+   testable.register()

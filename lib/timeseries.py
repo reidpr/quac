@@ -375,6 +375,7 @@ Tests not implemented:
    - mixed data types in different fragments
    - data less than zero
    - inferring hashmod from existing Dataset
+   - non-zero fill (this is tested separately in the script tests)
 '''
 
 import datetime
@@ -548,10 +549,12 @@ class Fragment_Group(object):
          os.makedirs(os.path.dirname(self.filename), exist_ok=True)
       self.db = db.SQLite(self.filename, writeable)
 
-   def create(self, name, dtype=TYPE_DEFAULT):
-      'Create and return a fragment initialized to zero.'
-      return Fragment(self, name, np.zeros(self.length, dtype=dtype),
-                      Fragment_Source.NEW)
+   def create(self, name, dtype=TYPE_DEFAULT, fill=None):
+      'Create and return a fragment initialized to zero or fill.'
+      data = np.zeros(self.length, dtype=dtype)
+      if (fill is not None):
+         data[:] = fill
+      return Fragment(self, name, data, Fragment_Source.NEW)
 
    def delete(self, name):
       self.db.sql(("DELETE FROM data%d WHERE name=?"
@@ -581,6 +584,12 @@ class Fragment_Group(object):
          for f in self.fetch_all(shard):
             print(' ', f)
 
+   def empty_p(self):
+      sql = ("SELECT SUM(a) FROM (%s LIMIT 1)"
+             % " UNION ".join("SELECT 1 AS a FROM data%d" % i
+                              for i in range(self.dataset.hashmod)))
+      return not self.db.get_one(sql)[0]
+
    def fetch(self, name):
       (dtype, total, data) \
          = self.db.get_one("""SELECT dtype, total, data FROM data%d
@@ -594,13 +603,13 @@ class Fragment_Group(object):
                               ORDER BY name""" % shard):
          yield self.deserialize(*i)
 
-   def fetch_or_create(self, name, dtype=TYPE_DEFAULT):
+   def fetch_or_create(self, name, dtype=TYPE_DEFAULT, fill=None):
       '''dtype is only used on create; if fetch is successful, the fragment is
          returned unchanged.'''
       try:
          return self.fetch(name)
       except db.Not_Enough_Rows_Error:
-         return self.create(name, dtype)
+         return self.create(name, dtype, fill)
 
    def initialize_db(self):
       if (self.db.exists('sqlite_master', "type='table' AND name='metadata'")):
@@ -637,7 +646,6 @@ class Fragment_Group(object):
       # We use journal_mode = PERSIST to avoid metadata operations and
       # re-allocation, which can be expensive on parallel filesystems.
       self.db.sql("""PRAGMA cache_size = -1048576;
-                     PRAGMA journal_mode = PERSIST;
                      PRAGMA synchronous = OFF; """)
       self.initialize_db()
       self.validate_db()
@@ -703,7 +711,7 @@ class Fragment(object):
    def save(self, ignore=-1):
       self.total_update()
       if (self.total < ignore):
-         return
+         return False
       if (self.total <= FRAGMENT_TOTAL_ZMAX):
          data = zlib.compress(self.data.data, ZLEVEL)
       else:
@@ -717,6 +725,7 @@ class Fragment(object):
                               SET dtype=?, total=?, data=?
                               WHERE name=?""" % self.shard,
                            (self.data.dtype.char, self.total, data, self.name))
+      return True
 
    def total_update(self):
       # np.sum() returns a NumPy data type, which confuses SQLite somehow.
