@@ -56,14 +56,15 @@ Add the first time series fragment:
    >>> jan.begin()
    >>> a = jan.create('f11')
    >>> a
-   f11 nf 0.0 []
+   f11 nf 0.0 {744z 0n}
    >>> a.data[0] = 11
    >>> a
-   f11 nf 0.0 [(0, 11.0)]
+   f11 nf 0.0 {743z 0n (0, 11.0)}
    >>> a.data[2] = 22.0
    >>> a
-   f11 nf 0.0 [(0, 11.0), (2, 22.0)]
+   f11 nf 0.0 {742z 0n (0, 11.0), (2, 22.0)}
    >>> a.save()
+   True
    >>> jan.commit()
    >>> ds.dump()
    fragment 2015-01-01
@@ -71,20 +72,20 @@ Add the first time series fragment:
    shard 1
    shard 2
    shard 3
-     f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+     f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
 
 Try some fetching:
 
    >>> jan.fetch('f11')
-   f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+   f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
    >>> jan.fetch('nonexistent')
    Traceback (most recent call last):
      ...
    db.Not_Enough_Rows_Error: no such row
    >>> jan.fetch_or_create('f11')
-   f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+   f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
    >>> jan.fetch_or_create('nonexistent')
-   nonexistent nf 0.0 []
+   nonexistent nf 0.0 {744z 0n}
 
 Add the rest of uf11:
 
@@ -93,6 +94,7 @@ Add the rest of uf11:
    >>> a = feb.create('f11')
    >>> a.data[671] = 44
    >>> a.save()
+   True
    >>> feb.commit()
    >>> ds.dump()
    fragment 2015-01-01
@@ -100,13 +102,13 @@ Add the rest of uf11:
    shard 1
    shard 2
    shard 3
-     f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+     f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
    fragment 2015-02-01
    shard 0
    shard 1
    shard 2
    shard 3
-     f11 uf 44.0 [(671, 44.0)]
+     f11 uf 44.0 {671z 0n (671, 44.0)}
 
 Add remaining time series:
 
@@ -114,75 +116,86 @@ Add remaining time series:
    >>> b = jan.create('d01', dtype=np.float64)
    >>> b.data[0] = 1
    >>> b.save()
+   True
    >>> c = jan.create('f10')
    >>> c.data[0] = 66
    >>> c.save()
+   True
    >>> d = jan.create('f00')
    >>> d.data[0] = 0
    >>> d.save()
+   True
    >>> jan.commit()
    >>> feb.begin()
    >>> b = feb.create('d01', dtype=np.float64)
    >>> b.data[0] = 55
    >>> b.save()
+   True
    >>> c = feb.create('f10')
    >>> c.data[0] = 5
    >>> c.save()
+   True
    >>> d = feb.create('f00')
    >>> d.data[0] = 0
    >>> d.save()
+   True
    >>> feb.commit()
    >>> ds.dump()
    fragment 2015-01-01
    shard 0
-     d01 zd 1.0 [(0, 1.0)]
-     f10 uf 66.0 [(0, 66.0)]
+     d01 zd 1.0 {743z 0n (0, 1.0)}
+     f10 uf 66.0 {743z 0n (0, 66.0)}
    shard 1
-     f00 zf 0.0 []
+     f00 zf 0.0 {744z 0n}
    shard 2
    shard 3
-     f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+     f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
    fragment 2015-02-01
    shard 0
-     d01 ud 55.0 [(0, 55.0)]
-     f10 zf 5.0 [(0, 5.0)]
+     d01 ud 55.0 {671z 0n (0, 55.0)}
+     f10 zf 5.0 {671z 0n (0, 5.0)}
    shard 1
-     f00 zf 0.0 []
+     f00 zf 0.0 {672z 0n}
    shard 2
    shard 3
-     f11 uf 44.0 [(671, 44.0)]
+     f11 uf 44.0 {671z 0n (671, 44.0)}
 
 A fragment is compressed if its total is below a threshold:
 
    >>> feb.begin()
    >>> a = feb.create('foo')
    >>> a
-   foo nf 0.0 []
+   foo nf 0.0 {672z 0n}
    >>> a.save()  # new to compressed
+   True
    >>> a = feb.fetch('foo')
    >>> a
-   foo zf 0.0 []
+   foo zf 0.0 {672z 0n}
    >>> a.data[0] = 5
    >>> a.save()  # compressed to compressed
+   True
    >>> a = feb.fetch('foo')
    >>> a
-   foo zf 5.0 [(0, 5.0)]
+   foo zf 5.0 {671z 0n (0, 5.0)}
    >>> a.data[0] = 6
    >>> a.save()  # compressed to uncompressed
+   True
    >>> a = feb.fetch('foo')
    >>> a
-   foo uf 6.0 [(0, 6.0)]
+   foo uf 6.0 {671z 0n (0, 6.0)}
    >>> a.data[0] = 7
    >>> a.save()  # uncompressed to uncompressed
+   True
    >>> a = feb.fetch('foo')
    >>> a
-   foo uf 7.0 [(0, 7.0)]
+   foo uf 7.0 {671z 0n (0, 7.0)}
    >>> a.data[0] = 2
    >>> a.data[1] = 3
    >>> a.save()  # uncompressed to compressed
+   True
    >>> a = feb.fetch('foo')
    >>> a
-   foo zf 5.0 [(0, 2.0), (1, 3.0)]
+   foo zf 5.0 {670z 0n (0, 2.0), (1, 3.0)}
    >>> feb.delete('foo')
    >>> feb.commit()
 
@@ -192,6 +205,7 @@ Duplicate fragments are rejected:
    >>> a = jan.create('foo')
    >>> b = jan.create('foo')
    >>> a.save()
+   True
    >>> b.save()
    Traceback (most recent call last):
      ...
@@ -206,18 +220,18 @@ threshold, as well as compact the database.
    >>> ds.dump()
    fragment 2015-01-01
    shard 0
-     f10 uf 66.0 [(0, 66.0)]
+     f10 uf 66.0 {743z 0n (0, 66.0)}
    shard 1
    shard 2
    shard 3
-     f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+     f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
    fragment 2015-02-01
    shard 0
-     d01 ud 55.0 [(0, 55.0)]
+     d01 ud 55.0 {671z 0n (0, 55.0)}
    shard 1
    shard 2
    shard 3
-     f11 uf 44.0 [(671, 44.0)]
+     f11 uf 44.0 {671z 0n (671, 44.0)}
 
 You can also prune at save time, in which case pruned data will never touch
 the database:
@@ -225,26 +239,28 @@ the database:
    >>> jan.begin()
    >>> a = jan.create('pruneme')
    >>> a.save(ignore=KEEP_THRESHOLD)
+   False
    >>> a = jan.create('keepme')
    >>> a.data[0] = 77
    >>> a.save(ignore=KEEP_THRESHOLD)
+   True
    >>> jan.commit()
    >>> ds.dump()
    fragment 2015-01-01
    shard 0
-     f10 uf 66.0 [(0, 66.0)]
+     f10 uf 66.0 {743z 0n (0, 66.0)}
    shard 1
    shard 2
-     keepme uf 77.0 [(0, 77.0)]
+     keepme uf 77.0 {743z 0n (0, 77.0)}
    shard 3
-     f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+     f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
    fragment 2015-02-01
    shard 0
-     d01 ud 55.0 [(0, 55.0)]
+     d01 ud 55.0 {671z 0n (0, 55.0)}
    shard 1
    shard 2
    shard 3
-     f11 uf 44.0 [(671, 44.0)]
+     f11 uf 44.0 {671z 0n (671, 44.0)}
 
 Note, however, that pruning during save time can leave erroneous data if the
 fragment already exists.
@@ -253,25 +269,26 @@ fragment already exists.
    >>> a = jan.fetch('f10')
    >>> a.data[0] = 1                  # change will be lost
    >>> a                              # total not updated yet
-   f10 uf 66.0 [(0, 1.0)]
+   f10 uf 66.0 {743z 0n (0, 1.0)}
    >>> a.save(ignore=KEEP_THRESHOLD)
+   False
    >>> jan.commit()
    >>> ds.dump()                      # note old value of f10
    fragment 2015-01-01
    shard 0
-     f10 uf 66.0 [(0, 66.0)]
+     f10 uf 66.0 {743z 0n (0, 66.0)}
    shard 1
    shard 2
-     keepme uf 77.0 [(0, 77.0)]
+     keepme uf 77.0 {743z 0n (0, 77.0)}
    shard 3
-     f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+     f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
    fragment 2015-02-01
    shard 0
-     d01 ud 55.0 [(0, 55.0)]
+     d01 ud 55.0 {671z 0n (0, 55.0)}
    shard 1
    shard 2
    shard 3
-     f11 uf 44.0 [(671, 44.0)]
+     f11 uf 44.0 {671z 0n (671, 44.0)}
 
 Uncommitted changes are not visible to simultaneous readers:
 
@@ -279,49 +296,50 @@ Uncommitted changes are not visible to simultaneous readers:
    >>> a = jan.fetch('f10')
    >>> a.data[1] = 88
    >>> a
-   f10 uf 66.0 [(0, 66.0), (1, 88.0)]
+   f10 uf 66.0 {742z 0n (0, 66.0), (1, 88.0)}
    >>> a.save()
+   True
    >>> ds2.dump()                     # note old value of f10
    fragment 2015-01-01
    shard 0
-     f10 uf 66.0 [(0, 66.0)]
+     f10 uf 66.0 {743z 0n (0, 66.0)}
    shard 1
    shard 2
-     keepme uf 77.0 [(0, 77.0)]
+     keepme uf 77.0 {743z 0n (0, 77.0)}
    shard 3
-     f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+     f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
    fragment 2015-02-01
    shard 0
-     d01 ud 55.0 [(0, 55.0)]
+     d01 ud 55.0 {671z 0n (0, 55.0)}
    shard 1
    shard 2
    shard 3
-     f11 uf 44.0 [(671, 44.0)]
+     f11 uf 44.0 {671z 0n (671, 44.0)}
    >>> jan.commit()
    >>> ds2.dump()                     # f10 now has updated value
    fragment 2015-01-01
    shard 0
-     f10 uf 154.0 [(0, 66.0), (1, 88.0)]
+     f10 uf 154.0 {742z 0n (0, 66.0), (1, 88.0)}
    shard 1
    shard 2
-     keepme uf 77.0 [(0, 77.0)]
+     keepme uf 77.0 {743z 0n (0, 77.0)}
    shard 3
-     f11 uf 33.0 [(0, 11.0), (2, 22.0)]
+     f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
    fragment 2015-02-01
    shard 0
-     d01 ud 55.0 [(0, 55.0)]
+     d01 ud 55.0 {671z 0n (0, 55.0)}
    shard 1
    shard 2
    shard 3
-     f11 uf 44.0 [(671, 44.0)]
+     f11 uf 44.0 {671z 0n (671, 44.0)}
 
 Complete time series can be queried. Note that missing fragments are filled
 with zeroes, but series where all fragments have been pruned return not found.
 
-   >>> u.fmt_sparsearray(ds.fetch('f11'))
-   [(0, 11.0), (2, 22.0), (1415, 44.0)]
-   >>> u.fmt_sparsearray(ds.fetch('d01'))
-   [(744, 55.0)]
+   >>> print(u.fmt_sparsearray(ds.fetch('f11')))
+   {1413z 0n (0, 11.0), (2, 22.0), (1415, 44.0)}
+   >>> print(u.fmt_sparsearray(ds.fetch('d01')))
+   {1415z 0n (744, 55.0)}
    >>> ds.fetch('f00')
    Traceback (most recent call last):
      ...
@@ -331,13 +349,13 @@ One or more shards can be iterated through:
 
    >>> for ts in ds.fetch_all(0):
    ...    print(ts[0], ts[1].dtype, len(ts[1]), u.fmt_sparsearray(ts[1]))
-   d01 float64 1416 [(744, 55.0)]
-   f10 float32 1416 [(0, 66.0), (1, 88.0)]
+   d01 float64 1416 {1415z 0n (744, 55.0)}
+   f10 float32 1416 {1414z 0n (0, 66.0), (1, 88.0)}
    >>> for ts in ds.fetch_all(3, 1, 0):
    ...    print(ts[0], ts[1].dtype, len(ts[1]), u.fmt_sparsearray(ts[1]))
-   f11 float32 1416 [(0, 11.0), (2, 22.0), (1415, 44.0)]
-   d01 float64 1416 [(744, 55.0)]
-   f10 float32 1416 [(0, 66.0), (1, 88.0)]
+   f11 float32 1416 {1413z 0n (0, 11.0), (2, 22.0), (1415, 44.0)}
+   d01 float64 1416 {1415z 0n (744, 55.0)}
+   f10 float32 1416 {1414z 0n (0, 66.0), (1, 88.0)}
 
 Opening bogus months fails:
 
@@ -374,8 +392,9 @@ Tests not implemented:
    - writing beyond array limits
    - mixed data types in different fragments
    - data less than zero
-   - inferring hashmod from existing Dataset
-   - non-zero fill (this is tested separately in the script tests)
+   - tested separately in the script tests:
+     - inferring hashmod from existing Dataset
+     - non-zero fill
 '''
 
 import datetime
@@ -437,7 +456,7 @@ class Dataset(object):
                 'hashmod',
                 'writeable')
 
-   def __init__(self, filename, hashmod, writeable=False):
+   def __init__(self, filename, hashmod=None, writeable=False):
       self.filename = filename
       self.hashmod = hashmod
       self.writeable = writeable
@@ -614,9 +633,11 @@ class Fragment_Group(object):
    def initialize_db(self):
       if (self.db.exists('sqlite_master', "type='table' AND name='metadata'")):
          l.debug('found metadata table, assuming already initalized')
+         if (self.dataset.hashmod is None):
+            self.dataset.hashmod = int(self.metadatum_get('hashmod'))
+            self.metadata['hashmod'] = self.dataset.hashmod
          if (self.length is None):
-            self.length = int(self.db.get_one("""SELECT value FROM metadata
-                                                 WHERE key = 'length'""")[0])
+            self.length = int(self.metadatum_get('length'))
             self.metadata['length'] = self.length
       else:
          if (not self.writeable):
@@ -639,6 +660,11 @@ class Fragment_Group(object):
                              data       BLOB NOT NULL)
                            WITHOUT ROWID""" % i)
          self.db.commit()
+
+   def metadatum_get(self, key):
+      return self.db.get_one("SELECT value FROM metadata WHERE key = ?",
+                             (key,))[0]
+
 
    def open(self, writeable):
       l.debug('opening %s, writeable=%s' % (self.filename, writeable))
@@ -729,9 +755,8 @@ class Fragment(object):
 
    def total_update(self):
       # np.sum() returns a NumPy data type, which confuses SQLite somehow.
-      # Therefore, use a plain Python float. Also np.sum() is about 30 times
-      # faster than Python sum() on a 1000-element array.
-      self.total = float(abs(self.data).sum())
+      # Therefore, use a plain Python float.
+      self.total = float(np.nansum(np.abs(self.data)))
 
 
 testable.register()

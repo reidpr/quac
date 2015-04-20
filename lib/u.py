@@ -918,7 +918,11 @@ def fmt_si(num):
    return fmt_real(num, 1000, ["", "k", "M", "G", "T", "P"])
 
 def fmt_sparsearray(a):
-   return [i for i in enumerate(a) if i[1] != 0]
+   nonsparse = ", ".join(str(i) for i in enumerate(a)
+                         if i[1] != 0 and not np.isnan(i[1]))
+   return ('{%dz %dn%s%s}' % (sum(1 for i in a if i == 0),
+                             sum(1 for i in a if np.isnan(i)),
+                             ' ' if nonsparse else '', nonsparse))
 
 def fmt_bytes(num):
    return fmt_real(num, 1024, ["B", "KiB", "MiB", "GiB", "TiB", "PiB"])
