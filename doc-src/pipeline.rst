@@ -281,7 +281,10 @@ A fully populated data directory looks (in part) something like this:
 Article filtering
 -----------------
 
-Three classes of articles are excluded from the time series files:
+Four classes of articles are excluded from the time series files:
+
+#. Data lines with delimiters other than a single space. These are invalid
+   (and rare).
 
 #. Articles with anything other than lowercase A to Z in the language
    (project) code. This excludes invalid project codes as well as
@@ -311,8 +314,9 @@ Three classes of articles are excluded from the time series files:
    * http://en.wikipedia.org/wiki/Percent-encoding
    * http://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_%28technical_restrictions%29
 
-   This is done to make downstream processing easier and whilshoulde excluding
-   a minimal set of articles.
+   This removes roughly half of the lines in the pageview files. It is done to
+   make downstream processing easier while excluding a minimal set of
+   articles.
 
 #. Articles with less than a threshold number of requests in a given month.
    The zero vector is inferred for such months. This avoids storing

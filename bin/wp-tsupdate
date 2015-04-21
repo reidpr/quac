@@ -94,6 +94,7 @@ import os
 import sys
 import time
 
+import apsw
 import numpy as np
 import pytz
 
@@ -163,7 +164,7 @@ def file_read(file_):
       ts = wikimedia.timestamp_parse(file_)
       hour_offset = time_.hour_offset(ts)
       # FIXME: See issue #108 before changing the project code filter.
-      fp = u.zcat(file_, r"zcat '%s' | LC_ALL=C egrep '^[a-z]+ [-A-Za-z0-9_~!*();@,%%]+ '")
+      fp = u.zcat(file_, r"zcat '%s' | LC_ALL=C egrep '^[a-z]+ [-A-Za-z0-9_~!*();@,%%]+ [0-9]+ [0-9]+$'")
       badline_ct = 0
       badline_last = None
       for (i, line) in enumerate(fp):
@@ -194,7 +195,7 @@ def files_process(fg, files):
       else:
          return fg.fetch_or_create(proj, dtype=dtype, fill=fill)
    keep_threshold = args.keep_threshold if args.eager_prune_p else -1
-   l.info('write strategy %d (eager prune=%d, empty=%d), keep threshold %d'
+   l.info('write strategy %d (eager prune=%d, empty=%d), keep threshold=%d'
           % (args.eager_prune_p * 2 + args.file_empty_p, args.eager_prune_p,
              args.file_empty_p, keep_threshold))
    line_ct = 0
@@ -214,7 +215,11 @@ def files_process(fg, files):
          articles_seen.add((proj, url))
       if (proj != proj_last):
          if (proj_last is not None):
-            proj_totals.save()
+            try:
+               proj_totals.save()
+            except apsw.ConstraintError:
+               u.abort('duplicate project, cannot save: %s' % proj_last)
+         proj_last = proj
          proj_totals = fetch_or_create(proj, np.float64, fill=np.nan)
       url_v = fetch_or_create('%s/%s' % (proj, url), np.float32)
       for (_, _, hour_offset, count) in gr:

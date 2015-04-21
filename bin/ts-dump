@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+
+# Copyright © Los Alamos National Security, LLC, and others.
+
+'Dump a time series dataset to stdout.'
+
+import sys
+
+import quacpath
+import timeseries
+import u
+
+timeseries.Dataset(sys.argv[1]).dump()
