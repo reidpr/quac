@@ -32,8 +32,8 @@ if [ -z "$2" ]; then  # give a 2nd argument to skip the lengthy copy
     # time series we are going to test against later.
     #
     # Also, we want to make sure that November is almost, but not quite,
-    # closed (to test HDF5 repacking); to do so, we exclude the very last hour
-    # in the month. However, this is stamped 2012-12-01 00:00:00, so it's
+    # closed (to test time series pruning); to do so, we exclude the very last
+    # hour in the month. However, this is stamped 2012-12-01 00:00:00, so it's
     # already implicitly excluded by the patterns below.
     for file in $1/2012/2012-09/pagecounts-201209{28,29,30}-*.gz \
                 $1/2012/2012-{10,11}/pagecounts-*.gz; do
@@ -50,26 +50,30 @@ if [ -z "$2" ]; then  # give a 2nd argument to skip the lengthy copy
 
 fi
 
-# Pathological cases. Here be breakage. We want to test that we deal with it
+# Pathological and unusual cases. We want to test that we deal with it
 # correctly. Important: None of these files should contain any valid data! (We
 # want to keep the test data duration nice and compact.) All of these problems
 # were downloaded correctly from WMF.
 mkdir -p raw/2008/2008-10
 mkdir -p raw/2011/2011-10
+mkdir -p raw/2015/2015-01
 mkdir -p raw/2099/2099-01  # synthetic problems go here
 
-# This file ends in the middle of a line (real)
+# Ends in the middle of a line (real)
 zcat $1/2008/2008-10/pagecounts-20081021-090000.gz | tail -1 | gzip -9 > raw/2008/2008-10/pagecounts-20081021-090000.gz
 
-# This file is named .gz but is not gzipped (real)
+# Named .gz but is not gzipped (real)
 cp $1/2011/2011-10/pagecounts-20111008-180001.gz raw/2011/2011-10
 
-# This file contains 100 unparseable lines (synthetic) that pass egrep
+# Contains 100 unparseable lines (synthetic) that pass egrep
 (for i in {1..100}; do echo 'a a a a'; done) | gzip -9 > raw/2099/2099-01/pagecounts-20990101-010000.gz
 
-# This file ends in a way that breaks the gzip decompression (real, but with a
-# synthetic truncation added).
+# Ends in a way that breaks the gzip decompression (real, but with a synthetic
+# truncation added).
 dd if=$1/2009/2009-09/pagecounts-20090921-160000.gz of=raw/2099/2099-01/pagecounts-20990101-020000.gz bs=1k count=16
 
-# This file is not a gzip file (real, but truncated)
+# Not a gzip file (real, but truncated)
 head -10 $1/2010/2010-07/pagecounts-20100707-112221.tmp > raw/2099/2099-01/pagecounts-20990101-030000.tmp
+
+# Whole file sorted together (dot and non-dot in proper order together)
+extract $1/2015/2015-01/pagecounts-20150103-010000.gz

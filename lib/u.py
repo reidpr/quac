@@ -33,6 +33,7 @@ import psutil
 import pytz
 import random
 import re
+import resource
 import subprocess
 import sys
 import time
@@ -82,6 +83,15 @@ verbose = False
 
 # Should chatter include timestamps? Set in parse_args().
 log_timestamps = True
+
+### Environment ###
+
+# Use a consistent, widely available, boring locale.
+os.environ['LC_ALL'] = 'C'
+
+# Some parts of QUAC need lots of files open.
+fl = resource.getrlimit(resource.RLIMIT_NOFILE)
+resource.setrlimit(resource.RLIMIT_NOFILE, (2048, fl[1]))
 
 
 ### Classes ###

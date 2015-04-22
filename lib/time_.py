@@ -261,7 +261,7 @@ def iso8601_parse(text):
    '''Parse a date or datetime in ISO 8601 format and return a datetime
       object. For datetimes, can handle either "T" or " " as a separator.'''
    # WARNING: ISO dates have no notion of time zone. Thus, if you want a
-   # datetime in a time zone other than local time, you must include a time.
+   # datetime in a time zone other than UTC, you must include a time.
    try:
       text = ISO8601_SPACE_SEP.sub(r'\1T\3', text)
       dt = isodate.parse_datetime(text)

@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Examine a bunch of Wikipedia files and test that they are sorted in the way
+# we expect. (See the docs for details.)
+
+export LC_ALL=C
+
+DATA=$1
+TMPFILE=/tmp/wp-testsort.tmp.$$  # put it on a RAM filesystem for performance
+
+PROJ_FILTER_ALL='[a-z.]+'
+PROJ_FILTER_DOT='[a-z]+\.[a-z]+'
+PROJ_FILTER_NODOT='[a-z]+'
+URL_FILTER='[-A-Za-z0-9_~!*();@,%%]+ [0-9]+ [0-9]+$'
+
+function testsort () {
+    if (egrep "^$2 $URL_FILTER" $1 | sort --check=quiet); then
+        printf ' ok  '
+        return 0
+    else
+        printf ' fail'
+        return 1
+    fi
+}
+
+echo 'file                             dot  !dot all'
+echo '-------------------------------- ---- ---- ----'
+
+dot_fail=0
+nodot_fail=0
+all_fail=0
+file_ct=0
+# pipe through sort because multiple globs don't come out in order
+files=$(echo $DATA/raw/*/*/pagecounts-*{01,15}-{00,12}*.gz | tr ' ' '\n' | sort)
+for file in $files; do
+    echo $file | sed -e 's/^.*\///' | tr -d '\n'
+    zcat $file > $TMPFILE
+    printf ':  '
+    testsort $TMPFILE "$PROJ_FILTER_DOT"   || ((dot_fail++))
+    testsort $TMPFILE "$PROJ_FILTER_NODOT" || ((nodot_fail++))
+    testsort $TMPFILE "$PROJ_FILTER_ALL"   || ((all_fail++))
+    rm -f $TMPFILE
+    echo
+    ((file_ct++))
+    #if [[ $file_ct -ge 4 ]]; then break; fi
+done
+
+echo "${file_ct} files tested; failures: dot=$dot_fail nodot=$nodot_fail all=$all_fail"

@@ -159,14 +159,13 @@ def main():
    ds.close()
    l.info('done')
 
-def file_read(file_):
+def file_read(file_, project_re):
    try:
       ts = wikimedia.timestamp_parse(file_)
       hour_offset = time_.hour_offset(ts)
       # FIXME: See issue #108 before changing the project code filter.
-      fp = u.zcat(file_, r"zcat '%s' | LC_ALL=C egrep '^[a-z]+ [-A-Za-z0-9_~!*();@,%%]+ [0-9]+ [0-9]+$'")
+      fp = u.zcat(file_, r"zcat '%%s' | egrep '^%s [-A-Za-z0-9_~!*();@,%%%%]+ [0-9]+ [0-9]+$'" % project_re)
       badline_ct = 0
-      badline_last = None
       for (i, line) in enumerate(fp):
          try:
             (proj, url, count, _) = line.split(b' ')
@@ -181,10 +180,9 @@ def file_read(file_):
             if (isinstance(x, UnicodeDecodeError)):
                raise x
             badline_ct += 1
-            badline_last = i + 1
       if (badline_ct > 0):
-         l.warning('%s: %d lines with parse errors skipped (last was %d)'
-                   % (file_, badline_ct, badline_last))
+         l.warning('%s: %d lines with parse errors skipped'
+                   % (file_, badline_ct))
    except (EOFError, IOError) as x:
       l.warning('%s: error reading file, skipped: %s' % (file_, str(x)))
 
@@ -205,8 +203,7 @@ def files_process(fg, files):
    proj_totals = None
    proj_last = None
    articles_seen = set()
-   for ((proj, url), gr) in itertools.groupby(heapq.merge(*(file_read(f)
-                                                            for f in files)),
+   for ((proj, url), gr) in itertools.groupby(files_read(files),
                                               key=lambda i: i[:2]):
       url_total_ct += 1
       if (args.warn_duplicates):
@@ -244,6 +241,24 @@ def files_process(fg, files):
                 url_total_ct / time_used))
    except ZeroDivisionError:
       pass
+
+def files_read(pv_files):
+   pipes = list()
+   # While there is a period near the beginning of the data which appear to
+   # contain fully sorted files, I don't trust this tremendously, so I only
+   # test against the later transition back to fully-sorted. (See the docs.)
+   for f in pv_files:
+      ts = wikimedia.timestamp_parse(f)
+      if (ts <= time_.iso8601_parse('2015-01-15')):
+         # dot and non-dot sorted separately; use two pipes
+         pipes.append(file_read(f, r'[a-z]+'))
+         pipes.append(file_read(f, r'[a-z]+\.[a-z]+'))
+      else:
+         # fully sorted; need only one pipe
+         pipes.append(file_read(f, r'[a-z.]+'))
+   # We pursued an external "sort -m" based merge, but this turns out to
+   # perform just as well and is simpler.
+   return heapq.merge(*pipes)
 
 def pv_files_validated(pv_files):
    # Check month consistency in reverse order because the most common cause of
