@@ -636,6 +636,13 @@ def mpi_available_p():
    return bool('SLURM_NODELIST' in os.environ
                and distutils.spawn.find_executable('mpirun'))
 
+def mtime(filename):
+   "Return the mtime of filename, or the epoch if it doesn't exist."
+   try:
+      return os.stat(filename).st_mtime
+   except FileNotFoundError:
+      return 0
+
 def path_configured(path):
    if (cpath is None):
       raise No_Configuration_Read()

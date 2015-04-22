@@ -145,6 +145,7 @@ def main():
    ds = timeseries.Dataset(args.outfile, int(c['wkpd']['hashmod']),
                            writeable=True)
    fg = ds.open_month(month)
+   outfile_mtime = fg.mtime
    l.info('opened %s/%s length %d hours' % (args.outfile, fg.tag, fg.length))
    args.file_empty_p = fg.empty_p()
    args.eager_prune_p = args.prune
@@ -157,6 +158,7 @@ def main():
       l.info('pruned to %d in %s' % (args.keep_threshold,
                                      u.fmt_seconds(time.time() - start)))
    ds.close()
+   fg.mtime = mtime_max(outfile_mtime, *pv_files)
    l.info('done')
 
 def file_read(file_, project_re):
@@ -259,6 +261,32 @@ def files_read(pv_files):
    # We pursued an external "sort -m" based merge, but this turns out to
    # perform just as well and is simpler.
    return heapq.merge(*pipes)
+
+def mtime_max(*files):
+   '''Compute a "maximum" mtime which is two microseconds after the last
+      time found in the arguments, which can be float timestamps or strings,
+      the latter assumed to be filenames from which mtime is gathered.
+
+      The two microseconds are because some Linux filesystems (e.g., ext4)
+      store timestamps to nanosecond resolution, but Python can only set to
+      microsecond resolution. For example, copying the mtime 2013-11-12
+      14:46:35.567961144 will result in 2013-11-12 14:46:35.567961000, which
+      is earlier; therefore, unnecessary files may be processed. Adding a
+      small interval guarantees that the metadata file is the same or newer.
+      We use two microseconds rather than one because I saw (but couldn't
+      reproduce) an example of make not believing a one-microsecond file to be
+      newer, which I think is attributable to a rounding error of some kind.
+
+      This assumes that the earliest file processed in the *next* run is at
+      least two microseconds newer than the latest file in this run. This
+      assumption is violated in some of the older data, I believe that which
+      has been moved around at some point, so use caution.'''
+   def mtime(f):
+      if (isinstance(f, str)):
+         return u.mtime(f)
+      else:
+         return f
+   return max(mtime(f) for f in files) + 2e-6
 
 def pv_files_validated(pv_files):
    # Check month consistency in reverse order because the most common cause of

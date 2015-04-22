@@ -41,3 +41,8 @@ x rm -Rf data
 x $WP_TSUPDATE --prune data $(ls raw/2012/2012-10/*.gz | tail -n +2) \
                             raw/2012/2012-11/pagecounts-20121101-000000.gz
 
+echo
+echo '*** Validate modification times'
+stat data/* | fgrep Modify: | sed -E 's/[0-9]{6} / /' > mtime.dataset
+stat raw/2012/2012-10/pagecounts-201210* raw/2012/2012-11/pagecounts-20121101-000000.gz | fgrep Modify: | sed -E 's/[0-9]{6} / /' | tail -1 > mtime.input
+diff -u mtime.input mtime.dataset

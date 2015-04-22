@@ -100,3 +100,5 @@ wptsu INFO     write strategy 3 (eager prune=1, empty=1), keep threshold=30
 wptsu INFO     read 807 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     5 of 280 URLs saved (1.8%, [RATE] total/s)
 wptsu INFO     done
+
+*** Validate modification times

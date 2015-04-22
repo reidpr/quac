@@ -541,6 +541,17 @@ class Fragment_Group(object):
                 'tag',
                 'writeable')
 
+   @property
+   def mtime(self):
+      if (self.empty_p):
+         return 0
+      else:
+         return u.mtime(self.filename)
+
+   @mtime.setter
+   def mtime(self, value):
+      os.utime(self.filename, (value, value))
+
    def __init__(self, dataset, filename, tag, length=None):
       self.dataset = dataset
       self.filename = '%s/%s.db' % (filename, tag)
