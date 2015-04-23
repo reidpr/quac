@@ -6,10 +6,9 @@
 
 cd $DATADIR
 ln -s $QUACBASE/tests/standalone/wp-access/raw .
-ln -s $QUACBASE/tests/standalone/test.cfg .
 
 LIMIT=5
-WP_TSUPDATE="wp-tsupdate --notimes --warn-duplicates --config test.cfg --limit=$LIMIT"
+WP_TSUPDATE="wp-tsupdate --warn-duplicates --limit=$LIMIT"
 
 echo
 echo '*** Warning -- bad globbing gives multiple months'

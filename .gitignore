@@ -114,5 +114,5 @@ tests/twitter/tweets/pre
 tests/twitter/tweets/geo
 
 # derived test wikimedia data
-tests/standalone/wp-access/h5.mk
-tests/standalone/wp-access/h5/*
+tests/standalone/wp-access/ts.mk
+tests/standalone/wp-access/ts

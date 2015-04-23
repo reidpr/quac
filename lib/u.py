@@ -34,6 +34,7 @@ import pytz
 import random
 import re
 import resource
+import shlex
 import subprocess
 import sys
 import time
@@ -358,11 +359,6 @@ def configure(config_path):
       specified in the files."""
    global cpath
    config_read(abspath("../misc/default.cfg", __file__))  # 1. default.cfg
-   if (config_path is None):
-      try:
-         config_path = os.environ['QUACCONFIG']
-      except KeyError:
-         pass
    if (config_path is not None):
       # this need to be an absolute path in case we change directories later
       cpath = os.path.abspath(config_path)
@@ -679,6 +675,10 @@ def partition_sentinel(iter_, sentinel):
 def parse_args(ap, args=sys.argv[1:]):
    '''Parse command line arguments and set a few globals based on the result.
       Note that this function must be called before logging_init().'''
+   try:
+      args = shlex.split(os.environ['QUACARGS']) + args
+   except KeyError:
+      pass
    args = ap.parse_args(args)
    try:
       multicore.init(args.cores)

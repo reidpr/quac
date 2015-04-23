@@ -12,6 +12,9 @@ export PATH=$QUACBASE/bin:$PATH
 # $PYTHONPATH is unset.
 export PYTHONPATH=$QUACBASE/lib${PYTHONPATH:+:}$PYTHONPATH
 
+# Use the test arguments
+export QUACARGS="--notimes --config=$QUACBASE/tests/test.cfg"
+
 # Make a private directory for tests to work in. If tests need to share state,
 # they can set it up manually.
 mkdir $DATADIR/$TESTNAME

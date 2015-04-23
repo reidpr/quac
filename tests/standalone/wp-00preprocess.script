@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Preprocess the Wikipedia data and test that it worked. Later Wikipedia tests
+# will use these data, so it needs to come first.
+
+# Copyright © Los Alamos National Security, LLC, and others.
+
+. ./environment.sh
+cd wp-access
+
+MAKEFILE=$QUACBASE/misc/wp-preprocess.mk
+
+# Do we have the expected raw files?
+x ls -R raw
+
+# Fiddle a timestamp so the newest file is predictable and not the last file
+# when sorted lexically.
+touch -c raw/2099/2099-01/pagecounts-20990101-010000.gz
+
+# Remove existing makefile and time series files, etc.
+x make -f $MAKEFILE clean
+x ls
+
+# Make all
+x make -f $MAKEFILE
+x ls . ts
+
+# Touch a file, make again
+x touch -c raw/2099/2099-01/pagecounts-20990101-010000.gz
+x make -f $MAKEFILE
+x ls . ts
+
+# Make only complete months
+x rm -Rf ts
+x make -f $MAKEFILE tsfiles-complete
+x ls . ts
+
+# Make only incomplete months
+x make -f $MAKEFILE tsfiles-incomplete
+x ls . ts
+x make -f $MAKEFILE
