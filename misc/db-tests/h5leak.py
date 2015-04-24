@@ -1,3 +1,5 @@
+# Copyright © Los Alamos National Security, LLC, and others.
+
 import gc
 import h5py
 import memory_profiler

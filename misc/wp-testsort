@@ -3,6 +3,9 @@
 # Examine a bunch of Wikipedia files and test that they are sorted in the way
 # we expect. (See the docs for details.)
 
+# Copyright © Los Alamos National Security, LLC, and others.
+
+
 export LC_ALL=C
 
 DATA=$1

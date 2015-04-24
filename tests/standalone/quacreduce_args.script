@@ -10,7 +10,6 @@ cd $DATADIR
 
 set +e
 exec 2>&1  # send stderr to stdout to make output more readable
-#set -x    # safe because we have no pipelines in this script
 
 
 echo '*** Check input files for unique names'
@@ -43,6 +42,8 @@ echo $?
 
 echo '*** Check that job fails if the map or reduce commands fail'
 x quacreduce --notimes --map false --reduce true /dev/null
-y "make --quiet || true"
+x make --quiet
 x quacreduce --notimes --map true --reduce false /dev/null
-y "make --quiet || true"
+x make --quiet
+
+true  # don't pass make's failure code to cmdtest

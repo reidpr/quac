@@ -25,6 +25,7 @@ and --force not specified, etc. Note that import problems do cause failure.'''
 import argparse
 from collections import Counter, defaultdict
 import glob
+import io
 import os.path
 import re
 import shutil
@@ -194,8 +195,11 @@ def test_cmdtest(filename):
       stderr=subprocess.STDOUT,
       universal_newlines=True)
    if (testout.find('0 failures') < 0):
-      print()
-      print(testout, end=' ')
+      if (len(testout.splitlines()) > 12):
+         print('FAILED, large diff not printed')
+      else:
+         print()
+         print(testout, end=' ')
       raise Failure('fail')
    # Success!
    print('ok')
@@ -208,7 +212,7 @@ def test_module(filename):
    print(filename[2:], '...', end=' ')
    sys.stdout.flush()
    module = file_to_module(filename)
-   text = open(filename, 'rt').read()
+   text = io.open(filename, 'rt', encoding='UTF-8').read()
    # Check prerequisites for testing
    is_testable(text)
    import_test(filename, text)
@@ -228,7 +232,7 @@ def test_module(filename):
 
 def test_script(filename):
    # Is it a Python script? If not, ignore it.
-   bytes_ = open(filename, 'rb').read()
+   bytes_ = io.open(filename, 'rb').read()
    if (not re.search(rb'^#!.+python', bytes_)):
       raise Failure('ignore')
    # Start test

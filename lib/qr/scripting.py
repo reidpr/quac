@@ -164,7 +164,6 @@ def makefile_dump(args):
 
 SHELL=%s
 .SHELLFLAGS=-ec
-.ONESHELL:
 
 '''
             % (time_.nowstr_human(), shell))

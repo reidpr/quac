@@ -12,32 +12,32 @@ WP_TSUPDATE="wp-tsupdate --warn-duplicates --limit=$LIMIT"
 
 echo
 echo '*** Warning -- bad globbing gives multiple months'
-x $WP_TSUPDATE data raw/2012/2012-10/pagecounts-20121001-*.gz
+z $WP_TSUPDATE data raw/2012/2012-10/pagecounts-20121001-*.gz
 
 echo
 echo '*** Strategy 1 -- first update of month (one day)'
 x rm -Rf data
-x $WP_TSUPDATE data \
+z $WP_TSUPDATE data \
     $(ls raw/2012/2012-10/pagecounts-20121001-*.gz | tail -n +2) \
     raw/2012/2012-10/pagecounts-20121002-000000.gz
 x ts-dump data
 
 echo
 echo '*** Strategy 0 -- first ~29 days'
-x $WP_TSUPDATE data \
+z $WP_TSUPDATE data \
     $(ls raw/2012/2012-10/pagecounts-201210[012]*.gz | tail -n +2)
 x ts-dump data
 
 echo
 echo '*** Strategy 2 -- close out month (2 days + 1 hour)'
-x $WP_TSUPDATE --prune data raw/2012/2012-10/pagecounts-2012103*.gz \
+z $WP_TSUPDATE --prune data raw/2012/2012-10/pagecounts-2012103*.gz \
                             raw/2012/2012-11/pagecounts-20121101-000000.gz
 x ts-dump data
 
 echo
 echo '*** Strategy 3 -- bulk load a whole month'
 x rm -Rf data
-x $WP_TSUPDATE --prune data $(ls raw/2012/2012-10/*.gz | tail -n +2) \
+z $WP_TSUPDATE --prune data $(ls raw/2012/2012-10/*.gz | tail -n +2) \
                             raw/2012/2012-11/pagecounts-20121101-000000.gz
 
 echo

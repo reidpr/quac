@@ -149,11 +149,15 @@ class ArgumentParser(argparse.ArgumentParser):
       self.default_group = self.add_argument_group('functionality')
 
    def parse_args(self, args):
-      gr = self.add_argument_group('help, etc.')
+      gr = self.add_argument_group('generic options')
       gr.add_argument(
          '-h', '--help',
          action='help',
          help='show this help message and exit')
+      gr.add_argument(
+         '--config',
+         metavar='FILE',
+         help='configuration file')
       gr.add_argument(
          '--notimes',
          action='store_true',

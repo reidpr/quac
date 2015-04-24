@@ -3,29 +3,21 @@
 # Test that wp-get-dumps script works. To do so, we download dumps for one of
 # the smallest Wikipedias, Afar (http://aa.wikipedia.org).
 #
-# This is a little risky, as mirror could stop working, the dump content could
-# change, etc. But, we'll try it out. In this particular case, the wiki is
-# "locked" as of 6/3/2013 (because there's no actual content), so that should
-# help.
+# While the wiki is "closed" as of 4/23/2013, the content of the dump does
+# change from time to time as the export format is updated.
 #
 # Copyright (c) Los Alamos National Security, LLC, and others.
 
 . ./environment.sh
 
-cd $DATADIR
-
+# Use a generic location rather than test-specific so that we can configure
+# the path.
+cd $QUACBASE/tests/tmp
+rm -Rf wp-dumps
 mkdir wp-dumps
-cat > quacrc <<EOF
-[wkpd]
-dump_dir = wp-dumps
-bandwidth_limit = 10000
-projects = aawiki
-dumps = stub-meta-history.xml.gz pagelinks.sql.gz
-EOF
 
-# Do the mirror. The head pipe is to remove the statistics, which change; the
-# "updating Wikimedia dumps" line also changes b/c it contains $DESTDIR.
-y "wp-get-dumps --notimes --config quacrc 2>&1 | head -n -15 | fgrep -v 'updating Wikimedia dumps'"
+# Do the mirror. The head pipe is to remove the statistics, which change.
+y "wp-get-dumps 2>&1 | head -n -15"
 
 # Dumps contain timestamps and system version information which change.
 # Therefore, we need to extract the .gz files and do a little magic for a

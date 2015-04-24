@@ -1,3 +1,5 @@
+# Copyright © Los Alamos National Security, LLC, and others.
+
 import os
 from pprint import pprint
 import time

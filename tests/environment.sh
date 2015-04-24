@@ -32,24 +32,32 @@ set -e
 # - timestamps (e.g., 1:23:45)
 # - rates (e.g., 100 elephants/s)
 #
-# The regular expressions look like line noise because I'm trying to be
-# portable.
+# FIXME: These sed expressions have been untested on a Mac. They used to use
+# the non-extended syntax, which is kind of horrible and kept confusing me.
+# Interestingly, the -E flag is undocumented on Ubuntu but sees to work. We
+# may need some other portability solution.
 cleanup () {
-    sed -e 's/[0-9]\{1,2\}:[0-9][0-9]:[0-9][0-9]/[TIME]/g' \
-        -e 's/[0-9.]\{1,\} \([a-zA-Z]\{1,\}\/s\)/[RATE] \1/g' \
-        -e "s|$QUACBASE|[QUACBASE]|g"
+    sed -E -e 's/[0-9]{1,2}:[0-9]{2}:[0-9]{2}/[TIME]/g' \
+           -e 's/[0-9.]+( ?[a-zA-Z]+\/(s|second)([ )]|$))/[RATE]\1/g' \
+           -e "s|$QUACBASE|[QUACBASE]|g"
 }
 
-# echo key commands
+# Echo key commands (in parent shell), no cleanup.
 x () {
-    echo "\$ $@" | cleanup
-    eval "$@" 2>&1 | cleanup
+    echo "\$ $@"
+    eval "$@" 2>&1
 }
 
-# echo key pipelines (executed in a subshell)
+# Echo key pipelines (in a subshell), piping through cleanup
 y () {
     echo "$ ($1)" | cleanup
     bash -c "$1" 2>&1 | cleanup
+}
+
+# Echo key commands (in parent shell), with cleanup; return value inaccessible.
+z () {
+    echo "\$ $@" | cleanup
+    eval "$@" 2>&1 | cleanup
 }
 
 # Decide how to call netstat. The problem is that Red Hat and everyone else
