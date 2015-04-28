@@ -12,7 +12,7 @@
 
 # Use a generic location rather than test-specific so that we can configure
 # the path.
-cd $QUACBASE/tests/tmp
+cd $TMPDIR
 rm -Rf wp-dumps
 mkdir wp-dumps
 

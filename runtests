@@ -44,8 +44,10 @@ ap.add_argument('--interactive',
 ap.add_argument('--noclean',
                 action='store_true',
                 help="don't remove old test runs from test directory")
+ap.add_argument('--tmp',
+                help="tempdir for tests (default: inside QUAC source tree)")
 ap.add_argument('target',
-                help='modules, scripts, and/or cmdtests to run (default all)',
+                help='modules, scripts, and/or cmdtests to run (default: all)',
                 nargs='*',
                 metavar='FILE')
 args = ap.parse_args()
@@ -59,11 +61,15 @@ for (i, t) in enumerate(args.target):
    if (t[:2] != './'):
       args.target[i] = './' + args.target[i]
 
-# We want to use a temporary directory within the QUAC checkout because
-# typical default TMPDIR settings are not shared between nodes in a cluster,
-# which we need for some tests.
-tmpdir = os.path.join(quacbase, 'tests/tmp')
-if (not args.noclean):
+# Default temporary directory is within the QUAC checkout because typical
+# $TMPDIR settings are not shared between nodes in a cluster, which we need
+# for some tests. On the other hand, sometimes using the one in the QUAC
+# checkout has issues (e.g., if it's a read-only mount).
+if (args.tmp):
+   tmpdir = os.path.join(os.path.expanduser(args.tmp), 'quactest')
+else:
+   tmpdir = os.path.join(quacbase, 'tests/tmp')
+if (not args.noclean and os.path.exists(tmpdir)):
    print('### removing old test temporary data')
    shutil.rmtree(tmpdir)
    os.mkdir(tmpdir)

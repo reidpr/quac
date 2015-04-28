@@ -88,13 +88,13 @@ These instructions assume that virtualenvs are installed under
    bindings). This cannot be done using :samp:`pip` because the install script
    requires options, and :samp:`pip` `cannot provide them
    <http://rogerbinns.github.io/apsw/download.html#easy-install-pip-pypi>`_.
-   For example (the latest version is probably the best choice)::
+   For example (use the latest version)::
 
      $ pushd /usr/local/src
-     $ wget https://github.com/rogerbinns/apsw/releases/download/3.8.8.2-r1/apsw-3.8.8.2-r1.zip
-     $ unzip apsw-3.8.8.2-r1.zip
-     $ cd apsw-3.8.8.2-r1
-     $ python setup.py fetch --all --missing-checksum-ok build --enable-all-extensions install test
+     $ wget https://github.com/rogerbinns/apsw/releases/download/3.8.9-r1/apsw-3.8.9-r1.zip
+     $ unzip apsw-3.8.9-r1.zip
+     $ cd apsw-3.8.9-r1
+     $ python setup.py fetch --all build --enable-all-extensions install test
      $ popd
 
    The tests take 5-10 minutes to run; you can omit if you want to live
@@ -102,6 +102,14 @@ These instructions assume that virtualenvs are installed under
 
    You can also install APSW at the system level and configure your virtualenv
    to pass system modules through.
+
+   .. warning:: APSW version 3.8.9, and hence SQLite 3.8.9, or higher is
+                required. This is because prior versions of SQLite incorrectly
+                enforce memory limits that QUAC depends on, leading to a
+                memory leak. See the 3rd item in the `release notes
+                <http://www.sqlite.org/releaselog/3_8_9.html>`_ and the
+                `relevant commit
+                <http://www.sqlite.org/cgi/src/vinfo/6fc4e79a2350295a?sbs=0>`_.
 
 #. Install remaining Python dependencies::
 

@@ -936,6 +936,14 @@ def fmt_seconds(num):
    return str(timedelta(seconds=int(round(num))))
 
 def fmt_si(num):
+   """e.g.:
+
+      >>> fmt_si(1)
+      '1.00'
+      >>> fmt_si(10**3)
+      '1.00k'
+      >>> fmt_si(2**10)
+      '1.02k'"""
    return fmt_real(num, 1000, ["", "k", "M", "G", "T", "P"])
 
 def fmt_sparsearray(a):
@@ -946,16 +954,52 @@ def fmt_sparsearray(a):
                              ' ' if nonsparse else '', nonsparse))
 
 def fmt_bytes(num):
+   """e.g.:
+
+      >>> fmt_bytes(1)
+      '1.00B'
+      >>> fmt_bytes(10**3)
+      '1000.00B'
+      >>> fmt_bytes(2**10)
+      '1.00KiB'
+      >>> fmt_bytes(10**6)
+      '976.56KiB'
+      >>> fmt_bytes(2**20)
+      '1.00MiB'
+      >>> fmt_bytes(2**30)
+      '1.00GiB'
+      >>> fmt_bytes(2**31)
+      '2.00GiB'
+      >>> fmt_bytes(2**32+1)
+      '4.00GiB'"""
    return fmt_real(num, 1024, ["B", "KiB", "MiB", "GiB", "TiB", "PiB"])
 
 def fmt_real(num, factor, units):
-   assert num >= 0, "negative numbers unimplemented"
+   '''e.g.:
+
+      >>> fmt_real(1.23456, 10, ('a', 'b'))
+      '1.23a'
+      >>> fmt_real(12.3456, 10, ('a', 'b'))
+      '1.23b'
+      >>> fmt_real(-1.23456, 10, ('a', 'b'))
+      '-1.23a'
+      >>> fmt_real(-12.3456, 10, ('a', 'b'))
+      '-1.23b'
+      >>> fmt_real(123.456, 10, ('a', 'b'))
+      Traceback (most recent call last):
+        ...
+      ValueError: number too large'''
+   if (num >= 0):
+      sign = ''
+   else:
+      sign = '-'
+      num *= -1
    factor = float(factor)
    for unit in units:
       if (num < factor):
-         return ("%.1f%s" % (num, unit))
+         return ("%s%.2f%s" % (sign, num, unit))
       num /= factor
-   assert False, "number too large"
+   raise ValueError('number too large')
 
 
 # Default logger to allow testing. You should never actually see output from

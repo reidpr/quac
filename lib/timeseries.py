@@ -37,6 +37,7 @@ Test setup:
 
 Create read-write and read-only time series datasets with four shards:
 
+   >>> c = u.configure(None)
    >>> ds = Dataset(tmp + '/foo', 4, writeable=True)
    >>> ds2 = Dataset(tmp + '/foo', 4)
 
@@ -415,6 +416,7 @@ import testable
 import time_
 import u
 
+c = u.c
 l = u.l
 #u.logging_init('test', verbose_=True)
 #l.debug('')
@@ -468,7 +470,7 @@ class Dataset(object):
 
    @property
    def fragment_tags(self):
-      for g in glob.iglob('%s/*.db' % self.filename):
+      for g in sorted(glob.iglob('%s/*.db' % self.filename)):
          yield os.path.split(os.path.splitext(g)[0])[1]
 
    def assemble(self, fragments):
@@ -682,8 +684,9 @@ class Fragment_Group(object):
       self.connect(writeable)
       # We use journal_mode = PERSIST to avoid metadata operations and
       # re-allocation, which can be expensive on parallel filesystems.
-      self.db.sql("""PRAGMA cache_size = -1048576;
-                     PRAGMA synchronous = OFF; """)
+      self.db.sql("""PRAGMA cache_size = -%d;
+                     PRAGMA synchronous = OFF; """
+                  % c.getint('limt', 'sqlite_page_cache_kb'))
       self.initialize_db()
       self.validate_db()
 

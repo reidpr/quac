@@ -34,6 +34,9 @@ import sys
 
 import apsw
 
+import u
+c = u.c
+
 
 class Not_Enough_Rows_Error(Exception): pass
 class Too_Many_Rows_Error(Exception): pass
@@ -46,6 +49,7 @@ class SQLite(object):
                 'curs')
 
    def __init__(self, filename, writeable):
+      apsw.softheaplimit(c.getint('limt', 'sqlite_heap_bytes'))
       if (writeable):
          flags = apsw.SQLITE_OPEN_READWRITE | apsw.SQLITE_OPEN_CREATE
       else:

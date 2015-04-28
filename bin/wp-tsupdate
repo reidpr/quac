@@ -115,21 +115,22 @@ ap = u.ArgumentParser(description=__doc__)
 gr = ap.default_group
 gr.add_argument('--warn-duplicates',
                 action='store_true',
-                help='Warn if article found more than once (lots of memory!)')
-gr.add_argument('--config',
-                metavar='FILE',
-                help='Configuration file')
+                help='warn if article found more than once (lots of memory!)')
 gr.add_argument('--limit',
                 metavar='N',
                 type=int,
                 default=sys.maxsize,
-                help='Stop processing after saving this many time series')
+                help='stop processing after saving this many time series')
 gr.add_argument('--prune',
                 action='store_true',
-                help='Prune and compact the dataset')
+                help='prune and compact the dataset')
+gr.add_argument('--stats',
+                metavar='N',
+                type=int,
+                help='print statistics every N writes (implies --verbose)')
 gr.add_argument('outfile',
                 metavar='OUTFILE',
-                help='Time series dataset to create or update')
+                help='time series dataset to create or update')
 gr.add_argument('pv_files',
                 metavar='PAGECOUNT',
                 nargs='+',
@@ -205,6 +206,7 @@ def files_process(fg, files):
    proj_totals = None
    proj_last = None
    articles_seen = set()
+   stats_printed = True
    for ((proj, url), gr) in itertools.groupby(files_read(files),
                                               key=lambda i: i[:2]):
       url_total_ct += 1
@@ -230,6 +232,17 @@ def files_process(fg, files):
             proj_totals.data[hour_offset] += count
       if (url_v.save(keep_threshold)):
          url_write_ct += 1
+         stats_printed = False # avoid multiple stats after non-write iterations
+      if (args.stats and url_write_ct % args.stats == 0 and not stats_printed):
+         l.debug('... statistics after %d writes ...' % url_write_ct)
+         l.debug('current article: %s' % url_v.name)
+         u.memory_use_log()
+         l.debug('SQLite malloc: %s now, %s max'
+                 % (u.fmt_bytes(apsw.memoryused()),
+                    u.fmt_bytes(apsw.memoryhighwater())))
+         l.debug('SQLite pagecache pages: %d now, %s max'
+                 % apsw.status(apsw.SQLITE_STATUS_PAGECACHE_USED))
+         stats_printed = True
       if (url_write_ct >= args.limit):
          break
    if (proj_last is not None):
@@ -319,6 +332,8 @@ def pv_files_validated(pv_files):
 
 try:
    args = u.parse_args(ap)
+   if (args.stats):
+      u.verbose = True
    u.configure(args.config)
    u.logging_init('wptsu')
    if (__name__ == '__main__'):

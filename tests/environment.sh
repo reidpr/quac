@@ -1,5 +1,7 @@
 # Copyright (c) Los Alamos National Security, LLC, and others.
 
+umask 007
+
 # Set up environment for tests.
 
 # base QUAC directory
