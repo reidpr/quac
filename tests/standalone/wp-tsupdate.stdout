@@ -73,6 +73,7 @@ wptsu INFO     write strategy 2 (eager prune=1, empty=0), keep threshold=30
 wptsu INFO     read 312 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     5 of 62 URLs saved (8.1%, [RATE] total/s)
 wptsu INFO     pruned to 30 in [TIME]
+wptsu INFO     vacuumed in [TIME]
 wptsu INFO     done
 $ ts-dump data
 fragment 2012-10-01
@@ -99,6 +100,7 @@ wptsu INFO     opened data/2012-10-01 length 744 hours
 wptsu INFO     write strategy 3 (eager prune=1, empty=1), keep threshold=30
 wptsu INFO     read 807 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     5 of 280 URLs saved (1.8%, [RATE] total/s)
+wptsu INFO     vacuumed in [TIME]
 wptsu INFO     done
 
 *** Validate modification times

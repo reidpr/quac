@@ -698,6 +698,8 @@ class Fragment_Group(object):
          # and retain the WITHOUT ROWID property.
          self.db.sql("DELETE FROM data%d WHERE total < ?" % si, (keep_thr,))
       l.debug('deleted pruneable rows')
+
+   def vacuum(self):
       self.db.sql("VACUUM");
       page_size = self.db.get_one("PRAGMA page_size")[0]
       free_ct = self.db.get_one("PRAGMA freelist_count")[0]

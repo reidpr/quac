@@ -153,11 +153,21 @@ def main():
    fg.begin()
    files_process(fg, pv_files)
    fg.commit()
-   if (args.prune and not args.file_empty_p):
+   if (args.prune):
+      if (not args.file_empty_p):
+         # Strategy 2: batch prune
+         start = time.time()
+         fg.prune(args.keep_threshold)
+         l.info('pruned to %d in %s' % (args.keep_threshold,
+                                        u.fmt_seconds(time.time() - start)))
+      # Strategies 2 and 3. Vacuuming apparently helps even under Strategy 3,
+      # where I assumed it wouldn't, because we insert in sequential order
+      # with no deletions. However, some very informal tests suggest a space
+      # savings of 10% and single-article query performance improvement of 2x,
+      # at the cost of several hours of vacuuming.
       start = time.time()
-      fg.prune(args.keep_threshold)
-      l.info('pruned to %d in %s' % (args.keep_threshold,
-                                     u.fmt_seconds(time.time() - start)))
+      fg.vacuum()
+      l.info('vacuumed in %s' % u.fmt_seconds(time.time() - start))
    ds.close()
    fg.mtime = mtime_max(outfile_mtime, *pv_files)
    l.info('done')
