@@ -1596,6 +1596,8 @@ wptsu INFO     opened ts/2012-10-01 length 744 hours
 wptsu INFO     write strategy 3 (eager prune=1, empty=1), keep threshold=30
 wptsu INFO     read 371981 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     1701 of 84533 URLs saved (2.0%, [RATE] total/s)
+wptsu DEBUG    vacuumed: 6.50MiB used; 104 total, 0 free pages
+wptsu INFO     vacuumed in [TIME]
 wptsu INFO     done
 wp-tsupdate --prune on 97 files for 2012-09-01.db ...
 wptsu INFO     starting
@@ -1606,6 +1608,8 @@ wptsu INFO     opened ts/2012-09-01 length 720 hours
 wptsu INFO     write strategy 3 (eager prune=1, empty=1), keep threshold=30
 wptsu INFO     read 44897 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     437 of 12774 URLs saved (3.4%, [RATE] total/s)
+wptsu DEBUG    vacuumed: 2.06MiB used; 33 total, 0 free pages
+wptsu INFO     vacuumed in [TIME]
 wptsu INFO     done
 wp-tsupdate on 2 files for 2099-01-01.db ...
 wptsu INFO     starting
@@ -1719,6 +1723,8 @@ wptsu INFO     opened ts/2012-10-01 length 744 hours
 wptsu INFO     write strategy 3 (eager prune=1, empty=1), keep threshold=30
 wptsu INFO     read 371981 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     1701 of 84533 URLs saved (2.0%, [RATE] total/s)
+wptsu DEBUG    vacuumed: 6.50MiB used; 104 total, 0 free pages
+wptsu INFO     vacuumed in [TIME]
 wptsu INFO     done
 wp-tsupdate --prune on 97 files for 2012-09-01.db ...
 wptsu INFO     starting
@@ -1729,6 +1735,8 @@ wptsu INFO     opened ts/2012-09-01 length 720 hours
 wptsu INFO     write strategy 3 (eager prune=1, empty=1), keep threshold=30
 wptsu INFO     read 44897 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     437 of 12774 URLs saved (3.4%, [RATE] total/s)
+wptsu DEBUG    vacuumed: 2.06MiB used; 33 total, 0 free pages
+wptsu INFO     vacuumed in [TIME]
 wptsu INFO     done
 $ ls . ts
 .:
