@@ -3,6 +3,9 @@
 QUACBASE := $(abspath $(shell dirname $(lastword $(MAKEFILE_LIST)))/..)
 export PATH := $(QUACBASE)/bin:$(PATH)
 
+.ONESHELL:
+.SHELLFLAGS = -ec
+
 ## Files
 
 # Directory containing pagecount files

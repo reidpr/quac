@@ -1584,7 +1584,7 @@ ls-R.fulldata
 raw
 README
 $ make -f [QUACBASE]/misc/wp-preprocess.mk
-[QUACBASE]/misc/wp-preprocess.mk:32: ts.mk: No such file or directory
+[QUACBASE]/misc/wp-preprocess.mk:35: ts.mk: No such file or directory
 mkdir -p ts
 wp-ts.mk-create raw > ts.mk
 wp-tsupdate --prune on 718 files for 2012-10-01.db ...
