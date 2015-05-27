@@ -51,8 +51,8 @@ for (ts, files) in deps.items():
    print('%s: ts/%s' % (target, dbfile))
    print('ts/%s: %s' % (dbfile, ' '.join(sorted(files))))
    # $? is all newer prerequisites
+   # command printing suppressed because it is so huge
    print('\t@echo wp-tsupdate %s on $(words $?) files for %s ...'
          % (prune, dbfile))
-   # command printing suppressed because it is so huge
-   print('\t@wp-tsupdate %s --verbose ts $?' % prune)
+   print('\twp-tsupdate %s --verbose --stats 5000 ts $?' % prune)
 
