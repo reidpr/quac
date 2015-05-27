@@ -56,7 +56,7 @@ STATEFILE = '/tmp/%s+%s' % (CWDPROXY, 'sshrot.state')
 SOCKFILE = '/tmp/%s+%s' % (CWDPROXY, 'sshsock.%h')
 if (u.mpi_available_p()):
    MPI_MODE = True
-   CMD_BASE = ['mpirun', '-np', '1', '-H']
+   CMD_BASE = ['mpirun', '-x', 'PATH', '-np', '1', '-H']
 else:
    MPI_MODE = False
    CMD_BASE = ['ssh', '-o', 'BatchMode=yes']
