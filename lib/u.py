@@ -28,6 +28,7 @@ import logging
 import os
 import os.path
 import pickle
+import platform
 from pprint import pprint
 import psutil
 import pytz
@@ -501,11 +502,11 @@ def logging_init(tag, file_=None, stderr_force=False, level=None,
 
    # add tag string to permit logcheck filtering, which applies the same
    # regexes to all files it's watching.
+   hostname = platform.node().split('.')[0]
+   fmt = '%s %s %%(levelname)-8s %%(message)s'
    if (log_timestamps):
-      fmt = '%%(asctime)s %s %%(levelname)-8s %%(message)s'
-   else:
-      fmt = '%s %%(levelname)-8s %%(message)s'
-   form = logging.Formatter((fmt % (tag)), '%Y-%m-%d_%H:%M:%S')
+      fmt = '%%(asctime)s ' + fmt
+   form = logging.Formatter((fmt % (hostname, tag)), '%Y-%m-%d_%H:%M:%S')
 
    # file logger
    try:
