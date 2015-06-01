@@ -19,12 +19,21 @@ $ head -5 aawiki-latest-pagelinks.sql
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8 */;
+$ tail -5 aawiki-latest-pagelinks.sql
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
 $ head -5 aawiki-latest-stub-meta-history.xml
 <mediawiki xmlns="http://www.mediawiki.org/xml/export-0.10/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.10/ http://www.mediawiki.org/xml/export-0.10.xsd" version="0.10" xml:lang="aa">
   <siteinfo>
     <sitename>Wikipedia</sitename>
     <dbname>aawiki</dbname>
     <base>http://aa.wikipedia.org/wiki/Main_Page</base>
-$ md5sum aawiki-latest-pagelinks.sql aawiki-latest-stub-meta-history.xml
-558e8d2cded57a8426885687a6746371  aawiki-latest-pagelinks.sql
-be26c49fc340b624737d5fa9cc32b7cf  aawiki-latest-stub-meta-history.xml
+$ tail -5 aawiki-latest-stub-meta-history.xml
+      <text id="10533" bytes="117" />
+      <sha1>7210kk8bqhstp21n3p3mihytpu2dcan</sha1>
+    </revision>
+  </page>
+</mediawiki>

@@ -26,5 +26,6 @@ x cd wp-dumps/aawiki/latest
 y "zcat aawiki-latest-pagelinks.sql.gz | egrep -v '^--' > aawiki-latest-pagelinks.sql"
 y "zcat aawiki-latest-stub-meta-history.xml.gz | fgrep -v '<generator>' > aawiki-latest-stub-meta-history.xml"
 x head -5 aawiki-latest-pagelinks.sql
+x tail -5 aawiki-latest-pagelinks.sql
 x head -5 aawiki-latest-stub-meta-history.xml
-x md5sum aawiki-latest-pagelinks.sql aawiki-latest-stub-meta-history.xml
+x tail -5 aawiki-latest-stub-meta-history.xml
