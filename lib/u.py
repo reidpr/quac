@@ -503,10 +503,11 @@ def logging_init(tag, file_=None, stderr_force=False, level=None,
    # add tag string to permit logcheck filtering, which applies the same
    # regexes to all files it's watching.
    hostname = platform.node().split('.')[0]
-   fmt = '%s %s %%(levelname)-8s %%(message)s'
+   pid = os.getpid()
+   fmt = '%s %%(levelname)-8s %%(message)s' % tag
    if (log_timestamps):
-      fmt = '%%(asctime)s ' + fmt
-   form = logging.Formatter((fmt % (hostname, tag)), '%Y-%m-%d_%H:%M:%S')
+      fmt = '%%(asctime)s %s[%d] %s' % (hostname, pid, fmt)
+   form = logging.Formatter(fmt, '%Y-%m-%d_%H:%M:%S')
 
    # file logger
    try:
