@@ -142,6 +142,7 @@ gr.add_argument('pv_files',
 def main():
    l.info('starting')
    args.keep_threshold = int(c['wkpd']['keep_threshold'])
+   os.environ['SQLITE_TMPDIR'] = args.outfile
    (month, pv_files) = pv_files_validated(args.pv_files)
    ds = timeseries.Dataset(args.outfile, int(c['wkpd']['hashmod']),
                            writeable=True)
