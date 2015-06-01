@@ -54,5 +54,5 @@ for (ts, files) in deps.items():
    # command printing suppressed because it is so huge
    print('\t@echo wp-tsupdate %s on $(words $?) files for %s ...'
          % (prune, dbfile))
-   print('\twp-tsupdate %s --verbose --stats 5000 ts $?' % prune)
+   print('\twp-tsupdate %s --verbose ts $?' % prune)
 
