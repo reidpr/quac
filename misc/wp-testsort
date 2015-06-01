@@ -8,7 +8,16 @@
 
 export LC_ALL=C
 
-DATA=$1
+# If just one directory argument, it's a Wikipedia data directory; test a
+# reasonable selection of files. Otherwise, arguments are the specific files
+# to test.
+
+if [[ -d $1 ]]; then
+    # pipe through sort because multiple globs don't come out in order
+    FILES=$(echo $1/raw/*/*/pagecounts-*{01,15}-{00,12}*.gz | tr ' ' '\n' | sort)
+else
+    FILES="$*"
+fi
 TMPFILE=/tmp/wp-testsort.tmp.$$  # put it on a RAM filesystem for performance
 
 PROJ_FILTER_ALL='[a-z.]+'
@@ -33,9 +42,7 @@ dot_fail=0
 nodot_fail=0
 all_fail=0
 file_ct=0
-# pipe through sort because multiple globs don't come out in order
-files=$(echo $DATA/raw/*/*/pagecounts-*{01,15}-{00,12}*.gz | tr ' ' '\n' | sort)
-for file in $files; do
+for file in $FILES; do
     echo $file | sed -e 's/^.*\///' | tr -d '\n'
     zcat $file > $TMPFILE
     printf ':  '
