@@ -485,11 +485,14 @@ class Dataset(object):
       for g in self.groups.values():
          g.close()
 
-   def dump(self):
+   def dump(self, *tags):
       for ft in self.fragment_tags:
-         print('fragment %s' % ft)
-         fg = self.group_get(ft)
-         fg.dump()
+         if (len(tags) > 0 and ft not in tags):
+            print('fragment %s omitted' % ft)
+         else:
+            print('fragment %s' % ft)
+            fg = self.group_get(ft)
+            fg.dump()
 
    def fetch(self, name):
       fs = list()

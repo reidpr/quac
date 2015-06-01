@@ -20,7 +20,7 @@ extract () {
     year=$(echo $month | sed -e 's/...$//')
     echo $year/$month/$file
     if [ ! -e raw/$year/$month/$file ]; then
-        zcat $1 | fgrep -i sandy | gzip -9 > raw/$year/$month/$file
+        zcat $1 | fgrep -i sandy | gzip -n9 > raw/$year/$month/$file
     fi
 }
 
@@ -55,25 +55,45 @@ fi
 # want to keep the test data duration nice and compact.) All of these problems
 # were downloaded correctly from WMF.
 mkdir -p raw/2008/2008-10
+mkdir -p raw/2011/2011-01
 mkdir -p raw/2011/2011-10
 mkdir -p raw/2015/2015-01
 mkdir -p raw/2099/2099-01  # synthetic problems go here
 
 # Ends in the middle of a line (real)
-zcat $1/2008/2008-10/pagecounts-20081021-090000.gz | tail -1 | gzip -9 > raw/2008/2008-10/pagecounts-20081021-090000.gz
-
-# Named .gz but is not gzipped (real)
-cp $1/2011/2011-10/pagecounts-20111008-180001.gz raw/2011/2011-10
-
-# Contains 100 unparseable lines (synthetic) that pass egrep
-(for i in {1..100}; do echo 'a a a a'; done) | gzip -9 > raw/2099/2099-01/pagecounts-20990101-010000.gz
-
-# Ends in a way that breaks the gzip decompression (real, but with a synthetic
-# truncation added).
-dd if=$1/2009/2009-09/pagecounts-20090921-160000.gz of=raw/2099/2099-01/pagecounts-20990101-020000.gz bs=1k count=16
+zcat $1/2008/2008-10/pagecounts-20081021-090000.gz | tail -1 | gzip -n9 > raw/2008/2008-10/pagecounts-20081021-090000.gz
 
 # Not a gzip file (real, but truncated)
 head -10 $1/2010/2010-07/pagecounts-20100707-112221.tmp > raw/2099/2099-01/pagecounts-20990101-030000.tmp
 
+# Out of order (real excerpt)
+cat <<EOF | gzip -n9 > raw/2011/2011-01/pagecounts-20110116-100000.gz
+en L%C3%A1szl%C3%B3_Szab%C3%B3_(footballer_born_1989) 1 33842
+en L%C3%A1szl%C3%B3_Szoll%C3%A1s 3 15824
+en L%C3%A1szl%C3%B3_Vask%C3%BAti 1 32309
+en L%C3%A1szl%C3%B3_Vincze 1 7640
+en L%C3%A1trabjarg 1 377
+en Kyriakos 1 9920
+en Kyriakos_Kyritsis 1 10331
+en Kyriakos_Papadopoulos 4 86219
+en Kyriakos_Pittakis 1 7917
+en Kyriakos_Tamvakis 1 8358
+EOF
+
+# Named .gz but is not gzipped (real)
+cp $1/2011/2011-10/pagecounts-20111008-180001.gz raw/2011/2011-10
+
 # Whole file sorted together (dot and non-dot in proper order together)
 extract $1/2015/2015-01/pagecounts-20150103-010000.gz
+
+# Contains 100 unparseable lines (synthetic) that pass egrep
+(for i in {1..100}; do echo 'a a a a'; done) | gzip -n9 > raw/2099/2099-01/pagecounts-20990101-010000.gz
+
+# Ends in a way that breaks the gzip decompression. The problem was identified
+# in pagecounts-20090921-160000.gz.
+cat <<EOF | gzip -n9 | dd bs=24 count=1 of=raw/2099/2099-01/pagecounts-20990101-020000.gz
+a b 1 1
+c d 1 1
+e f 1 1
+g h 1 1
+EOF

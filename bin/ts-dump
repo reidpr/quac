@@ -11,4 +11,4 @@ import timeseries
 import u
 
 u.configure(None)
-timeseries.Dataset(sys.argv[1]).dump()
+timeseries.Dataset(sys.argv[1]).dump(*sys.argv[2:])
