@@ -358,6 +358,18 @@ One or more shards can be iterated through:
    d01 float64 1416 {1415z 0n (744, 55.0)}
    f10 float32 1416 {1414z 0n (0, 66.0), (1, 88.0)}
 
+Optionally, time series where the only fragment is in the lexically-last tag
+can be omitted. This is to accommodate use cases where most fragments have
+been pruned, but the last has not.
+
+   >>> for ts in ds.fetch_all(0, last_only=False):
+   ...    print(ts[0], ts[1].dtype, len(ts[1]), u.fmt_sparsearray(ts[1]))
+   f10 float32 1416 {1414z 0n (0, 66.0), (1, 88.0)}
+   >>> for ts in ds.fetch_all(3, 1, 0, last_only=False):
+   ...    print(ts[0], ts[1].dtype, len(ts[1]), u.fmt_sparsearray(ts[1]))
+   f11 float32 1416 {1413z 0n (0, 11.0), (2, 22.0), (1415, 44.0)}
+   f10 float32 1416 {1414z 0n (0, 66.0), (1, 88.0)}
+
 Opening bogus months fails:
 
    >>> january_nonutc = datetime.datetime(2015, 1, 1,
@@ -464,9 +476,17 @@ class Dataset(object):
       self.writeable = writeable
       self.groups = dict()
 
+   # FIXME: Properties are supposed to be fast, but these touch the filesystem
+   # in a loop. Memoizing seems like the right approach, but then how do we
+   # invalidate the cache?
+
    @property
    def fragment_tag_first(self):
       return next(self.fragment_tags)
+
+   @property
+   def fragment_tag_last(self):
+      return list(self.fragment_tags)[-1]
 
    @property
    def fragment_tags(self):
@@ -503,12 +523,21 @@ class Dataset(object):
          raise db.Not_Enough_Rows_Error('no non-zero fragments found')
       return self.assemble(fs)
 
-   def fetch_all(self, *shards):
+   def fetch_all(self, *shards, last_only=True):
+      last_tag = self.fragment_tag_last
       for sh in shards:
+         # Performance note: Even in last_only==False mode, we still retrieve
+         # all the fragments in the last tag, even though we will discard most
+         # of them. That is, we are guessing that keeping an orderly iteration
+         # pattern is best, even though we won't use most of the results.
          fgs = [self.group_get(t).fetch_all(sh) for t in self.fragment_tags]
          for (name, fragments) in itertools.groupby(heapq.merge(*fgs),
                                                     lambda x: x.name):
-            yield (name, self.assemble(fragments))
+            fragments = list(fragments)
+            if (len(fragments) > 1
+                or last_only
+                or last_tag != fragments[0].group.tag):
+               yield (name, self.assemble(fragments))
 
    def open_month(self, month):
       if (month.day != 1):
