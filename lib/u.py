@@ -602,7 +602,7 @@ def memory_use():
       Note: This used to have an option to get peak usage, in addition to
       current usage. However, Macs seem not to be able to do this, and since
       it's not critical information for our uses, that feature was removed.'''
-   info = psutil.Process(os.getpid()).get_memory_info()
+   info = psutil.Process(os.getpid()).memory_info()
    return (info.vms, info.rss)
 
 def memory_use_log(detail=''):
