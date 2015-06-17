@@ -1587,99 +1587,99 @@ get-test-data
 ls-R.fulldata
 raw
 README
-$ make -f [QUACBASE]/misc/wp-preprocess.mk
+$ (make -f [QUACBASE]/misc/wp-preprocess.mk 2>&1 | sort)
+
+
+
+gzip: raw/2011/2011-10/pagecounts-20111008-180001.gz: not in gzip format
+gzip: raw/2011/2011-10/pagecounts-20111008-180001.gz: not in gzip format
+gzip: raw/2099/2099-01/pagecounts-20990101-020000.gz: unexpected end of file
 [QUACBASE]/misc/wp-preprocess.mk:35: ts.mk: No such file or directory
 mkdir -p ts
 wp-ts.mk-create raw > ts.mk
-wp-tsupdate --prune on 718 files for 2012-10-01.db ...
-wptsu INFO     starting
-wptsu DEBUG    opening ts/2012-10-01.db, writeable=True
 wptsu DEBUG    initializing
-wptsu DEBUG    validated 5 metadata items
-wptsu INFO     opened ts/2012-10-01 length 744 hours
-wptsu INFO     write strategy 3 (eager prune=1, empty=1), keep threshold=60
-wptsu INFO     read 371981 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     1262 of 84533 URLs saved (1.5%, [RATE] total/s)
-wptsu DEBUG    vacuumed: 4.81MiB used; 77 total, 0 free pages
-wptsu INFO     vacuumed in [TIME]
-wptsu INFO     done
-wp-tsupdate --prune on 97 files for 2012-09-01.db ...
-wptsu INFO     starting
-wptsu DEBUG    opening ts/2012-09-01.db, writeable=True
 wptsu DEBUG    initializing
-wptsu DEBUG    validated 5 metadata items
-wptsu INFO     opened ts/2012-09-01 length 720 hours
-wptsu INFO     write strategy 3 (eager prune=1, empty=1), keep threshold=60
-wptsu INFO     read 44897 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     242 of 12774 URLs saved (1.9%, [RATE] total/s)
-wptsu DEBUG    vacuumed: 1.56MiB used; 25 total, 0 free pages
-wptsu INFO     vacuumed in [TIME]
-wptsu INFO     done
-wp-tsupdate on 719 files for 2012-11-01.db ...
-wptsu INFO     starting
-wptsu DEBUG    opening ts/2012-11-01.db, writeable=True
 wptsu DEBUG    initializing
-wptsu DEBUG    validated 5 metadata items
-wptsu INFO     opened ts/2012-11-01 length 720 hours
-wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
-wptsu INFO     read 433077 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     103741 of 103741 URLs saved (100.0%, [RATE] total/s)
-wptsu INFO     done
-wp-tsupdate on 1 files for 2011-01-01.db ...
-wptsu INFO     starting
+wptsu DEBUG    initializing
+wptsu DEBUG    initializing
+wptsu DEBUG    initializing
+wptsu DEBUG    initializing
+wptsu DEBUG    initializing
+wptsu DEBUG    opening ts/2008-10-01.db, writeable=True
 wptsu DEBUG    opening ts/2011-01-01.db, writeable=True
-wptsu DEBUG    initializing
+wptsu DEBUG    opening ts/2011-10-01.db, writeable=True
+wptsu DEBUG    opening ts/2012-09-01.db, writeable=True
+wptsu DEBUG    opening ts/2012-10-01.db, writeable=True
+wptsu DEBUG    opening ts/2012-11-01.db, writeable=True
+wptsu DEBUG    opening ts/2015-01-01.db, writeable=True
+wptsu DEBUG    opening ts/2099-01-01.db, writeable=True
+wptsu DEBUG    vacuumed: 1.56MiB used; 25 total, 0 free pages
+wptsu DEBUG    vacuumed: 4.81MiB used; 77 total, 0 free pages
 wptsu DEBUG    validated 5 metadata items
-wptsu INFO     opened ts/2011-01-01 length 744 hours
-wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
-wptsu WARNING  raw/2011/2011-01/pagecounts-20110116-100000.gz: read error, skipping rest: out of order at line 6
-wptsu INFO     read 5 lines in [TIME] ([RATE] lines/s)
+wptsu DEBUG    validated 5 metadata items
+wptsu DEBUG    validated 5 metadata items
+wptsu DEBUG    validated 5 metadata items
+wptsu DEBUG    validated 5 metadata items
+wptsu DEBUG    validated 5 metadata items
+wptsu DEBUG    validated 5 metadata items
+wptsu DEBUG    validated 5 metadata items
+wptsu INFO     103741 of 103741 URLs saved (100.0%, [RATE] total/s)
+wptsu INFO     1262 of 84533 URLs saved (1.5%, [RATE] total/s)
+wptsu INFO     242 of 12774 URLs saved (1.9%, [RATE] total/s)
+wptsu INFO     2 of 2 URLs saved (100.0%, [RATE] total/s)
+wptsu INFO     369 of 369 URLs saved (100.0%, [RATE] total/s)
 wptsu INFO     5 of 5 URLs saved (100.0%, [RATE] total/s)
 wptsu INFO     done
-wp-tsupdate on 1 files for 2008-10-01.db ...
-wptsu INFO     starting
-wptsu DEBUG    opening ts/2008-10-01.db, writeable=True
-wptsu DEBUG    initializing
-wptsu DEBUG    validated 5 metadata items
+wptsu INFO     done
+wptsu INFO     done
+wptsu INFO     done
+wptsu INFO     done
+wptsu INFO     done
+wptsu INFO     done
+wptsu INFO     done
 wptsu INFO     opened ts/2008-10-01 length 744 hours
-wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
-wptsu INFO     read 0 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     done
-wp-tsupdate on 1 files for 2011-10-01.db ...
-wptsu INFO     starting
-wptsu DEBUG    opening ts/2011-10-01.db, writeable=True
-wptsu DEBUG    initializing
-wptsu DEBUG    validated 5 metadata items
+wptsu INFO     opened ts/2011-01-01 length 744 hours
 wptsu INFO     opened ts/2011-10-01 length 744 hours
-wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
-
-gzip: raw/2011/2011-10/pagecounts-20111008-180001.gz: not in gzip format
-
-gzip: raw/2011/2011-10/pagecounts-20111008-180001.gz: not in gzip format
-wptsu INFO     read 0 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     done
-wp-tsupdate on 2 files for 2099-01-01.db ...
-wptsu INFO     starting
-wptsu DEBUG    opening ts/2099-01-01.db, writeable=True
-wptsu DEBUG    initializing
-wptsu DEBUG    validated 5 metadata items
-wptsu INFO     opened ts/2099-01-01 length 744 hours
-wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
-
-gzip: raw/2099/2099-01/pagecounts-20990101-020000.gz: unexpected end of file
-wptsu INFO     read 2 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     2 of 2 URLs saved (100.0%, [RATE] total/s)
-wptsu INFO     done
-wp-tsupdate on 1 files for 2015-01-01.db ...
-wptsu INFO     starting
-wptsu DEBUG    opening ts/2015-01-01.db, writeable=True
-wptsu DEBUG    initializing
-wptsu DEBUG    validated 5 metadata items
+wptsu INFO     opened ts/2012-09-01 length 720 hours
+wptsu INFO     opened ts/2012-10-01 length 744 hours
+wptsu INFO     opened ts/2012-11-01 length 720 hours
 wptsu INFO     opened ts/2015-01-01 length 744 hours
-wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
+wptsu INFO     opened ts/2099-01-01 length 744 hours
+wptsu INFO     read 0 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     read 0 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     read 2 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     read 369 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     369 of 369 URLs saved (100.0%, [RATE] total/s)
-wptsu INFO     done
+wptsu INFO     read 371981 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     read 433077 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     read 44897 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     read 5 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     starting
+wptsu INFO     starting
+wptsu INFO     starting
+wptsu INFO     starting
+wptsu INFO     starting
+wptsu INFO     starting
+wptsu INFO     starting
+wptsu INFO     starting
+wptsu INFO     vacuumed in [TIME]
+wptsu INFO     vacuumed in [TIME]
+wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
+wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
+wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
+wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
+wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
+wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
+wptsu INFO     write strategy 3 (eager prune=1, empty=1), keep threshold=60
+wptsu INFO     write strategy 3 (eager prune=1, empty=1), keep threshold=60
+wp-tsupdate on 1 files for 2008-10-01.db ...
+wp-tsupdate on 1 files for 2011-01-01.db ...
+wp-tsupdate on 1 files for 2011-10-01.db ...
+wp-tsupdate on 1 files for 2015-01-01.db ...
+wp-tsupdate on 2 files for 2099-01-01.db ...
+wp-tsupdate on 719 files for 2012-11-01.db ...
+wp-tsupdate --prune on 718 files for 2012-10-01.db ...
+wp-tsupdate --prune on 97 files for 2012-09-01.db ...
+wptsu WARNING  raw/2011/2011-01/pagecounts-20110116-100000.gz: read error, skipping rest: out of order at line 6
 $ ls . ts
 .:
 get-test-data
@@ -1730,31 +1730,31 @@ ts:
 2015-01-01.db
 2099-01-01.db
 $ rm -Rf ts
-$ make -f [QUACBASE]/misc/wp-preprocess.mk tsfiles-complete
-wp-tsupdate --prune on 718 files for 2012-10-01.db ...
-wptsu INFO     starting
-wptsu DEBUG    opening ts/2012-10-01.db, writeable=True
+$ (make -f [QUACBASE]/misc/wp-preprocess.mk tsfiles-complete 2>&1 | sort)
 wptsu DEBUG    initializing
-wptsu DEBUG    validated 5 metadata items
-wptsu INFO     opened ts/2012-10-01 length 744 hours
-wptsu INFO     write strategy 3 (eager prune=1, empty=1), keep threshold=60
-wptsu INFO     read 371981 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     1262 of 84533 URLs saved (1.5%, [RATE] total/s)
-wptsu DEBUG    vacuumed: 4.81MiB used; 77 total, 0 free pages
-wptsu INFO     vacuumed in [TIME]
-wptsu INFO     done
-wp-tsupdate --prune on 97 files for 2012-09-01.db ...
-wptsu INFO     starting
+wptsu DEBUG    initializing
 wptsu DEBUG    opening ts/2012-09-01.db, writeable=True
-wptsu DEBUG    initializing
-wptsu DEBUG    validated 5 metadata items
-wptsu INFO     opened ts/2012-09-01 length 720 hours
-wptsu INFO     write strategy 3 (eager prune=1, empty=1), keep threshold=60
-wptsu INFO     read 44897 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     242 of 12774 URLs saved (1.9%, [RATE] total/s)
+wptsu DEBUG    opening ts/2012-10-01.db, writeable=True
 wptsu DEBUG    vacuumed: 1.56MiB used; 25 total, 0 free pages
-wptsu INFO     vacuumed in [TIME]
+wptsu DEBUG    vacuumed: 4.81MiB used; 77 total, 0 free pages
+wptsu DEBUG    validated 5 metadata items
+wptsu DEBUG    validated 5 metadata items
+wptsu INFO     1262 of 84533 URLs saved (1.5%, [RATE] total/s)
+wptsu INFO     242 of 12774 URLs saved (1.9%, [RATE] total/s)
 wptsu INFO     done
+wptsu INFO     done
+wptsu INFO     opened ts/2012-09-01 length 720 hours
+wptsu INFO     opened ts/2012-10-01 length 744 hours
+wptsu INFO     read 371981 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     read 44897 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     starting
+wptsu INFO     starting
+wptsu INFO     vacuumed in [TIME]
+wptsu INFO     vacuumed in [TIME]
+wptsu INFO     write strategy 3 (eager prune=1, empty=1), keep threshold=60
+wptsu INFO     write strategy 3 (eager prune=1, empty=1), keep threshold=60
+wp-tsupdate --prune on 718 files for 2012-10-01.db ...
+wp-tsupdate --prune on 97 files for 2012-09-01.db ...
 $ ls . ts
 .:
 get-test-data
@@ -1767,72 +1767,72 @@ ts.mk
 ts:
 2012-09-01.db
 2012-10-01.db
-$ make -f [QUACBASE]/misc/wp-preprocess.mk tsfiles-incomplete
-wp-tsupdate on 719 files for 2012-11-01.db ...
-wptsu INFO     starting
-wptsu DEBUG    opening ts/2012-11-01.db, writeable=True
+$ (make -f [QUACBASE]/misc/wp-preprocess.mk tsfiles-incomplete 2>&1 | sort)
+
+
+
+gzip: raw/2011/2011-10/pagecounts-20111008-180001.gz: not in gzip format
+gzip: raw/2011/2011-10/pagecounts-20111008-180001.gz: not in gzip format
+gzip: raw/2099/2099-01/pagecounts-20990101-020000.gz: unexpected end of file
 wptsu DEBUG    initializing
-wptsu DEBUG    validated 5 metadata items
-wptsu INFO     opened ts/2012-11-01 length 720 hours
-wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
-wptsu INFO     read 433077 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     103741 of 103741 URLs saved (100.0%, [RATE] total/s)
-wptsu INFO     done
-wp-tsupdate on 1 files for 2011-01-01.db ...
-wptsu INFO     starting
+wptsu DEBUG    initializing
+wptsu DEBUG    initializing
+wptsu DEBUG    initializing
+wptsu DEBUG    initializing
+wptsu DEBUG    initializing
+wptsu DEBUG    opening ts/2008-10-01.db, writeable=True
 wptsu DEBUG    opening ts/2011-01-01.db, writeable=True
-wptsu DEBUG    initializing
+wptsu DEBUG    opening ts/2011-10-01.db, writeable=True
+wptsu DEBUG    opening ts/2012-11-01.db, writeable=True
+wptsu DEBUG    opening ts/2015-01-01.db, writeable=True
+wptsu DEBUG    opening ts/2099-01-01.db, writeable=True
 wptsu DEBUG    validated 5 metadata items
-wptsu INFO     opened ts/2011-01-01 length 744 hours
-wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
-wptsu WARNING  raw/2011/2011-01/pagecounts-20110116-100000.gz: read error, skipping rest: out of order at line 6
-wptsu INFO     read 5 lines in [TIME] ([RATE] lines/s)
+wptsu DEBUG    validated 5 metadata items
+wptsu DEBUG    validated 5 metadata items
+wptsu DEBUG    validated 5 metadata items
+wptsu DEBUG    validated 5 metadata items
+wptsu DEBUG    validated 5 metadata items
+wptsu INFO     103741 of 103741 URLs saved (100.0%, [RATE] total/s)
+wptsu INFO     2 of 2 URLs saved (100.0%, [RATE] total/s)
+wptsu INFO     369 of 369 URLs saved (100.0%, [RATE] total/s)
 wptsu INFO     5 of 5 URLs saved (100.0%, [RATE] total/s)
 wptsu INFO     done
-wp-tsupdate on 1 files for 2008-10-01.db ...
-wptsu INFO     starting
-wptsu DEBUG    opening ts/2008-10-01.db, writeable=True
-wptsu DEBUG    initializing
-wptsu DEBUG    validated 5 metadata items
+wptsu INFO     done
+wptsu INFO     done
+wptsu INFO     done
+wptsu INFO     done
+wptsu INFO     done
 wptsu INFO     opened ts/2008-10-01 length 744 hours
-wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
-wptsu INFO     read 0 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     done
-wp-tsupdate on 1 files for 2011-10-01.db ...
-wptsu INFO     starting
-wptsu DEBUG    opening ts/2011-10-01.db, writeable=True
-wptsu DEBUG    initializing
-wptsu DEBUG    validated 5 metadata items
+wptsu INFO     opened ts/2011-01-01 length 744 hours
 wptsu INFO     opened ts/2011-10-01 length 744 hours
-wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
-
-gzip: raw/2011/2011-10/pagecounts-20111008-180001.gz: not in gzip format
-
-gzip: raw/2011/2011-10/pagecounts-20111008-180001.gz: not in gzip format
-wptsu INFO     read 0 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     done
-wp-tsupdate on 2 files for 2099-01-01.db ...
-wptsu INFO     starting
-wptsu DEBUG    opening ts/2099-01-01.db, writeable=True
-wptsu DEBUG    initializing
-wptsu DEBUG    validated 5 metadata items
-wptsu INFO     opened ts/2099-01-01 length 744 hours
-wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
-
-gzip: raw/2099/2099-01/pagecounts-20990101-020000.gz: unexpected end of file
-wptsu INFO     read 2 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     2 of 2 URLs saved (100.0%, [RATE] total/s)
-wptsu INFO     done
-wp-tsupdate on 1 files for 2015-01-01.db ...
-wptsu INFO     starting
-wptsu DEBUG    opening ts/2015-01-01.db, writeable=True
-wptsu DEBUG    initializing
-wptsu DEBUG    validated 5 metadata items
+wptsu INFO     opened ts/2012-11-01 length 720 hours
 wptsu INFO     opened ts/2015-01-01 length 744 hours
-wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
+wptsu INFO     opened ts/2099-01-01 length 744 hours
+wptsu INFO     read 0 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     read 0 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     read 2 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     read 369 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     369 of 369 URLs saved (100.0%, [RATE] total/s)
-wptsu INFO     done
+wptsu INFO     read 433077 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     read 5 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     starting
+wptsu INFO     starting
+wptsu INFO     starting
+wptsu INFO     starting
+wptsu INFO     starting
+wptsu INFO     starting
+wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
+wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
+wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
+wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
+wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
+wptsu INFO     write strategy 1 (eager prune=0, empty=1), keep threshold=-1
+wp-tsupdate on 1 files for 2008-10-01.db ...
+wp-tsupdate on 1 files for 2011-01-01.db ...
+wp-tsupdate on 1 files for 2011-10-01.db ...
+wp-tsupdate on 1 files for 2015-01-01.db ...
+wp-tsupdate on 2 files for 2099-01-01.db ...
+wp-tsupdate on 719 files for 2012-11-01.db ...
+wptsu WARNING  raw/2011/2011-01/pagecounts-20110116-100000.gz: read error, skipping rest: out of order at line 6
 $ ls . ts
 .:
 get-test-data

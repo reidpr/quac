@@ -22,7 +22,7 @@ z make -f $MAKEFILE clean
 x ls
 
 # Make all
-z make -f $MAKEFILE
+y "make -f $MAKEFILE 2>&1 | sort"
 x ls . ts
 
 # Touch a file, make again
@@ -32,11 +32,11 @@ x ls . ts
 
 # Make only complete months
 x rm -Rf ts
-z make -f $MAKEFILE tsfiles-complete
+y "make -f $MAKEFILE tsfiles-complete 2>&1 | sort"
 x ls . ts
 
 # Make only incomplete months
-z make -f $MAKEFILE tsfiles-incomplete
+y "make -f $MAKEFILE tsfiles-incomplete 2>&1 | sort"
 x ls . ts
 z make -f $MAKEFILE
 
