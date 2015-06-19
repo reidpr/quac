@@ -119,24 +119,6 @@ if (c.getboolean("coll", "no_proxy")):
    del os.environ["https_proxy"]
 
 
-# Monkey-patch TwitterAPI 2.2.5 because the library reads data from the socket
-# one byte at a time, which is unacceptably poor performance: 100% CPU to
-# collect less than half of statuses/sample, which results in Twitter dropping
-# the connection after about 6,000 tweets. This patch alters the
-# Response.response.iter_lines() call on TwitterAPI.py line 197 to use default
-# buffering, which is fast enough for the full stream at 5% CPU.
-#
-# The serious hairiness in finding a reference to _StreamingIterable is
-# because TwitterAPI.__init__.py does some stuff I don't understand that hides
-# that class.
-#
-# Reported as a bug: https://github.com/geduldig/TwitterAPI/issues/33
-def monkey___init__(self, response):
-   self.results = response.iter_lines()
-_SI = sys.modules[TwitterAPI.TwitterAPI.__module__]._StreamingIterable
-_SI.__init__ = monkey___init__
-
-
 ### Program ###
 
 def handle_sigterm(signum, frame):
@@ -209,7 +191,8 @@ class Tweet_Collector(object):
             except (requests.exceptions.RequestException,
                     requests.packages.urllib3.exceptions.HTTPError,
                     requests.packages.urllib3.exceptions.HTTPWarning,
-                    ValueError,
+                    TwitterAPI.TwitterRequestError,
+                    TwitterAPI.TwitterConnectionError,
                     ConnectionError) as x:
                l.warning("connection failed: %s" % (str(x)))
                if (not self.reconnect_barrier()):
