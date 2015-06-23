@@ -96,6 +96,7 @@ nosetests.xml
 deps
 doc
 doc-src/_build
+env
 
 bin/hashsplit
 

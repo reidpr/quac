@@ -122,8 +122,8 @@ def main():
       if (args.e):
          cmd_args = ['set', '-e', ';'] + cmd_args
       try:
-         venv = os.path.basename(os.environ['VIRTUAL_ENV'])
-         cmd_args = ['workon', venv, ';'] + cmd_args
+         venv = os.environ['VIRTUAL_ENV']
+         cmd_args = ['.', venv + '/bin/activate', ';'] + cmd_args
       except KeyError:
          pass
       if (MPI_MODE):

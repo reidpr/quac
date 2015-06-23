@@ -28,6 +28,7 @@ C='Copyright (\(c\)|©) Los Alamos National Security, LLC, and others'
 for filename in $(find . \(    -path ./.git \
                             -o -path ./deps \
                             -o -path ./doc \
+                            -o -path ./env \
                             -o -path ./experiments \
                             -o -path ./doc-src/_build \
                             -o -path ./tests/twitter/tweets \
