@@ -71,9 +71,7 @@ When is each strategy used?
      Again, performance is acceptable due to the small number of input data.
 
      This strategy is also important for bulk loading, in that it is used for
-     the last, incomplete month of the bulk load. This month should not be
-     included in a synchronized parallel bulk loading job, because it will be
-     much slower than the other months that can use strategy 3.
+     the last, incomplete month of the bulk load.
 
   2. This happens for the daily update the last time it is run each month.
      Because it must process the entire file, it takes significantly longer
