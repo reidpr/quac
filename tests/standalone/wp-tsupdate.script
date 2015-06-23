@@ -39,6 +39,7 @@ echo '*** Strategy 3 -- bulk load a whole month'
 x rm -Rf data
 z $WP_TSUPDATE --prune data $(ls raw/2012/2012-10/*.gz | tail -n +2) \
                             raw/2012/2012-11/pagecounts-20121101-000000.gz
+x ts-dump data
 
 echo
 echo '*** Validate modification times'

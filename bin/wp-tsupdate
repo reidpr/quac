@@ -233,7 +233,7 @@ def files_process(fg, files):
       if (proj != proj_last):
          if (proj_last is not None):
             try:
-               proj_totals.save()
+               proj_totals.save(keep_threshold)
             except apsw.ConstraintError:
                u.abort('duplicate project, cannot save: %s' % proj_last)
          proj_last = proj
@@ -262,7 +262,7 @@ def files_process(fg, files):
       if (url_write_ct >= args.limit):
          break
    if (proj_last is not None):
-      proj_totals.save()
+      proj_totals.save(keep_threshold)
    time_used = time.time() - start
    l.info('read %s lines in %s (%d lines/s)'
           % (line_ct, u.fmt_seconds(time_used), (line_ct) / time_used))
