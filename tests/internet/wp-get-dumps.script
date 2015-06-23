@@ -17,7 +17,7 @@ rm -Rf wp-dumps
 mkdir wp-dumps
 
 # Do the mirror. The head pipe is to remove the statistics, which change.
-y "wp-get-dumps 2>&1 | head -n -15"
+y "wp-get-dumps 2>&1 | head -n 11"
 
 # Dumps contain timestamps and system version information which change.
 # Therefore, we need to extract the .gz files and do a little magic for a
