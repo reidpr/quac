@@ -35,17 +35,18 @@ Test setup:
    >>> january = time_.iso8601_parse('2015-01-01')
    >>> february = time_.iso8601_parse('2015-02-01')
 
-Create read-write and read-only time series datasets with four shards:
+Create read-write time series dataset with four shards:
 
    >>> c = u.configure(None)
    >>> ds = Dataset(tmp + '/foo', 4, writeable=True)
-   >>> ds2 = Dataset(tmp + '/foo', 4)
 
 Open January:
 
    >>> ds.dump()
+   length 0 hours
    >>> jan = ds.open_month(january)
    >>> ds.dump()
+   length 744 hours
    fragment 2015-01-01
    shard 0
    shard 1
@@ -68,6 +69,7 @@ Add the first time series fragment:
    True
    >>> jan.commit()
    >>> ds.dump()
+   length 744 hours
    fragment 2015-01-01
    shard 0
    shard 1
@@ -98,6 +100,7 @@ Add the rest of uf11:
    True
    >>> feb.commit()
    >>> ds.dump()
+   length 1416 hours
    fragment 2015-01-01
    shard 0
    shard 1
@@ -142,6 +145,7 @@ Add remaining time series:
    True
    >>> feb.commit()
    >>> ds.dump()
+   length 1416 hours
    fragment 2015-01-01
    shard 0
      d01 zd 1.0 {743z 0n (0, 1.0)}
@@ -219,6 +223,7 @@ threshold, as well as compact the database.
    >>> jan.prune(KEEP_THRESHOLD)
    >>> feb.prune(KEEP_THRESHOLD)
    >>> ds.dump()
+   length 1416 hours
    fragment 2015-01-01
    shard 0
      f10 uf 66.0 {743z 0n (0, 66.0)}
@@ -247,6 +252,7 @@ the database:
    True
    >>> jan.commit()
    >>> ds.dump()
+   length 1416 hours
    fragment 2015-01-01
    shard 0
      f10 uf 66.0 {743z 0n (0, 66.0)}
@@ -275,52 +281,10 @@ fragment already exists.
    False
    >>> jan.commit()
    >>> ds.dump()                      # note old value of f10
+   length 1416 hours
    fragment 2015-01-01
    shard 0
      f10 uf 66.0 {743z 0n (0, 66.0)}
-   shard 1
-   shard 2
-     keepme uf 77.0 {743z 0n (0, 77.0)}
-   shard 3
-     f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
-   fragment 2015-02-01
-   shard 0
-     d01 ud 55.0 {671z 0n (0, 55.0)}
-   shard 1
-   shard 2
-   shard 3
-     f11 uf 44.0 {671z 0n (671, 44.0)}
-
-Uncommitted changes are not visible to simultaneous readers:
-
-   >>> jan.begin()
-   >>> a = jan.fetch('f10')
-   >>> a.data[1] = 88
-   >>> a
-   f10 uf 66.0 {742z 0n (0, 66.0), (1, 88.0)}
-   >>> a.save()
-   True
-   >>> ds2.dump()                     # note old value of f10
-   fragment 2015-01-01
-   shard 0
-     f10 uf 66.0 {743z 0n (0, 66.0)}
-   shard 1
-   shard 2
-     keepme uf 77.0 {743z 0n (0, 77.0)}
-   shard 3
-     f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
-   fragment 2015-02-01
-   shard 0
-     d01 ud 55.0 {671z 0n (0, 55.0)}
-   shard 1
-   shard 2
-   shard 3
-     f11 uf 44.0 {671z 0n (671, 44.0)}
-   >>> jan.commit()
-   >>> ds2.dump()                     # f10 now has updated value
-   fragment 2015-01-01
-   shard 0
-     f10 uf 154.0 {742z 0n (0, 66.0), (1, 88.0)}
    shard 1
    shard 2
      keepme uf 77.0 {743z 0n (0, 77.0)}
@@ -346,29 +310,131 @@ with zeroes, but series where all fragments have been pruned return not found.
      ...
    db.Not_Enough_Rows_Error: no non-zero fragments found
 
-One or more shards can be iterated through:
+Zero or more shards can be iterated through. If no shards specified, iterate
+through all.
 
    >>> for ts in ds.fetch_all(0):
    ...    print(ts[0], ts[1].dtype, len(ts[1]), u.fmt_sparsearray(ts[1]))
    d01 float64 1416 {1415z 0n (744, 55.0)}
-   f10 float32 1416 {1414z 0n (0, 66.0), (1, 88.0)}
+   f10 float32 1416 {1415z 0n (0, 66.0)}
    >>> for ts in ds.fetch_all(3, 1, 0):
    ...    print(ts[0], ts[1].dtype, len(ts[1]), u.fmt_sparsearray(ts[1]))
    f11 float32 1416 {1413z 0n (0, 11.0), (2, 22.0), (1415, 44.0)}
    d01 float64 1416 {1415z 0n (744, 55.0)}
-   f10 float32 1416 {1414z 0n (0, 66.0), (1, 88.0)}
+   f10 float32 1416 {1415z 0n (0, 66.0)}
+   >>> for ts in ds.fetch_all():
+   ...    print(ts[0], ts[1].dtype, len(ts[1]), u.fmt_sparsearray(ts[1]))
+   d01 float64 1416 {1415z 0n (744, 55.0)}
+   f10 float32 1416 {1415z 0n (0, 66.0)}
+   keepme float32 1416 {1415z 0n (0, 77.0)}
+   f11 float32 1416 {1413z 0n (0, 11.0), (2, 22.0), (1415, 44.0)}
 
 Optionally, time series where the only fragment is in the lexically-last tag
 can be omitted. This is to accommodate use cases where most fragments have
 been pruned, but the last has not.
 
-   >>> for ts in ds.fetch_all(0, last_only=False):
+   >>> for ts in ds.fetch_all(last_only=False):
    ...    print(ts[0], ts[1].dtype, len(ts[1]), u.fmt_sparsearray(ts[1]))
-   f10 float32 1416 {1414z 0n (0, 66.0), (1, 88.0)}
-   >>> for ts in ds.fetch_all(3, 1, 0, last_only=False):
-   ...    print(ts[0], ts[1].dtype, len(ts[1]), u.fmt_sparsearray(ts[1]))
+   f10 float32 1416 {1415z 0n (0, 66.0)}
+   keepme float32 1416 {1415z 0n (0, 77.0)}
    f11 float32 1416 {1413z 0n (0, 11.0), (2, 22.0), (1415, 44.0)}
-   f10 float32 1416 {1414z 0n (0, 66.0), (1, 88.0)}
+
+A Pandas-based interface is provided as well:
+
+   >>> dsp = Dataset_Pandas(tmp + '/bar', 4, writeable=True)
+   >>> jan = dsp.open_month(january)
+   >>> jan.begin()
+   >>> a = jan.create('foo', fill=np.nan)
+   >>> a.data[0:3] = [10, 0, 12]
+   >>> a
+   foo nf 0.0 {1z 741n (0, 10.0), (2, 12.0)}
+   >>> a.save()
+   True
+   >>> a = jan.create('foo/bar')
+   >>> a.data[0:4] = [20, 21, 22, 23]
+   >>> a.save()
+   True
+   >>> a = jan.create('foo/baz')
+   >>> a.data[0:4] = [30, 31, 32, 33]
+   >>> a.save()
+   True
+   >>> jan.commit()
+   >>> dsp.dump()
+   length 744 hours
+   fragment 2015-01-01
+   shard 0
+   shard 1
+     foo/bar uf 86.0 {740z 0n (0, 20.0), (1, 21.0), (2, 22.0), (3, 23.0)}
+     foo/baz uf 126.0 {740z 0n (0, 30.0), (1, 31.0), (2, 32.0), (3, 33.0)}
+   shard 2
+   shard 3
+     foo uf 22.0 {1z 741n (0, 10.0), (2, 12.0)}
+   >>> dsp.index
+   PeriodIndex(['2015-01-01 00:00', '2015-01-01 01:00', '2015-01-01 02:00',
+                '2015-01-01 03:00', '2015-01-01 04:00', '2015-01-01 05:00',
+     ...
+                '2015-01-31 20:00', '2015-01-31 21:00', '2015-01-31 22:00',
+                '2015-01-31 23:00'],
+               dtype='int64', length=744, freq='H')
+   >>> dsp.fetch('foo/bar')
+   2015-01-01 00:00    20
+   2015-01-01 01:00    21
+   2015-01-01 02:00    22
+   2015-01-01 03:00    23
+   2015-01-01 04:00     0
+   2015-01-01 05:00     0
+   2015-01-01 06:00     0
+   ...
+   2015-01-31 22:00     0
+   2015-01-31 23:00     0
+   Freq: H, Name: foo/bar, dtype: float32
+   >>> pd.DataFrame({ s.name: s for s in dsp.fetch_all() })
+                     foo  foo/bar  foo/baz
+   2015-01-01 00:00   10       20       30
+   2015-01-01 01:00    0       21       31
+   2015-01-01 02:00   12       22       32
+   2015-01-01 03:00  NaN       23       33
+   2015-01-01 04:00  NaN        0        0
+   2015-01-01 05:00  NaN        0        0
+   ...
+   2015-01-31 22:00  NaN        0        0
+   2015-01-31 23:00  NaN        0        0
+   <BLANKLINE>
+   [744 rows x 3 columns]
+   >>> dsp.fetch('notfound')
+   Traceback (most recent call last):
+     ...
+   db.Not_Enough_Rows_Error: no non-zero fragments found
+
+The Pandas interface provides automatic normalization:
+
+   >>> dsp.fetch('foo/bar', normalize=True)
+   2015-01-01 00:00    2.000000
+   2015-01-01 01:00         inf
+   2015-01-01 02:00    1.833333
+   2015-01-01 03:00         NaN
+   2015-01-01 04:00         NaN
+   ...
+   2015-01-31 22:00         NaN
+   2015-01-31 23:00         NaN
+   Freq: H, Name: foo/bar$norm, dtype: float32
+   >>> pd.DataFrame({ s.name: s for s in dsp.fetch_all(normalize=True) })
+                     foo/bar$norm  foo/baz$norm
+   2015-01-01 00:00      2.000000      3.000000
+   2015-01-01 01:00           inf           inf
+   2015-01-01 02:00      1.833333      2.666667
+   2015-01-01 03:00           NaN           NaN
+   2015-01-01 04:00           NaN           NaN
+   ...
+   2015-01-31 22:00           NaN           NaN
+   2015-01-31 23:00           NaN           NaN
+   <BLANKLINE>
+   [744 rows x 2 columns]
+   >>> dsp.fetch('foo', normalize=True)
+   Traceback (most recent call last):
+     ...
+   ValueError: delimiter "/" not found
+   >>> dsp.close()
 
 Opening bogus months fails:
 
@@ -389,9 +455,31 @@ Opening bogus months fails:
      ...
    ValueError: must have day=1, not 2
 
-Close the datasets:
+Close the dataset:
 
    >>> ds.close()
+
+Re-open it; data still there. Note that simultaneous writing and reading in
+separate datasets is not supported.
+
+   >>> ds2 = Dataset(tmp + '/foo', 4)
+   >>> ds2.dump()
+   length 1416 hours
+   fragment 2015-01-01
+   shard 0
+     f10 uf 66.0 {743z 0n (0, 66.0)}
+   shard 1
+   shard 2
+     keepme uf 77.0 {743z 0n (0, 77.0)}
+   shard 3
+     f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
+   fragment 2015-02-01
+   shard 0
+     d01 ud 55.0 {671z 0n (0, 55.0)}
+   shard 1
+   shard 2
+   shard 3
+     f11 uf 44.0 {671z 0n (671, 44.0)}
    >>> ds2.close()
 
 Tests not implemented:
@@ -421,6 +509,7 @@ import sys
 import zlib
 
 import numpy as np
+import pandas as pd
 
 import db
 import hash_
@@ -456,6 +545,10 @@ TYPE_DEFAULT = np.float32
 HASH = 'fnv1a_32'
 hashf = getattr(hash_, HASH)
 
+# Normalization stuff
+NZ_DELIM='/'
+NZ_SUFFIX='$norm'
+
 class Fragment_Source(enum.Enum):
    'Where did a fragment come from?'
    n = 1; NEW = 1           # created from scratch
@@ -466,8 +559,10 @@ class Fragment_Source(enum.Enum):
 class Dataset(object):
 
    __slots__ = ('filename',
+                'fragment_tags',
                 'groups',
                 'hashmod',
+                'length',
                 'writeable')
 
    def __init__(self, filename, hashmod=None, writeable=False):
@@ -475,23 +570,15 @@ class Dataset(object):
       self.hashmod = hashmod
       self.writeable = writeable
       self.groups = dict()
-
-   # FIXME: Properties are supposed to be fast, but these touch the filesystem
-   # in a loop. Memoizing seems like the right approach, but then how do we
-   # invalidate the cache?
+      self.caches_reset()
 
    @property
    def fragment_tag_first(self):
-      return next(self.fragment_tags)
+      return self.fragment_tags[0]
 
    @property
    def fragment_tag_last(self):
-      return list(self.fragment_tags)[-1]
-
-   @property
-   def fragment_tags(self):
-      for g in sorted(glob.iglob('%s/*.db' % self.filename)):
-         yield os.path.split(os.path.splitext(g)[0])[1]
+      return self.fragment_tags[-1]
 
    def assemble(self, fragments):
       fmap = { tag: None for tag in self.fragment_tags }
@@ -501,11 +588,27 @@ class Dataset(object):
             fmap[tag] = self.group_get(tag).create(None)
       return np.concatenate([f.data for (tag, f) in sorted(fmap.items())])
 
+   def caches_reset(self):
+      'Reset all the caches associated with the groups.'
+      # Pull the fragment tags from the filesystem, not self.groups, because
+      # some groups may not be open.
+      self.fragment_tags = list()
+      for gf in sorted(glob.iglob('%s/*.db' % self.filename)):
+         self.fragment_tags.append(os.path.split(os.path.splitext(gf)[0])[1])
+      # Compute the length from the fragment tags, assuming they are months.
+      # If they aren't, this will fail. The obvious thing to do then is open
+      # each group and query it for length, but that's a bad idea because we
+      # do not want to open groups unless we really need to interact with
+      # them. Parallel writes to different groups depend on this.
+      self.length = sum(time_.hours_in_month(time_.iso8601_parse(f))
+                        for f in self.fragment_tags)
+
    def close(self):
       for g in self.groups.values():
          g.close()
 
    def dump(self, *tags):
+      print('length %d hours' % self.length)
       for ft in self.fragment_tags:
          if (len(tags) > 0 and ft not in tags):
             print('fragment %s omitted' % ft)
@@ -513,6 +616,10 @@ class Dataset(object):
             print('fragment %s' % ft)
             fg = self.group_get(ft)
             fg.dump()
+
+   def dup(self):
+      'Return a read-only clone of myself.'
+      return self.__class__(self.filename, self.hashmod)
 
    def fetch(self, name):
       fs = list()
@@ -524,7 +631,8 @@ class Dataset(object):
       return self.assemble(fs)
 
    def fetch_all(self, *shards, last_only=True):
-      last_tag = self.fragment_tag_last
+      if (len(shards) == 0):
+         shards = range(self.hashmod)
       for sh in shards:
          # Performance note: Even in last_only==False mode, we still retrieve
          # all the fragments in the last tag, even though we will discard most
@@ -536,7 +644,7 @@ class Dataset(object):
             fragments = list(fragments)
             if (len(fragments) > 1
                 or last_only
-                or last_tag != fragments[0].group.tag):
+                or self.fragment_tag_last != fragments[0].group.tag):
                yield (name, self.assemble(fragments))
 
    def open_month(self, month):
@@ -558,10 +666,66 @@ class Dataset(object):
          fg = Fragment_Group(self, self.filename, tag, length)
          fg.open(self.writeable)
          self.groups[tag] = fg
+         self.caches_reset()
       return self.groups[tag]
 
    def shard(self, name):
       return hashf(name) % self.hashmod
+
+
+class Dataset_Pandas(Dataset):
+
+   __slots__ = ('denoms',
+                'ds_mirror',
+                'index')
+
+   def caches_reset(self):
+      super().caches_reset()
+      self.denoms = dict()
+      self.ds_mirror = None
+      if (len(self.groups) > 0):
+         self.index = pd.period_range(self.fragment_tag_first, freq='H',
+                                      periods=self.length)
+      else:
+         self.index = None
+
+   def normalize(self, series):
+      # FIXME: In a read-write access pattern, the saved denominator series
+      # will get stale. The workaround is to explicitly call caches_reset()
+      # when transitioning from reading to writing, but that's lame. The right
+      # solution may be to invalidate the denominator caches on first write,
+      # but that is not implemented yet.
+      denom_name = series.name.split(NZ_DELIM, 1)[0]
+      if (series.name == denom_name):
+         raise ValueError('delimiter "%s" not found' % NZ_DELIM)
+      if (denom_name not in self.denoms):
+         # Fetch denominator series. Note that we could proactively save
+         # denominator series as we encounter them, but that optimizes a rare
+         # case, and always fetching reduces the number of code paths.
+         if (self.ds_mirror is None):
+            self.ds_mirror = self.dup()
+         self.denoms[denom_name] = self.ds_mirror.fetch(denom_name)
+      nseries = series / self.denoms[denom_name]
+      nseries.name = series.name + NZ_SUFFIX
+      return nseries
+
+   def fetch(self, name, normalize=False):
+      series = pd.Series(super().fetch(name), name=name, index=self.index)
+      if (normalize):
+         series = self.normalize(series)
+      return series
+
+   def fetch_all(self, normalize=False, *args, **kwargs):
+      for (name, array) in super().fetch_all(*args, **kwargs):
+         series = pd.Series(array, name=name, index=self.index)
+         if (not normalize):
+            yield series
+         else:
+            try:
+               yield self.normalize(series)
+            except ValueError:
+               # It was a denominator series; ignore it.
+               pass
 
 
 class Fragment_Group(object):

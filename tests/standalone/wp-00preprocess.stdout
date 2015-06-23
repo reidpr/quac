@@ -1854,6 +1854,7 @@ ts:
 $ make -f [QUACBASE]/misc/wp-preprocess.mk
 make: Nothing to be done for 'all'.
 $ ts-dump ts 2008-10-01 2011-01-01 2011-10-01 2099-01-01
+length 5904 hours
 fragment 2008-10-01
 shard 0
 shard 1

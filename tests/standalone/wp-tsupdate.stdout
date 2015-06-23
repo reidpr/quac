@@ -19,6 +19,7 @@ wptsu INFO     read 5 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     5 of 5 URLs saved (100.0%, [RATE] total/s)
 wptsu INFO     done
 $ ts-dump data
+length 744 hours
 fragment 2012-10-01
 shard 0
   bg/Benny%20Benassi%20feat%2E%20Sandy zf 1.0 {743z 0n (12, 1.0)}
@@ -42,6 +43,7 @@ wptsu INFO     read 10 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     5 of 5 URLs saved (100.0%, [RATE] total/s)
 wptsu INFO     done
 $ ts-dump data
+length 744 hours
 fragment 2012-10-01
 shard 0
   an/Sandy zf 2.0 {743z 0n (669, 2.0)}
@@ -76,6 +78,7 @@ wptsu INFO     pruned to 60 in [TIME]
 wptsu INFO     vacuumed in [TIME]
 wptsu INFO     done
 $ ts-dump data
+length 744 hours
 fragment 2012-10-01
 shard 0
   cs.n/Hurik%C3%A1n_Sandy_potopil_repliku_Bounty uf 82.0 {718z 0n (700, 1.0), (701, 1.0), (705, 1.0), (708, 3.0), (709, 1.0), (711, 1.0), (714, 2.0), (716, 2.0), (718, 1.0), (722, 1.0), (723, 2.0), (726, 4.0), (727, 6.0), (728, 2.0), (729, 5.0), (730, 3.0), (732, 1.0), (733, 9.0), (734, 3.0), (735, 4.0), (736, 4.0), (737, 6.0), (738, 5.0), (739, 3.0), (740, 6.0), (741, 5.0)}
