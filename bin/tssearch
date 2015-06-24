@@ -51,7 +51,7 @@ def main():
    except FileNotFoundError as x:
       u.abort(str(x))
    ds.open_all()
-   l.debug('connected to dataset')
+   l.info('connected to dataset')
    if (args.list):
       series_ct = 0
       for s in ds.fetch_all(last_only=(not args.no_last_only)):
@@ -62,7 +62,7 @@ def main():
    else:
       serieses = dict()
       for name in args.names:
-         l.debug('fetching %s' % name)
+         l.info('fetching %s' % name)
          try:
             s = ds.fetch(name, last_only=(not args.no_last_only),
                          normalize=(not args.raw), resample=args.interval)
