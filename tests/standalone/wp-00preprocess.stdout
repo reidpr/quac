@@ -1613,8 +1613,8 @@ wptsu DEBUG    opening ts/2012-10-01.db, writeable=True
 wptsu DEBUG    opening ts/2012-11-01.db, writeable=True
 wptsu DEBUG    opening ts/2015-01-01.db, writeable=True
 wptsu DEBUG    opening ts/2099-01-01.db, writeable=True
-wptsu DEBUG    vacuumed: 1.56MiB used; 25 total, 0 free pages
-wptsu DEBUG    vacuumed: 4.81MiB used; 77 total, 0 free pages
+wptsu DEBUG    vacuumed: 1.31MiB used; 21 total, 0 free pages
+wptsu DEBUG    vacuumed: 4.50MiB used; 72 total, 0 free pages
 wptsu DEBUG    validated 5 metadata items
 wptsu DEBUG    validated 5 metadata items
 wptsu DEBUG    validated 5 metadata items
@@ -1735,8 +1735,8 @@ wptsu DEBUG    initializing
 wptsu DEBUG    initializing
 wptsu DEBUG    opening ts/2012-09-01.db, writeable=True
 wptsu DEBUG    opening ts/2012-10-01.db, writeable=True
-wptsu DEBUG    vacuumed: 1.56MiB used; 25 total, 0 free pages
-wptsu DEBUG    vacuumed: 4.81MiB used; 77 total, 0 free pages
+wptsu DEBUG    vacuumed: 1.31MiB used; 21 total, 0 free pages
+wptsu DEBUG    vacuumed: 4.50MiB used; 72 total, 0 free pages
 wptsu DEBUG    validated 5 metadata items
 wptsu DEBUG    validated 5 metadata items
 wptsu INFO     1262 of 84533 URLs saved (1.5%, [RATE] total/s)
@@ -1889,3 +1889,8 @@ shard 1
 shard 2
   c zd 1.0 {0z 743n (1, 1.0)}
 shard 3
+$ rm ts/2008-10-01.db ts/2011-01-01.db ts/2011-10-01.db ts/2015-01-01.db ts/2099-01-01.db
+$ ls ts
+2012-09-01.db
+2012-10-01.db
+2012-11-01.db

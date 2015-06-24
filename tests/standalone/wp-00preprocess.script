@@ -42,3 +42,8 @@ z make -f $MAKEFILE
 
 # Dump the tricky parts of the dataset
 x ts-dump ts 2008-10-01 2011-01-01 2011-10-01 2099-01-01
+
+# Later tests only want the "real" data, not the messy broken parts, so remove
+# the latter.
+x rm ts/{2008-10-01,2011-01-01,2011-10-01,2015-01-01,2099-01-01}.db
+x ls ts

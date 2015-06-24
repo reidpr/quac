@@ -333,6 +333,12 @@ Optionally, time series where the only fragment is in the lexically-last tag
 can be omitted. This is to accommodate use cases where most fragments have
 been pruned, but the last has not.
 
+   >>> print(u.fmt_sparsearray(ds.fetch('f10', last_only=False)))
+   {1415z 0n (0, 66.0)}
+   >>> ds.fetch('d01', last_only=False)
+   Traceback (most recent call last):
+     ...
+   db.Not_Enough_Rows_Error: only non-zero fragment was last
    >>> for ts in ds.fetch_all(last_only=False):
    ...    print(ts[0], ts[1].dtype, len(ts[1]), u.fmt_sparsearray(ts[1]))
    f10 float32 1416 {1415z 0n (0, 66.0)}
@@ -406,7 +412,7 @@ A Pandas-based interface is provided as well:
      ...
    db.Not_Enough_Rows_Error: no non-zero fragments found
 
-The Pandas interface provides automatic normalization:
+The Pandas interface provides automatic normalization and resampling:
 
    >>> dsp.fetch('foo/bar', normalize=True)
    2015-01-01 00:00    2.000000
@@ -418,6 +424,22 @@ The Pandas interface provides automatic normalization:
    2015-01-31 22:00         NaN
    2015-01-31 23:00         NaN
    Freq: H, Name: foo/bar$norm, dtype: float32
+   >>> dsp.fetch('foo/bar', resample='D')
+   2015-01-01    86
+   2015-01-02     0
+   2015-01-03     0
+   ...
+   2015-01-30     0
+   2015-01-31     0
+   Freq: D, Name: foo/bar, dtype: float32
+   >>> dsp.fetch('foo/bar', normalize=True, resample='D')
+   2015-01-01    3.909091
+   2015-01-02         NaN
+   2015-01-03         NaN
+   ...
+   2015-01-30         NaN
+   2015-01-31         NaN
+   Freq: D, Name: foo/bar$norm, dtype: float32
    >>> pd.DataFrame({ s.name: s for s in dsp.fetch_all(normalize=True) })
                      foo/bar$norm  foo/baz$norm
    2015-01-01 00:00      2.000000      3.000000
@@ -566,6 +588,8 @@ class Dataset(object):
                 'writeable')
 
    def __init__(self, filename, hashmod=None, writeable=False):
+      if (not writeable and not os.path.isdir(filename)):
+         raise FileNotFoundError('not a directory: %s' % filename)
       self.filename = filename
       self.hashmod = hashmod
       self.writeable = writeable
@@ -621,16 +645,24 @@ class Dataset(object):
       'Return a read-only clone of myself.'
       return self.__class__(self.filename, self.hashmod)
 
-   def fetch(self, name):
+   def fetch(self, name, last_only=True):
+      self.open_all()
       fs = list()
-      for t in self.fragment_tags:
-         fg = self.group_get(t)
-         fs.append(fg.fetch_or_create(name))
-      if (not any(f.total for f in fs)):
+      for g in self.groups.values():
+         try:
+            fs.append(g.fetch(name))
+         except db.Not_Enough_Rows_Error:
+            pass
+      if (len(fs) == 0):
          raise db.Not_Enough_Rows_Error('no non-zero fragments found')
+      if (not last_only
+          and len(fs) == 1
+          and self.fragment_tag_last == fs[0].group.tag):
+         raise db.Not_Enough_Rows_Error('only non-zero fragment was last')
       return self.assemble(fs)
 
    def fetch_all(self, *shards, last_only=True):
+      self.open_all()
       if (len(shards) == 0):
          shards = range(self.hashmod)
       for sh in shards:
@@ -638,7 +670,7 @@ class Dataset(object):
          # all the fragments in the last tag, even though we will discard most
          # of them. That is, we are guessing that keeping an orderly iteration
          # pattern is best, even though we won't use most of the results.
-         fgs = [self.group_get(t).fetch_all(sh) for t in self.fragment_tags]
+         fgs = (g.fetch_all(sh) for g in self.groups.values())
          for (name, fragments) in itertools.groupby(heapq.merge(*fgs),
                                                     lambda x: x.name):
             fragments = list(fragments)
@@ -646,6 +678,10 @@ class Dataset(object):
                 or last_only
                 or self.fragment_tag_last != fragments[0].group.tag):
                yield (name, self.assemble(fragments))
+
+   def open_all(self):
+      for f in self.fragment_tags:
+         self.group_get(f)
 
    def open_month(self, month):
       if (month.day != 1):
@@ -698,19 +734,26 @@ class Dataset_Pandas(Dataset):
       denom_name = series.name.split(NZ_DELIM, 1)[0]
       if (series.name == denom_name):
          raise ValueError('delimiter "%s" not found' % NZ_DELIM)
-      if (denom_name not in self.denoms):
+      denom_key = (denom_name, series.index.freq)
+      if (denom_key not in self.denoms):
          # Fetch denominator series. Note that we could proactively save
          # denominator series as we encounter them, but that optimizes a rare
          # case, and always fetching reduces the number of code paths.
          if (self.ds_mirror is None):
             self.ds_mirror = self.dup()
-         self.denoms[denom_name] = self.ds_mirror.fetch(denom_name)
-      nseries = series / self.denoms[denom_name]
+         denom = self.ds_mirror.fetch(denom_name)
+         if (denom.index.freq != series.index.freq):
+            denom = denom.resample(series.index.freq, how='sum')
+         self.denoms[denom_key] = denom
+      nseries = series / self.denoms[denom_key]
       nseries.name = series.name + NZ_SUFFIX
       return nseries
 
-   def fetch(self, name, normalize=False):
-      series = pd.Series(super().fetch(name), name=name, index=self.index)
+   def fetch(self, name, normalize=False, resample=None, *args, **kwargs):
+      series = pd.Series(super().fetch(name, *args, **kwargs),
+                         name=name, index=self.index)
+      if (resample):
+         series = series.resample(resample, how='sum')
       if (normalize):
          series = self.normalize(series)
       return series

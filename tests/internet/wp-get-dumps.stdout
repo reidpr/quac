@@ -1,4 +1,4 @@
-$ (wp-get-dumps 2>&1 | head -n -15)
+$ (wp-get-dumps 2>&1 | head -n 11)
 wpdmp INFO     updating Wikimedia dumps in [QUACBASE]/tests/tmp/wp-dumps
 wpdmp INFO     bandwidth limit is [RATE] KB/s
 receiving incremental file list
