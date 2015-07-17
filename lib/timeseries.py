@@ -356,11 +356,11 @@ A Pandas-based interface is provided as well:
    foo nf 0.0 {1z 741n (0, 10.0), (2, 12.0)}
    >>> a.save()
    True
-   >>> a = jan.create('foo/bar')
+   >>> a = jan.create('foo+bar')
    >>> a.data[0:4] = [20, 21, 22, 23]
    >>> a.save()
    True
-   >>> a = jan.create('foo/baz')
+   >>> a = jan.create('foo+baz')
    >>> a.data[0:4] = [30, 31, 32, 33]
    >>> a.save()
    True
@@ -370,8 +370,8 @@ A Pandas-based interface is provided as well:
    fragment 2015-01-01
    shard 0
    shard 1
-     foo/bar uf 86.0 {740z 0n (0, 20.0), (1, 21.0), (2, 22.0), (3, 23.0)}
-     foo/baz uf 126.0 {740z 0n (0, 30.0), (1, 31.0), (2, 32.0), (3, 33.0)}
+     foo+bar uf 86.0 {740z 0n (0, 20.0), (1, 21.0), (2, 22.0), (3, 23.0)}
+     foo+baz uf 126.0 {740z 0n (0, 30.0), (1, 31.0), (2, 32.0), (3, 33.0)}
    shard 2
    shard 3
      foo uf 22.0 {1z 741n (0, 10.0), (2, 12.0)}
@@ -382,7 +382,7 @@ A Pandas-based interface is provided as well:
                 '2015-01-31 20:00', '2015-01-31 21:00', '2015-01-31 22:00',
                 '2015-01-31 23:00'],
                dtype='int64', length=744, freq='H')
-   >>> dsp.fetch('foo/bar')
+   >>> dsp.fetch('foo+bar')
    2015-01-01 00:00    20
    2015-01-01 01:00    21
    2015-01-01 02:00    22
@@ -393,9 +393,9 @@ A Pandas-based interface is provided as well:
    ...
    2015-01-31 22:00     0
    2015-01-31 23:00     0
-   Freq: H, Name: foo/bar, dtype: float32
+   Freq: H, Name: foo+bar, dtype: float32
    >>> pd.DataFrame({ s.name: s for s in dsp.fetch_all() })
-                     foo  foo/bar  foo/baz
+                     foo  foo+bar  foo+baz
    2015-01-01 00:00   10       20       30
    2015-01-01 01:00    0       21       31
    2015-01-01 02:00   12       22       32
@@ -414,7 +414,7 @@ A Pandas-based interface is provided as well:
 
 The Pandas interface provides automatic normalization and resampling:
 
-   >>> dsp.fetch('foo/bar', normalize=True)
+   >>> dsp.fetch('foo+bar', normalize=True)
    2015-01-01 00:00    2.000000
    2015-01-01 01:00         inf
    2015-01-01 02:00    1.833333
@@ -423,25 +423,25 @@ The Pandas interface provides automatic normalization and resampling:
    ...
    2015-01-31 22:00         NaN
    2015-01-31 23:00         NaN
-   Freq: H, Name: foo/bar$norm, dtype: float32
-   >>> dsp.fetch('foo/bar', resample='D')
+   Freq: H, Name: foo+bar$norm, dtype: float32
+   >>> dsp.fetch('foo+bar', resample='D')
    2015-01-01    86
    2015-01-02     0
    2015-01-03     0
    ...
    2015-01-30     0
    2015-01-31     0
-   Freq: D, Name: foo/bar, dtype: float32
-   >>> dsp.fetch('foo/bar', normalize=True, resample='D')
+   Freq: D, Name: foo+bar, dtype: float32
+   >>> dsp.fetch('foo+bar', normalize=True, resample='D')
    2015-01-01    3.909091
    2015-01-02         NaN
    2015-01-03         NaN
    ...
    2015-01-30         NaN
    2015-01-31         NaN
-   Freq: D, Name: foo/bar$norm, dtype: float32
+   Freq: D, Name: foo+bar$norm, dtype: float32
    >>> pd.DataFrame({ s.name: s for s in dsp.fetch_all(normalize=True) })
-                     foo/bar$norm  foo/baz$norm
+                     foo+bar$norm  foo+baz$norm
    2015-01-01 00:00      2.000000      3.000000
    2015-01-01 01:00           inf           inf
    2015-01-01 02:00      1.833333      2.666667
@@ -455,7 +455,7 @@ The Pandas interface provides automatic normalization and resampling:
    >>> dsp.fetch('foo', normalize=True)
    Traceback (most recent call last):
      ...
-   ValueError: delimiter "/" not found
+   ValueError: delimiter "+" not found
    >>> dsp.close()
 
 Opening bogus months fails:
@@ -568,7 +568,7 @@ HASH = 'fnv1a_32'
 hashf = getattr(hash_, HASH)
 
 # Normalization stuff
-NZ_DELIM='/'
+NZ_DELIM='+'
 NZ_SUFFIX='$norm'
 
 class Fragment_Source(enum.Enum):

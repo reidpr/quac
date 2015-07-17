@@ -387,14 +387,13 @@ Four classes of articles are excluded from the time series files:
   following URL characters are passed through:
 
   * ASCII alphanumeric (A--Z upper and lower case, plus digits 0--9).
-  * The rest of the "unreserved set", except for dot: :samp:`-_~`
-  * Some of the reserved set: :samp:`!*();@,`
+  * The rest of the unreserved set: :samp:`-_.~`
+  * Some of the reserved set: :samp:`!*();@,/`
   * Percent (:samp:`%`), to allow encoded URLs through.
 
   For example, this excludes articles:
 
   * In non-main namespaces (these titles contain a colon).
-  * With a slash in the title (e.g., "Input/output").
   * Accessed with non-percent-encoded high characters (code point ≥128).
 
   See:
@@ -405,8 +404,8 @@ Four classes of articles are excluded from the time series files:
   This is done to make downstream processing easier while excluding a minimal
   set of articles.
 
-Together, these three filters exclude roughly half of the total data lines in
-the pageview files. These filters are done using standard UNIX text processing
+Together, these three filters exclude roughly 1/3 of the total data lines in
+the pageview files. Filtering is done using standard UNIX text processing
 tools, so the excluded data never touch Python code; be aware of this when
 interpreting statistics printed by the QUAC scripts.
 
@@ -419,10 +418,10 @@ A final filter is implemented in Python:
 
   The threshold is configurable at :samp:`wkpd.keep_threshold`.
 
-In sum, after filtering, only a small percentage of articles with reported
-hits find their way into the time series files. The exception is the current
-month, where the last step has not yet been applied, and so roughly half of
-articles are still present.
+In sum, after filtering, only a small percentage of URLs with reported hits
+find their way into the time series files. The exception is the current month,
+where the last step has not yet been applied, and so roughly 2/3 of articles
+are still present.
 
 Pagecount file format
 ---------------------

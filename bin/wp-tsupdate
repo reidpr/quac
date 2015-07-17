@@ -178,8 +178,7 @@ def file_read(file_, project_re):
    try:
       ts = wikimedia.timestamp_parse(file_)
       hour_offset = time_.hour_offset(ts)
-      # FIXME: See issue #108 before changing the project code filter.
-      fp = u.zcat(file_, r"zcat '%%s' | egrep '^%s [-A-Za-z0-9_~!*();@,%%%%]+ [0-9]+ [0-9]+$'" % project_re)
+      fp = u.zcat(file_, r"zcat '%%s' | egrep '^%s [-A-Za-z0-9_~!*();@,./%%%%]+ [0-9]+ [0-9]+$'" % project_re)
       badline_ct = 0
       prev_line = b''
       for (i, line) in enumerate(fp):
@@ -228,7 +227,7 @@ def files_process(fg, files):
       url_total_ct += 1
       if (args.warn_duplicates):
          if ((proj, url) in articles_seen):
-            l.warn('duplicate article found: %s/%s' % (proj, url))
+            l.warn('duplicate article found: %s+%s' % (proj, url))
          articles_seen.add((proj, url))
       if (proj != proj_last):
          if (proj_last is not None):
@@ -238,7 +237,7 @@ def files_process(fg, files):
                u.abort('duplicate project, cannot save: %s' % proj_last)
          proj_last = proj
          proj_totals = fetch_or_create(proj, np.float64, fill=np.nan)
-      url_v = fetch_or_create('%s/%s' % (proj, url), np.float32)
+      url_v = fetch_or_create('%s+%s' % (proj, url), np.float32)
       for (_, _, hour_offset, count) in gr:
          line_ct += 1
          url_v.data[hour_offset] = count

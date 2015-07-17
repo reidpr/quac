@@ -1613,8 +1613,8 @@ wptsu DEBUG    opening ts/2012-10-01.db, writeable=True
 wptsu DEBUG    opening ts/2012-11-01.db, writeable=True
 wptsu DEBUG    opening ts/2015-01-01.db, writeable=True
 wptsu DEBUG    opening ts/2099-01-01.db, writeable=True
-wptsu DEBUG    vacuumed: 1.31MiB used; 21 total, 0 free pages
-wptsu DEBUG    vacuumed: 4.50MiB used; 72 total, 0 free pages
+wptsu DEBUG    vacuumed: 1.38MiB used; 22 total, 0 free pages
+wptsu DEBUG    vacuumed: 4.75MiB used; 76 total, 0 free pages
 wptsu DEBUG    validated 5 metadata items
 wptsu DEBUG    validated 5 metadata items
 wptsu DEBUG    validated 5 metadata items
@@ -1623,11 +1623,11 @@ wptsu DEBUG    validated 5 metadata items
 wptsu DEBUG    validated 5 metadata items
 wptsu DEBUG    validated 5 metadata items
 wptsu DEBUG    validated 5 metadata items
-wptsu INFO     103741 of 103741 URLs saved (100.0%, [RATE] total/s)
-wptsu INFO     1262 of 84533 URLs saved (1.5%, [RATE] total/s)
-wptsu INFO     242 of 12774 URLs saved (1.9%, [RATE] total/s)
+wptsu INFO     107328 of 107328 URLs saved (100.0%, [RATE] total/s)
+wptsu INFO     1365 of 88081 URLs saved (1.5%, [RATE] total/s)
+wptsu INFO     245 of 13262 URLs saved (1.8%, [RATE] total/s)
 wptsu INFO     2 of 2 URLs saved (100.0%, [RATE] total/s)
-wptsu INFO     369 of 369 URLs saved (100.0%, [RATE] total/s)
+wptsu INFO     374 of 374 URLs saved (100.0%, [RATE] total/s)
 wptsu INFO     5 of 5 URLs saved (100.0%, [RATE] total/s)
 wptsu INFO     done
 wptsu INFO     done
@@ -1648,10 +1648,10 @@ wptsu INFO     opened ts/2099-01-01 length 744 hours
 wptsu INFO     read 0 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     read 0 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     read 2 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     read 369 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     read 371981 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     read 433077 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     read 44897 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     read 374 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     read 381034 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     read 444612 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     read 45980 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     read 5 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     starting
 wptsu INFO     starting
@@ -1735,18 +1735,18 @@ wptsu DEBUG    initializing
 wptsu DEBUG    initializing
 wptsu DEBUG    opening ts/2012-09-01.db, writeable=True
 wptsu DEBUG    opening ts/2012-10-01.db, writeable=True
-wptsu DEBUG    vacuumed: 1.31MiB used; 21 total, 0 free pages
-wptsu DEBUG    vacuumed: 4.50MiB used; 72 total, 0 free pages
+wptsu DEBUG    vacuumed: 1.38MiB used; 22 total, 0 free pages
+wptsu DEBUG    vacuumed: 4.75MiB used; 76 total, 0 free pages
 wptsu DEBUG    validated 5 metadata items
 wptsu DEBUG    validated 5 metadata items
-wptsu INFO     1262 of 84533 URLs saved (1.5%, [RATE] total/s)
-wptsu INFO     242 of 12774 URLs saved (1.9%, [RATE] total/s)
+wptsu INFO     1365 of 88081 URLs saved (1.5%, [RATE] total/s)
+wptsu INFO     245 of 13262 URLs saved (1.8%, [RATE] total/s)
 wptsu INFO     done
 wptsu INFO     done
 wptsu INFO     opened ts/2012-09-01 length 720 hours
 wptsu INFO     opened ts/2012-10-01 length 744 hours
-wptsu INFO     read 371981 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     read 44897 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     read 381034 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     read 45980 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     starting
 wptsu INFO     starting
 wptsu INFO     vacuumed in [TIME]
@@ -1792,9 +1792,9 @@ wptsu DEBUG    validated 5 metadata items
 wptsu DEBUG    validated 5 metadata items
 wptsu DEBUG    validated 5 metadata items
 wptsu DEBUG    validated 5 metadata items
-wptsu INFO     103741 of 103741 URLs saved (100.0%, [RATE] total/s)
+wptsu INFO     107328 of 107328 URLs saved (100.0%, [RATE] total/s)
 wptsu INFO     2 of 2 URLs saved (100.0%, [RATE] total/s)
-wptsu INFO     369 of 369 URLs saved (100.0%, [RATE] total/s)
+wptsu INFO     374 of 374 URLs saved (100.0%, [RATE] total/s)
 wptsu INFO     5 of 5 URLs saved (100.0%, [RATE] total/s)
 wptsu INFO     done
 wptsu INFO     done
@@ -1811,8 +1811,8 @@ wptsu INFO     opened ts/2099-01-01 length 744 hours
 wptsu INFO     read 0 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     read 0 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     read 2 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     read 369 lines in [TIME] ([RATE] lines/s)
-wptsu INFO     read 433077 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     read 374 lines in [TIME] ([RATE] lines/s)
+wptsu INFO     read 444612 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     read 5 lines in [TIME] ([RATE] lines/s)
 wptsu INFO     starting
 wptsu INFO     starting
@@ -1862,15 +1862,15 @@ shard 2
 shard 3
 fragment 2011-01-01
 shard 0
-  en/L%C3%A1trabjarg zf 1.0 {743z 0n (369, 1.0)}
+  en+L%C3%A1trabjarg zf 1.0 {743z 0n (369, 1.0)}
 shard 1
-  en/L%C3%A1szl%C3%B3_Vincze zf 1.0 {743z 0n (369, 1.0)}
+  en+L%C3%A1szl%C3%B3_Vincze zf 1.0 {743z 0n (369, 1.0)}
 shard 2
   en ud 7.0 {0z 743n (369, 7.0)}
 shard 3
-  en/L%C3%A1szl%C3%B3_Szab%C3%B3_(footballer_born_1989) zf 1.0 {743z 0n (369, 1.0)}
-  en/L%C3%A1szl%C3%B3_Szoll%C3%A1s zf 3.0 {743z 0n (369, 3.0)}
-  en/L%C3%A1szl%C3%B3_Vask%C3%BAti zf 1.0 {743z 0n (369, 1.0)}
+  en+L%C3%A1szl%C3%B3_Szab%C3%B3_(footballer_born_1989) zf 1.0 {743z 0n (369, 1.0)}
+  en+L%C3%A1szl%C3%B3_Szoll%C3%A1s zf 3.0 {743z 0n (369, 3.0)}
+  en+L%C3%A1szl%C3%B3_Vask%C3%BAti zf 1.0 {743z 0n (369, 1.0)}
 fragment 2011-10-01
 shard 0
 shard 1
@@ -1884,8 +1884,8 @@ fragment 2099-01-01
 shard 0
   a zd 1.0 {0z 743n (1, 1.0)}
 shard 1
-  a/b zf 1.0 {743z 0n (1, 1.0)}
-  c/d zf 1.0 {743z 0n (1, 1.0)}
+  a+b zf 1.0 {743z 0n (1, 1.0)}
+  c+d zf 1.0 {743z 0n (1, 1.0)}
 shard 2
   c zd 1.0 {0z 743n (1, 1.0)}
 shard 3

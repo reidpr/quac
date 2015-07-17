@@ -14,15 +14,15 @@ y "tssearch -l ts 2>&1 | (head -20; echo '[...]'; tail)"
 y "tssearch -lt ts 2>&1 | (head -20; echo '[...]'; tail)"
 
 # Some searches
-x tssearch ts en/Hurricane_Sandy en/Sandy_Abbas en/Sandy_Koufax NOTFOUND
-x tssearch -iD ts en/Hurricane_Sandy en/Sandy_Abbas en/Sandy_Koufax NOTFOUND
-x tssearch -iW ts en/Hurricane_Sandy en/Sandy_Abbas en/Sandy_Koufax NOTFOUND
-x tssearch -riW ts en/Hurricane_Sandy en/Sandy_Abbas en/Sandy_Koufax NOTFOUND
-x tssearch -triW ts en/Hurricane_Sandy en/Sandy_Abbas en/Sandy_Koufax NOTFOUND
+x tssearch ts en+Hurricane_Sandy en+Sandy_Abbas en+Sandy_Koufax NOTFOUND
+x tssearch -iD ts en+Hurricane_Sandy en+Sandy_Abbas en+Sandy_Koufax NOTFOUND
+x tssearch -iW ts en+Hurricane_Sandy en+Sandy_Abbas en+Sandy_Koufax NOTFOUND
+x tssearch -riW ts en+Hurricane_Sandy en+Sandy_Abbas en+Sandy_Koufax NOTFOUND
+x tssearch -triW ts en+Hurricane_Sandy en+Sandy_Abbas en+Sandy_Koufax NOTFOUND
 
 # Some failed searches
 x tssearch ts NOTFOUND
-x tssearch NOTADATASET en/Hurricane_Sandy
+x tssearch NOTADATASET en+Hurricane_Sandy
 
 # Erroneous invocations
 x tssearch ts
