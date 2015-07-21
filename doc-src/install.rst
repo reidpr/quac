@@ -137,64 +137,66 @@ These instructions assume that virtualenvs are installed under
           <https://github.com/defunkt/hub>`_ is recommended.
 
 
-Self-compile (not recommended)
-==============================
+Self-compile
+============
 
-.. warning:: This installation method should only be used if the normal way
-             does not work. It is rarely tested and likely to be broken. In
-             particular, it has not been updated since before the Python 3
-             upgrade.
+This installation method is useful when internet access is available and/or
+system libraries are insufficient. Root access is not required.
 
-             Essentially, it re-implements the most basic functionality of a
-             package manager, and it does so rather poorly and without regard
-             to what you already have installed.
+.. warning:: This installation method is unsupported and poorly tested. Use it
+             only as a last resort.
 
-This method does not require root, and it will take a little while to run,
-since it has to download and compile a fair amount of stuff. There are
-separate scripts to download and install, in case you want to QUAC on a system
-that doesn't have good access to the Internet.
+Prerequisites
+-------------
 
-Prerequisites:
+* A staging machine with git, :code:`pip` (either Python 2 or 3 is fine),
+  :code:`wget`, and internet access.
 
-* Some basic dependencies such as GNU Make 3.81 and C/C++/Fortran compilers.
-  Exactly what is currently unknown, but it "Works For Me™".
+* Target machine needs basic dependencies such as GNU Make 3.81 and
+  C/C++/Fortran compilers. Exactly what is currently unknown, but it "Works
+  For Me™" on a RHEL6.6 box.
 
-* The `Environment Modules <http://modules.sourceforge.net/>`_ package. You
-  probably have this if your system has a ``module`` command. This isn't
-  strictly needed, as you can get the same effect by editing your shell init
-  files appropriately.
+Install :code:`pip2pi`
+----------------------
 
-The below assumes that you have unpacked QUAC into ``$QUACBASE``.
+It's OK if you install :code:`pip2pi` using a different Python version than
+you will be using for QUAC, as it's only used to build a :code:`pip`
+repository on the staging machine.
 
-First, install the dependencies::
+::
 
-   $ mkdir $QUACBASE/deps
-   $ cd $QUACBASE/deps
-   $ ../misc/manual-download  # creates $QUACBASE/deps/src
-   $ ../misc/manual-install
+   $ pip install pip2pi
 
-Optional:
 
-* ``manual-install`` takes an argument which is the number of processes to use
-  while compiling (``make -j``).
+Prepare the dependency package
+------------------------------
 
-* You can run ``manual-download`` anywhere and move the resulting ``src``
-  directory into ``$QUACBASE/deps`` manually.
+In this step, you will download source code for QUAC's dependencies and create
+a package that can be transferred elsewhere. After unpacking QUAC into
+:code:`$QUACBASE`::
 
-Second, configure your environment. Add following to your ``.bashrc``::
+   $ deactivate          # if you have a virtualenv active
+   $ cd $QUACBASE
+   $ ./misc/manual-download
 
-   $ module use --append $QUACBASE/misc
-   $ module load quac-module
+The script will create a file :code:`deps.tar.gz`. Copy this to your target
+QUAC working directory.
 
-Note that in addition to making all the dependencies available, this module
-adds the QUAC libraries and binaries themselves to your various paths. Be
-aware of this if you have multiple QUAC working directories. (For example,
-suppose a colleague has installed QUAC and its dependencies in location
-:math:`A`, and you've loaded ``quac-module`` from :math:`A` because you don't
-want to duplicate the tedious installation. You have your own QUAC working
-directory at :math:`B` so you can hack on it. If you simply type
-``quacreduce``, you will get the one in :math:`A` even if you are working in
-:math:`B`, unless you take measures to prevent this.)
+Compile and install
+-------------------
+
+On the target machine::
+
+   $ cd $QUACBASE
+   $ tar xf deps.tar.gz
+   $ ./misc/manual-install
+
+Test
+----
+
+::
+
+   $ ./runtests
 
 
 ..  LocalWords:  MYPREFIX Rv setuptools Sv defunkt QUACBASE deps src

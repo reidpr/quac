@@ -94,9 +94,11 @@ nosetests.xml
 *.log
 
 deps
+deps.tar.gz
 doc
 doc-src/_build
 env
+env.*
 
 bin/hashsplit
 
