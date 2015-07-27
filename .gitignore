@@ -99,6 +99,7 @@ doc
 doc-src/_build
 env
 env.*
+requirements-*.txt
 
 bin/hashsplit
 

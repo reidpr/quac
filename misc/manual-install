@@ -11,7 +11,18 @@ ENV=$QUACBASE/env
 MAKEJ=${3:1}
 PIPINSTALL="pip install --index-url=file://$QUACBASE/deps/packages/simple"
 
+# This script does not install the geographic libraries. I tried at length to
+# get things to build properly -- the issue is that everything seems to work,
+# but then key attributes of the gdal module are missing -- but was unable to
+# resolve the problem. Because we are not actively using the geo stuff at the
+# moment, this is acceptable. I would welcome a patch to fix this.
+egrep -v '^(Django|pyproj)==' requirements.txt > requirements-nogeo.txt
+
+
 function install_ {
+
+    # this links the binaries to my libraries without needing LD_LIBRARY_PATH
+    export LDFLAGS=-Wl,-rpath=$PREFIX/lib
 
     # install Python and other non-pip stuff
     pushd $SRC
@@ -25,15 +36,17 @@ function install_ {
         exit 1
     fi
     install_apsw
-    install_swig
-    install_proj
-    install_geos
-    install_gdal
+    #install_swig
+    #install_proj
+    #install_geos
+    #install_gdal
     popd
 
-    $PIPINSTALL GDAL
+    unset LDFLAGS  # breaks numpy build
+    #$PIPINSTALL GDAL
     $PIPINSTALL numpy  # otherwise scipy et al. barf later
-    $PIPINSTALL -r requirements.txt
+    $PIPINSTALL pbr    # lockfile can't bring it in automatically
+    $PIPINSTALL -r requirements-nogeo.txt
     pip freeze --local
 }
 
@@ -48,7 +61,7 @@ function install_apsw {
     unzip -o apsw-*.zip
     tar xf sqlite-autoconf-*.tar.gz
     pushd apsw-*
-    ln -s ../sqlite-autoconf-*[0-9] sqlite3
+    ln -fs ../sqlite-autoconf-*[0-9] sqlite3
     python setup.py build --enable-all-extensions install
     popd
 }
