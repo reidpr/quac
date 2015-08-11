@@ -16,10 +16,14 @@ specific module, script, or cmdtest script. Examples:
 A few modules have interactive tests. These are good for drawing pictures and
 whatnot that need human interpretation to determine correctness.
 
+Specify --force to invoke Python module tests with the "manual" dependency.
+That is, this dependency is used to mark tests that are known to fail or have
+some other reason to avoid routine testing.
+
 The script prints a summary line when complete. It returns 0 (success) if
 everything testable passed, and 1 (failure) otherwise. Reasons that something
-is not testable include certain missing dependencies, no tests, tests disabled
-and --force not specified, etc. Note that import problems do cause failure.'''
+is not testable include missing dependencies or no tests. Note that import
+problems do cause failure.'''
 
 
 import argparse
@@ -87,10 +91,18 @@ del os.environ['TERM']
 # of them take a few seconds to run. We are lame and use a global variable.
 ready_tried = defaultdict(lambda: None)
 
+# Python modules can declare dependencies too. We store the results here; if
+# true, then the dependency is satisfied. Values are set below in
+# pydeps_set_status().
+pydeps = { 'geo':     None,
+           'icu':     None,
+           'manual':  None }
+
 
 ### main ###
 
 def main():
+   pydeps_set_status()
    status = Counter()
    status += testloop('Python modules in lib', './lib', test_module)
    status += testloop('Python scripts in bin', './bin', test_script)
@@ -111,7 +123,7 @@ def main():
 ###   failed:           %(fail)3d %(fail_alert)s
 ###   import failures:  %(import_fail)3d %(import_fail_alert)s
 ###   no tests:         %(notest)3d
-###   disabled:         %(disabled)3d
+###   python skips:     %(disabled)3d
 ###   cmdtest skips:    %(cmdtest_skip)3d''' % (status))
    print('###\n### tmpdir: %s' % tmpdir)
    sys.exit(retval)
@@ -172,13 +184,38 @@ def import_test(filename, text):
       raise Failure('import_fail')
 
 def is_testable(text):
-   m = re.search(r'testable\.(?P<manual>manualonly_)?register\(', text)
-   if (m is None):
+   # Is there a testable.register() call?
+   if (re.search(r'testable\.register\(', text) is None):
       print('no tests')
       raise Failure('notest')
-   if (m.group('manual') and not args.force):
-      print('disabled')
-      raise Failure('disabled')
+   # Are there any dependencies that are unsatisfied?
+   m = re.search(r'^\s*# Test-Depends: (.+)$', text, re.MULTILINE)
+   if (m is not None):
+      missing = sorted(dep for dep in m.group(1).split() if not pydeps[dep])
+      if (len(missing) > 0):
+         print('missing dependencies:', ' '.join(missing))
+         raise Failure('disabled')
+
+def pydep_geo():
+   try:
+      import django.contrib.gis
+   except ImportError:
+      return False
+   return True
+
+def pydep_icu():
+   try:
+      import icu
+   except ImportError:
+      return False
+   return True
+
+def pydep_manual():
+   return args.force
+
+def pydeps_set_status():
+   for dep in pydeps:
+      pydeps[dep] = globals()['pydep_' + dep]()
 
 def test_cmdtest(filename):
    # Silently return if not a cmdtest script

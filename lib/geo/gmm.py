@@ -885,9 +885,10 @@ class Token_All_Pipeline(pipeline.Model):
 
 ### Tests ###
 
+# Test-Depends: geo manual
 # Test passes as of sklearn.13-git
 # Fails under sklearn 0.16.1
-testable.manualonly_register('''
+testable.register('''
 
 # Test that fitting respects consistent random state.
 >>> def test_r():

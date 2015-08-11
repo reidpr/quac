@@ -97,4 +97,5 @@ class TSV_Reader_Job(object):
          yield line.split('\t')
 
 
-testable.manualonly_register('')
+# Test-Depends: manual
+testable.register('')

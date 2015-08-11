@@ -292,6 +292,7 @@ def dump_geojson(basename, geoms):
 
 ### Tests ###
 
+# Test-Depends: geo
 testable.register('''
 
 # Make sure the SRIDs we're interested in are available.

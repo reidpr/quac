@@ -389,6 +389,7 @@ T_TW_JSON_CO = r'''{"text":"Guantes, bufanda, tenis y chamarra :) #Viena","id_st
 # FIXME: add test tweets for the other geotag sources
 
 
+# Test-Depends: geo
 testable.register('''
 
 # Make sure we don't drop anything through all the parsing and unparsing.

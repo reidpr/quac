@@ -329,4 +329,5 @@ class Model(object, metaclass=ABCMeta):
          l.warn('%d cores requested, but %s is serial'
                 % (multicore.core_ct, self.__class__))
 
+# Test-Depends: geo
 testable.register('')
