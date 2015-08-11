@@ -27,4 +27,5 @@ This project contains code from Cyclopath, which is copyright (c) 2006-2012
 Regents of the University of Minnesota and open source under the Apache
 license. Grep for "Cyclopath" to find the relevant files.
 
-*This software has been approved for open source release, LACC #12-038.*
+*This software has been approved for open source release, LA-CC 12-038 and
+LA-CC 15-044.*
