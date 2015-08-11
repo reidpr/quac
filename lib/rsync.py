@@ -22,6 +22,7 @@ def byinclude(from_url, dest_dir, bwlimit, includes, verbose=False):
    more_args = list(include_args(dir_includes))
    more_args += include_args(includes)  # include includes
    more_args += ['--exclude', '*']      # exclude everything not included
+   more_args += ['--delete']            # some filenames change, rm old ones
    return fetch(from_url, dest_dir, bwlimit, more_args, verbose)
 
 def fetch(from_url, dest_dir, bwlimit, more_args, verbose):
