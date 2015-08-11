@@ -62,6 +62,12 @@ z () {
     eval "$@" 2>&1 | cleanup
 }
 
+# Echo key commands (in parent shell), with cleanup and sort; no return value.
+zs () {
+    echo "\$ $@ | sort" | cleanup
+    eval "$@" 2>&1 | cleanup | LC_ALL=C sort
+}
+
 # Decide how to call netstat. The problem is that Red Hat and everyone else
 # chose incompatible options for not truncating hostnames.
 if (netstat --help 2>&1 | fgrep -q -- --wide); then
