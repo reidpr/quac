@@ -30,10 +30,8 @@ $ head -5 aawiki-latest-stub-meta-history.xml
   <siteinfo>
     <sitename>Wikipedia</sitename>
     <dbname>aawiki</dbname>
-    <base>http://aa.wikipedia.org/wiki/Main_Page</base>
-$ tail -5 aawiki-latest-stub-meta-history.xml
-      <text id="10533" bytes="117" />
-      <sha1>7210kk8bqhstp21n3p3mihytpu2dcan</sha1>
+    <base>https://aa.wikipedia.org/wiki/Main_Page</base>
+$ tail -3 aawiki-latest-stub-meta-history.xml
     </revision>
   </page>
 </mediawiki>

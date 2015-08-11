@@ -28,4 +28,4 @@ y "zcat aawiki-latest-stub-meta-history.xml.gz | fgrep -v '<generator>' > aawiki
 x head -5 aawiki-latest-pagelinks.sql
 x tail -5 aawiki-latest-pagelinks.sql
 x head -5 aawiki-latest-stub-meta-history.xml
-x tail -5 aawiki-latest-stub-meta-history.xml
+x tail -3 aawiki-latest-stub-meta-history.xml
