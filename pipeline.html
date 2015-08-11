@@ -1,172 +1,415 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>3. Preprocessing data &mdash; QUAC documentation for commit 5ccb2ad</title>
-    
-    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="QUAC documentation for commit 5ccb2ad" href="index.html" />
-    <link rel="next" title="4. Map-Reduce with QUACreduce" href="map_reduce.html" />
-    <link rel="prev" title="2. Collecting data" href="collecting.html" /> 
-  </head>
-  <body>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="map_reduce.html" title="4. Map-Reduce with QUACreduce"
-             accesskey="N">next</a></li>
-        <li class="right" >
-          <a href="collecting.html" title="2. Collecting data"
-             accesskey="P">previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 5ccb2ad</a> &raquo;</li> 
-      </ul>
-    </div>
-      <div class="sphinxsidebar">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">3. Preprocessing data</a><ul>
-<li><a class="reference internal" href="#twitter">3.1. Twitter</a><ul>
-<li><a class="reference internal" href="#overview">3.1.1. Overview</a></li>
-<li><a class="reference internal" href="#file-organization">3.1.2. File organization</a></li>
-<li><a class="reference internal" href="#file-formats">3.1.3. File formats</a><ul>
-<li><a class="reference internal" href="#raw-json-tweets">3.1.3.1. Raw JSON tweets</a></li>
-<li><a class="reference internal" href="#tsv-files">3.1.3.2. TSV files</a></li>
-<li><a class="reference internal" href="#preprocessing-metadata-file">3.1.3.3. Preprocessing metadata file</a></li>
-<li><a class="reference internal" href="#geo-located-tweets">3.1.3.4. Geo-located tweets</a></li>
-<li><a class="reference internal" href="#alternatives-that-were-considered-and-rejected">3.1.3.5. Alternatives that were considered and rejected</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#wikimedia-pageview-logs">3.2. Wikimedia pageview logs</a><ul>
-<li><a class="reference internal" href="#id2">3.2.1. Overview</a></li>
-<li><a class="reference internal" href="#id3">3.2.2. File organization</a></li>
-<li><a class="reference internal" href="#pagecount-file-format">3.2.3. Pagecount file format</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#time-series-files">3.3. Time series files</a></li>
-</ul>
-</li>
-</ul>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>3. Preprocessing data &mdash; QUAC 0.7 documentation</title>
+  
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="collecting.html"
-                        title="previous chapter">2. Collecting data</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="map_reduce.html"
-                        title="next chapter">4. Map-Reduce with QUACreduce</a></p>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="QUAC 0.7 documentation" href="index.html"/>
+        <link rel="next" title="4. Map-Reduce with QUACreduce" href="map_reduce.html"/>
+        <link rel="prev" title="2. Collecting data" href="collecting.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> QUAC
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
+
+        
       </div>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body">
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">1. Installing QUAC</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#pypi-and-virtualenv-recommended">1.1. PyPI and virtualenv (recommended)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#self-compile">1.2. Self-compile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="install.html#prerequisites">1.2.1. Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#install-pip2pi">1.2.2. Install <code class="code docutils literal"><span class="pre">pip2pi</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#prepare-the-dependency-package">1.2.3. Prepare the dependency package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#compile-and-install">1.2.4. Compile and install</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#test">1.2.5. Test</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="collecting.html">2. Collecting data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="collecting.html#wikipedia">2.1. Wikipedia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collecting.html#twitter">2.2. Twitter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="collecting.html#set-up-authentication">2.2.1. Set up authentication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="collecting.html#run-the-collector">2.2.2. Run the collector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="collecting.html#build-the-tsv-files">2.2.3. Build the TSV files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="collecting.html#doing-it-seriously">2.2.4. Doing it seriously</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">3. Preprocessing data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#time-series-files">3.1. Time series files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#motivation">3.1.1. Motivation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-format">3.1.2. File format</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#twitter">3.2. Twitter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overview">3.2.1. Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-organization">3.2.2. File organization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-formats">3.2.3. File formats</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#raw-json-tweets">3.2.3.1. Raw JSON tweets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tsv-files">3.2.3.2. TSV files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#preprocessing-metadata-file">3.2.3.3. Preprocessing metadata file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geo-located-tweets">3.2.3.4. Geo-located tweets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#alternatives-that-were-considered-and-rejected">3.2.3.5. Alternatives that were considered and rejected</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#wikimedia-pageview-logs">3.3. Wikimedia pageview logs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">3.3.1. Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">3.3.2. File organization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#article-filtering">3.3.3. Article filtering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pagecount-file-format">3.3.4. Pagecount file format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#time-series-storage">3.3.5. Time series storage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="map_reduce.html">4. Map-Reduce with QUACreduce</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#introduction">4.1. Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#summary-of-api">4.2. Summary of API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#example">4.3. Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#create-sample-input">4.3.1. Create sample input</a></li>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#define-the-map-operator">4.3.2. Define the <em>map</em> operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#define-the-reduce-operator">4.3.3. Define the <em>reduce</em> operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#test-the-operators-together">4.3.4. Test the operators together</a></li>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#prepare-the-job">4.3.5. Prepare the job</a></li>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#run-the-job-with-make">4.3.6. Run the job with make</a></li>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#add-more-input-data">4.3.7. Add more input data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#what-s-next">4.3.8. What&#8217;s next?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#distributed-quacreduce">4.4. Distributed QUACreduce</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#id5">4.4.1. Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#drawbacks">4.5. Drawbacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#fixme">4.6. FIXME</a></li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#footnotes">4.7. Footnotes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="timeseries.html">5. Time series analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="timeseries.html#input-file-format">5.1. Input file format</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">6. Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">7. Frequently asked questions (FAQ)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#a-caution-about-tweet-ids">7.1. A caution about tweet IDs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#my-python-script-barfs-with-unicodedecodeerror-when-printing-tweets">7.2. My python script barfs with <code class="docutils literal"><span class="pre">UnicodeDecodeError</span></code> when printing tweets!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#unicode-works-ok-in-the-terminal-but-python-barfs-when-redirecting-stdout">7.3. Unicode works OK in the terminal, but Python barfs when redirecting stdout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#collect-daemon-fails-to-start-and-there-s-no-error-message">7.4. <code class="code docutils literal"><span class="pre">collect</span> <span class="pre">--daemon</span></code> fails to start and there&#8217;s no error message</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-quickly-see-a-tweet-as-it-s-supposed-to-look">7.5. How do I quickly see a tweet as it&#8217;s &#8220;supposed&#8221; to look?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="limitations.html">8. Limitations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">9. Citing QUAC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">10. How to contribute</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#basic-workflow">10.1. Basic workflow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#branching-model">10.1.1. Branching model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#doing-actual-work">10.1.2. Doing actual work</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#merging-to-master">10.1.3. Merging to <code class="docutils literal"><span class="pre">master</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#cutting-a-release">10.1.4. Cutting a release</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#simplifying-cmdtest-updates-with-meld">10.2. Simplifying <code class="samp docutils literal"><span class="pre">cmdtest</span></code> updates with <code class="samp docutils literal"><span class="pre">meld</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#code-style">10.3. Code style</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#docstrings">10.3.1. Docstrings</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#documentation">10.4. Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#building-the-docs">10.4.1. Building the docs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#conventions">10.4.2. Conventions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#publishing-to-the-web">10.4.3. Publishing to the web</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#prerequisites">10.4.3.1. Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#publishing">10.4.3.2. Publishing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="release_notes.html">11. Release notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="release_notes.html#the-future">11.1. The future</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release_notes.html#list-of-releases">11.2. List of releases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-6-october-20-2014">11.2.1. v0.6 (October 20, 2014)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-5-november-13-2013">11.2.2. v0.5 (November 13, 2013)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-4-october-10-2013">11.2.3. v0.4 (October 10, 2013)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-3-august-5-2013">11.2.4. v0.3 (August 5, 2013)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-2-may-30-2013">11.2.5. v0.2 (May 30, 2013)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-1-april-26-2013">11.2.6. v0.1 (April 26, 2013)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="credits.html">12. Credits</a></li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">QUAC</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>3. Preprocessing data</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
             
   <div class="section" id="preprocessing-data">
 <h1>3. Preprocessing data<a class="headerlink" href="#preprocessing-data" title="Permalink to this headline">¶</a></h1>
 <p>Typically, raw data direct from collection is not too useful. QUAC implements
 a preprocessing step to translate it into more pleasant formats as well as do
 some preliminary analysis. This section describes the steps to do that.</p>
-<p><em>All times and dates are in UTC except as otherwise noted.</em></p>
-<div class="section" id="twitter">
-<h2>3.1. Twitter<a class="headerlink" href="#twitter" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="overview">
-<h3>3.1.1. Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h3>
-<p>QUAC&#8217;s Twitter pipeline has three basic steps:</p>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><a class="reference internal" href="#time-series-files" id="id5">Time series files</a><ul>
+<li><a class="reference internal" href="#motivation" id="id6">Motivation</a></li>
+<li><a class="reference internal" href="#file-format" id="id7">File format</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#twitter" id="id8">Twitter</a><ul>
+<li><a class="reference internal" href="#overview" id="id9">Overview</a></li>
+<li><a class="reference internal" href="#file-organization" id="id10">File organization</a></li>
+<li><a class="reference internal" href="#file-formats" id="id11">File formats</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#wikimedia-pageview-logs" id="id12">Wikimedia pageview logs</a><ul>
+<li><a class="reference internal" href="#id2" id="id13">Overview</a></li>
+<li><a class="reference internal" href="#id3" id="id14">File organization</a></li>
+<li><a class="reference internal" href="#article-filtering" id="id15">Article filtering</a></li>
+<li><a class="reference internal" href="#pagecount-file-format" id="id16">Pagecount file format</a></li>
+<li><a class="reference internal" href="#time-series-storage" id="id17">Time series storage</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">All times and dates are in UTC except as otherwise noted.</p>
+</div>
+<div class="section" id="time-series-files">
+<h2><a class="toc-backref" href="#id5">3.1. Time series files</a><a class="headerlink" href="#time-series-files" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="motivation">
+<h3><a class="toc-backref" href="#id6">3.1.1. Motivation</a><a class="headerlink" href="#motivation" title="Permalink to this headline">¶</a></h3>
+<p>The ultimate goal of preprocessing is to turn diverse kinds of internet data
+into hourly time series of event counts, for example n-gram occurences in
+Twitter messages or Wikpedia article hits. These are stored in the time series
+files.</p>
+<p>We have three main goals for these files:</p>
 <ol class="arabic simple">
-<li>Collect tweets using the streaming API. (<tt class="docutils literal"><span class="pre">collect</span></tt> script.)</li>
-<li>Convert the tweets from the raw JSON, de-duplicate and clean them up, and
-produce nicely organized and ordered TSV files. (<tt class="docutils literal"><span class="pre">parse.mk</span></tt> makefile.)</li>
-<li>Geo-locate tweets that do not contain a geotag. (<tt class="docutils literal"><span class="pre">geo.mk</span></tt> makefile.) (But
-see issue <a class="reference external" href="https://github.com/reidpr/quac/issues/15">#15</a>.)</li>
+<li>Provide a unified format for many types of things that can be counted over
+time, to feed into a unified analysis framework.</li>
+<li>Facilitate parallel access to the dataset without specialized I/O
+techniques (such as MPI parallel I/O).</li>
+<li>Facilitate reasonable performance for continually updated data written in
+time-major order (e.g., each hour, a new Wikipedia access log file arrives
+giving hits for all pages) as well as fast reading in item-major order
+(e.g., quickly iterate through each Wikipedia article&#8217;s complete time
+series). That is, we want to accomplish a data transpose implicitly during
+the preprocessing phase.</li>
 </ol>
 </div>
+<div class="section" id="file-format">
+<h3><a class="toc-backref" href="#id7">3.1.2. File format</a><a class="headerlink" href="#file-format" title="Permalink to this headline">¶</a></h3>
+<p>Named time series are stored in SQLite3 database files. A directory contains
+multiple databases <em>fragmented</em> by time (month); within each file are multiple
+tables <em>sharded</em> by time series name (by hashing).</p>
+<p>Currently, time series must be hourly, and fragments are one per month. We
+have attempted to make the API extensible to remove these limitations without
+excessive disruption to existing code.</p>
+<p>Time series vectors can be any NumPy data type. If any time series fragment is
+present in a fragment file, it is complete (i.e., a value is present for each
+hour in the month.)</p>
+<p>Functionality is provided for pruning (and replacing with zeroes on fetch)
+fragments with small magnitude.</p>
+<p>For example:</p>
+<ul class="simple">
+<li><code class="samp docutils literal"><span class="pre">ts/</span></code> &#8212; Time series directory (can be named arbitrarily)<ul>
+<li><code class="samp docutils literal"><span class="pre">2007-12-01.db</span></code> &#8212; Data for the month of December 2007.<ul>
+<li><code class="samp docutils literal"><span class="pre">data0</span></code> &#8212; Table containing data for time series whose name
+hashed mode <span class="math">\(n\)</span> is 0.</li>
+<li><code class="samp docutils literal"><span class="pre">data1</span></code> &#8212; Table containing data for time series whose name
+hashed mode <span class="math">\(n\)</span> is 1.</li>
+<li>... (additional shards)</li>
+</ul>
+</li>
+<li><code class="samp docutils literal"><span class="pre">2008-01-01.db</span></code> &#8212; Data for the month of January 2008.<ul>
+<li>... (shards)</li>
+</ul>
+</li>
+<li>... (one file for each month in the dataset)</li>
+</ul>
+</li>
+</ul>
+<p>A data table has the following columns. All are <code class="samp docutils literal"><span class="pre">NOT</span> <span class="pre">NULL</span></code>.</p>
+<ul class="simple">
+<li><code class="samp docutils literal"><span class="pre">name</span></code>: Time series name (text, primary key).</li>
+<li><code class="samp docutils literal"><span class="pre">dtype</span></code>: NumPy data type character code (text).</li>
+<li><code class="samp docutils literal"><span class="pre">total</span></code>: Sum of element absolute values in the time series fragment
+(double, regardless of fragment data type).</li>
+<li><code class="samp docutils literal"><span class="pre">data</span></code>: Content of time series fragment. This is either a memory dump
+of the corresponding NumPy object (i.e., a C array), or the same memory dump
+compressed with zlib (if <code class="samp docutils literal"><span class="pre">total</span></code> is below a threshold).</li>
+</ul>
+<p>Each database also contains a <code class="samp docutils literal"><span class="pre">metadata</span></code> table with various parameters.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Data tables do not use explicit indexes, instead relying on SQLite&#8217;s
+<a class="reference external" href="http://www.sqlite.org/withoutrowid.html">WITHOUT ROWID</a> feature coupled
+with maximum-size 64kB pages. Back-of-the-envelope calculations suggest
+this is the right choice performance-wise, but it has not been tested.</p>
+</div>
+</div>
+</div>
+<div class="section" id="twitter">
+<h2><a class="toc-backref" href="#id8">3.2. Twitter</a><a class="headerlink" href="#twitter" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="overview">
+<h3><a class="toc-backref" href="#id9">3.2.1. Overview</a><a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h3>
+<p>QUAC&#8217;s Twitter pipeline has three basic steps:</p>
+<ol class="arabic simple">
+<li>Collect tweets using the streaming API. (<code class="docutils literal"><span class="pre">collect</span></code> script.)</li>
+<li>Convert the tweets from the raw JSON, de-duplicate and clean them up, and
+produce nicely organized and ordered TSV files. (<code class="docutils literal"><span class="pre">parse.mk</span></code> makefile.)</li>
+<li>Geo-locate tweets that do not contain a geotag. (<code class="docutils literal"><span class="pre">geo.mk</span></code> makefile.) (But
+see issue <a class="reference external" href="https://github.com/reidpr/quac/issues/15">#15</a>.)</li>
+</ol>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Processing Twitter data into time series files is not yet implemented.</p>
+</div>
+</div>
 <div class="section" id="file-organization">
-<h3>3.1.2. File organization<a class="headerlink" href="#file-organization" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id10">3.2.2. File organization</a><a class="headerlink" href="#file-organization" title="Permalink to this headline">¶</a></h3>
 <p>A fully populated data directory looks something like this:</p>
 <ul class="simple">
-<li><tt class="samp docutils literal"><span class="pre">raw/</span></tt> &#8212; Raw JSON tweets fresh from the Streaming API.<ul>
-<li><tt class="samp docutils literal"><span class="pre">2012-04/</span></tt> &#8212; Tweets from <tt class="docutils literal"><span class="pre">collect</span></tt>. Each month gets its own
+<li><code class="samp docutils literal"><span class="pre">raw/</span></code> &#8212; Raw JSON tweets fresh from the Streaming API.<ul>
+<li><code class="samp docutils literal"><span class="pre">2012-04/</span></code> &#8212; Tweets from <code class="docutils literal"><span class="pre">collect</span></code>. Each month gets its own
 directory.<ul>
-<li><tt class="samp docutils literal"><span class="pre">20120401_003115</span><em><span class="pre">.json.gz</span></em></tt> &#8212; Sequence of JSON tweet objects.
+<li><code class="samp docutils literal"><span class="pre">20120401_003115</span><em><span class="pre">.json.gz</span></em></code> &#8212; Sequence of JSON tweet objects.
 <em>Note:</em> As of roughly April 14, 2014, most tweets contain spurious
 newlines due to the erroneous way that QUAC handles
-<tt class="docutils literal"><span class="pre">Transfer-Encoding:</span> <span class="pre">chunked</span></tt> HTTP data. Our parsing strategy works
+<code class="docutils literal"><span class="pre">Transfer-Encoding:</span> <span class="pre">chunked</span></code> HTTP data. Our parsing strategy works
 around this problem. We plan to fix this in Issue #8.</li>
-<li><tt class="samp docutils literal"><span class="pre">20120401_003115</span><em><span class="pre">.stats</span></em></tt> &#8212; Text file containing a few statistics
+<li><code class="samp docutils literal"><span class="pre">20120401_003115</span><em><span class="pre">.stats</span></em></code> &#8212; Text file containing a few statistics
 about the above.</li>
-<li><tt class="samp docutils literal"><span class="pre">20120401_003115</span><em><span class="pre">.2012-03-31.raw.tsv</span></em></tt> &#8212; Direct TSV translation
+<li><code class="samp docutils literal"><span class="pre">20120401_003115</span><em><span class="pre">.2012-03-31.raw.tsv</span></em></code> &#8212; Direct TSV translation
 of tweets from March 31 contained in the JSON file above (i.e., still
 contains duplicates and is in arbitrary order).</li>
-<li><tt class="samp docutils literal"><span class="pre">20120401_003115</span><em><span class="pre">.2013-04-01.raw.tsv</span></em></tt> &#8212; A given JSON file can
+<li><code class="samp docutils literal"><span class="pre">20120401_003115</span><em><span class="pre">.2013-04-01.raw.tsv</span></em></code> &#8212; A given JSON file can
 have tweets from multiple days, so it may produce more than one
-<tt class="docutils literal"><span class="pre">.raw.tsv</span></tt> file.</li>
-<li><tt class="samp docutils literal"><span class="pre">20120401_003115</span><em><span class="pre">.d</span></em></tt> &#8211; Makefile listing dependencies related to
-the above JSON and <tt class="docutils literal"><span class="pre">.raw.tsv</span></tt> files.</li>
+<code class="docutils literal"><span class="pre">.raw.tsv</span></code> file.</li>
+<li><code class="samp docutils literal"><span class="pre">20120401_003115</span><em><span class="pre">.d</span></em></code> &#8211; Makefile listing dependencies related to
+the above JSON and <code class="docutils literal"><span class="pre">.raw.tsv</span></code> files.</li>
 <li>... (lots more of the above)</li>
 </ul>
 </li>
-<li><tt class="samp docutils literal"><span class="pre">legacy/</span></tt> &#8212; Subdirectories don&#8217;t have to be named after dates.
+<li><code class="samp docutils literal"><span class="pre">legacy/</span></code> &#8212; Subdirectories don&#8217;t have to be named after dates.
 (Perhaps you have some existing Twitter data that were not collected with
 QUAC.)</li>
 <li>... (more subdirs)</li>
 </ul>
 </li>
-<li><tt class="samp docutils literal"><span class="pre">pre/</span></tt><ul>
-<li><tt class="samp docutils literal"><span class="pre">2012-03-31</span><em><span class="pre">.all.tsv</span></em></tt> &#8212; Processed tweets from March 31 from all
+<li><code class="samp docutils literal"><span class="pre">pre/</span></code><ul>
+<li><code class="samp docutils literal"><span class="pre">2012-03-31</span><em><span class="pre">.all.tsv</span></em></code> &#8212; Processed tweets from March 31 from all
 raw JSON files. No duplicates and in ascending order by tweet ID.</li>
-<li><tt class="samp docutils literal"><span class="pre">2012-03-31</span><em><span class="pre">.geo.tsv</span></em></tt> &#8212; Subset of the above that contain a
+<li><code class="samp docutils literal"><span class="pre">2012-03-31</span><em><span class="pre">.geo.tsv</span></em></code> &#8212; Subset of the above that contain a
 geotag.</li>
-<li>... (two <tt class="docutils literal"><span class="pre">.tsv</span></tt> per day in the data)</li>
-<li><tt class="samp docutils literal"><span class="pre">metadata</span></tt> &#8212; Python pickle file summarizing metadata for the above
+<li>... (two <code class="docutils literal"><span class="pre">.tsv</span></code> per day in the data)</li>
+<li><code class="samp docutils literal"><span class="pre">metadata</span></code> &#8212; Python pickle file summarizing metadata for the above
 files.</li>
 </ul>
 </li>
-<li><tt class="samp docutils literal"><span class="pre">geo/</span></tt> &#8212; <cite>FIXME</cite></li>
+<li><code class="samp docutils literal"><span class="pre">geo/</span></code> &#8212; <cite>FIXME</cite></li>
 </ul>
-<p>In addition to the above, you will find <tt class="docutils literal"><span class="pre">.log</span></tt> files scattered about. These
+<p>In addition to the above, you will find <code class="docutils literal"><span class="pre">.log</span></code> files scattered about. These
 are simply log files produced during processing.</p>
 </div>
 <div class="section" id="file-formats">
-<h3>3.1.3. File formats<a class="headerlink" href="#file-formats" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id11">3.2.3. File formats</a><a class="headerlink" href="#file-formats" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="raw-json-tweets">
-<h4>3.1.3.1. Raw JSON tweets<a class="headerlink" href="#raw-json-tweets" title="Permalink to this headline">¶</a></h4>
-<p>Each raw tweet file (<tt class="docutils literal"><span class="pre">.json.gz</span></tt>) is a gzipped sequence of JSON-encoded
+<h4>3.2.3.1. Raw JSON tweets<a class="headerlink" href="#raw-json-tweets" title="Permalink to this headline">¶</a></h4>
+<p>Each raw tweet file (<code class="docutils literal"><span class="pre">.json.gz</span></code>) is a gzipped sequence of JSON-encoded
 tweets in the <a class="reference external" href="https://dev.twitter.com/docs/platform-objects">format documented by Twitter</a>, separated by newlines
 (i.e., a file cannot be parsed as a single JSON object). Non-tweet objects do
 appear; these are also JSON encoded. Newlines do not appear within encoded
@@ -175,9 +418,9 @@ timestamp of when collection started for that file (time zone is <em>local</em>,
 historical artifact which will not be fixed &#8211; be careful!) and placed in a
 1-level hierarchy by year and month. The collection process caps the number of
 tweets in each raw file to a &#8220;reasonable&#8221; number that changes occasionally.</p>
-<p>Along with each <tt class="docutils literal"><span class="pre">.json.gz</span></tt> is a <tt class="docutils literal"><span class="pre">.stats</span></tt> file. This contains a few
+<p>Along with each <code class="docutils literal"><span class="pre">.json.gz</span></code> is a <code class="docutils literal"><span class="pre">.stats</span></code> file. This contains a few
 statistics about the raw file&#8217;s data, though its key purpose is simply to mark
-that the collector closed the tweet file in an orderly way. Bare <tt class="docutils literal"><span class="pre">.json.gz</span></tt>
+that the collector closed the tweet file in an orderly way. Bare <code class="docutils literal"><span class="pre">.json.gz</span></code>
 files may be still in progress, broken, etc. and should be read with caution.
 Tweets are Unicode and indeed contain high characters, so care must be taken
 in handling character encodings.</p>
@@ -190,27 +433,27 @@ parsability of the JSON.</p>
 <ul>
 <li><p class="first">While the encoding of the output is ostensibly UTF-8, it appears that high
 characters are escaped with the &#8220;uXXXX&#8221; notation. For example:</p>
-<div class="highlight-python"><div class="highlight"><pre>&quot;text&quot;:&quot;\u2606\u2606\u2606\u2606\u2606#Cruzeiro&quot;
+<div class="highlight-text"><div class="highlight"><pre>&quot;text&quot;:&quot;\u2606\u2606\u2606\u2606\u2606#Cruzeiro&quot;
 </pre></div>
 </div>
 </li>
 <li><p class="first">Some text has excessive escaping. For example, forward slashes do not need
 to be escaped, but they are anyway:</p>
-<div class="highlight-python"><div class="highlight"><pre>&quot;source&quot;:&quot;\u003Ca href=\&quot;http:\/\/blackberry.com\/twitter&quot;
+<div class="highlight-text"><div class="highlight"><pre>&quot;source&quot;:&quot;\u003Ca href=\&quot;http:\/\/blackberry.com\/twitter&quot;
 </pre></div>
 </div>
 </li>
 </ul>
 </div>
 <div class="section" id="tsv-files">
-<h4>3.1.3.2. TSV files<a class="headerlink" href="#tsv-files" title="Permalink to this headline">¶</a></h4>
+<h4>3.2.3.2. TSV files<a class="headerlink" href="#tsv-files" title="Permalink to this headline">¶</a></h4>
 <p>The raw tweet files are not so convenient to work with: JSON parsing is slow,
 and tweets can be duplicated and out of order (including between files, which
 makes parallelization difficult). Therefore, we pre-process the JSON into a
 TSV format which addresses these issues. The final product is a pair of TSV
 files for each day:</p>
 <ul class="simple">
-<li><tt class="samp docutils literal"><span class="pre">YYYY-DD-MM.</span><em><span class="pre">all</span></em><span class="pre">.tsv</span></tt> &#8212; For each day, we build one
+<li><code class="samp docutils literal"><span class="pre">YYYY-DD-MM.</span><em><span class="pre">all</span></em><span class="pre">.tsv</span></code> &#8212; For each day, we build one
 tab-separated-values (TSV) file containing tweets created on that day, in
 ascending ID order. There is no header line, no quoting, and no
 within-record newlines or tabs (these are stripped before storing the
@@ -225,41 +468,35 @@ correspond to those in the JSON; refer to the Twitter docs):<ol class="arabic">
 <li><em>user_description</em>: free text</li>
 <li><em>user_lang</em>: <a class="reference external" href="http://en.wikipedia.org/wiki/ISO_639-1">ISO 639-1</a>
 language code set by user. Note that this is a fairly unreliable means of
-determining the language of <tt class="docutils literal"><span class="pre">text</span></tt>. <cite>FIXME: take advantage of new
+determining the language of <code class="docutils literal"><span class="pre">text</span></code>. <cite>FIXME: take advantage of new
 lang tweet attribute when it comes out.</cite></li>
 <li><em>user_location</em>: free text</li>
 <li><em>user_time_zone</em>: self-selected from a few dozen options</li>
 <li><em>location_lon</em>: longitude of geotag (WGS84)</li>
 <li><em>location_lat</em>: latitude of geotag</li>
 <li><em>location_src</em>: code indicating source of geotag; one of:<ul>
-<li><tt class="docutils literal"><span class="pre">co</span></tt>: <tt class="docutils literal"><span class="pre">coordinates</span></tt> attribute (GeoJSON)</li>
-<li><tt class="docutils literal"><span class="pre">ge</span></tt>: <tt class="docutils literal"><span class="pre">geo</span></tt> attribute (an older form of official geotag) <cite>FIXME</cite></li>
-<li><tt class="docutils literal"><span class="pre">lo</span></tt>: coordinates appearing in user <tt class="docutils literal"><span class="pre">location</span></tt> field <cite>FIXME</cite></li>
+<li><code class="docutils literal"><span class="pre">co</span></code>: <code class="docutils literal"><span class="pre">coordinates</span></code> attribute (GeoJSON)</li>
+<li><code class="docutils literal"><span class="pre">ge</span></code>: <code class="docutils literal"><span class="pre">geo</span></code> attribute (an older form of official geotag) <cite>FIXME</cite></li>
+<li><code class="docutils literal"><span class="pre">lo</span></code>: coordinates appearing in user <code class="docutils literal"><span class="pre">location</span></code> field <cite>FIXME</cite></li>
 <li>... <cite>FIXME</cite></li>
 </ul>
 </li>
 </ol>
 </li>
-<li><tt class="samp docutils literal"><span class="pre">YYYY-DD-MM.</span><em><span class="pre">geo</span></em><span class="pre">.tsv</span></tt> &#8212; The subset of the above which have a
+<li><code class="samp docutils literal"><span class="pre">YYYY-DD-MM.</span><em><span class="pre">geo</span></em><span class="pre">.tsv</span></code> &#8212; The subset of the above which have a
 geotag.</li>
 </ul>
-<p>There are also intermediate TSV files (<tt class="docutils literal"><span class="pre">.raw.tsv</span></tt>) which are in the above
+<p>There are also intermediate TSV files (<code class="docutils literal"><span class="pre">.raw.tsv</span></code>) which are in the above
 format but have not yet had de-duplication and re-ordering. Downstream
 applications should ignore them.</p>
-<p><cite>FIXME</cite>:</p>
-<ul class="simple">
-<li>Try gzipping the TSV files. Some quick and dirty tests suggest that
-processing time (with <tt class="docutils literal"><span class="pre">gzip</span> <span class="pre">-1</span></tt>) will roughly double and file sizes will
-roughly halve.</li>
-</ul>
 </div>
 <div class="section" id="preprocessing-metadata-file">
-<h4>3.1.3.3. Preprocessing metadata file<a class="headerlink" href="#preprocessing-metadata-file" title="Permalink to this headline">¶</a></h4>
+<h4>3.2.3.3. Preprocessing metadata file<a class="headerlink" href="#preprocessing-metadata-file" title="Permalink to this headline">¶</a></h4>
 <p>This file is a pickled Python dictionary containing metadata about the
 directory of preprocessed TSV files. It currently contains one item:</p>
 <ol class="arabic simple">
-<li><tt class="docutils literal"><span class="pre">days</span></tt> is a <tt class="docutils literal"><span class="pre">dict</span></tt> listing metadata for the daily TSV files above. Keys
-are <tt class="docutils literal"><span class="pre">datetime.date</span></tt> instances, and values are dictionaries with the
+<li><code class="docutils literal"><span class="pre">days</span></code> is a <code class="docutils literal"><span class="pre">dict</span></code> listing metadata for the daily TSV files above. Keys
+are <code class="docutils literal"><span class="pre">datetime.date</span></code> instances, and values are dictionaries with the
 following fields:<ul>
 <li><em>count</em>: Number of tweets</li>
 <li><em>count_geotag</em>: Number of geotagged tweets</li>
@@ -273,7 +510,7 @@ as well. This proved to be not so useful, and so it hasn&#8217;t been reimplemen
 in the new make-based processing scheme.</em></p>
 </div>
 <div class="section" id="geo-located-tweets">
-<h4>3.1.3.4. Geo-located tweets<a class="headerlink" href="#geo-located-tweets" title="Permalink to this headline">¶</a></h4>
+<h4>3.2.3.4. Geo-located tweets<a class="headerlink" href="#geo-located-tweets" title="Permalink to this headline">¶</a></h4>
 <p><cite>FIXME</cite></p>
 <ul class="simple">
 <li>TSV, one per day</li>
@@ -282,7 +519,7 @@ in the new make-based processing scheme.</em></p>
 </ul>
 </div>
 <div class="section" id="alternatives-that-were-considered-and-rejected">
-<h4>3.1.3.5. Alternatives that were considered and rejected<a class="headerlink" href="#alternatives-that-were-considered-and-rejected" title="Permalink to this headline">¶</a></h4>
+<h4>3.2.3.5. Alternatives that were considered and rejected<a class="headerlink" href="#alternatives-that-were-considered-and-rejected" title="Permalink to this headline">¶</a></h4>
 <p>We tried the following and ultimately rejected them (for now). A key
 requirement (as of 2/21/2013) is that we&#8217;d like convenient parallel access and
 not to mess with setting up servers.</p>
@@ -311,67 +548,116 @@ key/value.</li>
 </div>
 </div>
 <div class="section" id="wikimedia-pageview-logs">
-<h2>3.2. Wikimedia pageview logs<a class="headerlink" href="#wikimedia-pageview-logs" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id12">3.3. Wikimedia pageview logs</a><a class="headerlink" href="#wikimedia-pageview-logs" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="id2">
-<h3>3.2.1. Overview<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
-<p>The pipeline for Wikimedia data (Wikipedia and related projects) is simpler.
-We acquire them using the <tt class="docutils literal"><span class="pre">wp-get-access-logs</span></tt> script and then preprocess
-them into HDF5 time series files using the <tt class="docutils literal"><span class="pre">wp-preprocess.mk</span></tt> makefile.</p>
+<h3><a class="toc-backref" href="#id13">3.3.1. Overview</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>Wikimedia data (Wikipedia and related projects) are acquired using the
+<code class="docutils literal"><span class="pre">wp-get-access-logs</span></code> script and then preprocessed into time series files
+using the <code class="docutils literal"><span class="pre">wp-preprocess.mk</span></code> makefile.</p>
 </div>
 <div class="section" id="id3">
-<h3>3.2.2. File organization<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id14">3.3.2. File organization</a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <p>A fully populated data directory looks (in part) something like this:</p>
 <ul class="simple">
-<li><tt class="samp docutils literal"><span class="pre">raw/</span></tt> &#8212; Raw text files direct from WMF. Note that some of these
+<li><code class="samp docutils literal"><span class="pre">raw/</span></code> &#8212; Raw text files direct from WMF. Note that some of these
 files contain breakage.<ul>
-<li><tt class="samp docutils literal"><span class="pre">2012/</span></tt><ul>
-<li><tt class="samp docutils literal"><span class="pre">2012-04/</span></tt> &#8212; Article access counts (&#8220;pageviews&#8221;) from April
-2012. Each month gets its own subdirectory.<ul>
-<li><tt class="samp docutils literal"><span class="pre">pagecounts-20120428-130001.gz</span></tt> &#8212; Number of times each URL was
-served.</li>
-<li><tt class="samp docutils literal"><span class="pre">projectcounts-20120428-130001</span></tt> &#8212; Total number of URLs served
-from each project (e.g., Norwegian Wiktionary) for the same hour.
-These files have a number of problems, so we don&#8217;t use them (see issue
-<a class="reference external" href="https://github.com/reidpr/quac/issues/81">#81</a>).</li>
+<li><code class="samp docutils literal"><span class="pre">2012/</span></code><ul>
+<li><code class="samp docutils literal"><span class="pre">2012-04/</span></code> &#8212; Article access counts (&#8220;pageviews&#8221; or &#8220;pagecounts&#8221;)
+of intervals ending in April 2012.<ul>
+<li><code class="samp docutils literal"><span class="pre">pagecounts-20120428-130001.gz</span></code> &#8212; Number of times each URL was
+served during 12:00:00 through 12:59:59 on April 28.</li>
+<li>... (one file for each hour starting March 31, 23:00:00 through April
+30, 22:00:00)</li>
 </ul>
 </li>
 </ul>
 </li>
+<li>... (Each month gets its own subdirectory.)</li>
 </ul>
 </li>
-<li><tt class="samp docutils literal"><span class="pre">hashed/</span></tt> &#8212; Text files in an improved hierarchy. All of these files
-will parse correctly.<ul>
-<li><tt class="samp docutils literal"><span class="pre">185/</span></tt> &#8212; Pageviews whose filenames hashed to 185. Currently, we
-use the DJB2 hash algorithm mod 256 (the modulus is configurable). QUAC
-Wikimedia processing code is directory-parallel, so by doing this we can
-operate with wider parallelism (there are currently 71 months in the data
-set).<ul>
-<li><tt class="samp docutils literal"><span class="pre">pagecounts-20120428-130001.gz</span></tt> &#8212; Symlink to the corresponding
-pagecount file in the raw directory.</li>
+<li><code class="samp docutils literal"><span class="pre">ts/</span></code> &#8212; Time series dataset.</li>
 </ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">We do not download or use the <code class="samp docutils literal"><span class="pre">projectcounts</span></code> files, which contain
+the total number of URLs served from each project (e.g., Norwegian
+Wiktionary), because many of them are broken and must be re-generated
+anyway. (See issue <a class="reference external" href="https://github.com/reidpr/quac/issues/81">#81</a>.)</p>
+</div>
+</div>
+<div class="section" id="article-filtering">
+<h3><a class="toc-backref" href="#id15">3.3.3. Article filtering</a><a class="headerlink" href="#article-filtering" title="Permalink to this headline">¶</a></h3>
+<p>Four classes of articles are excluded from the time series files:</p>
+<ul>
+<li><p class="first">Data lines with delimiters other than a single space. These are invalid
+(and rare).</p>
+</li>
+<li><p class="first">Articles with anything other than lowercase A to Z and dot in the project
+(language) code. These are invalid.</p>
+</li>
+<li><p class="first">Articles with &#8220;funny&#8221; characters in their URLs. Specifically, only the
+following URL characters are passed through:</p>
+<ul class="simple">
+<li>ASCII alphanumeric (A&#8211;Z upper and lower case, plus digits 0&#8211;9).</li>
+<li>The rest of the unreserved set: <code class="samp docutils literal"><span class="pre">-_.~</span></code></li>
+<li>Some of the reserved set: <code class="samp docutils literal"><span class="pre">!*();&#64;,/</span></code></li>
+<li>Percent (<code class="samp docutils literal"><span class="pre">%</span></code>), to allow encoded URLs through.</li>
+</ul>
+<p>For example, this excludes articles:</p>
+<ul class="simple">
+<li>In non-main namespaces (these titles contain a colon).</li>
+<li>Accessed with non-percent-encoded high characters (code point ≥128).</li>
+</ul>
+<p>See:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://en.wikipedia.org/wiki/Percent-encoding">http://en.wikipedia.org/wiki/Percent-encoding</a></li>
+<li><a class="reference external" href="http://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_%28technical_restrictions%29">http://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_%28technical_restrictions%29</a></li>
+</ul>
+<p>This is done to make downstream processing easier while excluding a minimal
+set of articles.</p>
 </li>
 </ul>
+<p>Together, these three filters exclude roughly 1/3 of the total data lines in
+the pageview files. Filtering is done using standard UNIX text processing
+tools, so the excluded data never touch Python code; be aware of this when
+interpreting statistics printed by the QUAC scripts.</p>
+<p>A final filter is implemented in Python:</p>
+<ul>
+<li><p class="first">Articles with less than a threshold number of requests in a given month.
+The zero vector is inferred for such months. This avoids storing
+low-traffic article time series fragments that are too rarely accessed or
+noisy to be useful in analysis.</p>
+<p>The threshold is configurable at <code class="samp docutils literal"><span class="pre">wkpd.keep_threshold</span></code>.</p>
 </li>
-<li><tt class="samp docutils literal"><span class="pre">hashed_small/</span></tt> &#8212; Subset of the above, retaining only the midnight
-to 1am data for each day; this sampling strategy avoids introducing new gaps
-in the data. This is for testing and yields a dataset somewhat less than 4%
-the size of the full dataset.</li>
-<li><tt class="samp docutils literal"><span class="pre">hashed_tiny/</span></tt> &#8212; An even tinier subset (not necessarily a subset of
-the small subset). Sampling strategy varies, but the goal is about 2-3 GB of
-compressed pageview data. Note that available parallelism is less than the
-full dataset.</li>
-<li><tt class="samp docutils literal"><span class="pre">metadata</span></tt> &#8212; The metadata file.</li>
-<li><tt class="samp docutils literal"><span class="pre">metadata.daily</span></tt> &#8212; A subset of the metadata file containing only
-daily data.</li>
 </ul>
+<p>In sum, after filtering, only a small percentage of URLs with reported hits
+find their way into the time series files. The exception is the current month,
+where the last step has not yet been applied, and so roughly 2/3 of articles
+are still present.</p>
 </div>
 <div class="section" id="pagecount-file-format">
-<h3>3.2.3. Pagecount file format<a class="headerlink" href="#pagecount-file-format" title="Permalink to this headline">¶</a></h3>
-<p>The file format of the pagecount files is <a class="reference external" href="http://dumps.wikimedia.org/other/pagecounts-raw/">documented by WMF</a>. There are some quirks:</p>
+<h3><a class="toc-backref" href="#id16">3.3.4. Pagecount file format</a><a class="headerlink" href="#pagecount-file-format" title="Permalink to this headline">¶</a></h3>
+<p>Pagecount files are compressed text files containing a sequence of lines. Each
+line describes accesses to a given article and is a space-separated 4-tuple of
+project code, article URL, number of requests, and bytes served. See the <a class="reference external" href="http://dumps.wikimedia.org/other/pagecounts-raw/">WMF
+documentation</a> for further
+details.</p>
+<p>There are several quirks:</p>
 <ol class="arabic">
+<li><p class="first">The files apparently contain all requested URLs, not necessarily articles
+that really exist(ed).</p>
+</li>
+<li><p class="first">Rarely, lines with incorrect delimeters or other format problems are
+encountered.</p>
+</li>
 <li><p class="first">The timestamp in the filename is the <em>end</em> of the hour recorded in the
 file. Often, these timestamps are a few seconds past the hour; we ignore
 this.</p>
+</li>
+<li><p class="first">There have been periods of modest <a class="reference external" href="http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts/readme.txt">underreporting</a>,
+with up to 20% of hits unrecorded. We assume such underreporting is random
+and do not try to correct it. Because our analysis works on fraction of
+total traffic rather than raw hit counts, the effect should be minimal.</p>
 </li>
 <li><p class="first">Filesystem timestamps are not reliable, especially in the older parts of
 the data. That is, sometimes older files have newer timestamps, and the
@@ -390,142 +676,114 @@ URLs:</p>
 <li>(UTF-8) <a class="reference external" href="http://ru.wikipedia.org/wiki/%D0%9B%D1%8E%D0%B4%D0%B8_%D0%98%D0%BA%D1%81">http://ru.wikipedia.org/wiki/%D0%9B%D1%8E%D0%B4%D0%B8_%D0%98%D0%BA%D1%81</a></li>
 <li>(Windows-1251) <a class="reference external" href="http://ru.wikipedia.org/wiki/%CB%FE%E4%E8_%C8%EA%F1">http://ru.wikipedia.org/wiki/%CB%FE%E4%E8_%C8%EA%F1</a></li>
 </ul>
-<p>Other encodings (e.g., ISO 8859-5, %BB%EE%D4%D8_%B8%DA%E1 and KOI8-R,
-%EC%C0%C4%C9_%E9%CB%D3) do not work. Figuring out this mess is something
-I&#8217;m not very interested in. How WMF does it, I have no idea.</p>
+<p>Other encodings (e.g., ISO 8859-5, <code class="code docutils literal"><span class="pre">%BB%EE%D4%D8_%B8%DA%E1</span></code> and
+KOI8-R, <code class="code docutils literal"><span class="pre">%EC%C0%C4%C9_%E9%CB%D3</span></code>) do not work. Figuring out this mess
+is something I&#8217;m not very interested in. How WMF does it, I have no idea.</p>
 <p>We do, however, normalize spaces into underscores. I believe this may be
 incomplete (see issue #77).</p>
 </li>
-<li><p class="first">There have been periods of modest <a class="reference external" href="http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts//readme.txt">underreporting</a>,
-with up to 20% of hits unrecorded. We assume such underreporting is random
-and do not try to correct it. Because our analysis works on fraction of
-total traffic rather than raw hit counts, the effect should be minimal.</p>
+<li><p class="first">Line ordering varies. The following observations are after the extra-Python
+exclusions described above.</p>
+<ul class="simple">
+<li>From the beginning to roughly May 15, 2008, files are in <code class="samp docutils literal"><span class="pre">LC_ALL=C</span>
+<span class="pre">sort</span></code> order.</li>
+<li>From roughly May 15, 2008 to roughly January 1, 2015, project codes
+containing a dot and projects codes without a dot are <em>separately</em> in
+<code class="samp docutils literal"><span class="pre">LC_ALL=C</span> <span class="pre">sort</span></code> order, but the combined file is not in that order.
+I do not know why the change happened.</li>
+<li>From roughly January 1, 2015 to the present (as of April 21, 2015), files
+are in <code class="samp docutils literal"><span class="pre">LC_ALL=C</span> <span class="pre">sort</span></code> order again. This corresponds with a change
+in file production method at Wikimedia, so I suspect it is fairly
+reliable.</li>
+</ul>
 </li>
 </ol>
 </div>
+<div class="section" id="time-series-storage">
+<h3><a class="toc-backref" href="#id17">3.3.5. Time series storage</a><a class="headerlink" href="#time-series-storage" title="Permalink to this headline">¶</a></h3>
+<p>Time series names for Wikipedia articles are the language concatenated with a
+slash and the article URL, for example <code class="samp docutils literal"><span class="pre">en/Fever</span></code> or
+<code class="samp docutils literal"><span class="pre">fr/Fi%C3%A8vre</span></code>. These time series are <code class="samp docutils literal"><span class="pre">np.float32</span></code> to save
+space. Elements with the value 0 indicate <em>either</em> a zero value or no data.</p>
+<p>For normalization and to resolve this ambiguity, language total time series
+are also stored under the language code (e.g., <code class="samp docutils literal"><span class="pre">en</span></code> or <code class="samp docutils literal"><span class="pre">fr</span></code>, no
+trailing slash) as <code class="samp docutils literal"><span class="pre">np.float64</span></code> to avoid floating-point summation
+problems. Elements of these total vectors are either the total of all time
+series of that language for that hour, or <code class="samp docutils literal"><span class="pre">NaN</span></code> if no hits at all in
+that language were recorded. Under this system, it is still ambiguous whether
+a given language did not exist or recorded no traffic, but these two
+situations are close enough that we believe this is not a concern.</p>
+<p>Typical analysis will divide an article time series by the language total time
+series to obtain a fraction of total traffic with <code class="samp docutils literal"><span class="pre">NaN</span></code> elements for
+missing data.</p>
 </div>
-<div class="section" id="time-series-files">
-<h2>3.3. Time series files<a class="headerlink" href="#time-series-files" title="Permalink to this headline">¶</a></h2>
-<p>The time series files are HDF5 files containing hourly time series of
-occurrences of some item, for example occurrences of n-grams in Twitter
-messages or Wikipedia article hits.</p>
-<p>We have three main goals for these files:</p>
-<ol class="arabic simple">
-<li>Provide a unified format for many types of things that can be counted over
-time, to feed into a unified analysis framework.</li>
-<li>Facilitate parallel access to the dataset without specialized I/O
-techniques (such as MPI parallel I/O).</li>
-<li>Facilitate reasonable performance for continually updated data written in
-time-major order (e.g., each hour, a new Wikipedia access log file arrives
-giving hits for all pages) as well as fast reading in item-major order
-(e.g., quickly iterate through complete each Wikipedia article&#8217;s time
-series). That is, we want to accomplish a data transpose implicitly during
-the preprocessing phase.</li>
-</ol>
-<p>The basic idea is that for each month, we have <span class="math">\(n\)</span> HDF5 data files, with
-items distributed across the files by hashing. A time series directory looks
-like this:</p>
-<ul class="simple">
-<li><tt class="samp docutils literal"><span class="pre">h5ts/</span></tt> &#8212; Root of time series<ul>
-<li><tt class="samp docutils literal"><span class="pre">2007-12/</span></tt> &#8212; Items from December 2007.<ul>
-<li><tt class="samp docutils literal"><span class="pre">0.h5</span></tt> &#8212; Items whose hash mod <span class="math">\(n\)</span> is 0.</li>
-<li><tt class="samp docutils literal"><span class="pre">1.h5</span></tt> &#8212; Items whose hash mod <span class="math">\(n\)</span> is 1.</li>
-<li>...</li>
-<li><tt class="samp docutils literal"><em><span class="pre">n-1</span></em><span class="pre">.h5</span></tt> &#8212; Items whose hash mode <span class="math">\(n\)</span> is <span class="math">\(n-1\)</span>.</li>
-</ul>
-</li>
-<li><tt class="samp docutils literal"><span class="pre">2008-01/</span></tt> &#8212; Items from January 2008.</li>
-<li>... (one for each month in the dataset)</li>
-</ul>
-</li>
-</ul>
-<p>Note that datasets with different <span class="math">\(n\)</span> can be combined in the same
-computation. Care may be required for proper load balancing.</p>
-<p>Within each data file is the following HDF5 tree. This information has the
-notion of <em>namespace</em>; these are used for things like language in Wikipedia
-access logs. In the example, we use two namespaces: <tt class="samp docutils literal"><span class="pre">en</span></tt> and <tt class="samp docutils literal"><span class="pre">ru</span></tt>.
-Groups are indicated by trailing slashes, datsets by their absence (these HDF5
-concepts correspond roughly to POSIX directories and files), and attributes by
-italics.</p>
-<p>We use the term <em>time series</em> here to represent a vector of data points, one
-per hour, spanning the entire month. If an item is present, then it has a
-complete vector in the file regardless of how many data points are actually
-available (this is so vectors can be updated without moving them, which would
-leave holes that HDF5 cannot deal with well). Missing data points are
-represented as <tt class="samp docutils literal"><span class="pre">NaN</span></tt>. For example, for a file covering a 30-day month,
-every item will have a 720-element vector.</p>
-<ul class="simple">
-<li><tt class="samp docutils literal"><span class="pre">/</span></tt> &#8212; Root of HDF5 file tree.<ul>
-<li><tt class="samp docutils literal"><span class="pre">total/</span></tt> &#8212; Summary data.<ul>
-<li><tt class="samp docutils literal"><span class="pre">en/</span></tt> &#8212; Summary data for the namespace <em>en</em>.<ul>
-<li><em>total_ct</em> &#8212; Total month count for the entire namespace (float64).</li>
-<li><em>min_hour</em> &#8212; Minimum hour index with valid data (int32). For a full
-month, this will be zero.</li>
-<li><em>max_hour</em> &#8212; Maximum hour index with valid data (int32). For a full
-month, this will be the number of days in the month times 24 minus 1
-(e.g., a 30-day month will yield 719).</li>
-<li><tt class="samp docutils literal"><span class="pre">totals</span></tt> &#8212; Vector of hourly totals for namespace <em>en</em> (float64).</li>
-</ul>
-</li>
-<li><tt class="samp docutils literal"><span class="pre">ru/</span></tt> &#8212; Summary data for the namespace <em>ru</em>.<ul>
-<li>...</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><tt class="samp docutils literal"><span class="pre">weirdal/</span></tt> &#8212; Item time series.<ul>
-<li><tt class="samp docutils literal"><span class="pre">en/</span></tt> &#8212; Time series for namespace <em>en</em>.<ul>
-<li><tt class="samp docutils literal"><span class="pre">Cat</span></tt> &#8212; Time series for item <em>Cat</em> (float32).<ul>
-<li><em>total_ct</em> &#8212; Total month count for <em>Cat</em> (float64).</li>
-</ul>
-</li>
-<li><tt class="samp docutils literal"><span class="pre">Dog</span></tt> &#8212; Time series for item <em>Dog</em> (float32).<ul>
-<li>... (attributes)</li>
-</ul>
-</li>
-<li>... (several million more items)</li>
-</ul>
-</li>
-<li><tt class="samp docutils literal"><span class="pre">ru/</span></tt> &#8212; Time series for namespace <em>ru</em>.<ul>
-<li>...</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<p>As for data types, we use floats for the vectors rather than integers, which
-would be more appropriate for counted data, because floats have <tt class="samp docutils literal"><span class="pre">NaN</span></tt>
-and integers do not. This brings into play all the difficulties of floating
-point math. A key gotcha in our case is summation: adding two numbers of
-differing magnitudes will lose precision in the smaller. This motivates use of
-double precision (64 bit) floats for totals; single precision (32 bit) is used
-for base time series in order to save space.</p>
-<p>HDF5 files can be compressed or otherwise filtered using standard filters.</p>
 </div>
 </div>
 
 
           </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="map_reduce.html" class="btn btn-neutral float-right" title="4. Map-Reduce with QUACreduce" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="collecting.html" class="btn btn-neutral" title="2. Collecting data" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2012-2015, Los Alamos National Security, LLC and others.
+    </p>
+  </div>
+
+</footer>
+
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="map_reduce.html" title="4. Map-Reduce with QUACreduce"
-             >next</a></li>
-        <li class="right" >
-          <a href="collecting.html" title="2. Collecting data"
-             >previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 5ccb2ad</a> &raquo;</li> 
-      </ul>
-    </div>
-    <div class="footer">
-        &copy; Copyright 2012-2013, Los Alamos National Security, LLC and others.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.7',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>

@@ -1,91 +1,261 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>1. Installing QUAC &mdash; QUAC 0.7 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
     
-    <title>1. Installing QUAC &mdash; QUAC documentation for commit 5ccb2ad</title>
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="QUAC 0.7 documentation" href="index.html"/>
+        <link rel="next" title="2. Collecting data" href="collecting.html"/>
+        <link rel="prev" title="QUAC documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
     
-    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="QUAC documentation for commit 5ccb2ad" href="index.html" />
-    <link rel="next" title="2. Collecting data" href="collecting.html" />
-    <link rel="prev" title="Table of contents" href="index.html" /> 
-  </head>
-  <body>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="collecting.html" title="2. Collecting data"
-             accesskey="N">next</a></li>
-        <li class="right" >
-          <a href="index.html" title="Table of contents"
-             accesskey="P">previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 5ccb2ad</a> &raquo;</li> 
-      </ul>
-    </div>
-      <div class="sphinxsidebar">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">1. Installing QUAC</a><ul>
-<li><a class="reference internal" href="#pypi-and-virtualenv-recommended">1.1. PyPI and virtualenv (recommended)</a></li>
-<li><a class="reference internal" href="#self-compile-not-recommended">1.2. Self-compile (not recommended)</a></li>
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> QUAC
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">1. Installing QUAC</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pypi-and-virtualenv-recommended">1.1. PyPI and virtualenv (recommended)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#self-compile">1.2. Self-compile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">1.2.1. Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-pip2pi">1.2.2. Install <code class="code docutils literal"><span class="pre">pip2pi</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare-the-dependency-package">1.2.3. Prepare the dependency package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compile-and-install">1.2.4. Compile and install</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test">1.2.5. Test</a></li>
 </ul>
 </li>
 </ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="collecting.html">2. Collecting data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="collecting.html#wikipedia">2.1. Wikipedia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collecting.html#twitter">2.2. Twitter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="collecting.html#set-up-authentication">2.2.1. Set up authentication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="collecting.html#run-the-collector">2.2.2. Run the collector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="collecting.html#build-the-tsv-files">2.2.3. Build the TSV files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="collecting.html#doing-it-seriously">2.2.4. Doing it seriously</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">3. Preprocessing data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#time-series-files">3.1. Time series files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#motivation">3.1.1. Motivation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#file-format">3.1.2. File format</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#twitter">3.2. Twitter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#overview">3.2.1. Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#file-organization">3.2.2. File organization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#file-formats">3.2.3. File formats</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pipeline.html#raw-json-tweets">3.2.3.1. Raw JSON tweets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pipeline.html#tsv-files">3.2.3.2. TSV files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pipeline.html#preprocessing-metadata-file">3.2.3.3. Preprocessing metadata file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pipeline.html#geo-located-tweets">3.2.3.4. Geo-located tweets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pipeline.html#alternatives-that-were-considered-and-rejected">3.2.3.5. Alternatives that were considered and rejected</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#wikimedia-pageview-logs">3.3. Wikimedia pageview logs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#id2">3.3.1. Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#id3">3.3.2. File organization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#article-filtering">3.3.3. Article filtering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#pagecount-file-format">3.3.4. Pagecount file format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#time-series-storage">3.3.5. Time series storage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="map_reduce.html">4. Map-Reduce with QUACreduce</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#introduction">4.1. Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#summary-of-api">4.2. Summary of API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#example">4.3. Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#create-sample-input">4.3.1. Create sample input</a></li>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#define-the-map-operator">4.3.2. Define the <em>map</em> operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#define-the-reduce-operator">4.3.3. Define the <em>reduce</em> operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#test-the-operators-together">4.3.4. Test the operators together</a></li>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#prepare-the-job">4.3.5. Prepare the job</a></li>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#run-the-job-with-make">4.3.6. Run the job with make</a></li>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#add-more-input-data">4.3.7. Add more input data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#what-s-next">4.3.8. What&#8217;s next?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#distributed-quacreduce">4.4. Distributed QUACreduce</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="map_reduce.html#id5">4.4.1. Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#drawbacks">4.5. Drawbacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#fixme">4.6. FIXME</a></li>
+<li class="toctree-l2"><a class="reference internal" href="map_reduce.html#footnotes">4.7. Footnotes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="timeseries.html">5. Time series analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="timeseries.html#input-file-format">5.1. Input file format</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">6. Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">7. Frequently asked questions (FAQ)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#a-caution-about-tweet-ids">7.1. A caution about tweet IDs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#my-python-script-barfs-with-unicodedecodeerror-when-printing-tweets">7.2. My python script barfs with <code class="docutils literal"><span class="pre">UnicodeDecodeError</span></code> when printing tweets!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#unicode-works-ok-in-the-terminal-but-python-barfs-when-redirecting-stdout">7.3. Unicode works OK in the terminal, but Python barfs when redirecting stdout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#collect-daemon-fails-to-start-and-there-s-no-error-message">7.4. <code class="code docutils literal"><span class="pre">collect</span> <span class="pre">--daemon</span></code> fails to start and there&#8217;s no error message</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-quickly-see-a-tweet-as-it-s-supposed-to-look">7.5. How do I quickly see a tweet as it&#8217;s &#8220;supposed&#8221; to look?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="limitations.html">8. Limitations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">9. Citing QUAC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">10. How to contribute</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#basic-workflow">10.1. Basic workflow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#branching-model">10.1.1. Branching model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#doing-actual-work">10.1.2. Doing actual work</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#merging-to-master">10.1.3. Merging to <code class="docutils literal"><span class="pre">master</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#cutting-a-release">10.1.4. Cutting a release</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#simplifying-cmdtest-updates-with-meld">10.2. Simplifying <code class="samp docutils literal"><span class="pre">cmdtest</span></code> updates with <code class="samp docutils literal"><span class="pre">meld</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#code-style">10.3. Code style</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#docstrings">10.3.1. Docstrings</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#documentation">10.4. Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#building-the-docs">10.4.1. Building the docs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#conventions">10.4.2. Conventions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#publishing-to-the-web">10.4.3. Publishing to the web</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#prerequisites">10.4.3.1. Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#publishing">10.4.3.2. Publishing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="release_notes.html">11. Release notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="release_notes.html#the-future">11.1. The future</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release_notes.html#list-of-releases">11.2. List of releases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-6-october-20-2014">11.2.1. v0.6 (October 20, 2014)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-5-november-13-2013">11.2.2. v0.5 (November 13, 2013)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-4-october-10-2013">11.2.3. v0.4 (October 10, 2013)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-3-august-5-2013">11.2.4. v0.3 (August 5, 2013)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-2-may-30-2013">11.2.5. v0.2 (May 30, 2013)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-1-april-26-2013">11.2.6. v0.1 (April 26, 2013)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="credits.html">12. Credits</a></li>
+</ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">Table of contents</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="collecting.html"
-                        title="next chapter">2. Collecting data</a></p>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
+          
+        
       </div>
+      &nbsp;
+    </nav>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body">
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">QUAC</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>1. Installing QUAC</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
             
   <div class="section" id="installing-quac">
 <h1>1. Installing QUAC<a class="headerlink" href="#installing-quac" title="Permalink to this headline">¶</a></h1>
 <p>QUAC can be installed on most UNIX-based systems, though installation is
 easiest on OS X and Debian/Ubuntu. Patches to increase portability are very
 welcome.</p>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><a class="reference internal" href="#pypi-and-virtualenv-recommended" id="id1">PyPI and virtualenv (recommended)</a></li>
+<li><a class="reference internal" href="#self-compile" id="id2">Self-compile</a><ul>
+<li><a class="reference internal" href="#prerequisites" id="id3">Prerequisites</a></li>
+<li><a class="reference internal" href="#install-pip2pi" id="id4">Install <code class="code docutils literal"><span class="pre">pip2pi</span></code></a></li>
+<li><a class="reference internal" href="#prepare-the-dependency-package" id="id5">Prepare the dependency package</a></li>
+<li><a class="reference internal" href="#compile-and-install" id="id6">Compile and install</a></li>
+<li><a class="reference internal" href="#test" id="id7">Test</a></li>
+</ul>
+</li>
+</ul>
+</div>
 <div class="section" id="pypi-and-virtualenv-recommended">
-<h2>1.1. PyPI and virtualenv (recommended)<a class="headerlink" href="#pypi-and-virtualenv-recommended" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id1">1.1. PyPI and virtualenv (recommended)</a><a class="headerlink" href="#pypi-and-virtualenv-recommended" title="Permalink to this headline">¶</a></h2>
 <p>This method installs QUAC and its Python dependencies inside a virtual
 environment with its own Python binary and libraries. This isolates QUAC from
 other Python stuff you may have on your system, reducing conflicts.</p>
@@ -97,10 +267,11 @@ other Python stuff you may have on your system, reducing conflicts.</p>
 <li>Git.</li>
 <li>Python 3.4 including development libraries.</li>
 <li><cite>virtualenv</cite> and <cite>virtualenvwrapper</cite>.</li>
-<li>Libraries needed by Python packages (e.g., GEOS). Installation failures
-along the way should guide you here. Known <cite>.deb</cite> packages needed on
-Ubuntu Trusty:<ul>
+<li>Programs and libraries needed by Python packages (e.g., HDF5 command-line
+tools, GEOS). Installation failures along the way should guide you here.
+Known <cite>.deb</cite> packages needed on Ubuntu Trusty:<ul>
 <li><cite>cmdtest</cite></li>
+<li><cite>hdf5-tools</cite></li>
 <li><cite>libdgal-dev</cite></li>
 <li><cite>python-pip</cite></li>
 <li><cite>python-virtualenv</cite></li>
@@ -111,59 +282,86 @@ Ubuntu Trusty:<ul>
 <p>Installation of these things is outside the scope of this guide.</p>
 </li>
 <li><p class="first">Download QUAC using Git:</p>
-<div class="highlight-python"><div class="highlight"><pre>cd
-git clone https://github.com/reidpr/quac.git
-cd quac
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> <span class="nb">cd</span>
+<span class="gp">$</span><span class="nb"> </span>git clone https://github.com/reidpr/quac.git
+<span class="gp">$</span> <span class="nb">cd </span>quac
 </pre></div>
 </div>
 </li>
-<li><p class="first">Create virtual environment:</p>
-<div class="highlight-python"><div class="highlight"><pre>mkvirtualenv --python=/usr/bin/python3 quac
+<li><p class="first">Create virtual environment, and then deactivate it because you are going to
+be messing with it:</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> mkvirtualenv --python<span class="o">=</span>/usr/bin/python3 quac
+<span class="gp">$</span> deactivate
 </pre></div>
 </div>
 </li>
 <li><p class="first">Add to virtualenv post-activate hook
 (<cite>~/.virtualenvs/quac/bin/postactivate</cite>):</p>
-<div class="highlight-python"><div class="highlight"><pre>OLD_PYTHONPATH=&quot;$PYTHONPATH&quot;
-export PYTHONPATH=~/quac/lib
-OLD_PATH=&quot;$PATH&quot;
-export PATH=~/tw/quac/bin:$PATH
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">OLD_PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PYTHONPATH</span><span class="s2">&quot;</span>
+<span class="nb">export </span><span class="nv">PYTHONPATH</span><span class="o">=</span>~/quac/lib
+<span class="nv">OLD_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>~/tw/quac/bin:<span class="nv">$PATH</span>
 </pre></div>
 </div>
 </li>
 <li><p class="first">Add to virtualenv pre-deactivate hook
 (<cite>~/.virtualenvs/quac/bin/predeactivate</cite>):</p>
-<div class="highlight-python"><div class="highlight"><pre>export PYTHONPATH=&quot;$OLD_PYTHONPATH&quot;
-export PATH=&quot;$OLD_PATH&quot;
+<div class="highlight-sh"><div class="highlight"><pre><span class="nb">export </span><span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$OLD_PYTHONPATH</span><span class="s2">&quot;</span>
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$OLD_PATH</span><span class="s2">&quot;</span>
 </pre></div>
 </div>
 </li>
 <li><p class="first">Activate virtual environment:</p>
-<div class="highlight-python"><div class="highlight"><pre>workon quac
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> workon quac
 </pre></div>
 </div>
 </li>
-<li><p class="first">Install GDAL Python bindings (adjust include paths if needed):</p>
-<div class="highlight-python"><div class="highlight"><pre>CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install gdal==1.10.0
+<li><p class="first">Install GDAL Python bindings (adjust include paths and version if needed):</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> <span class="nv">CPLUS_INCLUDE_PATH</span><span class="o">=</span>/usr/include/gdal <span class="nv">C_INCLUDE_PATH</span><span class="o">=</span>/usr/include/gdal pip install <span class="nv">gdal</span><span class="o">==</span>1.10.0
 </pre></div>
 </div>
 <p>This must be done manually because the bindings have a buggy include path.
 Note also that the version must match the system GDAL libraries or the
 build will fail in strange ways.</p>
 </li>
+<li><p class="first">Install <a class="reference external" href="http://rogerbinns.github.io/apsw/">APSW</a> (alternate SQLite
+bindings). This cannot be done using <code class="samp docutils literal"><span class="pre">pip</span></code> because the install script
+requires options, and <code class="samp docutils literal"><span class="pre">pip</span></code> <a class="reference external" href="http://rogerbinns.github.io/apsw/download.html#easy-install-pip-pypi">cannot provide them</a>.
+For example (use the latest version):</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> <span class="nb">pushd</span> /usr/local/src
+<span class="gp">$</span> wget https://github.com/rogerbinns/apsw/releases/download/3.8.9-r1/apsw-3.8.9-r1.zip
+<span class="gp">$</span> unzip apsw-3.8.9-r1.zip
+<span class="gp">$</span> <span class="nb">cd </span>apsw-3.8.9-r1
+<span class="gp">$</span> python setup.py fetch --all build --enable-all-extensions install <span class="nb">test</span>
+<span class="gp">$</span><span class="nb"> popd</span>
+</pre></div>
+</div>
+<p>The tests take 5-10 minutes to run; you can omit if you want to live
+dangerously, or proceed in another terminal while they run.</p>
+<p>You can also install APSW at the system level and configure your virtualenv
+to pass system modules through.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">APSW version 3.8.9, and hence SQLite 3.8.9, or higher is
+required. This is because prior versions of SQLite incorrectly
+enforce memory limits that QUAC depends on, leading to a
+memory leak. See the 3rd item in the <a class="reference external" href="http://www.sqlite.org/releaselog/3_8_9.html">release notes</a> and the
+<a class="reference external" href="http://www.sqlite.org/cgi/src/vinfo/6fc4e79a2350295a?sbs=0">relevant commit</a>.</p>
+</div>
+</li>
 <li><p class="first">Install remaining Python dependencies:</p>
-<div class="highlight-python"><div class="highlight"><pre>pip install -r requirements.txt
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> pip install -r requirements.txt
 </pre></div>
 </div>
 </li>
 <li><p class="first">Build executables and the documentation:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">make</span>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> make
 </pre></div>
 </div>
 </li>
 <li><p class="first">Run the tests (this is actually pretty important, as it tells you whether
 you&#8217;ve installed all the dependencies correctly):</p>
-<div class="highlight-python"><div class="highlight"><pre>./runtests
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> ./runtests
 </pre></div>
 </div>
 <p>Some tests require additional data or resources; if they are not available,
@@ -177,86 +375,132 @@ life much easier going forward.)</p>
 <p class="first admonition-title">Note</p>
 <p class="last">If you plan to <a class="reference internal" href="contributing.html"><em>contribute to QUAC</em></a>, you should
 do two things differently. First, fork the repository on Github and
-clone your own fork instead. Second, the <tt class="docutils literal"><span class="pre">git</span></tt> wrapper <a class="reference external" href="https://github.com/defunkt/hub">hub</a> is recommended.</p>
+clone your own fork instead. Second, the Git wrapper <a class="reference external" href="https://github.com/defunkt/hub">hub</a> is recommended.</p>
 </div>
 </div>
-<div class="section" id="self-compile-not-recommended">
-<h2>1.2. Self-compile (not recommended)<a class="headerlink" href="#self-compile-not-recommended" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="self-compile">
+<h2><a class="toc-backref" href="#id2">1.2. Self-compile</a><a class="headerlink" href="#self-compile" title="Permalink to this headline">¶</a></h2>
+<p>This installation method is useful when internet access is available and/or
+system libraries are insufficient. Root access is not required.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p>This installation method should only be used if the normal way
-does not work. It is rarely tested and likely to be broken. In
-particular, it has not been updated since before the Python 3
-upgrade.</p>
-<p class="last">Essentially, it re-implements the most basic functionality of a
-package manager, and it does so rather poorly and without regard
-to what you already have installed.</p>
+<p class="last">This installation method is unsupported and poorly tested. Use it
+only as a last resort.</p>
 </div>
-<p>This method does not require root, and it will take a little while to run,
-since it has to download and compile a fair amount of stuff. There are
-separate scripts to download and install, in case you want to QUAC on a system
-that doesn&#8217;t have good access to the Internet.</p>
-<p>Prerequisites:</p>
+<div class="section" id="prerequisites">
+<h3><a class="toc-backref" href="#id3">1.2.1. Prerequisites</a><a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Some basic dependencies such as GNU Make 3.81 and C/C++/Fortran compilers.
-Exactly what is currently unknown, but it &#8220;Works For Me™&#8221;.</li>
-<li>The <a class="reference external" href="http://modules.sourceforge.net/">Environment Modules</a> package. You
-probably have this if your system has a <tt class="docutils literal"><span class="pre">module</span></tt> command. This isn&#8217;t
-strictly needed, as you can get the same effect by editing your shell init
-files appropriately.</li>
+<li>A staging machine with git, <code class="code docutils literal"><span class="pre">pip</span></code> (either Python 2 or 3 is fine),
+<code class="code docutils literal"><span class="pre">wget</span></code>, and internet access.</li>
+<li>Target machine needs basic dependencies such as GNU Make 3.81 and
+C/C++/Fortran compilers. Exactly what is currently unknown, but it &#8220;Works
+For Me™&#8221; on a RHEL6.6 box.</li>
 </ul>
-<p>The below assumes that you have unpacked QUAC into <tt class="docutils literal"><span class="pre">$QUACBASE</span></tt>.</p>
-<p>First, install the dependencies:</p>
-<div class="highlight-sh"><div class="highlight"><pre>mkdir <span class="nv">$QUACBASE</span>/deps
-<span class="nb">cd</span> <span class="nv">$QUACBASE</span>/deps
-../misc/manual-download  <span class="c"># creates $QUACBASE/deps/src</span>
-../misc/manual-install
+</div>
+<div class="section" id="install-pip2pi">
+<h3><a class="toc-backref" href="#id4">1.2.2. Install <code class="code docutils literal"><span class="pre">pip2pi</span></code></a><a class="headerlink" href="#install-pip2pi" title="Permalink to this headline">¶</a></h3>
+<p>It&#8217;s OK if you install <code class="code docutils literal"><span class="pre">pip2pi</span></code> using a different Python version than
+you will be using for QUAC, as it&#8217;s only used to build a <code class="code docutils literal"><span class="pre">pip</span></code>
+repository on the staging machine.</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> pip install pip2pi
 </pre></div>
 </div>
-<p>Optional:</p>
-<ul class="simple">
-<li><tt class="docutils literal"><span class="pre">manual-install</span></tt> takes an argument which is the number of processes to use
-while compiling (<tt class="docutils literal"><span class="pre">make</span> <span class="pre">-j</span></tt>).</li>
-<li>You can run <tt class="docutils literal"><span class="pre">manual-download</span></tt> anywhere and move the resulting <tt class="docutils literal"><span class="pre">src</span></tt>
-directory into <tt class="docutils literal"><span class="pre">$QUACBASE/deps</span></tt> manually.</li>
-</ul>
-<p>Second, configure your environment. Add following to your <tt class="docutils literal"><span class="pre">.bashrc</span></tt>.</p>
-<div class="highlight-sh"><div class="highlight"><pre>module use --append <span class="nv">$QUACBASE</span>/misc
-module load quac-module
+</div>
+<div class="section" id="prepare-the-dependency-package">
+<h3><a class="toc-backref" href="#id5">1.2.3. Prepare the dependency package</a><a class="headerlink" href="#prepare-the-dependency-package" title="Permalink to this headline">¶</a></h3>
+<p>In this step, you will download source code for QUAC&#8217;s dependencies and create
+a package that can be transferred elsewhere. After unpacking QUAC into
+<code class="code docutils literal"><span class="pre">$QUACBASE</span></code>:</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> deactivate          <span class="c"># if you have a virtualenv active</span>
+<span class="gp">$</span> <span class="nb">cd</span> <span class="nv">$QUACBASE</span>
+<span class="gp">$</span> ./misc/manual-download
 </pre></div>
 </div>
-<p>Note that in addition to making all the dependencies available, this module
-adds the QUAC libraries and binaries themselves to your various paths. Be
-aware of this if you have multiple QUAC working directories. (For example,
-suppose a colleague has installed QUAC and its dependencies in location
-<span class="math">\(A\)</span>, and you&#8217;ve loaded <tt class="docutils literal"><span class="pre">quac-module</span></tt> from <span class="math">\(A\)</span> because you don&#8217;t
-want to duplicate the tedious installation. You have your own QUAC working
-directory at <span class="math">\(B\)</span> so you can hack on it. If you simply type
-<tt class="docutils literal"><span class="pre">quacreduce</span></tt>, you will get the one in <span class="math">\(A\)</span> even if you are working in
-<span class="math">\(B\)</span>, unless you take measures to prevent this.)</p>
+<p>The script will create a file <code class="code docutils literal"><span class="pre">deps.tar.gz</span></code>. Copy this to your target
+QUAC working directory.</p>
+</div>
+<div class="section" id="compile-and-install">
+<h3><a class="toc-backref" href="#id6">1.2.4. Compile and install</a><a class="headerlink" href="#compile-and-install" title="Permalink to this headline">¶</a></h3>
+<p>On the target machine:</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> <span class="nb">cd</span> <span class="nv">$QUACBASE</span>
+<span class="gp">$</span> tar xf deps.tar.gz
+<span class="gp">$</span> ./misc/manual-install
+</pre></div>
+</div>
+</div>
+<div class="section" id="test">
+<h3><a class="toc-backref" href="#id7">1.2.5. Test</a><a class="headerlink" href="#test" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> ./runtests
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 
 
           </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="collecting.html" class="btn btn-neutral float-right" title="2. Collecting data" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="QUAC documentation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2012-2015, Los Alamos National Security, LLC and others.
+    </p>
+  </div>
+
+</footer>
+
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="collecting.html" title="2. Collecting data"
-             >next</a></li>
-        <li class="right" >
-          <a href="index.html" title="Table of contents"
-             >previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 5ccb2ad</a> &raquo;</li> 
-      </ul>
-    </div>
-    <div class="footer">
-        &copy; Copyright 2012-2013, Los Alamos National Security, LLC and others.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.7',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>

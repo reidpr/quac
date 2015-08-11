@@ -1,106 +1,269 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>4. Map-Reduce with QUACreduce &mdash; QUAC documentation for commit 5ccb2ad</title>
-    
-    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="QUAC documentation for commit 5ccb2ad" href="index.html" />
-    <link rel="next" title="5. Time series analysis" href="timeseries.html" />
-    <link rel="prev" title="3. Preprocessing data" href="pipeline.html" /> 
-  </head>
-  <body>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="timeseries.html" title="5. Time series analysis"
-             accesskey="N">next</a></li>
-        <li class="right" >
-          <a href="pipeline.html" title="3. Preprocessing data"
-             accesskey="P">previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 5ccb2ad</a> &raquo;</li> 
-      </ul>
-    </div>
-      <div class="sphinxsidebar">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">4. Map-Reduce with QUACreduce</a><ul>
-<li><a class="reference internal" href="#introduction">4.1. Introduction</a></li>
-<li><a class="reference internal" href="#summary-of-api">4.2. Summary of API</a></li>
-<li><a class="reference internal" href="#example">4.3. Example</a><ul>
-<li><a class="reference internal" href="#create-sample-input">4.3.1. Create sample input</a></li>
-<li><a class="reference internal" href="#define-the-map-operator">4.3.2. Define the <em>map</em> operator</a></li>
-<li><a class="reference internal" href="#define-the-reduce-operator">4.3.3. Define the <em>reduce</em> operator</a></li>
-<li><a class="reference internal" href="#test-the-operators-together">4.3.4. Test the operators together</a></li>
-<li><a class="reference internal" href="#prepare-the-job">4.3.5. Prepare the job</a></li>
-<li><a class="reference internal" href="#run-the-job-with-make">4.3.6. Run the job with make</a></li>
-<li><a class="reference internal" href="#add-more-input-data">4.3.7. Add more input data</a></li>
-<li><a class="reference internal" href="#what-s-next">4.3.8. What&#8217;s next?</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#distributed-quacreduce">4.4. Distributed QUACreduce</a><ul>
-<li><a class="reference internal" href="#id5">4.4.1. Example</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#drawbacks">4.5. Drawbacks</a></li>
-<li><a class="reference internal" href="#fixme">4.6. FIXME</a></li>
-<li><a class="reference internal" href="#footnotes">4.7. Footnotes</a></li>
-</ul>
-</li>
-</ul>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>4. Map-Reduce with QUACreduce &mdash; QUAC 0.7 documentation</title>
+  
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="pipeline.html"
-                        title="previous chapter">3. Preprocessing data</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="timeseries.html"
-                        title="next chapter">5. Time series analysis</a></p>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="QUAC 0.7 documentation" href="index.html"/>
+        <link rel="next" title="5. Time series analysis" href="timeseries.html"/>
+        <link rel="prev" title="3. Preprocessing data" href="pipeline.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> QUAC
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
+
+        
       </div>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body">
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">1. Installing QUAC</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#pypi-and-virtualenv-recommended">1.1. PyPI and virtualenv (recommended)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#self-compile">1.2. Self-compile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="install.html#prerequisites">1.2.1. Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#install-pip2pi">1.2.2. Install <code class="code docutils literal"><span class="pre">pip2pi</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#prepare-the-dependency-package">1.2.3. Prepare the dependency package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#compile-and-install">1.2.4. Compile and install</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#test">1.2.5. Test</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="collecting.html">2. Collecting data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="collecting.html#wikipedia">2.1. Wikipedia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collecting.html#twitter">2.2. Twitter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="collecting.html#set-up-authentication">2.2.1. Set up authentication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="collecting.html#run-the-collector">2.2.2. Run the collector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="collecting.html#build-the-tsv-files">2.2.3. Build the TSV files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="collecting.html#doing-it-seriously">2.2.4. Doing it seriously</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">3. Preprocessing data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#time-series-files">3.1. Time series files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#motivation">3.1.1. Motivation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#file-format">3.1.2. File format</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#twitter">3.2. Twitter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#overview">3.2.1. Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#file-organization">3.2.2. File organization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#file-formats">3.2.3. File formats</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pipeline.html#raw-json-tweets">3.2.3.1. Raw JSON tweets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pipeline.html#tsv-files">3.2.3.2. TSV files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pipeline.html#preprocessing-metadata-file">3.2.3.3. Preprocessing metadata file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pipeline.html#geo-located-tweets">3.2.3.4. Geo-located tweets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pipeline.html#alternatives-that-were-considered-and-rejected">3.2.3.5. Alternatives that were considered and rejected</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#wikimedia-pageview-logs">3.3. Wikimedia pageview logs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#id2">3.3.1. Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#id3">3.3.2. File organization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#article-filtering">3.3.3. Article filtering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#pagecount-file-format">3.3.4. Pagecount file format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html#time-series-storage">3.3.5. Time series storage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">4. Map-Reduce with QUACreduce</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">4.1. Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#summary-of-api">4.2. Summary of API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example">4.3. Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#create-sample-input">4.3.1. Create sample input</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#define-the-map-operator">4.3.2. Define the <em>map</em> operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#define-the-reduce-operator">4.3.3. Define the <em>reduce</em> operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-the-operators-together">4.3.4. Test the operators together</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare-the-job">4.3.5. Prepare the job</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-the-job-with-make">4.3.6. Run the job with make</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#add-more-input-data">4.3.7. Add more input data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-s-next">4.3.8. What&#8217;s next?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#distributed-quacreduce">4.4. Distributed QUACreduce</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">4.4.1. Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#drawbacks">4.5. Drawbacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fixme">4.6. FIXME</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#footnotes">4.7. Footnotes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="timeseries.html">5. Time series analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="timeseries.html#input-file-format">5.1. Input file format</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">6. Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">7. Frequently asked questions (FAQ)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#a-caution-about-tweet-ids">7.1. A caution about tweet IDs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#my-python-script-barfs-with-unicodedecodeerror-when-printing-tweets">7.2. My python script barfs with <code class="docutils literal"><span class="pre">UnicodeDecodeError</span></code> when printing tweets!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#unicode-works-ok-in-the-terminal-but-python-barfs-when-redirecting-stdout">7.3. Unicode works OK in the terminal, but Python barfs when redirecting stdout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#collect-daemon-fails-to-start-and-there-s-no-error-message">7.4. <code class="code docutils literal"><span class="pre">collect</span> <span class="pre">--daemon</span></code> fails to start and there&#8217;s no error message</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-do-i-quickly-see-a-tweet-as-it-s-supposed-to-look">7.5. How do I quickly see a tweet as it&#8217;s &#8220;supposed&#8221; to look?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="limitations.html">8. Limitations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">9. Citing QUAC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">10. How to contribute</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#basic-workflow">10.1. Basic workflow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#branching-model">10.1.1. Branching model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#doing-actual-work">10.1.2. Doing actual work</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#merging-to-master">10.1.3. Merging to <code class="docutils literal"><span class="pre">master</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#cutting-a-release">10.1.4. Cutting a release</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#simplifying-cmdtest-updates-with-meld">10.2. Simplifying <code class="samp docutils literal"><span class="pre">cmdtest</span></code> updates with <code class="samp docutils literal"><span class="pre">meld</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#code-style">10.3. Code style</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#docstrings">10.3.1. Docstrings</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#documentation">10.4. Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#building-the-docs">10.4.1. Building the docs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#conventions">10.4.2. Conventions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#publishing-to-the-web">10.4.3. Publishing to the web</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#prerequisites">10.4.3.1. Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#publishing">10.4.3.2. Publishing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="release_notes.html">11. Release notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="release_notes.html#the-future">11.1. The future</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release_notes.html#list-of-releases">11.2. List of releases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-6-october-20-2014">11.2.1. v0.6 (October 20, 2014)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-5-november-13-2013">11.2.2. v0.5 (November 13, 2013)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-4-october-10-2013">11.2.3. v0.4 (October 10, 2013)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-3-august-5-2013">11.2.4. v0.3 (August 5, 2013)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-2-may-30-2013">11.2.5. v0.2 (May 30, 2013)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-1-april-26-2013">11.2.6. v0.1 (April 26, 2013)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="credits.html">12. Credits</a></li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">QUAC</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>4. Map-Reduce with QUACreduce</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
             
   <div class="section" id="map-reduce-with-quacreduce">
 <h1>4. Map-Reduce with QUACreduce<a class="headerlink" href="#map-reduce-with-quacreduce" title="Permalink to this headline">¶</a></h1>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><a class="reference internal" href="#introduction" id="id10">Introduction</a></li>
+<li><a class="reference internal" href="#summary-of-api" id="id11">Summary of API</a></li>
+<li><a class="reference internal" href="#example" id="id12">Example</a><ul>
+<li><a class="reference internal" href="#create-sample-input" id="id13">Create sample input</a></li>
+<li><a class="reference internal" href="#define-the-map-operator" id="id14">Define the <em>map</em> operator</a></li>
+<li><a class="reference internal" href="#define-the-reduce-operator" id="id15">Define the <em>reduce</em> operator</a></li>
+<li><a class="reference internal" href="#test-the-operators-together" id="id16">Test the operators together</a></li>
+<li><a class="reference internal" href="#prepare-the-job" id="id17">Prepare the job</a></li>
+<li><a class="reference internal" href="#run-the-job-with-make" id="id18">Run the job with make</a></li>
+<li><a class="reference internal" href="#add-more-input-data" id="id19">Add more input data</a></li>
+<li><a class="reference internal" href="#what-s-next" id="id20">What&#8217;s next?</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#distributed-quacreduce" id="id21">Distributed QUACreduce</a><ul>
+<li><a class="reference internal" href="#id5" id="id22">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#drawbacks" id="id23">Drawbacks</a></li>
+<li><a class="reference internal" href="#fixme" id="id24">FIXME</a></li>
+<li><a class="reference internal" href="#footnotes" id="id25">Footnotes</a></li>
+</ul>
+</div>
 <div class="section" id="introduction">
-<h2>4.1. Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id10">4.1. Introduction</a><a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="http://en.wikipedia.org/wiki/MapReduce">Map-reduce</a> is a neat and easy to
 use parallel programming paradigm. <a class="footnote-reference" href="#id6" id="id1">[1]</a> QUACreduce is a simple map-reduce
 framework designed for situations where a unified, fast POSIX filesystem is
@@ -114,48 +277,48 @@ between jobs. <a class="footnote-reference" href="#id7" id="id2">[2]</a></li>
 computations which actually depend on the new data are redone.</li>
 <li>Data API is compatible with Hadoop Streaming.</li>
 </ul>
-<p>QUACreduce runs on top of <tt class="docutils literal"><span class="pre">make</span></tt> for incremental processing and works on
+<p>QUACreduce runs on top of <code class="docutils literal"><span class="pre">make</span></code> for incremental processing and works on
 both a single node as well as in a SLURM allocation.</p>
 </div>
 <div class="section" id="summary-of-api">
-<h2>4.2. Summary of API<a class="headerlink" href="#summary-of-api" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id11">4.2. Summary of API</a><a class="headerlink" href="#summary-of-api" title="Permalink to this headline">¶</a></h2>
 <p>The basic paradigm is that map and reduce operators produce and accept
 line-oriented input, with key and value separated by a single tab character.
 <a class="footnote-reference" href="#id8" id="id3">[3]</a> All characters except tab, return, and newline are permitted in keys and
 values (though this is untested). Null values are permitted; in this case the
 separating tab may or may be omitted. <a class="footnote-reference" href="#id9" id="id4">[4]</a> The last line of the stream must
 end in a newline.</p>
-<p>The <tt class="docutils literal"><span class="pre">quacreduce</span></tt> command implements this API by creating a makefile, which
-you then run with <tt class="docutils literal"><span class="pre">make</span></tt> (either directly or wrapped).</p>
+<p>The <code class="docutils literal"><span class="pre">quacreduce</span></code> command implements this API by creating a makefile, which
+you then run with <code class="docutils literal"><span class="pre">make</span></code> (either directly or wrapped).</p>
 <p>QUACreduce also has a Python API which we do not cover here (see
-<tt class="docutils literal"><span class="pre">lib/qr/wordcount.py</span></tt> and other examples in the same directory).</p>
+<code class="docutils literal"><span class="pre">lib/qr/wordcount.py</span></code> and other examples in the same directory).</p>
 </div>
 <div class="section" id="example">
-<h2>4.3. Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id12">4.3. Example</a><a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
 <p>This example implements a toy version of the classic &#8220;word count&#8221; example
 using standard UNIX tools.</p>
 <div class="section" id="create-sample-input">
-<h3>4.3.1. Create sample input<a class="headerlink" href="#create-sample-input" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="highlight"><pre>$ echo -e &#39;foo bar baz\nfoo foo&#39; &gt; /tmp/foo1.txt
-$ echo -e &#39;bar&#39; &gt; /tmp/foo2.txt
-$ cat /tmp/foo*.txt
-foo bar baz
-foo foo
-bar
+<h3><a class="toc-backref" href="#id13">4.3.1. Create sample input</a><a class="headerlink" href="#create-sample-input" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> <span class="nb">echo</span> -e <span class="s1">&#39;foo bar baz\nfoo foo&#39;</span> &gt; /tmp/foo1.txt
+<span class="gp">$</span> <span class="nb">echo</span> -e <span class="s1">&#39;bar&#39;</span> &gt; /tmp/foo2.txt
+<span class="gp">$</span> cat /tmp/foo*.txt
+<span class="go">foo bar baz</span>
+<span class="go">foo foo</span>
+<span class="go">bar</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="define-the-map-operator">
-<h3>4.3.2. Define the <em>map</em> operator<a class="headerlink" href="#define-the-map-operator" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id14">4.3.2. Define the <em>map</em> operator</a><a class="headerlink" href="#define-the-map-operator" title="Permalink to this headline">¶</a></h3>
 <p>This converts standard input into a sequence of key/value pairs, one per line.</p>
-<p>We will use <tt class="docutils literal"><span class="pre">tr</span></tt> for this:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ cat /tmp/foo*.txt | tr &#39;[:blank:]&#39; &#39;\n&#39;
-foo
-bar
-baz
-foo
-foo
-bar
+<p>We will use <code class="docutils literal"><span class="pre">tr</span></code> for this:</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> cat /tmp/foo*.txt <span class="p">|</span> tr <span class="s1">&#39;[:blank:]&#39;</span> <span class="s1">&#39;\n&#39;</span>
+<span class="go">foo</span>
+<span class="go">bar</span>
+<span class="go">baz</span>
+<span class="go">foo</span>
+<span class="go">foo</span>
+<span class="go">bar</span>
 </pre></div>
 </div>
 <p>(Note that in the standard map-reduce word count examples, the mapper emits
@@ -164,27 +327,27 @@ and counting the length of a set is the same as summing a set of 1&#8217;s of th
 same size, so we do the former.)</p>
 </div>
 <div class="section" id="define-the-reduce-operator">
-<h3>4.3.3. Define the <em>reduce</em> operator<a class="headerlink" href="#define-the-reduce-operator" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id15">4.3.3. Define the <em>reduce</em> operator</a><a class="headerlink" href="#define-the-reduce-operator" title="Permalink to this headline">¶</a></h3>
 <p>This converts a sequence of key/value pairs from
 the mapper, presented on standard input, into arbitrary output (typically
 one output item per set of identical keys). All input pairs with the same
 key are adjacent in the input, but there are otherwise no input ordering
 guarantees.</p>
-<p>We will use <tt class="docutils literal"><span class="pre">uniq</span></tt> to print each input word with the number of times it
+<p>We will use <code class="docutils literal"><span class="pre">uniq</span></code> to print each input word with the number of times it
 occurred:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ echo -e &#39;b\nb\na\nc\nc\nc&#39; | uniq -c
-2 b
-1 a
-3 c
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> <span class="nb">echo</span> -e <span class="s1">&#39;b\nb\na\nc\nc\nc&#39;</span> <span class="p">|</span> uniq -c
+<span class="go">2 b</span>
+<span class="go">1 a</span>
+<span class="go">3 c</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="test-the-operators-together">
-<h3>4.3.4. Test the operators together<a class="headerlink" href="#test-the-operators-together" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="highlight"><pre>$ cat /tmp/foo*.txt | tr &#39;[:blank:]&#39; &#39;\n&#39; | sort -sk1 -t &#39;    &#39; | uniq -c
-2 bar
-1 baz
-3 foo
+<h3><a class="toc-backref" href="#id16">4.3.4. Test the operators together</a><a class="headerlink" href="#test-the-operators-together" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> cat /tmp/foo*.txt <span class="p">|</span> tr <span class="s1">&#39;[:blank:]&#39;</span> <span class="s1">&#39;\n&#39;</span> <span class="p">|</span> sort -sk1 -t <span class="s1">&#39;    &#39;</span> <span class="p">|</span> uniq -c
+<span class="go">2 bar</span>
+<span class="go">1 baz</span>
+<span class="go">3 foo</span>
 </pre></div>
 </div>
 <p>Congratulations, you&#8217;ve just run map-reduce in serial mode, with one mapper
@@ -192,52 +355,52 @@ and one reducer! The next step is to run lots of mappers and reducers in
 parallel, which is one thing QUACreduce helps with.</p>
 </div>
 <div class="section" id="prepare-the-job">
-<h3>4.3.5. Prepare the job<a class="headerlink" href="#prepare-the-job" title="Permalink to this headline">¶</a></h3>
-<p>The <tt class="docutils literal"><span class="pre">quacreduce</span></tt> command is used to prepare a makefile as well as a SLURM
+<h3><a class="toc-backref" href="#id17">4.3.5. Prepare the job</a><a class="headerlink" href="#prepare-the-job" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal"><span class="pre">quacreduce</span></code> command is used to prepare a makefile as well as a SLURM
 job file:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ quacreduce --map &#39;tr &quot;[:blank:]&quot; &quot;\n&quot;&#39; \
-             --reduce &#39;uniq -c &gt; out/%(RID)&#39; \
-             --partitions 2 \
-             /tmp/mrjob /tmp/foo*.txt
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> quacreduce --map <span class="s1">&#39;tr &quot;[:blank:]&quot; &quot;\n&quot;&#39;</span> <span class="se">\</span>
+<span class="go">             --reduce &#39;uniq -c &gt; out/%(RID)&#39; \</span>
+<span class="go">             --partitions 2 \</span>
+<span class="go">             /tmp/mrjob /tmp/foo*.txt</span>
 </pre></div>
 </div>
 <p>What&#8217;s going on here?</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">--map</span></tt> defines the map operator. This can be any shell pipeline; watch
+<li><code class="docutils literal"><span class="pre">--map</span></code> defines the map operator. This can be any shell pipeline; watch
 quoting carefully! The CWD is the job directory.</li>
-<li><tt class="docutils literal"><span class="pre">--reduce</span></tt> defines the reduce operator. The variable <tt class="docutils literal"><span class="pre">%(RID)</span></tt> is the
+<li><code class="docutils literal"><span class="pre">--reduce</span></code> defines the reduce operator. The variable <code class="docutils literal"><span class="pre">%(RID)</span></code> is the
 reducer ID; this is important for keeping output from different reducers
 separate. It is substituted by QUACreduce during job construction.</li>
-<li><tt class="docutils literal"><span class="pre">--partitions</span></tt> defines the number of partitions. There is one reducer per
+<li><code class="docutils literal"><span class="pre">--partitions</span></code> defines the number of partitions. There is one reducer per
 partition, so this limits the available parallelism for the reduce step (as
 well as downstream map-reduce jobs unless you take other measures). The
 limiting factor to keep in mind is that if you have <span class="math">\(n\)</span> input files
 and <span class="math">\(p\)</span> partitions, you will need <span class="math">\(n \times p\)</span> temporary files,
 which can grow quickly.</li>
-<li><tt class="docutils literal"><span class="pre">/tmp/mrjob</span></tt> is a directory in which to build the job.</li>
-<li><tt class="docutils literal"><span class="pre">/tmp/foo*.txt</span></tt> are the input files. There should be lots of these, as
+<li><code class="docutils literal"><span class="pre">/tmp/mrjob</span></code> is a directory in which to build the job.</li>
+<li><code class="docutils literal"><span class="pre">/tmp/foo*.txt</span></code> are the input files. There should be lots of these, as
 only one mapper is run per input file. They can live anywhere but must
 have unique filenames even if they are in multiple directories.</li>
 </ul>
 </div>
 <div class="section" id="run-the-job-with-make">
-<h3>4.3.6. Run the job with make<a class="headerlink" href="#run-the-job-with-make" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id18">4.3.6. Run the job with make</a><a class="headerlink" href="#run-the-job-with-make" title="Permalink to this headline">¶</a></h3>
 <p>This approach is simpler but is limited to the parallelism available in a
 single machine. If you need more, you can use a SLURM cluster (see the next
 step). For example:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ cd /tmp/mrjob
-$ ls -R
-.:
-Makefile  slurm_job  out  tmp
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> <span class="nb">cd</span> /tmp/mrjob
+<span class="gp">$</span> ls -R
+<span class="go">.:</span>
+<span class="go">Makefile  slurm_job  out  tmp</span>
 
-./out:
+<span class="go">./out:</span>
 
-./tmp:
+<span class="go">./tmp:</span>
 </pre></div>
 </div>
 <p>QUACreduce has created two files and two directories:</p>
 <ul>
-<li><p class="first"><tt class="docutils literal"><span class="pre">Makefile</span></tt> is what you expect; it defines the dependency graph among
+<li><p class="first"><code class="docutils literal"><span class="pre">Makefile</span></code> is what you expect; it defines the dependency graph among
 the temporary and job management files.</p>
 <p><strong>Note:</strong> Output files created by your reduce operator are <em>not</em> included
 in the dependency graph. Therefore, Make has no idea if they are complete
@@ -245,114 +408,114 @@ or not, so it&#8217;s your responsibility to make sure they&#8217;re not corrupt
 re-runs (which may include new data). It&#8217;s best practice to simply
 overwrite these each time the reducer is run.</p>
 </li>
-<li><p class="first"><tt class="docutils literal"><span class="pre">slurm_job</span></tt> is a SLURM batch file to run the Make job on multiple
+<li><p class="first"><code class="docutils literal"><span class="pre">slurm_job</span></code> is a SLURM batch file to run the Make job on multiple
 nodes.</p>
 </li>
-<li><p class="first"><tt class="docutils literal"><span class="pre">tmp</span></tt> is a directory containing various files used to contain
-intermediate results and manage job progress. <tt class="docutils literal"><span class="pre">make</span> <span class="pre">clean</span></tt> deletes
+<li><p class="first"><code class="docutils literal"><span class="pre">tmp</span></code> is a directory containing various files used to contain
+intermediate results and manage job progress. <code class="docutils literal"><span class="pre">make</span> <span class="pre">clean</span></code> deletes
 everything in this directory.</p>
 </li>
-<li><p class="first"><tt class="docutils literal"><span class="pre">out</span></tt> is a convenience directory for your use. You don&#8217;t have to put your
-output here, but you ought to have a good reason not to. <tt class="docutils literal"><span class="pre">make</span>
-<span class="pre">reallyclean</span></tt> deletes everything here as well as in <tt class="docutils literal"><span class="pre">tmp</span></tt>.</p>
+<li><p class="first"><code class="docutils literal"><span class="pre">out</span></code> is a convenience directory for your use. You don&#8217;t have to put your
+output here, but you ought to have a good reason not to. <code class="docutils literal"><span class="pre">make</span>
+<span class="pre">reallyclean</span></code> deletes everything here as well as in <code class="docutils literal"><span class="pre">tmp</span></code>.</p>
 </li>
 </ul>
 <p>You are now ready to run the job:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ make -j2
-[...FIXME...]
-$ ls -R
-.:
-Makefile  out  slurm_job  tmp
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> make -j2
+<span class="go">[...FIXME...]</span>
+<span class="gp">$</span> ls -R
+<span class="go">.:</span>
+<span class="go">Makefile  out  slurm_job  tmp</span>
 
-./out:
-0  1
+<span class="go">./out:</span>
+<span class="go">0  1</span>
 
-./tmp:
-0.reduced  foo1.txt.0  foo1.txt.mapped  foo2.txt.1
-1.reduced  foo1.txt.1  foo2.txt.0       foo2.txt.mapped
+<span class="go">./tmp:</span>
+<span class="go">0.reduced  foo1.txt.0  foo1.txt.mapped  foo2.txt.1</span>
+<span class="go">1.reduced  foo1.txt.1  foo2.txt.0       foo2.txt.mapped</span>
 </pre></div>
 </div>
 <p>Note that the subdirectories are now populated.</p>
 <p>Your output is available with:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ cat out/*
-2 bar
-1 baz
-3 foo
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> cat out/*
+<span class="go">2 bar</span>
+<span class="go">1 baz</span>
+<span class="go">3 foo</span>
 </pre></div>
 </div>
 <p>Note that the output order has changed. In general, you must sort yourself
 if you care about this order.</p>
 </div>
 <div class="section" id="add-more-input-data">
-<h3>4.3.7. Add more input data<a class="headerlink" href="#add-more-input-data" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id19">4.3.7. Add more input data</a><a class="headerlink" href="#add-more-input-data" title="Permalink to this headline">¶</a></h3>
 <p>One of the neat things that QUACreduce can do is add additional data
 and then only re-run the parts of the job that are affected. For example:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ echo &#39;qux&#39; &gt; /tmp/foo3.txt
-$ cd /tmp/mrjob
-$ quacreduce --update . /tmp/foo*.txt
-$ make -j2
-[...FIXME...]
-$ cat out/*
-2 bar
-1 baz
-3 foo
-1 qux
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> <span class="nb">echo</span> <span class="s1">&#39;qux&#39;</span> &gt; /tmp/foo3.txt
+<span class="gp">$</span> <span class="nb">cd</span> /tmp/mrjob
+<span class="gp">$</span> quacreduce --update . /tmp/foo*.txt
+<span class="gp">$</span> make -j2
+<span class="go">[...FIXME...]</span>
+<span class="gp">$</span> cat out/*
+<span class="go">2 bar</span>
+<span class="go">1 baz</span>
+<span class="go">3 foo</span>
+<span class="go">1 qux</span>
 </pre></div>
 </div>
-<p>Note that only <tt class="docutils literal"><span class="pre">foo3.txt</span></tt> was mapped, because we already had mapper results
-for <tt class="docutils literal"><span class="pre">foo1.txt</span></tt> and <tt class="docutils literal"><span class="pre">foo2.txt</span></tt>.</p>
+<p>Note that only <code class="docutils literal"><span class="pre">foo3.txt</span></code> was mapped, because we already had mapper results
+for <code class="docutils literal"><span class="pre">foo1.txt</span></code> and <code class="docutils literal"><span class="pre">foo2.txt</span></code>.</p>
 </div>
 <div class="section" id="what-s-next">
-<h3>4.3.8. What&#8217;s next?<a class="headerlink" href="#what-s-next" title="Permalink to this headline">¶</a></h3>
-<p>For further help, say <tt class="docutils literal"><span class="pre">quacreduce</span> <span class="pre">--help</span></tt>.</p>
+<h3><a class="toc-backref" href="#id20">4.3.8. What&#8217;s next?</a><a class="headerlink" href="#what-s-next" title="Permalink to this headline">¶</a></h3>
+<p>For further help, say <code class="docutils literal"><span class="pre">quacreduce</span> <span class="pre">--help</span></code>.</p>
 </div>
 </div>
 <div class="section" id="distributed-quacreduce">
-<h2>4.4. Distributed QUACreduce<a class="headerlink" href="#distributed-quacreduce" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id21">4.4. Distributed QUACreduce</a><a class="headerlink" href="#distributed-quacreduce" title="Permalink to this headline">¶</a></h2>
 <p>QUACreduce jobs can be distributed across multiple nodes. The basic paradigm
 is that the master node runs a Make job which farms tasks out to compute nodes
 (which can include the master) using SSH; this list is taken from resource
-manager environment variables (e.g., <tt class="docutils literal"><span class="pre">$SLURM_NODELIST</span></tt>). Each node must
+manager environment variables (e.g., <code class="docutils literal"><span class="pre">$SLURM_NODELIST</span></code>). Each node must
 therefore have access to the job directory at the same path.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last">You probably should point <tt class="docutils literal"><span class="pre">--sortdir</span></tt> to node-local storage for
+<p class="last">You probably should point <code class="docutils literal"><span class="pre">--sortdir</span></code> to node-local storage for
 jobs of non-trivial size. Otherwise, you might attract the wrath
 of your operators for overly-aggressive use of the shared
 filesystem.</p>
 </div>
-<p>QUACreduce uses an SSH wrapper script called <tt class="docutils literal"><span class="pre">sshrot</span></tt> to distribute jobs
-(say <tt class="docutils literal"><span class="pre">sshrot</span> <span class="pre">--help</span></tt> for more details on using the script). If <tt class="docutils literal"><span class="pre">mpirun</span></tt> is
+<p>QUACreduce uses an SSH wrapper script called <code class="docutils literal"><span class="pre">sshrot</span></code> to distribute jobs
+(say <code class="docutils literal"><span class="pre">sshrot</span> <span class="pre">--help</span></code> for more details on using the script). If <code class="docutils literal"><span class="pre">mpirun</span></code> is
 available, that is used to distribute jobs; otherwise, it falls back to SSH.</p>
 <p>The script has a few quirks you need to be aware of:</p>
 <ol class="arabic simple">
-<li><tt class="docutils literal"><span class="pre">sshrot</span></tt> may not work as expected if your login shell is not <tt class="docutils literal"><span class="pre">bash</span></tt>,
+<li><code class="docutils literal"><span class="pre">sshrot</span></code> may not work as expected if your login shell is not <code class="docutils literal"><span class="pre">bash</span></code>,
 and simply invoking your desired shell as part of the command may not work
 because shell quoting rules are really complicated.</li>
-<li><tt class="docutils literal"><span class="pre">ssh</span></tt> is invoked with <tt class="docutils literal"><span class="pre">-o</span> <span class="pre">BatchMode=yes</span></tt>, i.e., don&#8217;t try to ask the
+<li><code class="docutils literal"><span class="pre">ssh</span></code> is invoked with <code class="docutils literal"><span class="pre">-o</span> <span class="pre">BatchMode=yes</span></code>, i.e., don&#8217;t try to ask the
 user for authentication information, just fail instead if they would have
 to supply anything. This means that you need something set up for
-non-interactive, passwordless login to the compute nodes (and <tt class="docutils literal"><span class="pre">localhost</span></tt>
+non-interactive, passwordless login to the compute nodes (and <code class="docutils literal"><span class="pre">localhost</span></code>
 if you want to run the tests). For example, SSH keys and a running SSH
 agent will work.</li>
 <li>No special effort is made to either conserve TCP connections with SSH
-multiplexing or (conversely) avoid the <tt class="docutils literal"><span class="pre">MaxSessions</span></tt> multiplexing limit.
+multiplexing or (conversely) avoid the <code class="docutils literal"><span class="pre">MaxSessions</span></code> multiplexing limit.
 These issues may limit scaling.</li>
 </ol>
 <div class="section" id="id5">
-<h3>4.4.1. Example<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id22">4.4.1. Example</a><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
 <p><cite>FIXME</cite></p>
-<div class="highlight-python"><div class="highlight"><pre>$ sbatch -N2 slurm_job -j4
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> sbatch -N2 slurm_job -j4
 </pre></div>
 </div>
-<p>Note that the number of nodes requested from SLURM and <tt class="docutils literal"><span class="pre">-j</span></tt>, which is the
-total number of tasks <tt class="docutils literal"><span class="pre">make</span></tt> will run simultaneously, must be coordinated
+<p>Note that the number of nodes requested from SLURM and <code class="docutils literal"><span class="pre">-j</span></code>, which is the
+total number of tasks <code class="docutils literal"><span class="pre">make</span></code> will run simultaneously, must be coordinated
 for good performance. The above might be appropriate for a cluster with two
 cores per node. Memory could be a limitation also, along with myriad others.</p>
 </div>
 </div>
 <div class="section" id="drawbacks">
-<h2>4.5. Drawbacks<a class="headerlink" href="#drawbacks" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id23">4.5. Drawbacks</a><a class="headerlink" href="#drawbacks" title="Permalink to this headline">¶</a></h2>
 <p>QUACreduce is pretty simple and has a number of limitations. If these are
 a problem, perhaps you are better off with something else. Some of these could
 be fixed, and others are more fundamental.</p>
@@ -371,13 +534,13 @@ parallel.</li>
 </ul>
 </div>
 <div class="section" id="fixme">
-<h2>4.6. FIXME<a class="headerlink" href="#fixme" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id24">4.6. FIXME</a><a class="headerlink" href="#fixme" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>parallel sorts</li>
 </ul>
 </div>
 <div class="section" id="footnotes">
-<h2>4.7. Footnotes<a class="headerlink" href="#footnotes" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id25">4.7. Footnotes</a><a class="headerlink" href="#footnotes" title="Permalink to this headline">¶</a></h2>
 <table class="docutils footnote" frame="void" id="id6" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
@@ -414,24 +577,68 @@ permitted but a null value isn&#8217;t.</td></tr>
 
 
           </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="timeseries.html" class="btn btn-neutral float-right" title="5. Time series analysis" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pipeline.html" class="btn btn-neutral" title="3. Preprocessing data" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2012-2015, Los Alamos National Security, LLC and others.
+    </p>
+  </div>
+
+</footer>
+
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="timeseries.html" title="5. Time series analysis"
-             >next</a></li>
-        <li class="right" >
-          <a href="pipeline.html" title="3. Preprocessing data"
-             >previous</a> |</li>
-        <li><a href="index.html">QUAC documentation for commit 5ccb2ad</a> &raquo;</li> 
-      </ul>
-    </div>
-    <div class="footer">
-        &copy; Copyright 2012-2013, Los Alamos National Security, LLC and others.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.7',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>
