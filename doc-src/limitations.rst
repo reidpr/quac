@@ -3,6 +3,10 @@
 Limitations
 ***********
 
+.. contents::
+   :depth: 2
+   :local:
+
 * Adventures with ``joblib``:
 
   * ``Parallel`` has a ``verbose`` argument that is underdocumented ("[I]f non

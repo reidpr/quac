@@ -62,21 +62,18 @@ class Raise_Unittest_Exception(argparse.Action):
       raise Unittests_Only_Exception
 
 
-def register(teststr):
+def register(teststr=None):
    calling_frame = inspect.stack()[1][0]
    calling_module = sys.modules[calling_frame.f_locals['__name__']]
-   calling_frame.f_locals['__test__'] = {'tests': teststr}
+   if (teststr is not None):
+      calling_frame.f_locals['__test__'] = {'tests': teststr}
    calling_frame.f_locals['test_interactive'] = test_interactive_null
    if (calling_module.__name__ in ('__main__', '<run_path>')):
       if (run_tests):
          test(calling_module)
 
-manualonly_register = register
-'''Same as register(), but normally not invoked when test.sh is automatically
-   collecting modules to test.'''
-
 def test(module):
-   options = doctest.ELLIPSIS #| doctest.REPORT_ONLY_FIRST_FAILURE
+   options = doctest.ELLIPSIS | doctest.REPORT_ONLY_FIRST_FAILURE
    doctest.testmod(module, optionflags=options)
 
 def test_interactive_null():

@@ -7,6 +7,10 @@ These are basic directions to collect and preprocess data so you can do
 something awesome with them. These directions aren't comprehensive; you may
 need to consult other sources to fill in some gaps.
 
+.. contents::
+   :depth: 2
+   :local:
+
 .. note:: You may not need to do this. If you have collaborators who are
    already collecting data, you should probably in fact *not* do this. Just
    use their data.
@@ -66,7 +70,7 @@ Run the collector
 
 #. Run the collector for a while, e.g.::
 
-     collect --verbose --config /path/to/sample.cfg
+     $ collect --verbose --config /path/to/sample.cfg
 
    (Type Control-C to stop.)
 
@@ -75,7 +79,7 @@ Build the TSV files
 
 ::
 
-   /path/to/quac/misc/parse.sh 1 /path/to/tweets
+   $ $QUACBASE/misc/parse.sh 1 /path/to/tweets
 
 Doing it seriously
 ------------------
@@ -86,6 +90,8 @@ collect tweets in a serious and reliable way (i.e., without gaps):
 #. Run ``collect`` with the ``--daemon`` option, and set up ``logcheck`` to
    watch the log files and e-mail you if something goes wrong.
 
-#. Set up a cron job to build the TSVs regularly, e.g.::
+#. Set up a cron job to build the TSVs regularly, e.g.:
 
-     27 3 * * *  nice bash -l -c '/path/to/quac/misc/parse.sh 4 /path/to/tweets >> /path/to/logs/parse.log'
+   .. code-block:: sh
+
+     27 3 * * *  nice bash -l -c '$QUACBASE/misc/parse.sh 4 /path/to/tweets >> /path/to/logs/parse.log'

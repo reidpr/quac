@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Preprocess the Wikipedia data and test that it worked. Later Wikipedia tests
+# will use these data, so it needs to come first.
+
+# Copyright © Los Alamos National Security, LLC, and others.
+
+. ./environment.sh
+cd wp-access
+
+MAKEFILE=$QUACBASE/misc/wp-preprocess.mk
+
+# Do we have the expected raw files?
+x ls -R raw
+
+# Fiddle a timestamp so the newest file is predictable and not the last file
+# when sorted lexically.
+touch -c raw/2099/2099-01/pagecounts-20990101-010000.gz
+
+# Remove existing makefile and time series files, etc.
+z make -f $MAKEFILE clean
+x ls
+
+# Make all
+y "make -f $MAKEFILE 2>&1 | sort"
+x ls . ts
+
+# Touch a file, make again
+x touch -c raw/2099/2099-01/pagecounts-20990101-010000.gz
+z make -f $MAKEFILE
+x ls . ts
+
+# Make only complete months
+x rm -Rf ts
+y "make -f $MAKEFILE tsfiles-complete 2>&1 | sort"
+x ls . ts
+
+# Make only incomplete months
+y "make -f $MAKEFILE tsfiles-incomplete 2>&1 | sort"
+x ls . ts
+z make -f $MAKEFILE
+
+# Dump the tricky parts of the dataset
+x ts-dump ts 2008-10-01 2011-01-01 2011-10-01 2099-01-01
+
+# Later tests only want the "real" data, not the messy broken parts, so remove
+# the latter.
+x rm ts/{2008-10-01,2011-01-01,2011-10-01,2015-01-01,2099-01-01}.db
+x ls ts

@@ -94,8 +94,12 @@ nosetests.xml
 *.log
 
 deps
+deps.tar.gz
 doc
-sphinx/_build
+doc-src/_build
+env
+env.*
+requirements-*.txt
 
 bin/hashsplit
 
@@ -106,7 +110,7 @@ bin/hashsplit
 *.stdout-diff
 
 # test temporary files
-tests/tmp/tmp*
+tests/tmp/*
 
 # test tweets
 tests/twitter/tweets/raw
@@ -114,6 +118,5 @@ tests/twitter/tweets/pre
 tests/twitter/tweets/geo
 
 # derived test wikimedia data
-tests/standalone/wp-access/hashed*
-tests/standalone/wp-access/metadata*
-tests/standalone/wp-access/missing.tsv
+tests/standalone/wp-access/ts.mk
+tests/standalone/wp-access/ts

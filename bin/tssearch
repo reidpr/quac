@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+
+# Copyright © Los Alamos National Security, LLC, and others.
+
+'''Search a time series dataset for one or more specific named series and
+   return the result as TSV on stdout. Series not found are omitted from the
+   output with a warning.'''
+
+import sys
+
+import pandas as pd
+
+import quacpath
+import db
+import testable
+import timeseries
+import u
+
+c = u.c
+l = u.l
+
+
+### Setup ###
+
+ap = u.ArgumentParser(description=__doc__)
+gr = ap.default_group
+gr.add_argument('-i', '--interval',
+                metavar='CODE',
+                help='sum output to this interval (UTC)')
+gr.add_argument('-l', '--list',
+                action='store_true',
+                help='list series names instead of fetching specific series')
+gr.add_argument('-r', '--raw',
+                action='store_true',
+                help='return raw rather than normalized data')
+gr.add_argument('-t', '--no-last-only',
+                action='store_true',
+                help="don't list series that are zero except for last month")
+gr.add_argument('tsdir',
+                metavar='TIMESERIES_DIR',
+                help='directory containing time series data')
+gr.add_argument('names',
+                metavar='NAME',
+                nargs='*',
+                help='time series name')
+
+def main():
+   l.info('starting')
+   try:
+      ds = timeseries.Dataset_Pandas(args.tsdir)
+   except FileNotFoundError as x:
+      u.abort(str(x))
+   ds.open_all()
+   l.info('connected to dataset')
+   if (args.list):
+      series_ct = 0
+      for s in ds.fetch_all(last_only=(not args.no_last_only)):
+         series_ct += 1
+         print('%s\t%d' % (s.name, s.sum()))
+      sys.stdout.flush()
+      l.info('%d series found' % series_ct)
+   else:
+      serieses = dict()
+      for name in args.names:
+         l.info('fetching %s' % name)
+         try:
+            s = ds.fetch(name, last_only=(not args.no_last_only),
+                         normalize=(not args.raw), resample=args.interval)
+         except db.Not_Enough_Rows_Error as x:
+            l.warning('series not found: %s' % name)
+         else:
+            serieses[s.name] = s
+      if (len(serieses) == 0):
+         u.abort("didn't find any of the requested series")
+      df = pd.DataFrame(serieses)
+      df.to_csv(sys.stdout, sep='\t', float_format='%.4g')
+      sys.stdout.flush()
+   l.info('done')
+
+
+### Bootstrap ###
+
+if (__name__ == '__main__'):
+   try:
+      args = u.parse_args(ap)
+      u.configure(args.config)
+      u.logging_init('tsser')
+      if (args.list and len(args.names) != 0):
+         u.abort('cannot specify --list and NAME')
+      if (not args.list and len(args.names) < 1):
+         u.abort('must specify at least one NAME unless --list')
+      main()
+   except testable.Unittests_Only_Exception:
+      testable.register()

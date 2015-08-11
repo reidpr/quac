@@ -1,5 +1,7 @@
 # Copyright (c) Los Alamos National Security, LLC, and others.
 
+umask 007
+
 # Set up environment for tests.
 
 # base QUAC directory
@@ -11,6 +13,9 @@ export PATH=$QUACBASE/bin:$PATH
 # Same for Python modules; the oddness is so we don't have a trailing colon if
 # $PYTHONPATH is unset.
 export PYTHONPATH=$QUACBASE/lib${PYTHONPATH:+:}$PYTHONPATH
+
+# Use the test arguments
+export QUACARGS="--notimes --config=$QUACBASE/tests/test.cfg"
 
 # Make a private directory for tests to work in. If tests need to share state,
 # they can set it up manually.
@@ -24,16 +29,37 @@ export LC_ALL=en_US.UTF-8
 # stop test if any command fails
 set -e
 
-# echo key commands
-x () {
-    echo "\$ $@"
-    eval "$@"
+# Strip out things that vary in output:
+#
+# - timestamps (e.g., 1:23:45)
+# - rates (e.g., 100 elephants/s)
+#
+# FIXME: These sed expressions have been untested on a Mac. They used to use
+# the non-extended syntax, which is kind of horrible and kept confusing me.
+# Interestingly, the -E flag is undocumented on Ubuntu but sees to work. We
+# may need some other portability solution.
+cleanup () {
+    sed -E -e 's/[0-9]{1,2}:[0-9]{2}:[0-9]{2}/[TIME]/g' \
+           -e 's/[0-9.]+( ?[a-zA-Z]+\/(s|second)([ )]|$))/[RATE]\1/g' \
+           -e "s|$QUACBASE|[QUACBASE]|g"
 }
 
-# echo key pipelines (executed in a subshell)
+# Echo key commands (in parent shell), no cleanup.
+x () {
+    echo "\$ $@"
+    eval "$@" 2>&1
+}
+
+# Echo key pipelines (in a subshell), piping through cleanup
 y () {
-    echo "$ ($1)"
-    bash -c "$1"
+    echo "$ ($1)" | cleanup
+    bash -c "$1" 2>&1 | cleanup
+}
+
+# Echo key commands (in parent shell), with cleanup; return value inaccessible.
+z () {
+    echo "\$ $@" | cleanup
+    eval "$@" 2>&1 | cleanup
 }
 
 # Decide how to call netstat. The problem is that Red Hat and everyone else

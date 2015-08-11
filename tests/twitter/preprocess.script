@@ -15,8 +15,8 @@ ln -s $TWEETDIR/raw/small/small.json.gz raw/foo
 touch raw/foo/small.stats
 touch -d19700101 raw/foo/small.json.d  # suppress "No such file or directory"
 
-# output is variable, so ignore it
-$parsesh 1 . > /dev/null 2>&1
+# lots of order variability in this command, so ignore the output
+z $parsesh 1 . > /dev/null
 
 x ls -R .
 

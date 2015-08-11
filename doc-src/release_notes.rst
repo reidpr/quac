@@ -3,6 +3,10 @@
 Release notes
 *************
 
+.. contents::
+   :depth: 2
+   :local:
+
 QUAC releases are more a planning tool than anything else; we try to keep the
 ``master`` branch stable. That is, there's no real point in favoring a release
 tag instead of whatever is on ``master``. All that gets you is an old version.

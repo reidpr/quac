@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Examine a bunch of Wikipedia files and test that they are sorted in the way
+# we expect. (See the docs for details.)
+
+# Copyright © Los Alamos National Security, LLC, and others.
+
+
+export LC_ALL=C
+
+# If just one directory argument, it's a Wikipedia data directory; test a
+# reasonable selection of files. Otherwise, arguments are the specific files
+# to test.
+
+if [[ -d $1 ]]; then
+    # pipe through sort because multiple globs don't come out in order
+    FILES=$(echo $1/raw/*/*/pagecounts-*{01,15}-{00,12}*.gz | tr ' ' '\n' | sort)
+else
+    FILES="$*"
+fi
+TMPFILE=/tmp/wp-testsort.tmp.$$  # put it on a RAM filesystem for performance
+
+PROJ_FILTER_ALL='[a-z.]+'
+PROJ_FILTER_DOT='[a-z]+\.[a-z]+'
+PROJ_FILTER_NODOT='[a-z]+'
+URL_FILTER='[-A-Za-z0-9_~!*();@,%%]+ [0-9]+ [0-9]+$'
+
+function testsort () {
+    if (egrep "^$2 $URL_FILTER" $1 | sort --check=quiet); then
+        printf ' ok  '
+        return 0
+    else
+        printf ' fail'
+        return 1
+    fi
+}
+
+echo 'file                             dot  !dot all'
+echo '-------------------------------- ---- ---- ----'
+
+dot_fail=0
+nodot_fail=0
+all_fail=0
+file_ct=0
+for file in $FILES; do
+    echo $file | sed -e 's/^.*\///' | tr -d '\n'
+    zcat $file > $TMPFILE
+    printf ':  '
+    testsort $TMPFILE "$PROJ_FILTER_DOT"   || ((dot_fail++))
+    testsort $TMPFILE "$PROJ_FILTER_NODOT" || ((nodot_fail++))
+    testsort $TMPFILE "$PROJ_FILTER_ALL"   || ((all_fail++))
+    rm -f $TMPFILE
+    echo
+    ((file_ct++))
+    #if [[ $file_ct -ge 4 ]]; then break; fi
+done
+
+echo "${file_ct} files tested; failures: dot=$dot_fail nodot=$nodot_fail all=$all_fail"

@@ -19,18 +19,15 @@ x hashsplit foo
 echo $?
 x hashsplit 0 foo
 echo $?
-y "hashsplit '' foo"
-echo $?
-y "hashsplit 2 ''"
-echo $?
+y "hashsplit '' foo || echo 1"
+y "hashsplit 2 '' || echo 1"
 
 # Check directory and file creation.
 y "hashsplit 2 a < /dev/null"
 x ls -R a
 
 # Check failure on can't can't create directory because parent doesn't exist.
-y "hashsplit 2 /does/not/exist < /dev/null"
-echo $?
+y "hashsplit 2 /does/not/exist < /dev/null || echo 1"
 
 # Check failure on file where directory should be.
 x touch thisisafile

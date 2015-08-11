@@ -1,79 +1,110 @@
-'''
-This file wraps db_glue to offer a simpler interface. The basic abstraction is
-that each database handle contains a set of objects of a single type.
-
-The type to be stored needs to implement a few housekeeping methods.
-'''
+'Convenience methods to wrap APSW SQLite databases.'
 
 # Copyright (c) Los Alamos National Security, LLC, and others.
 
+# Note on execute() vs. executemany(): The standard Python DB-API cursors
+# offer both execute() and executemany() methods. The latter is often billed
+# as a performance improvement, because it saves the overhead of parsing the
+# query each time. However, in my testing there is minimal advantage gained by
+# executemany() in APSW. This is nice because plain execute() is often easier
+# to deal with.
+#
+# Results of three quick tests against an in-memory database:
+#
+# execute(), with statement cache:     620k inserts/second
+# execute(), without statement cache:  190k
+# executemany():                       660k
+#
+# I suspect this is due to two factors. First, sqlite3 has a
+# transaction-per-statement model by default, and executemany() implicitly
+# runs in a transaction; if you are using explicit transactions, as we do,
+# this advantage goes away. Second, APSW has a prepared statement cache, so
+# the savings of preparing only once in executemany goes away as well.
+#
+# Tests used:
+#
+# $ python -m timeit -s 'import apsw; db = apsw.Connection(":memory:"); c = db.cursor(); c.execute("create table foo (a int)");' 'c.execute("BEGIN"); [c.execute("insert into foo values (?)", (i,)) for i in range(10000)]; c.execute("COMMIT")'
+# 100 loops, best of 3: 16.1 msec per loop
+# $ python -m timeit -s 'import apsw; db = apsw.Connection(":memory:", statementcachesize=0); c = db.cursor(); c.execute("create table foo (a int)");' 'c.execute("BEGIN"); [c.execute("insert into foo values (?)", (i,)) for i in range(10000)]; c.execute("COMMIT")'
+# 10 loops, best of 3: 51.6 msec per loop
+# $ python -m timeit -s 'import apsw; db = apsw.Connection(":memory:"); c = db.cursor(); c.execute("create table foo (a int)");' 'c.execute("BEGIN"); c.executemany("insert into foo values (?)", ((i,) for i in range(10000))); c.execute("COMMIT")'
+# 100 loops, best of 3: 15.2 msec per loop
 
-import collections
+import sys
 
-import db_glue
+import apsw
+
+import u
+c = u.c
 
 
-TABLE = 'data'
+class Not_Enough_Rows_Error(Exception): pass
+class Too_Many_Rows_Error(Exception): pass
+class Invalid_DB_Error(Exception): pass
 
 
-class DB_Dict(collections.defaultdict):
-   '''A lazy-loading dictionary of databases. Essentially:
+class SQLite(object):
 
-      >>> d = DB_Dict('/tmp/foo', Foo_Type)
-      >>> d['bar'].insert(...)
+   __slots__ = ('db',
+                'curs')
 
-      In the second line, if d['bar'] isn't already a database, it will
-      magically become one (stored in "/tmp/foo_bar.db").'''
+   def __init__(self, filename, writeable):
+      apsw.softheaplimit(c.getint('limt', 'sqlite_heap_bytes'))
+      if (writeable):
+         flags = apsw.SQLITE_OPEN_READWRITE | apsw.SQLITE_OPEN_CREATE
+      else:
+         flags = apsw.SQLITE_OPEN_READONLY
+      self.db = apsw.Connection(filename, flags=flags)
+      self.curs = self.db.cursor()
 
-   def __init__(self, prefix, type_):
-      self.prefix = prefix
-      self.type_ = type_
+   def begin(self):
+      self.sql("BEGIN IMMEDIATE")
 
-   def __missing__(self, key):
-      self[key] = DB(self.prefix + key, self.type_)
-      return self[key]
+   def close(self):
+      # APSW docs suggest that closing the database is unnecessary, but it
+      # seems tidier to me. See:
+      # http://rogerbinns.github.io/apsw/connection.html#apsw.Connection.close
+      self.db.close()
 
    def commit(self):
-      for db_ in self.values():
-         db_.commit()
-         
+      self.sql("COMMIT")
 
-class DB(object):
+   def exists(self, table, where_clause):
+      return (next(self.get("SELECT count(*) FROM %s WHERE %s"
+                            % (table, where_clause)))[0] > 0)
 
-   __slots__ = ('_db',
-                'type_')
+   def get(self, sql_, bindvals=None):
+      return self.curs.execute(sql_, bindvals)
 
-   def __init__(self, filename, type_):
-      '''Open a database at filename (plus ".db") to store objects of type
-         type_, creating a new database if one does not already exist.'''
-      self.type_ = type_
-      self._open(filename + '.db', self.type_)
-      # FIXME: verify table has correct schema, not just present
-      if (not self._db.table_exists_p(TABLE)):
-         self._db.create_table(TABLE, self.type_.db_cols)
-         self.commit()
+   def get_many(self, sql_, bindvals=None):
+      return self.curs.executemany(sql_, bindvals)
 
-   def commit(self):
-      self._db.commit()
-
-   def delete(self):
-      assert False, 'FIXME: unimplemented'
-   
-   def exists(self, pk_value):
-      # We could add LIMIT 1, but since it's a PK, no need.
-      sql_ = ("SELECT 1 FROM %s WHERE %s = ?" % (TABLE, self.type_.pk_col))
-      return (len(self.sql(sql_, (pk_value,))) > 0)
-
-   def insert(self, item):
-      'WARNING: This clobbers existing rows with the same PK.'
-      self._db.insert_clobber(TABLE, item.as_dict())
+   def get_one(self, sql_, bindvals=None):
+      '''Return the single row result of query as an iterable. If row does not
+         exist, return KeyError. If multiple rows are returned, raise
+         ValueError.'''
+      it = self.curs.execute(sql_, bindvals)
+      try:
+         r = next(it)
+      except StopIteration:
+         raise Not_Enough_Rows_Error('no such row') from None
+      try:
+         next(it)
+      except StopIteration:
+         pass
+      else:
+         raise Too_Many_Rows_Error('query returned more than one result')
+      return r
 
    def rollback(self):
-      self._db.rollback()
+      self.sql("ROLLBACK")
 
-   def sql(self, sql_, parms=()):
-      return self._db.sql(sql_, parms)
+   def sql(self, sql_, bindvals=None):
+      'Execute SQL statement and discard the results.'
+      all(self.get(sql_, bindvals))
 
-   def _open(self, filename, type_):
-      self._db = db_glue.DB(filename)
+   def sql_many(self, sql_, bindvals=None):
+      all(self.get_many(sql_, bindvals))
 
+   def vacuum(self):
+      sql.SQL("VACUUM")

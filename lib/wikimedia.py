@@ -33,7 +33,6 @@ def hour_bizarro(x):
       return (do + min(x[1]['hours'].keys()),
               do + max(x[1]['hours'].keys()))
 
-
 def timestamp_parse(text):
    '''Parse the timestamp embedded in pagecount and projectcount files. A
       quirk is that the stamp marks the *end* of the data collection period;
@@ -45,6 +44,8 @@ def timestamp_parse(text):
 
       >>> timestamp_parse('2013/2013-10/pagecounts-20131016-090001.gz')
       datetime.datetime(2013, 10, 16, 8, 0, tzinfo=<UTC>)
+      >>> timestamp_parse('pagecounts-20120101-000000.gz')
+      datetime.datetime(2011, 12, 31, 23, 0, tzinfo=<UTC>)
       >>> timestamp_parse('2013/2013-10/projectcounts-20131016-09000')
       Traceback (most recent call last):
         ...

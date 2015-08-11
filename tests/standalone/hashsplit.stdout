@@ -28,10 +28,10 @@ except zero, tab, and newline.
 $ hashsplit 0 foo
 invalid number of output files: 0
 1
-$ (hashsplit '' foo)
+$ (hashsplit '' foo || echo 1)
 invalid number of output files: 0
 1
-$ (hashsplit 2 '')
+$ (hashsplit 2 '' || echo 1)
 length of BASENAME cannot be 0
 1
 $ (hashsplit 2 a < /dev/null)
@@ -39,7 +39,7 @@ $ ls -R a
 a:
 0
 1
-$ (hashsplit 2 /does/not/exist < /dev/null)
+$ (hashsplit 2 /does/not/exist < /dev/null || echo 1)
 can't mkdir /does/not/exist: No such file or directory
 1
 $ touch thisisafile

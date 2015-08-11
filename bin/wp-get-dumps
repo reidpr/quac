@@ -30,11 +30,6 @@ c = u.c
 ### Setup ###
 
 ap = u.ArgumentParser(description=__doc__, epilog=help_epilogue)
-gr = ap.add_argument_group('arguments')
-gr.add_argument("--config",
-                help="location of config file",
-                default=u.CONFIG_DEFAULT,
-                metavar="FILE")
 
 
 ### Main ###

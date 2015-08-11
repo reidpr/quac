@@ -28,10 +28,11 @@ C='Copyright (\(c\)|©) Los Alamos National Security, LLC, and others'
 for filename in $(find . \(    -path ./.git \
                             -o -path ./deps \
                             -o -path ./doc \
+                            -o -path ./env \
                             -o -path ./experiments \
-                            -o -path ./sphinx/_build \
+                            -o -path ./doc-src/_build \
                             -o -path ./tests/twitter/tweets \
-                            -o -path './tests/tmp/tmp*' \
+                            -o -path ./tests/tmp \
                          \) -prune -o -type f | LC_ALL=C sort); do
     if (file $filename | fgrep -q 'text' \
         && echo $filename | egrep -qv '\.(gz|stderr|stdout|tmp|tsv)'); then

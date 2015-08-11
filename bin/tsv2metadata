@@ -19,18 +19,12 @@ l = u.l
 
 ### Setup ###
 
-ap = argparse.ArgumentParser(description=__doc__)
-ap.add_argument('--unittest',
-                nargs=0,
-                action=testable.Raise_Unittest_Exception,
-                help='run unit tests instead of real stuff')
-ap.add_argument('--verbose',
-                action='store_true',
-                help='be more verbose with log output')
-ap.add_argument('outfile',
+ap = u.ArgumentParser(description=__doc__)
+gr = ap.default_group
+gr.add_argument('outfile',
                 metavar='OUTFILE',
                 help='metadata file to create or update')
-ap.add_argument('tsv_files',
+gr.add_argument('tsv_files',
                 metavar='TSV',
                 nargs='+',
                 help='.tsv files to add to metadata')

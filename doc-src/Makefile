@@ -14,9 +14,16 @@ ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 # the i18n builder cannot share the environment and doctrees with the others
 I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
+# Help dumps from scripts
+SCRIPTHELPS := $(addsuffix .help, \
+	          $(notdir $(shell find ../bin -executable -type f)))
+
 .PHONY: help clean html web dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext
 
 all: html
+
+%.help: ../bin/%
+	$< --help > $@
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -41,14 +48,17 @@ help:
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 
 clean:
-	-rm -rf $(BUILDDIR)/*
+	rm -rf $(BUILDDIR)/*
+	rm -rf ../doc/* ../doc/.nojekyll
 
+# FIXME: currently, not all the scripts support --help.
+#html: $(SCRIPTHELPS)
 html:
-	$(SPHINXBUILD) -b html -D html_title="QUAC documentation for commit $$(git rev-parse --short HEAD)" $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	$(SPHINXBUILD) -b html -D release="$$(cat ../VERSION)" -D version="$$(git rev-parse --short HEAD)" $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 	@echo
-	rsync -a --delete --exclude .git $(BUILDDIR)/html/ ../doc
+	rsync -a --delete --exclude-from RSYNC_EXCLUDE $(BUILDDIR)/html/ ../doc
 	touch ../doc/.nojekyll
 	@echo
 	@echo "HTML pages copied to doc/."

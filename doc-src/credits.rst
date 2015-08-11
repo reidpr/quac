@@ -5,6 +5,10 @@
 Credits
 *******
 
+.. contents::
+   :depth: 2
+   :local:
+
 * Reid Priedhorsky, Los Alamos National Laboratory
-* Aron Culotta, Northeastern Illinois University
+* Aron Culotta, Illinois Institute of Technology
 

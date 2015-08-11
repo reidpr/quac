@@ -207,7 +207,8 @@ class Weight(object):
 
 # test that self.all_gmms has stable order
 # disabled for now (see issue #100)
-testable.manualonly_register('''
+# Test-Depends: geo manual
+testable.register('''
 >>> import random
 >>> from . import gmm
 >>> def test_random():

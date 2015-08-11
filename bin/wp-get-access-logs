@@ -42,10 +42,6 @@ c = u.c
 
 ap = u.ArgumentParser(description=__doc__, epilog=help_epilogue)
 gr = ap.add_argument_group('arguments')
-gr.add_argument('--config',
-                help='location of config file',
-                default=u.CONFIG_DEFAULT,
-                metavar='FILE')
 gr.add_argument('--verify',
                 action='store_true',
                 help='verify MD5sums of existing files instead of downloading')

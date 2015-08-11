@@ -7,7 +7,101 @@ Typically, raw data direct from collection is not too useful. QUAC implements
 a preprocessing step to translate it into more pleasant formats as well as do
 some preliminary analysis. This section describes the steps to do that.
 
-*All times and dates are in UTC except as otherwise noted.*
+.. contents::
+   :depth: 2
+   :local:
+
+.. note::
+
+   All times and dates are in UTC except as otherwise noted.
+
+
+Time series files
+=================
+
+Motivation
+----------
+
+The ultimate goal of preprocessing is to turn diverse kinds of internet data
+into hourly time series of event counts, for example n-gram occurences in
+Twitter messages or Wikpedia article hits. These are stored in the time series
+files.
+
+We have three main goals for these files:
+
+1. Provide a unified format for many types of things that can be counted over
+   time, to feed into a unified analysis framework.
+
+2. Facilitate parallel access to the dataset without specialized I/O
+   techniques (such as MPI parallel I/O).
+
+3. Facilitate reasonable performance for continually updated data written in
+   time-major order (e.g., each hour, a new Wikipedia access log file arrives
+   giving hits for all pages) as well as fast reading in item-major order
+   (e.g., quickly iterate through each Wikipedia article's complete time
+   series). That is, we want to accomplish a data transpose implicitly during
+   the preprocessing phase.
+
+File format
+-----------
+
+Named time series are stored in SQLite3 database files. A directory contains
+multiple databases *fragmented* by time (month); within each file are multiple
+tables *sharded* by time series name (by hashing).
+
+Currently, time series must be hourly, and fragments are one per month. We
+have attempted to make the API extensible to remove these limitations without
+excessive disruption to existing code.
+
+Time series vectors can be any NumPy data type. If any time series fragment is
+present in a fragment file, it is complete (i.e., a value is present for each
+hour in the month.)
+
+Functionality is provided for pruning (and replacing with zeroes on fetch)
+fragments with small magnitude.
+
+For example:
+
+* :samp:`ts/` --- Time series directory (can be named arbitrarily)
+
+  * :samp:`2007-12-01.db` --- Data for the month of December 2007.
+
+    * :samp:`data0` --- Table containing data for time series whose name
+      hashed mode :math:`n` is 0.
+
+    * :samp:`data1` --- Table containing data for time series whose name
+      hashed mode :math:`n` is 1.
+
+    * ... (additional shards)
+
+  * :samp:`2008-01-01.db` --- Data for the month of January 2008.
+
+    * ... (shards)
+
+  * ... (one file for each month in the dataset)
+
+A data table has the following columns. All are :samp:`NOT NULL`.
+
+* :samp:`name`: Time series name (text, primary key).
+
+* :samp:`dtype`: NumPy data type character code (text).
+
+* :samp:`total`: Sum of element absolute values in the time series fragment
+  (double, regardless of fragment data type).
+
+* :samp:`data`: Content of time series fragment. This is either a memory dump
+  of the corresponding NumPy object (i.e., a C array), or the same memory dump
+  compressed with zlib (if :samp:`total` is below a threshold).
+
+Each database also contains a :samp:`metadata` table with various parameters.
+
+.. note::
+
+   Data tables do not use explicit indexes, instead relying on SQLite's
+   `WITHOUT ROWID <http://www.sqlite.org/withoutrowid.html>`_ feature coupled
+   with maximum-size 64kB pages. Back-of-the-envelope calculations suggest
+   this is the right choice performance-wise, but it has not been tested.
+
 
 Twitter
 =======
@@ -24,6 +118,10 @@ QUAC's Twitter pipeline has three basic steps:
 
 #. Geo-locate tweets that do not contain a geotag. (``geo.mk`` makefile.) (But
    see issue `#15 <https://github.com/reidpr/quac/issues/15>`_.)
+
+.. note::
+
+   Processing Twitter data into time series files is not yet implemented.
 
 
 File organization
@@ -115,12 +213,16 @@ Firefox, and my Python code.) These quirks do not appear to affect the
 parsability of the JSON.
 
 * While the encoding of the output is ostensibly UTF-8, it appears that high
-  characters are escaped with the "\uXXXX" notation. For example::
+  characters are escaped with the "\uXXXX" notation. For example:
+
+  .. code-block:: text
 
      "text":"\u2606\u2606\u2606\u2606\u2606#Cruzeiro"
 
 * Some text has excessive escaping. For example, forward slashes do not need
-  to be escaped, but they are anyway::
+  to be escaped, but they are anyway:
+
+  .. code-block:: text
 
      "source":"\u003Ca href=\"http:\/\/blackberry.com\/twitter"
 
@@ -169,12 +271,6 @@ files for each day:
 There are also intermediate TSV files (``.raw.tsv``) which are in the above
 format but have not yet had de-duplication and re-ordering. Downstream
 applications should ignore them.
-
-`FIXME`:
-
-* Try gzipping the TSV files. Some quick and dirty tests suggest that
-  processing time (with ``gzip -1``) will roughly double and file sizes will
-  roughly halve.
 
 Preprocessing metadata file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -242,9 +338,9 @@ Wikimedia pageview logs
 Overview
 --------
 
-The pipeline for Wikimedia data (Wikipedia and related projects) is simpler.
-We acquire them using the ``wp-get-access-logs`` script and then preprocess
-them into HDF5 time series files using the ``wp-preprocess.mk`` makefile.
+Wikimedia data (Wikipedia and related projects) are acquired using the
+``wp-get-access-logs`` script and then preprocessed into time series files
+using the ``wp-preprocess.mk`` makefile.
 
 File organization
 -----------------
@@ -256,53 +352,103 @@ A fully populated data directory looks (in part) something like this:
 
   * :samp:`2012/`
 
-    * :samp:`2012-04/` --- Article access counts ("pageviews") from April
-      2012. Each month gets its own subdirectory.
+    * :samp:`2012-04/` --- Article access counts ("pageviews" or "pagecounts")
+      of intervals ending in April 2012.
 
       * :samp:`pagecounts-20120428-130001.gz` --- Number of times each URL was
-        served.
+        served during 12:00:00 through 12:59:59 on April 28.
 
-      * :samp:`projectcounts-20120428-130001` --- Total number of URLs served
-        from each project (e.g., Norwegian Wiktionary) for the same hour.
-        These files have a number of problems, so we don't use them (see issue
-        `#81 <https://github.com/reidpr/quac/issues/81>`_).
+      * ... (one file for each hour starting March 31, 23:00:00 through April
+        30, 22:00:00)
 
-* :samp:`hashed/` --- Text files in an improved hierarchy. All of these files
-  will parse correctly.
+  * ... (Each month gets its own subdirectory.)
 
-  * :samp:`185/` --- Pageviews whose filenames hashed to 185. Currently, we
-    use the DJB2 hash algorithm mod 256 (the modulus is configurable). QUAC
-    Wikimedia processing code is directory-parallel, so by doing this we can
-    operate with wider parallelism (there are currently 71 months in the data
-    set).
+* :samp:`ts/` --- Time series dataset.
 
-    * :samp:`pagecounts-20120428-130001.gz` --- Symlink to the corresponding
-      pagecount file in the raw directory.
+.. note::
 
-* :samp:`hashed_small/` --- Subset of the above, retaining only the midnight
-  to 1am data for each day; this sampling strategy avoids introducing new gaps
-  in the data. This is for testing and yields a dataset somewhat less than 4%
-  the size of the full dataset.
+   We do not download or use the :samp:`projectcounts` files, which contain
+   the total number of URLs served from each project (e.g., Norwegian
+   Wiktionary), because many of them are broken and must be re-generated
+   anyway. (See issue `#81 <https://github.com/reidpr/quac/issues/81>`_.)
 
-* :samp:`hashed_tiny/` --- An even tinier subset (not necessarily a subset of
-  the small subset). Sampling strategy varies, but the goal is about 2-3 GB of
-  compressed pageview data. Note that available parallelism is less than the
-  full dataset.
+Article filtering
+-----------------
 
-* :samp:`metadata` --- The metadata file.
+Four classes of articles are excluded from the time series files:
 
-* :samp:`metadata.daily` --- A subset of the metadata file containing only
-  daily data.
+* Data lines with delimiters other than a single space. These are invalid
+  (and rare).
+
+* Articles with anything other than lowercase A to Z and dot in the project
+  (language) code. These are invalid.
+
+* Articles with "funny" characters in their URLs. Specifically, only the
+  following URL characters are passed through:
+
+  * ASCII alphanumeric (A--Z upper and lower case, plus digits 0--9).
+  * The rest of the unreserved set: :samp:`-_.~`
+  * Some of the reserved set: :samp:`!*();@,/`
+  * Percent (:samp:`%`), to allow encoded URLs through.
+
+  For example, this excludes articles:
+
+  * In non-main namespaces (these titles contain a colon).
+  * Accessed with non-percent-encoded high characters (code point ≥128).
+
+  See:
+
+  * http://en.wikipedia.org/wiki/Percent-encoding
+  * http://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_%28technical_restrictions%29
+
+  This is done to make downstream processing easier while excluding a minimal
+  set of articles.
+
+Together, these three filters exclude roughly 1/3 of the total data lines in
+the pageview files. Filtering is done using standard UNIX text processing
+tools, so the excluded data never touch Python code; be aware of this when
+interpreting statistics printed by the QUAC scripts.
+
+A final filter is implemented in Python:
+
+* Articles with less than a threshold number of requests in a given month.
+  The zero vector is inferred for such months. This avoids storing
+  low-traffic article time series fragments that are too rarely accessed or
+  noisy to be useful in analysis.
+
+  The threshold is configurable at :samp:`wkpd.keep_threshold`.
+
+In sum, after filtering, only a small percentage of URLs with reported hits
+find their way into the time series files. The exception is the current month,
+where the last step has not yet been applied, and so roughly 2/3 of articles
+are still present.
 
 Pagecount file format
 ---------------------
 
-The file format of the pagecount files is `documented by WMF
-<http://dumps.wikimedia.org/other/pagecounts-raw/>`_. There are some quirks:
+Pagecount files are compressed text files containing a sequence of lines. Each
+line describes accesses to a given article and is a space-separated 4-tuple of
+project code, article URL, number of requests, and bytes served. See the `WMF
+documentation <http://dumps.wikimedia.org/other/pagecounts-raw/>`_ for further
+details.
+
+There are several quirks:
+
+#. The files apparently contain all requested URLs, not necessarily articles
+   that really exist(ed).
+
+#. Rarely, lines with incorrect delimeters or other format problems are
+   encountered.
 
 #. The timestamp in the filename is the *end* of the hour recorded in the
    file. Often, these timestamps are a few seconds past the hour; we ignore
    this.
+
+#. There have been periods of modest `underreporting
+   <http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts/readme.txt>`_,
+   with up to 20% of hits unrecorded. We assume such underreporting is random
+   and do not try to correct it. Because our analysis works on fraction of
+   total traffic rather than raw hit counts, the effect should be minimal.
 
 #. Filesystem timestamps are not reliable, especially in the older parts of
    the data. That is, sometimes older files have newer timestamps, and the
@@ -322,127 +468,49 @@ The file format of the pagecount files is `documented by WMF
    * (UTF-8) http://ru.wikipedia.org/wiki/%D0%9B%D1%8E%D0%B4%D0%B8_%D0%98%D0%BA%D1%81
    * (Windows-1251) http://ru.wikipedia.org/wiki/%CB%FE%E4%E8_%C8%EA%F1
 
-   Other encodings (e.g., ISO 8859-5, %BB%EE%D4%D8_%B8%DA%E1 and KOI8-R,
-   %EC%C0%C4%C9_%E9%CB%D3) do not work. Figuring out this mess is something
-   I'm not very interested in. How WMF does it, I have no idea.
+   Other encodings (e.g., ISO 8859-5, :code:`%BB%EE%D4%D8_%B8%DA%E1` and
+   KOI8-R, :code:`%EC%C0%C4%C9_%E9%CB%D3`) do not work. Figuring out this mess
+   is something I'm not very interested in. How WMF does it, I have no idea.
 
    We do, however, normalize spaces into underscores. I believe this may be
    incomplete (see issue #77).
 
-#. There have been periods of modest `underreporting
-   <http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts//readme.txt>`_,
-   with up to 20% of hits unrecorded. We assume such underreporting is random
-   and do not try to correct it. Because our analysis works on fraction of
-   total traffic rather than raw hit counts, the effect should be minimal.
+#. Line ordering varies. The following observations are after the extra-Python
+   exclusions described above.
 
+   * From the beginning to roughly May 15, 2008, files are in :samp:`LC_ALL=C
+     sort` order.
 
-Time series files
-=================
+   * From roughly May 15, 2008 to roughly January 1, 2015, project codes
+     containing a dot and projects codes without a dot are *separately* in
+     :samp:`LC_ALL=C sort` order, but the combined file is not in that order.
+     I do not know why the change happened.
 
-The time series files are HDF5 files containing hourly time series of
-occurrences of some item, for example occurrences of n-grams in Twitter
-messages or Wikipedia article hits.
+   * From roughly January 1, 2015 to the present (as of April 21, 2015), files
+     are in :samp:`LC_ALL=C sort` order again. This corresponds with a change
+     in file production method at Wikimedia, so I suspect it is fairly
+     reliable.
 
-We have three main goals for these files:
+Time series storage
+-------------------
 
-1. Provide a unified format for many types of things that can be counted over
-   time, to feed into a unified analysis framework.
+Time series names for Wikipedia articles are the language concatenated with a
+slash and the article URL, for example :samp:`en/Fever` or
+:samp:`fr/Fi%C3%A8vre`. These time series are :samp:`np.float32` to save
+space. Elements with the value 0 indicate *either* a zero value or no data.
 
-2. Facilitate parallel access to the dataset without specialized I/O
-   techniques (such as MPI parallel I/O).
+For normalization and to resolve this ambiguity, language total time series
+are also stored under the language code (e.g., :samp:`en` or :samp:`fr`, no
+trailing slash) as :samp:`np.float64` to avoid floating-point summation
+problems. Elements of these total vectors are either the total of all time
+series of that language for that hour, or :samp:`NaN` if no hits at all in
+that language were recorded. Under this system, it is still ambiguous whether
+a given language did not exist or recorded no traffic, but these two
+situations are close enough that we believe this is not a concern.
 
-3. Facilitate reasonable performance for continually updated data written in
-   time-major order (e.g., each hour, a new Wikipedia access log file arrives
-   giving hits for all pages) as well as fast reading in item-major order
-   (e.g., quickly iterate through complete each Wikipedia article's time
-   series). That is, we want to accomplish a data transpose implicitly during
-   the preprocessing phase.
+Typical analysis will divide an article time series by the language total time
+series to obtain a fraction of total traffic with :samp:`NaN` elements for
+missing data.
 
-The basic idea is that for each month, we have :math:`n` HDF5 data files, with
-items distributed across the files by hashing. A time series directory looks
-like this:
-
-* :samp:`h5ts/` --- Root of time series
-
-  * :samp:`2007-12/` --- Items from December 2007.
-
-    * :samp:`0.h5` --- Items whose hash mod :math:`n` is 0.
-
-    * :samp:`1.h5` --- Items whose hash mod :math:`n` is 1.
-
-    * ...
-
-    * :samp:`{n-1}.h5` --- Items whose hash mode :math:`n` is :math:`n-1`.
-
-  * :samp:`2008-01/` --- Items from January 2008.
-
-  * ... (one for each month in the dataset)
-
-Note that datasets with different :math:`n` can be combined in the same
-computation. Care may be required for proper load balancing.
-
-Within each data file is the following HDF5 tree. This information has the
-notion of *namespace*; these are used for things like language in Wikipedia
-access logs. In the example, we use two namespaces: :samp:`en` and :samp:`ru`.
-Groups are indicated by trailing slashes, datsets by their absence (these HDF5
-concepts correspond roughly to POSIX directories and files), and attributes by
-italics.
-
-We use the term *time series* here to represent a vector of data points, one
-per hour, spanning the entire month. If an item is present, then it has a
-complete vector in the file regardless of how many data points are actually
-available (this is so vectors can be updated without moving them, which would
-leave holes that HDF5 cannot deal with well). Missing data points are
-represented as :samp:`NaN`. For example, for a file covering a 30-day month,
-every item will have a 720-element vector.
-
-* :samp:`/` --- Root of HDF5 file tree.
-
-  * :samp:`total/` --- Summary data.
-
-    * :samp:`en/` --- Summary data for the namespace *en*.
-
-      * *total_ct* --- Total month count for the entire namespace (float64).
-
-      * *min_hour* --- Minimum hour index with valid data (int32). For a full
-        month, this will be zero.
-
-      * *max_hour* --- Maximum hour index with valid data (int32). For a full
-        month, this will be the number of days in the month times 24 minus 1
-        (e.g., a 30-day month will yield 719).
-
-      * :samp:`totals` --- Vector of hourly totals for namespace *en* (float64).
-
-    * :samp:`ru/` --- Summary data for the namespace *ru*.
-
-      * ...
-
-  * :samp:`weirdal/` --- Item time series.
-
-    * :samp:`en/` --- Time series for namespace *en*.
-
-      * :samp:`Cat` --- Time series for item *Cat* (float32).
-
-        * *total_ct* --- Total month count for *Cat* (float64).
-
-      * :samp:`Dog` --- Time series for item *Dog* (float32).
-
-        * ... (attributes)
-
-      * ... (several million more items)
-
-    * :samp:`ru/` --- Time series for namespace *ru*.
-
-      * ...
-
-As for data types, we use floats for the vectors rather than integers, which
-would be more appropriate for counted data, because floats have :samp:`NaN`
-and integers do not. This brings into play all the difficulties of floating
-point math. A key gotcha in our case is summation: adding two numbers of
-differing magnitudes will lose precision in the smaller. This motivates use of
-double precision (64 bit) floats for totals; single precision (32 bit) is used
-for base time series in order to save space.
-
-HDF5 files can be compressed or otherwise filtered using standard filters.
 
 ..  LocalWords:  pagecount samp badfiles

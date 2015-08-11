@@ -7,4 +7,32 @@ import sys
 
 import quacpath
 
-pstats.Stats(sys.argv[1]).sort_stats('cumulative').print_stats(40)
+class Stats(pstats.Stats):
+
+   def print_line(self, func):
+      'Clone of Stats.print_line() hacked to print percentages.'
+      cc, nc, tt, ct, callers = self.stats[func]
+      c = str(nc)
+      if nc != cc:
+         c = c + '/' + str(cc)
+      print(c.rjust(9), end=' ', file=self.stream)
+      print(f8(100*tt/self.total_tt), end=' ', file=self.stream)
+      if nc == 0:
+         print(' '*8, end=' ', file=self.stream)
+      else:
+         print(f8(100*(tt/nc)/self.total_tt), end=' ', file=self.stream)
+      print(f8(100*ct/self.total_tt), end=' ', file=self.stream)
+      if cc == 0:
+         print(' '*8, end=' ', file=self.stream)
+      else:
+         print(f8(100*(ct/cc)/self.total_tt), end=' ', file=self.stream)
+      print(pstats.func_std_string(func), file=self.stream)
+
+def f8(x):
+   return '%8.1f' % x
+
+try:
+   ct = int(sys.argv[2])
+except IndexError:
+   ct = 13
+Stats(sys.argv[1]).sort_stats('cumulative').print_stats(ct)

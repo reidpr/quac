@@ -172,4 +172,5 @@ try:
    if (__name__ == '__main__'):
       main()
 except testable.Unittests_Only_Exception:
+   # Test-Depends: geo
    testable.register('')

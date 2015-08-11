@@ -146,7 +146,8 @@ class Tiny_ICU(base.Tzer):
       return tokens
 
 
-testable.manualonly_register('''
+# Test-Depends: manual icu
+testable.register('''
 
 >>> Tiny_ICU(1).tokenize(base.T_PUNCT) == base.T_PUNCT_TOKS
 True

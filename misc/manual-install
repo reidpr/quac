@@ -2,19 +2,66 @@
 
 # Copyright (c) Los Alamos National Security, LLC, and others.
 
+# Deficiencies. This script does not install:
+#
+# 1. The geographic libraries. I tried at length to get things to build
+#    properly -- the issue is that everything seems to work, but then key
+#    attributes of the gdal module are missing -- but was unable to resolve
+#    the problem. Because we are not actively using the geo stuff at the
+#    moment, this is acceptable.
+#
+# 2. cmdtest. This is because cmdtest and its dependencies (python-cliapp and
+#    python-ttystatus) are Python 2-only, the cmdtest script itself has a
+#    hardcoded /usr/bin/pythonm and I can't figure out how to get them
+#    installed in the Python 3 environment with a reasonable amount of
+#    screwing around. So, there are no cmdtests in this installation.
+#
+# Source code is in deps.tar.gz in case you are smarter than me. In this case,
+# please send a patch!
+
 set -e
 
 QUACBASE=$(cd $(dirname $0)/.. && pwd)
-MYPREFIX=$QUACBASE/deps
-MYSRC=$MYPREFIX/src
+PREFIX=$QUACBASE/deps
+SRC=$PREFIX/src
+ENV=$QUACBASE/env
 MAKEJ=${3:1}
+PIPINSTALL="pip install --index-url=file://$QUACBASE/deps/packages/simple"
 
-module use --append $QUACBASE/misc
-module load quac-module
+# strip out geo libraries
+egrep -v '^(Django|pyproj)==' requirements.txt > requirements-nogeo.txt
 
-mkdir -p $MYPREFIX
-mkdir -p $MYSRC
-cd $MYSRC
+
+function install_ {
+
+    # this links the binaries to my libraries without needing LD_LIBRARY_PATH
+    export LDFLAGS=-Wl,-rpath=$PREFIX/lib
+
+    # install Python and other non-pip stuff
+    pushd $SRC
+    install_python
+    . $ENV/bin/activate
+    export PATH=$PREFIX/bin:$PATH
+    PYTHON=$(command -v python)
+    if [[ $PYTHON != $ENV/bin/python ]]; then
+        echo
+        echo "wrong Python: $PYTHON, need $ENV/bin/python"
+        exit 1
+    fi
+    install_apsw
+    #install_swig
+    #install_proj
+    #install_geos
+    #install_gdal
+    popd
+
+    unset LDFLAGS  # breaks numpy build
+    #$PIPINSTALL GDAL
+    $PIPINSTALL numpy  # otherwise scipy et al. barf later
+    $PIPINSTALL pbr    # lockfile can't bring it in automatically
+    $PIPINSTALL -r requirements-nogeo.txt
+    pip freeze --local
+}
 
 function make_ {
     make -j$MAKEJ "$@"
@@ -23,109 +70,52 @@ function make_ {
     popd
 }
 
+function install_apsw {
+    unzip -o apsw-*.zip
+    tar xf sqlite-autoconf-*.tar.gz
+    pushd apsw-*
+    rm -f sqlite3
+    ln -s ../sqlite-autoconf-*[0-9] sqlite3
+    python setup.py build --enable-all-extensions install
+    popd
+}
+
 function install_gdal {
-    tar xzf gdal-*.tar.gz
+    tar xf gdal-*.tar.gz
     pushd gdal-*
-    ./configure --with-static-proj4 --prefix=$MYPREFIX
+    ./configure --with-static-proj4=$PREFIX \
+                --with-python=$QUACBASE/env/bin/python \
+                --prefix=$PREFIX
     make_
 }
 
 function install_geos {
     tar xjf geos-*.tar.bz2
     pushd geos-*
-    ./configure --enable-python --prefix=$MYPREFIX
+    ./configure --prefix=$PREFIX
     make_
-}
-
-function install_git {
-    tar xzf git-*.tar.gz
-    pushd git-*
-    make configure
-    ./configure --prefix=$MYPREFIX
-    make_
-}
-
-function install_pip {
-    tar xzf pip-*.tar.gz
-    pushd pip-*
-    python setup.py install
-    popd
 }
 
 function install_proj {
-    tar xzf proj-*.tar.gz
+    tar xf proj-*.tar.gz
     pushd proj-*
-    ./configure --without-jni --prefix=$MYPREFIX
+    ./configure --without-jni --prefix=$PREFIX
     make_
 }
 
 function install_python {
-    tar xjf Python-*.tar.bz2
+    tar xf Python-*.tgz
     pushd Python-*
-    ./configure --enable-shared --enable-unicode=ucs4 --prefix=$MYPREFIX
-    make_ OPT=-O3
-}
-
-function install_setuptools {
-    tar xzf setuptools-*.tar.gz
-    pushd setuptools-*
-    python setup.py install
-    popd
+    ./configure --enable-shared --prefix=$PREFIX
+    make_
+    $PREFIX/bin/pyvenv $ENV
 }
 
 function install_swig {
-    tar xzf swig-*.tar.gz
+    tar xf swig-*.tar.gz
     pushd swig-*
-    ./configure --prefix=$MYPREFIX
+    ./configure --prefix=$PREFIX
     make_
 }
 
-echo '*** starting, please wait while the first package is untarred'
-
-install_git
-install_python
-test $(python-config --prefix) = "$MYPREFIX" || (echo -n '*** wrong Python:' && python-config --prefix && false)
-install_setuptools
-install_pip
-install_swig
-install_gdal
-install_geos
-install_proj
-
-# The order here embodies a DAG to satisfy dependencies.
-pip install python-cliapp_*.tar.gz
-pip install python-ttystatus_*.tar.gz
-pip install cmdtest_*.tar.gz
-pip install numpy-*.tar.gz
-pip install scipy-*.tar.gz
-pip install anyjson-*.tar.gz
-pip install daemon-*.tar.gz
-pip install Django-*.tar.gz
-pip install GDAL-*.tar.gz
-pip install isodate-*.tar.gz
-pip install joblib-*.tar.gz
-pip install six-*.tar.gz
-pip install nose-*.tar.gz
-pip install pyparsing-*.tar.gz
-pip install python-dateutil-*.tar.gz
-pip install tornado-*.tar.gz
-pip install matplotlib-*.tar.gz
-pip install httplib2-*.tar.gz
-pip install oauth2-*.tar.gz
-pip install psutil-*.tar.gz
-pip install pyproj-*.tar.gz
-pip install python-hostlist-*.tar.gz
-pip install pytz-*.tar.bz2
-pip install reidpr-tweetstream-reidpr-*.zip
-pip install scikit-learn-*.tar.gz
-pip install docutils-*.tar.gz
-pip install MarkupSafe-*.tar.gz
-pip install Jinja2-*.tar.gz
-pip install Pygments-*.tar.gz
-pip install Sphinx-*.tar.gz
-pip install xlrd-*.tar.gz
-
-# TinySegmenter just needs to be put in place
-cp -v tinysegmenter.py ../lib/python2.7/site-packages
-
-echo '*** done'
+install_

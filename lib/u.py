@@ -28,11 +28,15 @@ import logging
 import os
 import os.path
 import pickle
+import platform
 from pprint import pprint
 import psutil
 import pytz
 import random
 import re
+import resource
+import shlex
+import subprocess
 import sys
 import time
 
@@ -81,6 +85,15 @@ verbose = False
 
 # Should chatter include timestamps? Set in parse_args().
 log_timestamps = True
+
+### Environment ###
+
+# Use a consistent, widely available, boring locale.
+os.environ['LC_ALL'] = 'C'
+
+# Some parts of QUAC need lots of files open.
+fl = resource.getrlimit(resource.RLIMIT_NOFILE)
+resource.setrlimit(resource.RLIMIT_NOFILE, (2048, fl[1]))
 
 
 ### Classes ###
@@ -137,11 +150,15 @@ class ArgumentParser(argparse.ArgumentParser):
       self.default_group = self.add_argument_group('functionality')
 
    def parse_args(self, args):
-      gr = self.add_argument_group('help, etc.')
+      gr = self.add_argument_group('generic options')
       gr.add_argument(
          '-h', '--help',
          action='help',
          help='show this help message and exit')
+      gr.add_argument(
+         '--config',
+         metavar='FILE',
+         help='configuration file')
       gr.add_argument(
          '--notimes',
          action='store_true',
@@ -485,11 +502,12 @@ def logging_init(tag, file_=None, stderr_force=False, level=None,
 
    # add tag string to permit logcheck filtering, which applies the same
    # regexes to all files it's watching.
+   hostname = platform.node().split('.')[0]
+   pid = os.getpid()
+   fmt = '%s %%(levelname)-8s %%(message)s' % tag
    if (log_timestamps):
-      fmt = '%%(asctime)s %s %%(levelname)-8s %%(message)s'
-   else:
-      fmt = '%s %%(levelname)-8s %%(message)s'
-   form = logging.Formatter((fmt % (tag)), '%Y-%m-%d_%H:%M:%S')
+      fmt = '%%(asctime)s %s[%d] %s' % (hostname, pid, fmt)
+   form = logging.Formatter(fmt, '%Y-%m-%d_%H:%M:%S')
 
    # file logger
    try:
@@ -570,22 +588,28 @@ def memoize(f):
    return wrapper
 
 def memory_use():
-   '''Return the amount of virtual memory currently allocated to this process,
-      in bytes. For example (note flexibility in results to accomodate
-      different operating systems):
+   '''Return the amount of memory currently allocated to this process, in bytes,
+      as a tuple of virtual memory (VMS), real memory (RSS). For example (note
+      flexibility in results to accomodate different operating systems):
 
       >>> a = 'a' * int(2e9)  # string 2 billion chars long
-      >>> 2e9 < memory_use() < 5e9
+      >>> 2e9 < memory_use()[0] < 5e9
+      True
+      >>> 2e9 < memory_use()[1] < 3e9
       True
       >>> del a
 
       Note: This used to have an option to get peak usage, in addition to
       current usage. However, Macs seem not to be able to do this, and since
       it's not critical information for our uses, that feature was removed.'''
-   return psutil.Process(os.getpid()).get_memory_info().vms
+   info = psutil.Process(os.getpid()).memory_info()
+   return (info.vms, info.rss)
 
-def memory_use_log():
-   l.debug('virtual memory in use: %s' % (fmt_bytes(memory_use())))
+def memory_use_log(detail=''):
+   if (detail):
+      detail = ' %s: ' % (detail)
+   (vms, rss) = memory_use()
+   l.debug('memory:%s vms=%s rss=%s' % (detail, fmt_bytes(vms), fmt_bytes(rss)))
 
 def mkdir_f(path):
    '''Ensure that directory path exists. That is, if path already exists and
@@ -613,6 +637,13 @@ def mpi_available_p():
       False otherwise.'''
    return bool('SLURM_NODELIST' in os.environ
                and distutils.spawn.find_executable('mpirun'))
+
+def mtime(filename):
+   "Return the mtime of filename, or the epoch if it doesn't exist."
+   try:
+      return os.stat(filename).st_mtime
+   except FileNotFoundError:
+      return 0
 
 def path_configured(path):
    if (cpath is None):
@@ -650,6 +681,10 @@ def partition_sentinel(iter_, sentinel):
 def parse_args(ap, args=sys.argv[1:]):
    '''Parse command line arguments and set a few globals based on the result.
       Note that this function must be called before logging_init().'''
+   try:
+      args = shlex.split(os.environ['QUACARGS']) + args
+   except KeyError:
+      pass
    args = ap.parse_args(args)
    try:
       multicore.init(args.cores)
@@ -868,6 +903,19 @@ def without_ext(filename, ext):
       raise ValueError('%s does not have extension %s' % (filename, ext))
    return fn_new
 
+def zcat(filename, pipeline="zcat '%s'"):
+   '''Return an open file descriptor containing the uncompressed content of the
+      given gzipped file. This is very roughly up to 10× faster than
+      gzip.open() (in one informal test) but costs an extra process that
+      consumes some CPU.
+
+      Warning: Because this uses shell pipelines, it should not be given
+      untrusted input.
+
+      Zombie processes are reaped when Popen object is garbage collected.'''
+   return subprocess.Popen(pipeline % filename, shell=True,
+                           stdout=subprocess.PIPE).stdout
+
 def zero_attrs(obj, attrs):
    '''e.g.:
 
@@ -890,19 +938,70 @@ def fmt_seconds(num):
    return str(timedelta(seconds=int(round(num))))
 
 def fmt_si(num):
+   """e.g.:
+
+      >>> fmt_si(1)
+      '1.00'
+      >>> fmt_si(10**3)
+      '1.00k'
+      >>> fmt_si(2**10)
+      '1.02k'"""
    return fmt_real(num, 1000, ["", "k", "M", "G", "T", "P"])
 
+def fmt_sparsearray(a):
+   nonsparse = ", ".join(str(i) for i in enumerate(a)
+                         if i[1] != 0 and not np.isnan(i[1]))
+   return ('{%dz %dn%s%s}' % (sum(1 for i in a if i == 0),
+                             sum(1 for i in a if np.isnan(i)),
+                             ' ' if nonsparse else '', nonsparse))
+
 def fmt_bytes(num):
+   """e.g.:
+
+      >>> fmt_bytes(1)
+      '1.00B'
+      >>> fmt_bytes(10**3)
+      '1000.00B'
+      >>> fmt_bytes(2**10)
+      '1.00KiB'
+      >>> fmt_bytes(10**6)
+      '976.56KiB'
+      >>> fmt_bytes(2**20)
+      '1.00MiB'
+      >>> fmt_bytes(2**30)
+      '1.00GiB'
+      >>> fmt_bytes(2**31)
+      '2.00GiB'
+      >>> fmt_bytes(2**32+1)
+      '4.00GiB'"""
    return fmt_real(num, 1024, ["B", "KiB", "MiB", "GiB", "TiB", "PiB"])
 
 def fmt_real(num, factor, units):
-   assert num >= 0, "negative numbers unimplemented"
+   '''e.g.:
+
+      >>> fmt_real(1.23456, 10, ('a', 'b'))
+      '1.23a'
+      >>> fmt_real(12.3456, 10, ('a', 'b'))
+      '1.23b'
+      >>> fmt_real(-1.23456, 10, ('a', 'b'))
+      '-1.23a'
+      >>> fmt_real(-12.3456, 10, ('a', 'b'))
+      '-1.23b'
+      >>> fmt_real(123.456, 10, ('a', 'b'))
+      Traceback (most recent call last):
+        ...
+      ValueError: number too large'''
+   if (num >= 0):
+      sign = ''
+   else:
+      sign = '-'
+      num *= -1
    factor = float(factor)
    for unit in units:
       if (num < factor):
-         return ("%.1f%s" % (num, unit))
+         return ("%s%.2f%s" % (sign, num, unit))
       num /= factor
-   assert False, "number too large"
+   raise ValueError('number too large')
 
 
 # Default logger to allow testing. You should never actually see output from

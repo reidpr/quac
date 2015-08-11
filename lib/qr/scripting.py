@@ -182,10 +182,11 @@ reallyclean: clean
    for filename in args.inputs:
       fp.write('''
 %(mapdone)s: %(input)s
-	%(read_cmd)s %(input)s | %(map_cmd)s | hashsplit %(nparts)d tmp/%(ibase)s && %(pipefail)s
+	%(read_cmd)s %(input)s | %(map_cmd)s | %(hashsplit)s %(nparts)d tmp/%(ibase)s && %(pipefail)s
 	touch %(mapdone)s
 ''' % { 'ibase': os.path.basename(filename),
         'input': filename,
+        'hashsplit': '%s/bin/hashsplit' % u.quacbase,
         'map_cmd': args.map,
         'mapdone': 'tmp/%s.mapped' % (os.path.basename(filename)),
         'nparts': args.partitions,
@@ -217,7 +218,7 @@ def pythonify(args):
    # Note: args.pyargs might not really be a string representation of a
    # dictionary. See base.Job.__init__() for more on how this hack works.
    params = repr(u.str_to_dict(args.pyargs))
-   base = "python -c \"import %(module)s; j = %(class_)s(%(params)s); " % locals()
+   base = "python3 -c \"import %(module)s; j = %(class_)s(%(params)s); " % locals()
    if (args.map is None):
       args.map = base + "j.map_stdinout()\""
    if (args.reduce is None):
