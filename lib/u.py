@@ -158,6 +158,7 @@ class ArgumentParser(argparse.ArgumentParser):
       gr.add_argument(
          '--config',
          metavar='FILE',
+         default=CONFIG_DEFAULT,
          help='configuration file')
       gr.add_argument(
          '--notimes',
