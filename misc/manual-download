@@ -31,6 +31,10 @@ $WGET http://download.osgeo.org/geos/geos-3.4.2.tar.bz2
 $WGET http://download.osgeo.org/proj/proj-4.9.1.tar.gz
 $WGET https://www.sqlite.org/2015/sqlite-autoconf-3081002.tar.gz
 $WGET http://prdownloads.sourceforge.net/swig/swig-3.0.6.tar.gz
+# cmdtest and friends aren't on PyPI. Versions to match Ubuntu Vivid.
+$WGET http://code.liw.fi/debian/pool/main/c/cmdtest/cmdtest_0.12.orig.tar.gz
+$WGET http://code.liw.fi/debian/pool/main/p/python-cliapp/python-cliapp_1.20140719.orig.tar.gz
+$WGET http://code.liw.fi/debian/pool/main/p/python-ttystatus/python-ttystatus_0.23.orig.tar.gz
 popd
 
 # pips
@@ -40,6 +44,9 @@ popd
 # just use pip2pi instead of pip2tgz and then dir2pi.
 
 egrep -v '^(matplotlib|pandas|scipy)' requirements.txt > deps/requirements.txt
+# Unclear why we need pbr (it doesn't get installed with the normal method),
+# but here it is.
+echo 'pbr' >> deps/requirements.txt
 pip2tgz deps/packages --no-use-wheel -r deps/requirements.txt GDAL==1.11.2
 pushd deps/packages
 $WGET https://pypi.python.org/packages/source/p/pandas/pandas-0.16.2.tar.gz
