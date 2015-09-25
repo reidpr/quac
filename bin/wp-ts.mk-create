@@ -29,7 +29,7 @@ for file_ in files:
                                                  microsecond=0)
    deps[ts].add(file_)
 
-for (ts, files) in deps.items():
+for (i, (ts, files)) in enumerate(deps.items()):
    month = ts.strftime('%Y%m')
    dbfile = ts.strftime('%Y-%m-01.db')
    next_month = (ts + relativedelta(months=1)).strftime('%Y%m')
@@ -42,13 +42,17 @@ for (ts, files) in deps.items():
    # use a simple text search to see if that file is present.
    if (any((next_month in i) for i in files)):
       prune = '--prune'
-      target = 'tsfiles-complete'
+      targets = ['tsfiles-complete']
+      if (i % 2 == 0):
+         targets.append('tsfiles-complete-even')
+      else:
+         targets.append('tsfiles-complete-odd')
    else:
       prune = ''
-      target = 'tsfiles-incomplete'
+      targets = ['tsfiles-incomplete']
    print()
    print('# %s, this month=%s, next month=%s' % (ts, month, next_month))
-   print('%s: ts/%s' % (target, dbfile))
+   print('%s: ts/%s' % (' '.join(targets), dbfile))
    print('ts/%s: %s' % (dbfile, ' '.join(sorted(files))))
    # $? is all newer prerequisites
    # command printing suppressed because it is so huge
