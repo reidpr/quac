@@ -856,9 +856,9 @@ class Fragment_Group(object):
             print(' ', f)
 
    def empty_p(self):
-      sql = ("SELECT SUM(a) FROM (%s LIMIT 1)"
-             % " UNION ".join("SELECT 1 AS a FROM data%d" % i
-                              for i in range(self.dataset.hashmod)))
+      subq = "SELECT * FROM (SELECT 1 AS a FROM data%d LIMIT 1)"
+      sql = ("SELECT SUM(a) FROM (%s)"
+             % " UNION ".join((subq % i) for i in range(self.dataset.hashmod)))
       return not self.db.get_one(sql)[0]
 
    def fetch(self, name):
