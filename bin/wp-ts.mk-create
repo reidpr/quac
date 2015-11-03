@@ -20,7 +20,7 @@ import wikimedia
 PC_ROOT = sys.argv[1]
 print('# pagecount root=%s' % PC_ROOT)
 
-files = glob.glob(PC_ROOT + '/*/*/pagecounts-*.gz')
+files = glob.glob(PC_ROOT + '/????/*/pagecounts-*.gz')
 print('# found %d files' % len(files))
 
 deps = defaultdict(set)
