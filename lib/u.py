@@ -158,7 +158,6 @@ class ArgumentParser(argparse.ArgumentParser):
       gr.add_argument(
          '--config',
          metavar='FILE',
-         default=CONFIG_DEFAULT,
          help='configuration file')
       gr.add_argument(
          '--notimes',
@@ -365,7 +364,10 @@ def configure(config_path):
       specified in the files."""
    global cpath
    config_read(abspath("../misc/default.cfg", __file__))  # 1. default.cfg
-   if (config_path is not None):
+   if (config_path is None):
+      if (os.path.exists(CONFIG_DEFAULT)):
+         config_read(CONFIG_DEFAULT)
+   else:
       # this need to be an absolute path in case we change directories later
       cpath = os.path.abspath(config_path)
       config_read(cpath)                                # 2. from command line
