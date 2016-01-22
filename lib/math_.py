@@ -623,9 +623,9 @@ def pearson(a, b, a_mask=None, b_mask=None, min_data=3):
    (a, b, a_mask, b_mask) = Date_Vector.bi_intersect(a, b, a_mask, b_mask)
    ab_mask = Date_Vector(a.first_day, np.ones(len(a), dtype=np.bool))
    if (a_mask is not None):
-      ab_mask *= a_mask
+      ab_mask *= a_mask.astype(ab_mask.dtype)
    if (b_mask is not None):
-      ab_mask *= b_mask
+      ab_mask *= b_mask.astype(ab_mask.dtype)
    if (len(a) < min_data or ab_mask.sum() < min_data):
       return 0.0
    # do some computin'
