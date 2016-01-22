@@ -1605,32 +1605,8 @@ wp-tsupdate on 1 files for 2011-10-01.db ...
 wp-tsupdate on 1 files for 2015-01-01.db ...
 wp-tsupdate on 2 files for 2099-01-01.db ...
 wp-tsupdate on 719 files for 2012-11-01.db ...
-wptsu DEBUG    initializing
-wptsu DEBUG    initializing
-wptsu DEBUG    initializing
-wptsu DEBUG    initializing
-wptsu DEBUG    initializing
-wptsu DEBUG    initializing
-wptsu DEBUG    initializing
-wptsu DEBUG    initializing
-wptsu DEBUG    opening ts/2008-10-01.db, writeable=True
-wptsu DEBUG    opening ts/2011-01-01.db, writeable=True
-wptsu DEBUG    opening ts/2011-10-01.db, writeable=True
-wptsu DEBUG    opening ts/2012-09-01.db, writeable=True
-wptsu DEBUG    opening ts/2012-10-01.db, writeable=True
-wptsu DEBUG    opening ts/2012-11-01.db, writeable=True
-wptsu DEBUG    opening ts/2015-01-01.db, writeable=True
-wptsu DEBUG    opening ts/2099-01-01.db, writeable=True
 wptsu DEBUG    vacuumed: 1.38MiB used; 22 total, 0 free pages
 wptsu DEBUG    vacuumed: 4.75MiB used; 76 total, 0 free pages
-wptsu DEBUG    validated 5 metadata items
-wptsu DEBUG    validated 5 metadata items
-wptsu DEBUG    validated 5 metadata items
-wptsu DEBUG    validated 5 metadata items
-wptsu DEBUG    validated 5 metadata items
-wptsu DEBUG    validated 5 metadata items
-wptsu DEBUG    validated 5 metadata items
-wptsu DEBUG    validated 5 metadata items
 wptsu INFO     107328 of 107328 URLs saved (100.0%, [RATE] total/s)
 wptsu INFO     1365 of 88081 URLs saved (1.5%, [RATE] total/s)
 wptsu INFO     2 of 2 URLs saved (100.0%, [RATE] total/s)
@@ -1704,9 +1680,6 @@ mkdir -p ts
 wp-ts.mk-create raw > ts.mk
 wp-tsupdate on 1 files for 2099-01-01.db ...
 wptsu INFO     starting
-wptsu DEBUG    opening ts/2099-01-01.db, writeable=True
-wptsu DEBUG    found metadata table, assuming already initalized
-wptsu DEBUG    validated 5 metadata items
 wptsu INFO     opened ts/2099-01-01 length 744 hours
 wptsu INFO     write strategy 0 (eager prune=0, empty=0), keep threshold=-1
 wptsu INFO     read 0 lines in [TIME] ([RATE] lines/s)
@@ -1733,14 +1706,8 @@ $ rm -Rf ts
 $ make -f [QUACBASE]/misc/wp-preprocess.mk tsfiles-complete | sort
 wp-tsupdate --prune on 718 files for 2012-10-01.db ...
 wp-tsupdate --prune on 97 files for 2012-09-01.db ...
-wptsu DEBUG    initializing
-wptsu DEBUG    initializing
-wptsu DEBUG    opening ts/2012-09-01.db, writeable=True
-wptsu DEBUG    opening ts/2012-10-01.db, writeable=True
 wptsu DEBUG    vacuumed: 1.38MiB used; 22 total, 0 free pages
 wptsu DEBUG    vacuumed: 4.75MiB used; 76 total, 0 free pages
-wptsu DEBUG    validated 5 metadata items
-wptsu DEBUG    validated 5 metadata items
 wptsu INFO     1365 of 88081 URLs saved (1.5%, [RATE] total/s)
 wptsu INFO     245 of 13262 URLs saved (1.8%, [RATE] total/s)
 wptsu INFO     done
@@ -1780,24 +1747,6 @@ wp-tsupdate on 1 files for 2011-10-01.db ...
 wp-tsupdate on 1 files for 2015-01-01.db ...
 wp-tsupdate on 2 files for 2099-01-01.db ...
 wp-tsupdate on 719 files for 2012-11-01.db ...
-wptsu DEBUG    initializing
-wptsu DEBUG    initializing
-wptsu DEBUG    initializing
-wptsu DEBUG    initializing
-wptsu DEBUG    initializing
-wptsu DEBUG    initializing
-wptsu DEBUG    opening ts/2008-10-01.db, writeable=True
-wptsu DEBUG    opening ts/2011-01-01.db, writeable=True
-wptsu DEBUG    opening ts/2011-10-01.db, writeable=True
-wptsu DEBUG    opening ts/2012-11-01.db, writeable=True
-wptsu DEBUG    opening ts/2015-01-01.db, writeable=True
-wptsu DEBUG    opening ts/2099-01-01.db, writeable=True
-wptsu DEBUG    validated 5 metadata items
-wptsu DEBUG    validated 5 metadata items
-wptsu DEBUG    validated 5 metadata items
-wptsu DEBUG    validated 5 metadata items
-wptsu DEBUG    validated 5 metadata items
-wptsu DEBUG    validated 5 metadata items
 wptsu INFO     107328 of 107328 URLs saved (100.0%, [RATE] total/s)
 wptsu INFO     2 of 2 URLs saved (100.0%, [RATE] total/s)
 wptsu INFO     374 of 374 URLs saved (100.0%, [RATE] total/s)

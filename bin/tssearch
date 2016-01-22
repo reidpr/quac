@@ -2,9 +2,9 @@
 
 # Copyright © Los Alamos National Security, LLC, and others.
 
-'''Search a time series dataset for one or more specific named series and
-   return the result as TSV on stdout. Series not found are omitted from the
-   output with a warning.'''
+'''\
+Search a time series dataset for one or more specific named series and return
+the result as TSV on stdout. Print a count of series found and not found.'''
 
 import sys
 
@@ -60,19 +60,13 @@ def main():
       sys.stdout.flush()
       l.info('%d series found' % series_ct)
    else:
-      serieses = dict()
-      for name in args.names:
-         l.info('fetching %s' % name)
-         try:
-            s = ds.fetch(name, last_only=(not args.no_last_only),
-                         normalize=(not args.raw), resample=args.interval)
-         except db.Not_Enough_Rows_Error as x:
-            l.warning('series not found: %s' % name)
-         else:
-            serieses[s.name] = s
-      if (len(serieses) == 0):
+      try:
+         df = ds.fetch_many(args.names, last_only=(not args.no_last_only),
+                            normalize=(not args.raw), resample=args.interval)
+      except db.Not_Enough_Rows_Error:
          u.abort("didn't find any of the requested series")
-      df = pd.DataFrame(serieses)
+      l.info('%d series requested, %d found' % (len(args.names),
+                                                len(df.columns)))
       df.to_csv(sys.stdout, sep='\t', float_format='%.4g')
       sys.stdout.flush()
    l.info('done')

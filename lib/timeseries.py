@@ -29,6 +29,7 @@ For example, consider the following time series:
 
 Test setup:
 
+   >>> from pprint import pprint
    >>> import pytz
    >>> tmp = os.environ['TMPDIR']
    >>> KEEP_THRESHOLD = 20
@@ -90,7 +91,7 @@ Try some fetching:
    >>> jan.fetch_or_create('nonexistent')
    nonexistent nf 0.0 {744z 0n}
 
-Add the rest of uf11:
+Add the rest of f11:
 
    >>> feb = ds.open_month(february)
    >>> feb.begin()
@@ -164,6 +165,19 @@ Add remaining time series:
    shard 2
    shard 3
      f11 uf 44.0 {671z 0n (671, 44.0)}
+
+You can fetch more than one time series at once:
+
+   >>> jan.fetch_many(['f11'])
+   [f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}]
+   >>> jan.fetch_many(['nonexistent'])
+   []
+   >>> jan.fetch_many([])
+   []
+   >>> jan.fetch_many(['f11', 'd01'])
+   [d01 zd 1.0 {743z 0n (0, 1.0)}, f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}]
+   >>> jan.fetch_many(['f11', 'nonexistent'])
+   [f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}]
 
 A fragment is compressed if its total is below a threshold:
 
@@ -308,7 +322,16 @@ with zeroes, but series where all fragments have been pruned return not found.
    >>> ds.fetch('f00')
    Traceback (most recent call last):
      ...
-   db.Not_Enough_Rows_Error: no non-zero fragments found
+   db.Not_Enough_Rows_Error: series not found
+   >>> list(ds.fetch_many(['f11']))
+   [('f11', array([ 11.,   0.,  22., ...,   0.,   0.,  44.], dtype=float32))]
+   >>> list(ds.fetch_many(['d01']))
+   [('d01', array([ 0.,  0.,  0., ...,  0.,  0.,  0.]))]
+   >>> list(ds.fetch_many(['f00']))
+   []
+   >>> pprint(list(ds.fetch_many(['f11', 'd01', 'f00'])))
+   [('d01', array([ 0.,  0.,  0., ...,  0.,  0.,  0.])),
+    ('f11', array([ 11.,   0.,  22., ...,   0.,   0.,  44.], dtype=float32))]
 
 Zero or more shards can be iterated through. If no shards specified, iterate
 through all.
@@ -338,7 +361,9 @@ been pruned, but the last has not.
    >>> ds.fetch('d01', last_only=False)
    Traceback (most recent call last):
      ...
-   db.Not_Enough_Rows_Error: only non-zero fragment was last
+   db.Not_Enough_Rows_Error: series not found
+   >>> list(ds.fetch_many(['f10', 'd01'], last_only=False))
+   [('f10', array([ 66.,   0.,   0., ...,   0.,   0.,   0.], dtype=float32))]
    >>> for ts in ds.fetch_all(last_only=False):
    ...    print(ts[0], ts[1].dtype, len(ts[1]), u.fmt_sparsearray(ts[1]))
    f10 float32 1416 {1415z 0n (0, 66.0)}
@@ -394,6 +419,41 @@ A Pandas-based interface is provided as well:
    2015-01-31 22:00     0
    2015-01-31 23:00     0
    Freq: H, Name: foo+bar, dtype: float32
+   >>> dsp.fetch_many(['foo+bar'])
+                     foo+bar
+   2015-01-01 00:00       20
+   2015-01-01 01:00       21
+   2015-01-01 02:00       22
+   2015-01-01 03:00       23
+   2015-01-01 04:00        0
+   2015-01-01 05:00        0
+   2015-01-01 06:00        0
+   ...
+   2015-01-31 22:00        0
+   2015-01-31 23:00        0
+   <BLANKLINE>
+   [744 rows x 1 columns]
+   >>> dsp.fetch_many(['nonexistent'])
+   Traceback (most recent call last):
+     ...
+   db.Not_Enough_Rows_Error: no matching series found
+   >>> dsp.fetch_many([])
+   Traceback (most recent call last):
+     ...
+   db.Not_Enough_Rows_Error: no matching series found
+   >>> dsp.fetch_many(['foo+bar', 'foo+baz', 'nonexistent'])
+                     foo+bar  foo+baz
+   2015-01-01 00:00       20       30
+   2015-01-01 01:00       21       31
+   2015-01-01 02:00       22       32
+   2015-01-01 03:00       23       33
+   2015-01-01 04:00        0        0
+   2015-01-01 05:00        0        0
+   ...
+   2015-01-31 22:00        0        0
+   2015-01-31 23:00        0        0
+   <BLANKLINE>
+   [744 rows x 2 columns]
    >>> pd.DataFrame({ s.name: s for s in dsp.fetch_all() })
                      foo  foo+bar  foo+baz
    2015-01-01 00:00   10       20       30
@@ -410,7 +470,7 @@ A Pandas-based interface is provided as well:
    >>> dsp.fetch('notfound')
    Traceback (most recent call last):
      ...
-   db.Not_Enough_Rows_Error: no non-zero fragments found
+   db.Not_Enough_Rows_Error: no matching series found
 
 The Pandas interface provides automatic normalization and resampling:
 
@@ -440,6 +500,14 @@ The Pandas interface provides automatic normalization and resampling:
    2015-01-30         NaN
    2015-01-31         NaN
    Freq: D, Name: foo+bar$norm, dtype: float32
+   >>> dsp.fetch_many(['foo+bar', 'foo+baz'], normalize=True, resample='D')
+               foo+bar$norm  foo+baz$norm
+   2015-01-01      3.909091      5.727273
+   2015-01-02           NaN           NaN
+   2015-01-03           NaN           NaN
+   ...
+   2015-01-30           NaN           NaN
+   2015-01-31           NaN           NaN
    >>> pd.DataFrame({ s.name: s for s in dsp.fetch_all(normalize=True) })
                      foo+bar$norm  foo+baz$norm
    2015-01-01 00:00      2.000000      3.000000
@@ -525,6 +593,7 @@ import enum
 import glob
 import itertools
 import heapq
+import operator
 import os
 import os.path
 import sys
@@ -646,20 +715,25 @@ class Dataset(object):
       return self.__class__(self.filename, self.hashmod)
 
    def fetch(self, name, last_only=True):
+      try:
+         return next(self.fetch_many((name,), last_only))[1]
+      except StopIteration:
+         raise db.Not_Enough_Rows_Error('series not found')
+
+   def fetch_many(self, names, last_only=True):
+      # This method is a generator to avoid duplicating the entire result set.
       self.open_all()
       fs = list()
       for g in self.groups.values():
-         try:
-            fs.append(g.fetch(name))
-         except db.Not_Enough_Rows_Error:
-            pass
-      if (len(fs) == 0):
-         raise db.Not_Enough_Rows_Error('no non-zero fragments found')
-      if (not last_only
-          and len(fs) == 1
-          and self.fragment_tag_last == fs[0].group.tag):
-         raise db.Not_Enough_Rows_Error('only non-zero fragment was last')
-      return self.assemble(fs)
+         fs.append(g.fetch_many(names))
+         #l.debug('fetched from group %s' % g.tag)
+      for (fragment, series) in itertools.groupby(heapq.merge(*fs)):
+         series = list(series)
+         if (    not last_only
+             and len(series) == 1
+             and self.fragment_tag_last == series[0].group.tag):
+            continue
+         yield (fragment.name, self.assemble(series))
 
    def fetch_all(self, *shards, last_only=True):
       self.open_all()
@@ -746,17 +820,51 @@ class Dataset_Pandas(Dataset):
             denom = denom.resample(series.index.freq, how='sum')
          self.denoms[denom_key] = denom
       nseries = series / self.denoms[denom_key]
-      nseries.name = series.name + NZ_SUFFIX
+      nseries.name = self.normalize_name(series.name)
       return nseries
 
-   def fetch(self, name, normalize=False, resample=None, *args, **kwargs):
-      series = pd.Series(super().fetch(name, *args, **kwargs),
-                         name=name, index=self.index)
-      if (resample):
-         series = series.resample(resample, how='sum')
-      if (normalize):
-         series = self.normalize(series)
-      return series
+   def normalize_name(self, name):
+      return (name + NZ_SUFFIX)
+
+   def fetch(self, name, *args, **kwargs):
+      return self.fetch_many((name,), *args, **kwargs).iloc[:,0]
+
+   def fetch_many(self, names, normalize=False, resample=None, *args, **kwargs):
+      '''Memory notes; this method:
+
+         * is inefficient if many of the names are not found, because space is
+           allocated in the result to hold them before it is later dropped.
+
+         * needs space for two copies of the result, because DataFrame.drop()
+           creates a copy even if inplace=True is specified.
+
+         FIXME: Raises db.Not_Enough_Rows_Error if nothing found, which is
+         inconsistent with how Dataset.fetch_many() simply returns an empty
+         list. The problem is that we don't know how to put an index on the
+         resulting DataFrame until we have at least one time series. There are
+         other methods to compute the index that don't require a time series,
+         but that's not implemented.'''
+      namefunc = self.normalize_name if normalize else lambda x: x
+      out_names = set(namefunc(name) for name in names)
+      missing_names = out_names.copy()
+      result = None
+      for (name, series) in super().fetch_many(names, *args, **kwargs):
+         series = pd.Series(series, name=name, index=self.index)
+         if (resample):
+            series = series.resample(resample, how='sum')
+         if (normalize):
+            series = self.normalize(series)
+         if (result is None):
+            # DataFrame initalization is here because we don't know until here
+            # what the right index is.
+            result = pd.DataFrame(columns=sorted(out_names), index=series.index,
+                                  dtype=series.dtype)
+         result.loc[:,series.name] = series
+         missing_names.remove(series.name)
+      if (result is None):
+         raise db.Not_Enough_Rows_Error('no matching series found')
+      result.drop(missing_names, axis=1, inplace=True)
+      return result
 
    def fetch_all(self, normalize=False, *args, **kwargs):
       for (name, array) in super().fetch_all(*args, **kwargs):
@@ -862,17 +970,35 @@ class Fragment_Group(object):
       return not self.db.get_one(sql)[0]
 
    def fetch(self, name):
-      (dtype, total, data) \
-         = self.db.get_one("""SELECT dtype, total, data FROM data%d
-                               WHERE name=?""" % self.dataset.shard(name),
-                           (name,))
-      return self.deserialize(name, dtype, total, data)
+      try:
+         return self.fetch_many((name,))[0]
+      except IndexError:
+         raise db.Not_Enough_Rows_Error('no such row')
 
    def fetch_all(self, shard):
       for i in self.db.get("""SELECT name, dtype, total, data
                               FROM data%d
                               ORDER BY name""" % shard):
          yield self.deserialize(*i)
+
+   def fetch_many(self, names):
+      # Return a list instead of a generator because we want SQLite to be
+      # completely out of this fragment before we move on to the next one,
+      # e.g., no active cursors.
+      results = list()
+      by_shard = { i: set() for i in range(self.dataset.hashmod) }
+      for name in names:
+         by_shard[self.dataset.shard(name)].add(name)
+      for (shard, snames) in by_shard.items():
+         if (len(snames) == 0):
+            continue
+         bind = ",".join('?' for i in range(len(snames)))
+         sql = """SELECT name, dtype, total, data
+                  FROM data%d
+                  WHERE name IN (%s)""" % (shard, bind)
+         results.extend(self.db.get(sql, snames))
+         #l.debug('fetched from shard %d' % shard)
+      return sorted(self.deserialize(*row) for row in results)
 
    def fetch_or_create(self, name, dtype=TYPE_DEFAULT, fill=None):
       '''dtype is only used on create; if fetch is successful, the fragment is
@@ -884,7 +1010,7 @@ class Fragment_Group(object):
 
    def initialize_db(self):
       if (self.db.exists('sqlite_master', "type='table' AND name='metadata'")):
-         l.debug('found metadata table, assuming already initalized')
+         #l.debug('found metadata table, assuming already initalized')
          if (self.dataset.hashmod is None):
             self.dataset.hashmod = int(self.metadatum_get('hashmod'))
             self.metadata['hashmod'] = self.dataset.hashmod
@@ -894,7 +1020,7 @@ class Fragment_Group(object):
       else:
          if (not self.writeable):
             raise db.Invalid_DB_Error('cannot initalize in read-only mode')
-         l.debug('initializing')
+         #l.debug('initializing')
          assert (self.length is not None)
          self.db.sql("""PRAGMA encoding='UTF-8';
                         PRAGMA page_size = 65536; """)
@@ -919,7 +1045,7 @@ class Fragment_Group(object):
 
 
    def open(self, writeable):
-      l.debug('opening %s, writeable=%s' % (self.filename, writeable))
+      #l.debug('opening %s, writeable=%s' % (self.filename, writeable))
       self.connect(writeable)
       # We use journal_mode = PERSIST to avoid metadata operations and
       # re-allocation, which can be expensive on parallel filesystems.
@@ -955,7 +1081,7 @@ class Fragment_Group(object):
                % (k, v, db_meta[k]))
       if (set(db_meta.keys()) != set(self.metadata.keys())):
          raise db.Invalid_DB_Error('Metadata mismatch: key sets differ')
-      l.debug('validated %d metadata items' % len(self.metadata))
+      #l.debug('validated %d metadata items' % len(self.metadata))
 
 
 class Fragment(object):
@@ -973,9 +1099,12 @@ class Fragment(object):
       self.source = source
       self.total = 0.0
 
-   # Compare on the name attribute, to faciliate sorting. Note that equality
-   # is not defined, since it seems odd to have two fragments compare equal
-   # merely because they share a name.
+   # FIXME: Comparisons are on the name attribute only. This is a little
+   # strange, but it is needed in Python 3.4 because heapq.merge() doesn't
+   # take a key argument (this was added in 3.5).
+
+   def __eq__(self, other):
+      return self.name == other.name
    def __lt__(self, other):
       return self.name < other.name
 

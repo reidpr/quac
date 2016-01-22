@@ -1,14 +1,5 @@
-$ (tssearch -l ts 2>&1 | (head -20; echo '[...]'; tail))
+$ (tssearch -l ts 2>&1 | (head; echo '[...]'; tail))
 tsser INFO     starting
-tsser DEBUG    opening ts/2012-09-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-10-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-11-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
 tsser INFO     connected to dataset
 als+Sandy_Island_(Neu-Kaledonien)	72
 an+Sandy	1
@@ -18,7 +9,6 @@ ang+Sandy,_Utah	1
 ar+120px-hurricane_sandy_goes-13_oct_24_2012_1445z.png	1
 ar+120px-sandy_poweroutage_1.jpg	1
 ar+74px-sandy_oct_29_2012_1815z.jpg	1
-ar+Abdllrhman_Sandy	1
 [...]
 zh+hurricane%20sandy%20%E7%81%BE%E5%90%8E%E5%BF%97%E6%84%BF%E8%80%85%E7%9A%84%E9%98%9F%E4%BC%8D%E5%90%A7%EF%BC%81	1
 zh+postsandy	1
@@ -30,17 +20,8 @@ zh.d+sandy	23
 zh.d+sandy_soil	3
 tsser INFO     107628 series found
 tsser INFO     done
-$ (tssearch -lt ts 2>&1 | (head -20; echo '[...]'; tail))
+$ (tssearch -lt ts 2>&1 | (head; echo '[...]'; tail))
 tsser INFO     starting
-tsser DEBUG    opening ts/2012-09-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-10-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-11-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
 tsser INFO     connected to dataset
 commons.m	2980
 cs+Sandy_Denny	191
@@ -50,7 +31,6 @@ de+Amitai_Sandy	128
 de+Big_Sandy_River_(Ohio_River)	152
 de+Intel-Sandy-Bridge-Mikroarchitektur	30356
 de+Liste_der_Lieder_von_Sandy_M%C3%B6lling	149
-de+Sandy	13529
 [...]
 tr+Intel_Sandy_Bridge_(microarchitecture)	906
 zh	10381
@@ -64,30 +44,8 @@ tsser INFO     1420 series found
 tsser INFO     done
 $ tssearch ts en+Hurricane_Sandy en+Sandy_Abbas en+Sandy_Koufax NOTFOUND
 tsser INFO     starting
-tsser DEBUG    opening ts/2012-09-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-10-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-11-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
 tsser INFO     connected to dataset
-tsser INFO     fetching en+Hurricane_Sandy
-tsser DEBUG    opening ts/2012-09-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-10-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-11-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser INFO     fetching en+Sandy_Abbas
-tsser INFO     fetching en+Sandy_Koufax
-tsser INFO     fetching NOTFOUND
-tsser WARNING  series not found: NOTFOUND
+tsser INFO     4 series requested, 3 found
 	en+Hurricane_Sandy$norm	en+Sandy_Abbas$norm	en+Sandy_Koufax$norm
 2012-09-01 00:00:00			
 2012-09-01 01:00:00			
@@ -2276,30 +2234,8 @@ tsser WARNING  series not found: NOTFOUND
 tsser INFO     done
 $ tssearch -iD ts en+Hurricane_Sandy en+Sandy_Abbas en+Sandy_Koufax NOTFOUND
 tsser INFO     starting
-tsser DEBUG    opening ts/2012-09-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-10-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-11-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
 tsser INFO     connected to dataset
-tsser INFO     fetching en+Hurricane_Sandy
-tsser DEBUG    opening ts/2012-09-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-10-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-11-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser INFO     fetching en+Sandy_Abbas
-tsser INFO     fetching en+Sandy_Koufax
-tsser INFO     fetching NOTFOUND
-tsser WARNING  series not found: NOTFOUND
+tsser INFO     4 series requested, 3 found
 	en+Hurricane_Sandy$norm	en+Sandy_Abbas$norm	en+Sandy_Koufax$norm
 2012-09-01			
 2012-09-02			
@@ -2395,30 +2331,8 @@ tsser WARNING  series not found: NOTFOUND
 tsser INFO     done
 $ tssearch -iW ts en+Hurricane_Sandy en+Sandy_Abbas en+Sandy_Koufax NOTFOUND
 tsser INFO     starting
-tsser DEBUG    opening ts/2012-09-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-10-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-11-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
 tsser INFO     connected to dataset
-tsser INFO     fetching en+Hurricane_Sandy
-tsser DEBUG    opening ts/2012-09-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-10-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-11-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser INFO     fetching en+Sandy_Abbas
-tsser INFO     fetching en+Sandy_Koufax
-tsser INFO     fetching NOTFOUND
-tsser WARNING  series not found: NOTFOUND
+tsser INFO     4 series requested, 3 found
 	en+Hurricane_Sandy$norm	en+Sandy_Abbas$norm	en+Sandy_Koufax$norm
 2012-08-27			
 2012-09-03			
@@ -2437,21 +2351,8 @@ tsser WARNING  series not found: NOTFOUND
 tsser INFO     done
 $ tssearch -riW ts en+Hurricane_Sandy en+Sandy_Abbas en+Sandy_Koufax NOTFOUND
 tsser INFO     starting
-tsser DEBUG    opening ts/2012-09-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-10-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-11-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
 tsser INFO     connected to dataset
-tsser INFO     fetching en+Hurricane_Sandy
-tsser INFO     fetching en+Sandy_Abbas
-tsser INFO     fetching en+Sandy_Koufax
-tsser INFO     fetching NOTFOUND
-tsser WARNING  series not found: NOTFOUND
+tsser INFO     4 series requested, 3 found
 	en+Hurricane_Sandy	en+Sandy_Abbas	en+Sandy_Koufax
 2012-08-27	0	0	0
 2012-09-03	0	0	0
@@ -2470,22 +2371,8 @@ tsser WARNING  series not found: NOTFOUND
 tsser INFO     done
 $ tssearch -triW ts en+Hurricane_Sandy en+Sandy_Abbas en+Sandy_Koufax NOTFOUND
 tsser INFO     starting
-tsser DEBUG    opening ts/2012-09-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-10-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-11-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
 tsser INFO     connected to dataset
-tsser INFO     fetching en+Hurricane_Sandy
-tsser INFO     fetching en+Sandy_Abbas
-tsser WARNING  series not found: en+Sandy_Abbas
-tsser INFO     fetching en+Sandy_Koufax
-tsser INFO     fetching NOTFOUND
-tsser WARNING  series not found: NOTFOUND
+tsser INFO     4 series requested, 2 found
 	en+Hurricane_Sandy	en+Sandy_Koufax
 2012-08-27	0	0
 2012-09-03	0	0
@@ -2504,18 +2391,7 @@ tsser WARNING  series not found: NOTFOUND
 tsser INFO     done
 $ tssearch ts NOTFOUND
 tsser INFO     starting
-tsser DEBUG    opening ts/2012-09-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-10-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
-tsser DEBUG    opening ts/2012-11-01.db, writeable=False
-tsser DEBUG    found metadata table, assuming already initalized
-tsser DEBUG    validated 5 metadata items
 tsser INFO     connected to dataset
-tsser INFO     fetching NOTFOUND
-tsser WARNING  series not found: NOTFOUND
 tsser FATAL    didn't find any of the requested series
 $ tssearch NOTADATASET en+Hurricane_Sandy
 tsser INFO     starting

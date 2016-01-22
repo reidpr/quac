@@ -10,8 +10,8 @@ set +e
 cd wp-access
 
 # List dataset content
-y "tssearch -l ts 2>&1 | (head -20; echo '[...]'; tail)"
-y "tssearch -lt ts 2>&1 | (head -20; echo '[...]'; tail)"
+y "tssearch -l ts 2>&1 | (head; echo '[...]'; tail)"
+y "tssearch -lt ts 2>&1 | (head; echo '[...]'; tail)"
 
 # Some searches
 x tssearch ts en+Hurricane_Sandy en+Sandy_Abbas en+Sandy_Koufax NOTFOUND
