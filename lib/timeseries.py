@@ -596,7 +596,9 @@ import heapq
 import operator
 import os
 import os.path
+import re
 import sys
+import urllib.parse
 import zlib
 
 import numpy as np
@@ -637,8 +639,54 @@ HASH = 'fnv1a_32'
 hashf = getattr(hash_, HASH)
 
 # Normalization stuff
-NZ_DELIM='+'
-NZ_SUFFIX='$norm'
+NZ_DELIM = '+'
+NZ_SUFFIX = '$norm'
+URL_NAME_RE = re.compile(r'^(.+%s)?(.+?)(%s)?$' % (re.escape(NZ_DELIM),
+                                                   re.escape(NZ_SUFFIX)))
+
+def name_norm_suffix(name):
+   """Append the normalized time series suffix, e.g.:
+
+        >>> name_norm_suffix('foo')
+        'foo$norm'
+        >>> name_norm_suffix('foo$norm')
+        'foo$norm$norm'"""
+   return (name + NZ_SUFFIX)
+
+def name_url_canonicalize(name):
+   """Canonicalize percent-encoding in URL and change spaces to underscores,
+      with optional namespace prefix and normalization suffix left unchanged.
+
+      The motivation is that people who show up with %20 in Wikipedia URLs
+      probably want the underscore version instead. See issue #77.
+
+        >>> name_url_canonicalize('Sandy_Koufax')
+        'Sandy_Koufax'
+        >>> name_url_canonicalize('en+Sandy_Koufax')
+        'en+Sandy_Koufax'
+        >>> name_url_canonicalize('en+Sandy%20Koufax')
+        'en+Sandy_Koufax'
+        >>> name_url_canonicalize('en+Sandy Koufax')
+        'en+Sandy_Koufax'
+        >>> name_url_canonicalize('Sandy_Koufax$norm')
+        'Sandy_Koufax$norm'
+        >>> name_url_canonicalize('en+Sandy_Koufax$norm')
+        'en+Sandy_Koufax$norm'
+        >>> name_url_canonicalize('pt+Doen%C3%A7a_cong%C3%AAnita')
+        'pt+Doen%C3%A7a_cong%C3%AAnita'
+
+      Input that is incorrectly encoded has undefined behavior, e.g.:
+
+        >>> name_url_canonicalize('en+Sandy%%20Koufax')
+        'en+Sandy%25_Koufax'
+        >>> name_url_canonicalize('en+Sandy%25%20Koufax')
+        'en+Sandy%25_Koufax'"""
+   m = URL_NAME_RE.search(name)
+   (prefix, name, suffix) = m.groups(default='')
+   name = urllib.parse.unquote(name)
+   name = name.replace(' ', '_')
+   name = urllib.parse.quote(name)
+   return (prefix + name + suffix)
 
 class Fragment_Source(enum.Enum):
    'Where did a fragment come from?'
@@ -820,11 +868,8 @@ class Dataset_Pandas(Dataset):
             denom = denom.resample(series.index.freq, how='sum')
          self.denoms[denom_key] = denom
       nseries = series / self.denoms[denom_key]
-      nseries.name = self.normalize_name(series.name)
+      nseries.name = name_norm_suffix(series.name)
       return nseries
-
-   def normalize_name(self, name):
-      return (name + NZ_SUFFIX)
 
    def fetch(self, name, *args, **kwargs):
       return self.fetch_many((name,), *args, **kwargs).iloc[:,0]
@@ -844,7 +889,7 @@ class Dataset_Pandas(Dataset):
          resulting DataFrame until we have at least one time series. There are
          other methods to compute the index that don't require a time series,
          but that's not implemented.'''
-      namefunc = self.normalize_name if normalize else lambda x: x
+      namefunc = name_norm_suffix if normalize else lambda x: x
       out_names = set(namefunc(name) for name in names)
       missing_names = out_names.copy()
       result = None

@@ -7,6 +7,7 @@ Search a time series dataset for one or more specific named series and return
 the result as TSV on stdout. Print a count of series found and not found.'''
 
 import sys
+import urllib.parse
 
 import pandas as pd
 
@@ -24,6 +25,9 @@ l = u.l
 
 ap = u.ArgumentParser(description=__doc__)
 gr = ap.default_group
+gr.add_argument('-c', '--canonical',
+                action='store_true',
+                help='specified names are already canonical, use as-is')
 gr.add_argument('-i', '--interval',
                 metavar='CODE',
                 help='sum output to this interval (UTC)')
@@ -60,6 +64,9 @@ def main():
       sys.stdout.flush()
       l.info('%d series found' % series_ct)
    else:
+      if (not args.canonical):
+         # FIXME: This switch should be better documented.
+         args.names = [timeseries.name_url_canonicalize(n) for n in args.names]
       try:
          df = ds.fetch_many(args.names, last_only=(not args.no_last_only),
                             normalize=(not args.raw), resample=args.interval)

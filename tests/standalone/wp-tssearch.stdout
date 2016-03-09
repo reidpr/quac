@@ -2389,6 +2389,24 @@ tsser INFO     4 series requested, 2 found
 2012-11-19	1.532e+05	5839
 2012-11-26	1.273e+05	4373
 tsser INFO     done
+$ tssearch -riM ts en+Sandy_Koufax
+tsser INFO     starting
+tsser INFO     connected to dataset
+tsser INFO     1 series requested, 1 found
+	en+Sandy_Koufax
+2012-09-01	4525
+2012-10-01	4.547e+04
+2012-11-01	2.631e+04
+tsser INFO     done
+$ tssearch -riM ts en+Sandy%20Koufax
+tsser INFO     starting
+tsser INFO     connected to dataset
+tsser INFO     1 series requested, 1 found
+	en+Sandy_Koufax
+2012-09-01	4525
+2012-10-01	4.547e+04
+2012-11-01	2.631e+04
+tsser INFO     done
 $ tssearch ts NOTFOUND
 tsser INFO     starting
 tsser INFO     connected to dataset

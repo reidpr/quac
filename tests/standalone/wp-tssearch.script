@@ -20,6 +20,10 @@ x tssearch -iW ts en+Hurricane_Sandy en+Sandy_Abbas en+Sandy_Koufax NOTFOUND
 x tssearch -riW ts en+Hurricane_Sandy en+Sandy_Abbas en+Sandy_Koufax NOTFOUND
 x tssearch -triW ts en+Hurricane_Sandy en+Sandy_Abbas en+Sandy_Koufax NOTFOUND
 
+# Verify normalization (these queries should return identical results)
+x tssearch -riM ts en+Sandy_Koufax
+x tssearch -riM ts en+Sandy%20Koufax
+
 # Some failed searches
 x tssearch ts NOTFOUND
 x tssearch NOTADATASET en+Hurricane_Sandy
