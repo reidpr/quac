@@ -408,29 +408,29 @@ A Pandas-based interface is provided as well:
                 '2015-01-31 23:00'],
                dtype='int64', length=744, freq='H')
    >>> dsp.fetch('foo+bar')
-   2015-01-01 00:00    20
-   2015-01-01 01:00    21
-   2015-01-01 02:00    22
-   2015-01-01 03:00    23
-   2015-01-01 04:00     0
-   2015-01-01 05:00     0
-   2015-01-01 06:00     0
+   2015-01-01 00:00    20.0
+   2015-01-01 01:00    21.0
+   2015-01-01 02:00    22.0
+   2015-01-01 03:00    23.0
+   2015-01-01 04:00     0.0
+   2015-01-01 05:00     0.0
+   2015-01-01 06:00     0.0
    ...
-   2015-01-31 22:00     0
-   2015-01-31 23:00     0
+   2015-01-31 22:00     0.0
+   2015-01-31 23:00     0.0
    Freq: H, Name: foo+bar, dtype: float32
    >>> dsp.fetch_many(['foo+bar'])
                      foo+bar
-   2015-01-01 00:00       20
-   2015-01-01 01:00       21
-   2015-01-01 02:00       22
-   2015-01-01 03:00       23
-   2015-01-01 04:00        0
-   2015-01-01 05:00        0
-   2015-01-01 06:00        0
+   2015-01-01 00:00     20.0
+   2015-01-01 01:00     21.0
+   2015-01-01 02:00     22.0
+   2015-01-01 03:00     23.0
+   2015-01-01 04:00      0.0
+   2015-01-01 05:00      0.0
+   2015-01-01 06:00      0.0
    ...
-   2015-01-31 22:00        0
-   2015-01-31 23:00        0
+   2015-01-31 22:00      0.0
+   2015-01-31 23:00      0.0
    <BLANKLINE>
    [744 rows x 1 columns]
    >>> dsp.fetch_many(['nonexistent'])
@@ -443,28 +443,28 @@ A Pandas-based interface is provided as well:
    db.Not_Enough_Rows_Error: no matching series found
    >>> dsp.fetch_many(['foo+bar', 'foo+baz', 'nonexistent'])
                      foo+bar  foo+baz
-   2015-01-01 00:00       20       30
-   2015-01-01 01:00       21       31
-   2015-01-01 02:00       22       32
-   2015-01-01 03:00       23       33
-   2015-01-01 04:00        0        0
-   2015-01-01 05:00        0        0
+   2015-01-01 00:00     20.0     30.0
+   2015-01-01 01:00     21.0     31.0
+   2015-01-01 02:00     22.0     32.0
+   2015-01-01 03:00     23.0     33.0
+   2015-01-01 04:00      0.0      0.0
+   2015-01-01 05:00      0.0      0.0
    ...
-   2015-01-31 22:00        0        0
-   2015-01-31 23:00        0        0
+   2015-01-31 22:00      0.0      0.0
+   2015-01-31 23:00      0.0      0.0
    <BLANKLINE>
    [744 rows x 2 columns]
    >>> pd.DataFrame({ s.name: s for s in dsp.fetch_all() })
-                     foo  foo+bar  foo+baz
-   2015-01-01 00:00   10       20       30
-   2015-01-01 01:00    0       21       31
-   2015-01-01 02:00   12       22       32
-   2015-01-01 03:00  NaN       23       33
-   2015-01-01 04:00  NaN        0        0
-   2015-01-01 05:00  NaN        0        0
+                      foo  foo+bar  foo+baz
+   2015-01-01 00:00  10.0     20.0     30.0
+   2015-01-01 01:00   0.0     21.0     31.0
+   2015-01-01 02:00  12.0     22.0     32.0
+   2015-01-01 03:00   NaN     23.0     33.0
+   2015-01-01 04:00   NaN      0.0      0.0
+   2015-01-01 05:00   NaN      0.0      0.0
    ...
-   2015-01-31 22:00  NaN        0        0
-   2015-01-31 23:00  NaN        0        0
+   2015-01-31 22:00   NaN      0.0      0.0
+   2015-01-31 23:00   NaN      0.0      0.0
    <BLANKLINE>
    [744 rows x 3 columns]
    >>> dsp.fetch('notfound')
@@ -485,12 +485,12 @@ The Pandas interface provides automatic normalization and resampling:
    2015-01-31 23:00         NaN
    Freq: H, Name: foo+bar$norm, dtype: float32
    >>> dsp.fetch('foo+bar', resample='D')
-   2015-01-01    86
-   2015-01-02     0
-   2015-01-03     0
+   2015-01-01    86.0
+   2015-01-02     0.0
+   2015-01-03     0.0
    ...
-   2015-01-30     0
-   2015-01-31     0
+   2015-01-30     0.0
+   2015-01-31     0.0
    Freq: D, Name: foo+bar, dtype: float32
    >>> dsp.fetch('foo+bar', normalize=True, resample='D')
    2015-01-01    3.909091
@@ -865,7 +865,7 @@ class Dataset_Pandas(Dataset):
             self.ds_mirror = self.dup()
          denom = self.ds_mirror.fetch(denom_name)
          if (denom.index.freq != series.index.freq):
-            denom = denom.resample(series.index.freq, how='sum')
+            denom = denom.resample(series.index.freq).sum()
          self.denoms[denom_key] = denom
       nseries = series / self.denoms[denom_key]
       nseries.name = name_norm_suffix(series.name)
@@ -896,7 +896,7 @@ class Dataset_Pandas(Dataset):
       for (name, series) in super().fetch_many(names, *args, **kwargs):
          series = pd.Series(series, name=name, index=self.index)
          if (resample):
-            series = series.resample(resample, how='sum')
+            series = series.resample(resample).sum()
          if (normalize):
             series = self.normalize(series)
          if (result is None):
