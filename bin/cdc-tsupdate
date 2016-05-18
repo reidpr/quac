@@ -1,0 +1,194 @@
+#!/usr/bin/env python3
+
+# Copyright © Los Alamos National Security, LLC, and others.
+
+"""
+   Parse and process CDC web log files in the same manner as the Wikimedia access logs.
+
+   The CDC logs are provided daily starting 2013-01-01.
+"""
+
+import csv
+from glob import iglob
+from itertools import chain
+import datetime
+from pathlib import Path
+import os
+
+import quacpath
+import timeseries
+import u
+import testable
+import time_
+
+# c is config (set at the bottom: u.configure())
+c = u.c
+
+# l is the logging object (set at the bottom: u.logging_init())
+l = u.l
+
+ap = u.ArgumentParser(description=__doc__)
+gr = ap.default_group
+gr.add_argument('outfile',
+            metavar='OUTFILE',
+            help='time series dataset to create or update')
+gr.add_argument('uncompressed_folder',
+            help='location of the folder containing the uncompressed CSV files')
+
+def main():
+   '''Read all new time series and write them to the dataset.'''
+   # read in the list of already processed files so that we don't process them again
+   previously_processed_files = set()
+   if Path(os.path.join(args.outfile, 'processed_files.txt')).is_file():
+      with open(os.path.join(args.outfile, 'processed_files.txt'), 'r') as f_in:
+         for f in f_in:
+            previously_processed_files.add(f.strip())
+
+   time_series, processed_files = read_time_series(previously_processed_files)
+   write_time_series(time_series, processed_files)
+
+def read_time_series(previously_processed_files):
+   '''Read all unprocessed files and build a time series for each region's pages.
+      The resulting file will be a dict mapping date to region to page/count time series.'''
+   # the CSV files are inconsistently named
+   csv_paths = [
+      iglob(os.path.join(args.uncompressed_folder, 'Flu Pages by Region*.csv')),
+      iglob(os.path.join(args.uncompressed_folder, 'Pages by Region*.csv')),
+      iglob(os.path.join(args.uncompressed_folder, 'Pages Data Extract for CDC Internet*.csv')),
+   ]
+   
+   processed_files = set()
+   time_series = dict() # map date to region to page/count time series
+   for path in chain.from_iterable(csv_paths):
+      if path in previously_processed_files:
+         l.info('skipping {}'.format(path))
+         continue
+
+      l.info('processing {}'.format(path))
+   
+      with open(path) as csvfile:
+         # skip header
+         for line in csvfile:
+            # the first line always starts with the byte order mark (BOM); this is "\xef\xbb\xbf" or character number 65279
+            if not (line.startswith('#') or ord(line[0]) == 65279):
+               break
+   
+         reader = csv.DictReader(csvfile)
+         for row in reader:
+            date = time_.utcify(datetime.datetime.strptime(row['Date'], '%b %d, %Y'))
+            page = row['Pages'].replace('\n', '').strip()
+            region = row['Regions']
+
+            # there's no consistent name for the "count" row...ugh
+            if 'All CDC  Visits' in row:
+               count = int(row['All CDC  Visits'])
+            elif 'Visits' in row:
+               count = int(row['Visits'])
+            elif 'Page Views' in row:
+               count = int(row['Page Views'])
+            elif 'Page Views (Report-Specific)' in row:
+               count = int(row['Page Views (Report-Specific)'])
+            else:
+               raise ValueError('Count key missing from row {} in file {}.'.format(row, path))
+   
+            #l.info('{} --- {} --- {} --- {}'.format(date, page, region, count))
+   
+            if date not in time_series:
+               time_series[date] = dict()
+            if region not in time_series[date]:
+               time_series[date][region] = dict()
+   
+            # there is some overlap in content; overlap is fine as long as it matches
+            if page in time_series[date][region] and time_series[date][region][page] != count:
+               #l.warning('differing count: {} --- {} --- {} --- {} --- {}'.format(date, page, region, count, time_series[date][region][page]))
+               continue
+   
+            time_series[date][region][page] = count
+
+      processed_files.add(path)
+
+   if not time_series:
+      l.info('no new data files')
+      return (None, None)
+
+   # ensure we aren't missing any dates
+   sorted_dates = sorted(time_series.keys())
+   current_date = sorted_dates[0]
+   last_date = sorted_dates[-1]
+   while current_date < last_date:
+      if current_date not in time_series.keys():
+         l.warning('missing date: {}'.format(current_date))
+      current_date += datetime.timedelta(days=1)
+
+   return (time_series, processed_files)
+
+def write_time_series(time_series, processed_files):
+   '''Write out the time series to the databases. Right now, we're using a hashmod of 4.
+      This results in ~100k rows per table for a full year's worth of data, which should
+      provide for excellent performance.'''
+   if not time_series:
+      l.info('no time series to write')
+      return
+
+   # pull out the last date for naming the DB files
+   last_date = sorted(time_series)[-1]
+
+   ds = timeseries.Dataset(args.outfile, 'D', 4, writeable=True)
+   for date, regions in sorted(time_series.items()):
+      num_days = time_.days_in_year(date)
+      day_offset = time_.day_year_offset(date)
+
+      l.info('{} - day {} ({} days in the year)'.format(date, day_offset, num_days))
+
+      # one DB per year
+      year = datetime.datetime(date.year, 1, 1)
+      if last_date.year == date.year:
+         # the last year is treated differently
+         # for the last year, we compute the number of data points
+         # the first year (2013) actually starts on Jan. 1, so we don't
+         # need to worry about treating it differently
+         num_days = time_.day_year_offset(last_date) + 1
+
+         # check to see if we need to rename this year's file
+         # because the filename contains the length, and the length
+         # of this year's data will change as we add new data, we
+         # must change the filename to reflect this
+         for f in iglob(os.path.join(args.outfile, '{}_*.db'.format(year.isoformat()))):
+            # there's only 1 file per year, so this for loop should contain a maximum of 1 element
+            os.rename(f, os.path.join(args.outfile, '{}_{}.db'.format(year.isoformat(), num_days)))
+
+      date_ds = ds.open_timestamp(year, num_days)
+      date_ds.begin()
+
+      for region, pages in sorted(regions.items()):
+         pages = regions[region]
+
+         for page, count in sorted(pages.items()):
+            #l.info('{} - {} - {} - {}'.format(date, region, page, count))
+
+            # save the page fragment
+            page_f = date_ds.fetch_or_create('{}+{}'.format(region, page))
+            page_f.data[day_offset] = count
+            page_f.save()
+
+            # update the region's fragment
+            region_f = date_ds.fetch_or_create(region)
+            region_f.data[day_offset] += count
+            region_f.save()
+
+      date_ds.commit()
+   #ds.dump()
+
+   # append the set of newly processed files to processed_files.txt
+   with open(os.path.join(args.outfile, 'processed_files.txt'), 'a') as f_out:
+      for f in sorted(processed_files):
+         f_out.write('{}\n'.format(f))
+
+try:
+   args = u.parse_args(ap)
+   u.configure(args.config)
+   u.logging_init('cdclogs')
+   if __name__=='__main__':
+      main()
+except testable.Unittests_Only_Exception:
+   testable.register()

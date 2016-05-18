@@ -154,41 +154,41 @@ def ddfs_parse(text):
       datetime.datetime(2013, 3, 20, 15, 58, 22)'''
    return datetime.datetime.strptime(text, '%Y/%m/%d %H:%M:%S')
 
-def hour_offset(dt):
+def hour_month_offset(dt):
    '''Return the number of hours between the given datetime and the beginning of
       its month. Time zone must be UTC. Minutes, seconds, and microseconds
       must be zero.
 
-        >>> hour_offset(iso8601_parse('2014-09-01 00:00:00'))
+        >>> hour_month_offset(iso8601_parse('2014-09-01 00:00:00'))
         0
-        >>> hour_offset(iso8601_parse('2014-09-01 01:00:00'))
+        >>> hour_month_offset(iso8601_parse('2014-09-01 01:00:00'))
         1
-        >>> hour_offset(iso8601_parse('2014-09-30 22:00:00'))
+        >>> hour_month_offset(iso8601_parse('2014-09-30 22:00:00'))
         718
-        >>> hour_offset(iso8601_parse('2014-09-30 23:00:00'))
+        >>> hour_month_offset(iso8601_parse('2014-09-30 23:00:00'))
         719
 
       Error conditions:
 
-        >>> hour_offset(iso8601_parse('2014-09-26 09:33:00'))
+        >>> hour_month_offset(iso8601_parse('2014-09-26 09:33:00'))
         Traceback (most recent call last):
            ...
         ValueError: minutes, seconds, and microseconds must be zero
-        >>> hour_offset(iso8601_parse('2014-09-26 09:00:33'))
+        >>> hour_month_offset(iso8601_parse('2014-09-26 09:00:33'))
         Traceback (most recent call last):
            ...
         ValueError: minutes, seconds, and microseconds must be zero
-        >>> hour_offset(datetime.datetime(2014, 9, 26, 9, 0, 0, 1, pytz.utc))
+        >>> hour_month_offset(datetime.datetime(2014, 9, 26, 9, 0, 0, 1, pytz.utc))
         Traceback (most recent call last):
            ...
         ValueError: minutes, seconds, and microseconds must be zero
-        >>> hour_offset(iso8601_parse('2014-09-26 09:00:00+01:00'))
+        >>> hour_month_offset(iso8601_parse('2014-09-26 09:00:00+01:00'))
         Traceback (most recent call last):
            ...
         ValueError: time zone must be UTC'''
    if (dt.tzinfo != pytz.utc):
       raise ValueError('time zone must be UTC')
-   if (not (dt.minute == dt.second == dt.microsecond)):
+   if (not (dt.minute == dt.second == dt.microsecond == 0)):
       raise ValueError('minutes, seconds, and microseconds must be zero')
    start = datetime.datetime(dt.year, dt.month, 1, tzinfo=dt.tzinfo)
    delta = relativedelta.relativedelta(dt, start)
@@ -240,6 +240,73 @@ def hours_in_month(dt):
    end_exclusive = start_inclusive + relativedelta.relativedelta(months=1)
    delta = end_exclusive - start_inclusive
    return int(round(delta.days * 24 + delta.seconds / 3600))
+
+def days_in_year(dt):
+   '''Return the number of days in the year of the given datetime.
+
+      Normal year:
+
+        >>> days_in_year(iso8601_parse('2014-10-26 09:33:00'))
+        365
+      
+      Leap year:
+
+        >>> days_in_year(iso8601_parse('2000-02-26 09:33:00'))
+        366'''
+   try:
+       datetime.datetime(dt.year, 2, 29)
+       return 366
+   except ValueError:
+       return 365
+
+def day_year_offset(dt):
+   '''Return the number of days between the given datetime and the beginning of
+      its year. Time zone must be UTC. Hours, minutes, seconds, and microseconds
+      must be zero.
+
+        >>> day_year_offset(iso8601_parse('2014-01-01 00:00:00'))
+        0
+      
+      Leap year:
+
+        >>> day_year_offset(iso8601_parse('2000-02-26 00:00:00'))
+        56
+        >>> day_year_offset(iso8601_parse('2000-02-29 00:00:00'))
+        59
+
+      Error conditions:
+
+        >>> day_year_offset(iso8601_parse('2000-02-29 23:23:23').replace(microsecond=23))
+        Traceback (most recent call last):
+           ...
+        ValueError: hours, minutes, seconds, and microseconds must be zero
+        >>> day_year_offset(iso8601_parse('2014-01-01 01:00:00'))
+        Traceback (most recent call last):
+           ...
+        ValueError: hours, minutes, seconds, and microseconds must be zero
+        >>> day_year_offset(iso8601_parse('2014-09-26 09:33:00'))
+        Traceback (most recent call last):
+           ...
+        ValueError: hours, minutes, seconds, and microseconds must be zero
+        >>> day_year_offset(iso8601_parse('2014-09-26 09:00:33'))
+        Traceback (most recent call last):
+           ...
+        ValueError: hours, minutes, seconds, and microseconds must be zero
+        >>> day_year_offset(datetime.datetime(2014, 9, 26, 9, 0, 0, 1, pytz.utc))
+        Traceback (most recent call last):
+           ...
+        ValueError: hours, minutes, seconds, and microseconds must be zero
+        >>> day_year_offset(iso8601_parse('2014-09-26 09:00:00+01:00'))
+        Traceback (most recent call last):
+           ...
+        ValueError: time zone must be UTC'''
+   if (dt.tzinfo != pytz.utc):
+      raise ValueError('time zone must be UTC')
+   if (not (dt.hour == dt.minute == dt.second == dt.microsecond == 0)):
+      raise ValueError('hours, minutes, seconds, and microseconds must be zero')
+   start = datetime.datetime(dt.year, 1, 1, tzinfo=dt.tzinfo)
+   delta = dt - start
+   return delta.days
 
 def iso8601_date(d):
    return d.strftime('%Y-%m-%d')

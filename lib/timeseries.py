@@ -31,24 +31,30 @@ Test setup:
 
    >>> from pprint import pprint
    >>> import pytz
+   >>> import os
    >>> tmp = os.environ['TMPDIR']
    >>> KEEP_THRESHOLD = 20
    >>> january = time_.iso8601_parse('2015-01-01')
+   >>> january_hours = time_.hours_in_month(january)
    >>> february = time_.iso8601_parse('2015-02-01')
+   >>> february_hours = time_.hours_in_month(february)
 
 Create read-write time series dataset with four shards:
 
    >>> c = u.configure(None)
-   >>> ds = Dataset(tmp + '/foo', 4, writeable=True)
+   >>> ds_dir = tmp + '/foo'
+   >>> if not os.path.exists(ds_dir):
+   ...    os.mkdir(ds_dir)
+   >>> ds = Dataset(ds_dir, 'H', 4, writeable=True)
 
 Open January:
 
    >>> ds.dump()
    length 0 hours
-   >>> jan = ds.open_month(january)
+   >>> jan = ds.open_timestamp(january, january_hours)
    >>> ds.dump()
    length 744 hours
-   fragment 2015-01-01
+   fragment 2015-01-01 00:00:00+00:00
    shard 0
    shard 1
    shard 2
@@ -71,7 +77,7 @@ Add the first time series fragment:
    >>> jan.commit()
    >>> ds.dump()
    length 744 hours
-   fragment 2015-01-01
+   fragment 2015-01-01 00:00:00+00:00
    shard 0
    shard 1
    shard 2
@@ -93,7 +99,7 @@ Try some fetching:
 
 Add the rest of f11:
 
-   >>> feb = ds.open_month(february)
+   >>> feb = ds.open_timestamp(february, february_hours)
    >>> feb.begin()
    >>> a = feb.create('f11')
    >>> a.data[671] = 44
@@ -102,13 +108,13 @@ Add the rest of f11:
    >>> feb.commit()
    >>> ds.dump()
    length 1416 hours
-   fragment 2015-01-01
+   fragment 2015-01-01 00:00:00+00:00
    shard 0
    shard 1
    shard 2
    shard 3
      f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
-   fragment 2015-02-01
+   fragment 2015-02-01 00:00:00+00:00
    shard 0
    shard 1
    shard 2
@@ -147,7 +153,7 @@ Add remaining time series:
    >>> feb.commit()
    >>> ds.dump()
    length 1416 hours
-   fragment 2015-01-01
+   fragment 2015-01-01 00:00:00+00:00
    shard 0
      d01 zd 1.0 {743z 0n (0, 1.0)}
      f10 uf 66.0 {743z 0n (0, 66.0)}
@@ -156,7 +162,7 @@ Add remaining time series:
    shard 2
    shard 3
      f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
-   fragment 2015-02-01
+   fragment 2015-02-01 00:00:00+00:00
    shard 0
      d01 ud 55.0 {671z 0n (0, 55.0)}
      f10 zf 5.0 {671z 0n (0, 5.0)}
@@ -238,14 +244,14 @@ threshold, as well as compact the database.
    >>> feb.prune(KEEP_THRESHOLD)
    >>> ds.dump()
    length 1416 hours
-   fragment 2015-01-01
+   fragment 2015-01-01 00:00:00+00:00
    shard 0
      f10 uf 66.0 {743z 0n (0, 66.0)}
    shard 1
    shard 2
    shard 3
      f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
-   fragment 2015-02-01
+   fragment 2015-02-01 00:00:00+00:00
    shard 0
      d01 ud 55.0 {671z 0n (0, 55.0)}
    shard 1
@@ -267,7 +273,7 @@ the database:
    >>> jan.commit()
    >>> ds.dump()
    length 1416 hours
-   fragment 2015-01-01
+   fragment 2015-01-01 00:00:00+00:00
    shard 0
      f10 uf 66.0 {743z 0n (0, 66.0)}
    shard 1
@@ -275,7 +281,7 @@ the database:
      keepme uf 77.0 {743z 0n (0, 77.0)}
    shard 3
      f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
-   fragment 2015-02-01
+   fragment 2015-02-01 00:00:00+00:00
    shard 0
      d01 ud 55.0 {671z 0n (0, 55.0)}
    shard 1
@@ -296,7 +302,7 @@ fragment already exists.
    >>> jan.commit()
    >>> ds.dump()                      # note old value of f10
    length 1416 hours
-   fragment 2015-01-01
+   fragment 2015-01-01 00:00:00+00:00
    shard 0
      f10 uf 66.0 {743z 0n (0, 66.0)}
    shard 1
@@ -304,7 +310,7 @@ fragment already exists.
      keepme uf 77.0 {743z 0n (0, 77.0)}
    shard 3
      f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
-   fragment 2015-02-01
+   fragment 2015-02-01 00:00:00+00:00
    shard 0
      d01 ud 55.0 {671z 0n (0, 55.0)}
    shard 1
@@ -372,8 +378,11 @@ been pruned, but the last has not.
 
 A Pandas-based interface is provided as well:
 
-   >>> dsp = Dataset_Pandas(tmp + '/bar', 4, writeable=True)
-   >>> jan = dsp.open_month(january)
+   >>> dsp_dir = tmp + '/bar'
+   >>> if not os.path.exists(dsp_dir):
+   ...    os.mkdir(dsp_dir)
+   >>> dsp = Dataset_Pandas(dsp_dir, 'H', 4, writeable=True)
+   >>> jan = dsp.open_timestamp(january, january_hours)
    >>> jan.begin()
    >>> a = jan.create('foo', fill=np.nan)
    >>> a.data[0:3] = [10, 0, 12]
@@ -392,7 +401,7 @@ A Pandas-based interface is provided as well:
    >>> jan.commit()
    >>> dsp.dump()
    length 744 hours
-   fragment 2015-01-01
+   fragment 2015-01-01 00:00:00+00:00
    shard 0
    shard 1
      foo+bar uf 86.0 {740z 0n (0, 20.0), (1, 21.0), (2, 22.0), (3, 23.0)}
@@ -526,25 +535,6 @@ The Pandas interface provides automatic normalization and resampling:
    ValueError: delimiter "+" not found
    >>> dsp.close()
 
-Opening bogus months fails:
-
-   >>> january_nonutc = datetime.datetime(2015, 1, 1,
-   ...                                    tzinfo=pytz.timezone('GMT'))
-   >>> mid_january1 = time_.iso8601_parse('2015-01-01 00:00:01')
-   >>> mid_january2 = time_.iso8601_parse('2015-01-02')
-   >>> jan = ds.open_month(january_nonutc)
-   Traceback (most recent call last):
-     ...
-   ValueError: time zone must be UTC
-   >>> jan = ds.open_month(mid_january1)
-   Traceback (most recent call last):
-     ...
-   ValueError: must have all sub-day attributes equal to zero
-   >>> jan = ds.open_month(mid_january2)
-   Traceback (most recent call last):
-     ...
-   ValueError: must have day=1, not 2
-
 Close the dataset:
 
    >>> ds.close()
@@ -555,7 +545,7 @@ separate datasets is not supported.
    >>> ds2 = Dataset(tmp + '/foo', 4)
    >>> ds2.dump()
    length 1416 hours
-   fragment 2015-01-01
+   fragment 2015-01-01 00:00:00+00:00
    shard 0
      f10 uf 66.0 {743z 0n (0, 66.0)}
    shard 1
@@ -563,7 +553,7 @@ separate datasets is not supported.
      keepme uf 77.0 {743z 0n (0, 77.0)}
    shard 3
      f11 uf 33.0 {742z 0n (0, 11.0), (2, 22.0)}
-   fragment 2015-02-01
+   fragment 2015-02-01 00:00:00+00:00
    shard 0
      d01 ud 55.0 {671z 0n (0, 55.0)}
    shard 1
@@ -600,6 +590,7 @@ import re
 import sys
 import urllib.parse
 import zlib
+import collections
 
 import numpy as np
 import pandas as pd
@@ -617,7 +608,7 @@ l = u.l
 
 
 # Storage schema version
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 # If a time series fragment is less than or equal to this, then the vector is
 # stored compressed. The reasoning is to avoid wasting space on shards that
@@ -702,24 +693,76 @@ class Dataset(object):
                 'groups',
                 'hashmod',
                 'length',
-                'writeable')
+                'interval',
+                'writeable',
+                'metadata_db',
+                'metadata')
 
-   def __init__(self, filename, hashmod=None, writeable=False):
+   def __init__(self, filename, interval=None, hashmod=None, writeable=False):
       if (not writeable and not os.path.isdir(filename)):
          raise FileNotFoundError('not a directory: %s' % filename)
       self.filename = filename
       self.hashmod = hashmod
+      self.interval = interval
       self.writeable = writeable
       self.groups = dict()
       self.caches_reset()
+      self.initialize_metadata_db()
+
+   def initialize_metadata_db(self):
+      self.metadata_db = db.SQLite(os.path.join(self.filename, 'metadata.db'), self.writeable)
+      if (self.metadata_db.exists('sqlite_master', "type='table' AND name='metadata'")):
+         #l.debug('found metadata table, assuming already initalized')
+         self.metadata = dict()
+         if (self.hashmod is None):
+            self.hashmod = int(self.metadatum_get('hashmod'))
+            self.metadata['hashmod'] = self.hashmod
+         if (self.interval is None):
+            self.interval = self.metadatum_get('interval')
+            self.metadata['interval'] = self.interval
+      else:
+         if (not self.writeable):
+            raise db.Invalid_DB_Error('cannot initalize in read-only mode')
+         #l.debug('initializing')
+         assert (self.interval is not None)
+
+         self.metadata = {'hashmod': self.hashmod,
+                          'interval': self.interval,
+                          'schema_version': SCHEMA_VERSION }
+
+         self.metadata_db.sql("""PRAGMA encoding='UTF-8';
+                        PRAGMA page_size = 65536; """)
+         self.metadata_db.begin()
+         self.metadata_db.sql("""CREATE TABLE metadata (
+                          key    TEXT NOT NULL PRIMARY KEY,
+                          value  TEXT NOT NULL )""")
+         self.metadata_db.sql_many("INSERT INTO metadata VALUES (?, ?)",
+                          self.metadata.items())
+         self.metadata_db.commit()
+         self.metadata_db.close()
+
+   def metadatum_get(self, key):
+      return self.metadata_db.get_one("SELECT value FROM metadata WHERE key = ?",
+                                      (key,))[0]
+
+   def validate_db(self):
+      db_meta = dict(self.db.get('SELECT key, value FROM metadata'))
+      for (k, v) in self.metadata.items():
+         if (str(v) != db_meta[k]):
+            raise db.Invalid_DB_Error(
+               'Metadata mismatch at key %s: expected %s, found %s'
+               % (k, v, db_meta[k]))
+      if (set(db_meta.keys()) != set(self.metadata.keys())):
+         raise db.Invalid_DB_Error('Metadata mismatch: key sets differ')
+      #l.debug('validated %d metadata items' % len(self.metadata))
 
    @property
    def fragment_tag_first(self):
-      return self.fragment_tags[0]
+      return next(iter(self.fragment_tags))
 
    @property
    def fragment_tag_last(self):
-      return self.fragment_tags[-1]
+      return next(reversed(self.fragment_tags))
 
    def assemble(self, fragments):
       fmap = { tag: None for tag in self.fragment_tags }
@@ -733,16 +776,22 @@ class Dataset(object):
       'Reset all the caches associated with the groups.'
       # Pull the fragment tags from the filesystem, not self.groups, because
       # some groups may not be open.
-      self.fragment_tags = list()
+      # `fragment_tags` maps the tag (date) to the length
+      self.fragment_tags = collections.OrderedDict()
       for gf in sorted(glob.iglob('%s/*.db' % self.filename)):
-         self.fragment_tags.append(os.path.split(os.path.splitext(gf)[0])[1])
-      # Compute the length from the fragment tags, assuming they are months.
-      # If they aren't, this will fail. The obvious thing to do then is open
-      # each group and query it for length, but that's a bad idea because we
-      # do not want to open groups unless we really need to interact with
-      # them. Parallel writes to different groups depend on this.
-      self.length = sum(time_.hours_in_month(time_.iso8601_parse(f))
-                        for f in self.fragment_tags)
+         file_name = os.path.split(os.path.splitext(gf)[0])[1]
+         if file_name != 'metadata':
+            # The file name will be of the form timestamp_length, so this
+            # splits on '_' to elicit the length. We could also open each
+            # group and query it for length, but that's a bad idea because
+            # we do not want to open groups unless we really need to interact
+            # with them. Parallel writes to different groups depend on this.
+            tag, length = file_name.split('_')
+            tag = time_.iso8601_parse(tag)
+            length = int(length)
+            self.fragment_tags[tag] = length
+      # Compute the length from the length in the file names.
+      self.length = sum(l for l in self.fragment_tags.values())
 
    def close(self):
       for g in self.groups.values():
@@ -760,7 +809,7 @@ class Dataset(object):
 
    def dup(self):
       'Return a read-only clone of myself.'
-      return self.__class__(self.filename, self.hashmod)
+      return self.__class__(self.filename, self.interval, self.hashmod)
 
    def fetch(self, name, last_only=True):
       try:
@@ -805,22 +854,19 @@ class Dataset(object):
       for f in self.fragment_tags:
          self.group_get(f)
 
-   def open_month(self, month):
-      if (month.day != 1):
-         raise ValueError('must have day=1, not %d' % month.day)
-      if (hasattr(month, 'hour') and (   month.hour != 0
-                                      or month.minute != 0
-                                      or month.second != 0
-                                      or month.microsecond != 0)):
-         raise ValueError('must have all sub-day attributes equal to zero')
-      return self.group_get(time_.iso8601_date(month),
-                            time_.hours_in_month(month))
+   def open_timestamp(self, timestamp, length):
+      '''`timestamp` should be a parsed timestamp (i.e., use
+         time_.iso8601_parse to generate a `datetime` object)
+         from a string)'''
+      return self.group_get(timestamp, length)
 
    def put(self, name, tag_first, ts):
       assert False, 'unimplemented'
 
    def group_get(self, tag, length=None):
       if (not tag in self.groups):
+         if length is None:
+            length = self.fragment_tags[tag]
          fg = Fragment_Group(self, self.filename, tag, length)
          fg.open(self.writeable)
          self.groups[tag] = fg
@@ -842,7 +888,7 @@ class Dataset_Pandas(Dataset):
       self.denoms = dict()
       self.ds_mirror = None
       if (len(self.groups) > 0):
-         self.index = pd.period_range(self.fragment_tag_first, freq='H',
+         self.index = pd.period_range(self.fragment_tag_first, freq=self.interval,
                                       periods=self.length)
       else:
          self.index = None
@@ -931,7 +977,6 @@ class Fragment_Group(object):
                 'db',
                 'filename',
                 'length',
-                'metadata',
                 'tag',
                 'writeable')
 
@@ -948,14 +993,13 @@ class Fragment_Group(object):
 
    def __init__(self, dataset, filename, tag, length=None):
       self.dataset = dataset
-      self.filename = '%s/%s.db' % (filename, tag)
       self.tag = tag
       self.length = length
-      self.metadata = { 'fragment_total_zmax': FRAGMENT_TOTAL_ZMAX,
-                        'hash': HASH,
-                        'hashmod': self.dataset.hashmod,
-                        'length': self.length,
-                        'schema_version': SCHEMA_VERSION }
+
+      # don't include timezone info in the filename if it exists
+      if type(tag) is datetime.datetime:
+          tag = tag.replace(tzinfo=None)
+      self.filename = '%s/%s_%s.db' % (filename, tag.isoformat(), length)
 
    def begin(self):
       self.db.begin()
@@ -1054,15 +1098,10 @@ class Fragment_Group(object):
          return self.create(name, dtype, fill)
 
    def initialize_db(self):
-      if (self.db.exists('sqlite_master', "type='table' AND name='metadata'")):
-         #l.debug('found metadata table, assuming already initalized')
-         if (self.dataset.hashmod is None):
-            self.dataset.hashmod = int(self.metadatum_get('hashmod'))
-            self.metadata['hashmod'] = self.dataset.hashmod
-         if (self.length is None):
-            self.length = int(self.metadatum_get('length'))
-            self.metadata['length'] = self.length
-      else:
+      # We assume that if the data0 table exists, then all other tables will
+      # exist. If this assumption is bad, an exception will be raised later
+      # when reading/writing.
+      if not self.db.exists('sqlite_master', "type='table' AND name='data0'"):
          if (not self.writeable):
             raise db.Invalid_DB_Error('cannot initalize in read-only mode')
          #l.debug('initializing')
@@ -1070,11 +1109,6 @@ class Fragment_Group(object):
          self.db.sql("""PRAGMA encoding='UTF-8';
                         PRAGMA page_size = 65536; """)
          self.db.begin()
-         self.db.sql("""CREATE TABLE metadata (
-                          key    TEXT NOT NULL PRIMARY KEY,
-                          value  TEXT NOT NULL )""")
-         self.db.sql_many("INSERT INTO metadata VALUES (?, ?)",
-                          self.metadata.items())
          for i in range(self.dataset.hashmod):
             self.db.sql("""CREATE TABLE data%d (
                              name       TEXT NOT NULL PRIMARY KEY,
@@ -1083,11 +1117,6 @@ class Fragment_Group(object):
                              data       BLOB NOT NULL)
                            WITHOUT ROWID""" % i)
          self.db.commit()
-
-   def metadatum_get(self, key):
-      return self.db.get_one("SELECT value FROM metadata WHERE key = ?",
-                             (key,))[0]
-
 
    def open(self, writeable):
       #l.debug('opening %s, writeable=%s' % (self.filename, writeable))
@@ -1098,7 +1127,6 @@ class Fragment_Group(object):
                      PRAGMA synchronous = OFF; """
                   % c.getint('limt', 'sqlite_page_cache_kb'))
       self.initialize_db()
-      self.validate_db()
 
    def prune(self, keep_thr):
       l.debug('pruning with threshold = %d' % keep_thr)
@@ -1116,17 +1144,6 @@ class Fragment_Group(object):
       total_ct = self.db.get_one("PRAGMA page_count")[0]
       l.debug('vacuumed: %s used; %d total, %d free pages'
               % (u.fmt_bytes(page_size * total_ct), total_ct, free_ct))
-
-   def validate_db(self):
-      db_meta = dict(self.db.get('SELECT key, value FROM metadata'))
-      for (k, v) in self.metadata.items():
-         if (str(v) != db_meta[k]):
-            raise db.Invalid_DB_Error(
-               'Metadata mismatch at key %s: expected %s, found %s'
-               % (k, v, db_meta[k]))
-      if (set(db_meta.keys()) != set(self.metadata.keys())):
-         raise db.Invalid_DB_Error('Metadata mismatch: key sets differ')
-      #l.debug('validated %d metadata items' % len(self.metadata))
 
 
 class Fragment(object):

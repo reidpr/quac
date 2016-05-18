@@ -145,9 +145,10 @@ def main():
    args.keep_threshold = int(c['wkpd']['keep_threshold'])
    os.environ['SQLITE_TMPDIR'] = args.outfile
    (month, pv_files) = pv_files_validated(args.pv_files)
-   ds = timeseries.Dataset(args.outfile, int(c['wkpd']['hashmod']),
+   ds = timeseries.Dataset(args.outfile, 'H', int(c['wkpd']['hashmod']),
                            writeable=True)
-   fg = ds.open_month(month)
+   num_hours = time_.hours_in_month(month)
+   fg = ds.open_timestamp(month, num_hours)
    outfile_mtime = fg.mtime
    l.info('opened %s/%s length %d hours' % (args.outfile, fg.tag, fg.length))
    args.file_empty_p = fg.empty_p()
@@ -177,7 +178,7 @@ def main():
 def file_read(file_, project_re):
    try:
       ts = wikimedia.timestamp_parse(file_)
-      hour_offset = time_.hour_offset(ts)
+      hour_month_offset = time_.hour_month_offset(ts)
       fp = u.zcat(file_, r"zcat '%%s' | egrep '^%s [-A-Za-z0-9_~!*();@,./%%%%]+ [0-9]+ [0-9]+$'" % project_re)
       badline_ct = 0
       prev_line = b''
@@ -188,7 +189,7 @@ def file_read(file_, project_re):
             (proj, url, count, _) = line.split(b' ')
             prev_line = line
             yield (proj.decode('ascii'), url.decode('ascii'),
-                   hour_offset, int(count))
+                   hour_month_offset, int(count))
          except ValueError as x:
             # Ignore lines that don't parse. Some files have thousands of
             # these (pagecounts-20130201-010000.gz), and many files have at
@@ -238,13 +239,13 @@ def files_process(fg, files):
          proj_last = proj
          proj_totals = fetch_or_create(proj, np.float64, fill=np.nan)
       url_v = fetch_or_create('%s+%s' % (proj, url), np.float32)
-      for (_, _, hour_offset, count) in gr:
+      for (_, _, hour_month_offset, count) in gr:
          line_ct += 1
-         url_v.data[hour_offset] = count
-         if (np.isnan(proj_totals.data[hour_offset])):
-            proj_totals.data[hour_offset] = count
+         url_v.data[hour_month_offset] = count
+         if (np.isnan(proj_totals.data[hour_month_offset])):
+            proj_totals.data[hour_month_offset] = count
          else:
-            proj_totals.data[hour_offset] += count
+            proj_totals.data[hour_month_offset] += count
       if (url_v.save(keep_threshold)):
          url_write_ct += 1
          stats_printed = False # avoid multiple stats after non-write iterations
