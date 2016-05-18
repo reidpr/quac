@@ -999,6 +999,13 @@ class Fragment_Group(object):
       # don't include timezone info in the filename if it exists
       if type(tag) is datetime.datetime:
           tag = tag.replace(tzinfo=None)
+      # This will result in filenames that look like this: 2015-01-01T00:00:00_365.db
+      # This is nice because the first chunk is an ISO 8601 timestamp, which can be
+      # easily parsed. However, colons are not valid characters in filenames outside
+      # of *nix (e.g., Windows won't be happy). Because all of our stuff runs on
+      # some *nix variant, I'm not going to bother changing it. We could always do
+      # something like 2015-01-01T00-00-00_365.db in the future, but that
+      # complicates parsing a tad.
       self.filename = '%s/%s_%s.db' % (filename, tag.isoformat(), length)
 
    def begin(self):
