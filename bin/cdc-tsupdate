@@ -138,25 +138,10 @@ def write_time_series(time_series, processed_files):
       num_days = time_.days_in_year(date)
       day_offset = time_.day_year_offset(date)
 
-      l.info('{} - day {} ({} days in the year)'.format(date, day_offset, num_days))
+      l.info('{} - day {} of {} days in the year'.format(date, (day_offset + 1), num_days))
 
       # one DB per year
       year = datetime.datetime(date.year, 1, 1)
-      if last_date.year == date.year:
-         # the last year is treated differently
-         # for the last year, we compute the number of data points
-         # the first year (2013) actually starts on Jan. 1, so we don't
-         # need to worry about treating it differently
-         num_days = time_.day_year_offset(last_date) + 1
-
-         # check to see if we need to rename this year's file
-         # because the filename contains the length, and the length
-         # of this year's data will change as we add new data, we
-         # must change the filename to reflect this
-         for f in iglob(os.path.join(args.outfile, '{}_*.db'.format(year.isoformat()))):
-            # there's only 1 file per year, so this for loop should contain a maximum of 1 element
-            os.rename(f, os.path.join(args.outfile, '{}_{}.db'.format(year.isoformat(), num_days)))
-
       date_ds = ds.open_timestamp(year, num_days)
       date_ds.begin()
 
