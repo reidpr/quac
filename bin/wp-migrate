@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+
+# Copyright © Los Alamos National Security, LLC, and others.
+
+'''Migrate the schema v1 Wikipedia data to v2.'''
+
+import os
+from glob import iglob
+
+import quacpath
+import u
+import testable
+import time_
+import db
+
+# c is config (set at the bottom: u.configure())
+c = u.c
+
+# l is the logging object (set at the bottom: u.logging_init())
+l = u.l
+
+ap = u.ArgumentParser(description=__doc__)
+gr = ap.default_group
+gr.add_argument('outfile',
+            metavar='OUTFILE',
+            help='time series dataset to create or update')
+
+def main():
+   # create the metadata DB
+   metadata_db = db.SQLite(os.path.join(args.outfile, 'metadata.db'), True)
+   metadata = {'hashmod': 64,
+               'interval': 'H',
+               'schema_version': 2}
+   metadata_db.sql("""PRAGMA encoding='UTF-8';
+                      PRAGMA page_size = 65536; """)
+   metadata_db.begin()
+   metadata_db.sql("""CREATE TABLE metadata (
+                      key    TEXT NOT NULL PRIMARY KEY,
+                      value  TEXT NOT NULL )""")
+   metadata_db.sql_many("INSERT INTO metadata VALUES (?, ?)",
+                        metadata.items())
+   metadata_db.commit()
+   metadata_db.close()
+
+   # for each DB, rename and delete the "metadata" table
+   for f in iglob(os.path.join(args.outfile, '*.db')):
+      filename = os.path.splitext(os.path.basename(f))[0]
+      if filename != 'metadata':
+         data_db = db.SQLite(f, True)
+         data_db.sql('DROP TABLE metadata;')
+         data_db.close()
+
+         date = time_.iso8601_parse(filename)
+         length = time_.hours_in_month(date)
+         new_filename = os.path.join(args.outfile,
+                                     '{}_{}.db'.format(date.replace(tzinfo=None).isoformat(),
+                                                       length))
+         os.rename(f, new_filename)
+
+try:
+   args = u.parse_args(ap)
+   u.configure(args.config)
+   u.logging_init('wp-migrate')
+   if __name__=='__main__':
+      main()
+except testable.Unittests_Only_Exception:
+   testable.register()

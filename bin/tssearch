@@ -7,9 +7,6 @@ Search a time series dataset for one or more specific named series and return
 the result as TSV on stdout. Print a count of series found and not found.'''
 
 import sys
-import urllib.parse
-
-import pandas as pd
 
 import quacpath
 import db

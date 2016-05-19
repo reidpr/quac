@@ -583,11 +583,9 @@ import enum
 import glob
 import itertools
 import heapq
-import operator
 import os
 import os.path
 import re
-import sys
 import urllib.parse
 import zlib
 import collections
@@ -710,8 +708,10 @@ class Dataset(object):
       self.initialize_metadata_db()
 
    def initialize_metadata_db(self):
-      self.metadata_db = db.SQLite(os.path.join(self.filename, 'metadata.db'), self.writeable)
-      if (self.metadata_db.exists('sqlite_master', "type='table' AND name='metadata'")):
+      self.metadata_db = db.SQLite(os.path.join(self.filename, 'metadata.db'),
+                                   self.writeable)
+      if (self.metadata_db.exists('sqlite_master',
+                                  "type='table' AND name='metadata'")):
          #l.debug('found metadata table, assuming already initalized')
          self.metadata = dict()
          if (self.hashmod is None):
@@ -742,7 +742,7 @@ class Dataset(object):
          self.metadata_db.close()
 
    def metadatum_get(self, key):
-      return self.metadata_db.get_one("SELECT value FROM metadata WHERE key = ?",
+      return self.metadata_db.get_one("SELECT value FROM metadata WHERE key=?",
                                       (key,))[0]
 
    def validate_db(self):
@@ -864,7 +864,7 @@ class Dataset(object):
       assert False, 'unimplemented'
 
    def group_get(self, tag, length=None):
-      if (not tag in self.groups):
+      if (tag not in self.groups):
          if length is None:
             length = self.fragment_tags[tag]
          fg = Fragment_Group(self, self.filename, tag, length)
@@ -888,7 +888,8 @@ class Dataset_Pandas(Dataset):
       self.denoms = dict()
       self.ds_mirror = None
       if (len(self.groups) > 0):
-         self.index = pd.period_range(self.fragment_tag_first, freq=self.interval,
+         self.index = pd.period_range(self.fragment_tag_first,
+                                      freq=self.interval,
                                       periods=self.length)
       else:
          self.index = None
@@ -918,7 +919,7 @@ class Dataset_Pandas(Dataset):
       return nseries
 
    def fetch(self, name, *args, **kwargs):
-      return self.fetch_many((name,), *args, **kwargs).iloc[:,0]
+      return self.fetch_many((name,), *args, **kwargs).iloc[:, 0]
 
    def fetch_many(self, names, normalize=False, resample=None, *args, **kwargs):
       '''Memory notes; this method:
@@ -950,7 +951,7 @@ class Dataset_Pandas(Dataset):
             # what the right index is.
             result = pd.DataFrame(columns=sorted(out_names), index=series.index,
                                   dtype=series.dtype)
-         result.loc[:,series.name] = series
+         result.loc[:, series.name] = series
          missing_names.remove(series.name)
       if (result is None):
          raise db.Not_Enough_Rows_Error('no matching series found')
@@ -998,14 +999,16 @@ class Fragment_Group(object):
 
       # don't include timezone info in the filename if it exists
       if type(tag) is datetime.datetime:
-          tag = tag.replace(tzinfo=None)
-      # This will result in filenames that look like this: 2015-01-01T00:00:00_365.db
-      # This is nice because the first chunk is an ISO 8601 timestamp, which can be
-      # easily parsed. However, colons are not valid characters in filenames outside
-      # of *nix (e.g., Windows won't be happy). Because all of our stuff runs on
-      # some *nix variant, I'm not going to bother changing it. We could always do
-      # something like 2015-01-01T00-00-00_365.db in the future, but that
-      # complicates parsing a tad.
+         tag = tag.replace(tzinfo=None)
+      # This will result in filenames that look like this:
+      #    2015-01-01T00:00:00_365.db
+      # This is nice because the first chunk is an ISO 8601 timestamp, which
+      # can be easily parsed. However, colons are not valid characters in
+      # filenames outside of *nix (e.g., Windows won't be happy). Because all
+      # of our stuff runs on some *nix variant, I'm not going to bother
+      # changing it. We could always do something like this:
+      #    2015-01-01T00-00-00_365.db
+      # in the future, but that complicates parsing a tad.
       self.filename = '%s/%s_%s.db' % (filename, tag.isoformat(), length)
 
    def begin(self):
@@ -1145,7 +1148,7 @@ class Fragment_Group(object):
       l.debug('deleted pruneable rows')
 
    def vacuum(self):
-      self.db.sql("VACUUM");
+      self.db.sql("VACUUM")
       page_size = self.db.get_one("PRAGMA page_size")[0]
       free_ct = self.db.get_one("PRAGMA freelist_count")[0]
       total_ct = self.db.get_one("PRAGMA page_count")[0]
@@ -1174,6 +1177,7 @@ class Fragment(object):
 
    def __eq__(self, other):
       return self.name == other.name
+
    def __lt__(self, other):
       return self.name < other.name
 

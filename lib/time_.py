@@ -248,16 +248,16 @@ def days_in_year(dt):
 
         >>> days_in_year(iso8601_parse('2014-10-26 09:33:00'))
         365
-      
+
       Leap year:
 
         >>> days_in_year(iso8601_parse('2000-02-26 09:33:00'))
         366'''
    try:
-       datetime.datetime(dt.year, 2, 29)
-       return 366
+      datetime.datetime(dt.year, 2, 29)
+      return 366
    except ValueError:
-       return 365
+      return 365
 
 def day_year_offset(dt):
    '''Return the number of days between the given datetime and the beginning of
@@ -266,7 +266,7 @@ def day_year_offset(dt):
 
         >>> day_year_offset(iso8601_parse('2014-01-01 00:00:00'))
         0
-      
+
       Leap year:
 
         >>> day_year_offset(iso8601_parse('2000-02-26 00:00:00'))
@@ -377,38 +377,38 @@ ZERO = datetime.timedelta(0)
 
 # A class capturing the platform's idea of local time.
 
-STDOFFSET = datetime.timedelta(seconds = -time.timezone)
+STDOFFSET = datetime.timedelta(seconds=-time.timezone)
 if time.daylight:
-    DSTOFFSET = datetime.timedelta(seconds = -time.altzone)
+   DSTOFFSET = datetime.timedelta(seconds=-time.altzone)
 else:
-    DSTOFFSET = STDOFFSET
+   DSTOFFSET = STDOFFSET
 
 DSTDIFF = DSTOFFSET - STDOFFSET
 
 class LocalTimezone(datetime.tzinfo):
 
-    def utcoffset(self, dt):
-        if self._isdst(dt):
-            return DSTOFFSET
-        else:
-            return STDOFFSET
+   def utcoffset(self, dt):
+      if self._isdst(dt):
+         return DSTOFFSET
+      else:
+         return STDOFFSET
 
-    def dst(self, dt):
-        if self._isdst(dt):
-            return DSTDIFF
-        else:
-            return ZERO
+   def dst(self, dt):
+      if self._isdst(dt):
+         return DSTDIFF
+      else:
+         return ZERO
 
-    def tzname(self, dt):
-        return time.tzname[self._isdst(dt)]
+   def tzname(self, dt):
+      return time.tzname[self._isdst(dt)]
 
-    def _isdst(self, dt):
-        tt = (dt.year, dt.month, dt.day,
-              dt.hour, dt.minute, dt.second,
-              dt.weekday(), 0, 0)
-        stamp = time.mktime(tt)
-        tt = time.localtime(stamp)
-        return tt.tm_isdst > 0
+   def _isdst(self, dt):
+      tt = (dt.year, dt.month, dt.day,
+            dt.hour, dt.minute, dt.second,
+            dt.weekday(), 0, 0)
+      stamp = time.mktime(tt)
+      tt = time.localtime(stamp)
+      return tt.tm_isdst > 0
 
 local_tz = LocalTimezone()
 
