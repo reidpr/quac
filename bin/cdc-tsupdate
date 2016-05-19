@@ -2,10 +2,8 @@
 
 # Copyright © Los Alamos National Security, LLC, and others.
 
-"""
-   Parse and process CDC web log files in the same manner as the Wikimedia
-   access logs. The CDC logs are provided daily starting 2013-01-01.
-"""
+'''Parse and process CDC web log files in the same manner as the Wikimedia
+access logs. The CDC logs are provided daily starting 2013-01-01.'''
 
 import csv
 from glob import iglob
