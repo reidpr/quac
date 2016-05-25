@@ -9,14 +9,15 @@ import csv
 from glob import iglob
 from itertools import chain
 import datetime
-from pathlib import Path
 import os
+import hashlib
 
 import quacpath
 import timeseries
 import u
 import testable
 import time_
+import db
 
 # c is config (set at the bottom: u.configure())
 c = u.c
@@ -32,17 +33,37 @@ gr.add_argument('outfile',
 gr.add_argument('uncompressed_folder',
             help='location of the folder containing the uncompressed CSV files')
 
+def get_sha256(path):
+   '''Get the SHA-256 hash of a file. This method can handle files of arbitrary
+      size. Idea comes from http://stackoverflow.com/a/3431838/1269634.'''
+   sha256 = hashlib.sha256()
+   with open(path, 'rb') as f:
+      # reading 1MiB at a time should provide sufficient performance for our
+      # dataset of small files
+      for chunk in iter(lambda: f.read(1048576), b''):
+         sha256.update(chunk)
+   return sha256.hexdigest()
+
 def main():
    '''Read all new time series and write them to the dataset.'''
-   # read in the list of already processed files so that we don't re-process
-   previously_processed_files = set()
-   if Path(os.path.join(args.outfile, 'processed_files.txt')).is_file():
-      with open(os.path.join(args.outfile, 'processed_files.txt'), 'r') as f_in:
-         for f in f_in:
-            previously_processed_files.add(f.strip())
+   previously_processed_files = None
+   try:
+      # if the database of previously processed files doesn't exist, create it
+      previously_processed_files = db.SQLite(os.path.join(args.outfile,
+                                                          'processed_files.db'),
+                                             True)
+      if not previously_processed_files.exists('sqlite_master',
+                                               "type='table' AND "
+                                               "name='processed_files'"):
+         previously_processed_files.sql('''CREATE TABLE processed_files (
+                                              path   TEXT NOT NULL PRIMARY KEY,
+                                              sha256 TEXT NOT NULL
+                                           );''')
 
-   time_series, processed_files = read_time_series(previously_processed_files)
-   write_time_series(time_series, processed_files)
+      time_series, processed_files = read_time_series(previously_processed_files)
+      write_time_series(time_series, processed_files, previously_processed_files)
+   finally:
+      previously_processed_files.close()
 
 def read_time_series(previously_processed_files):
    '''Read all unprocessed files and build a time series for each region's pages.
@@ -56,12 +77,18 @@ def read_time_series(previously_processed_files):
                          'Pages Data Extract for CDC Internet*.csv')),
    ]
 
-   processed_files = set()
+   processed_files = dict()  # map file path to hash
    time_series = dict()  # map date to region to page/count time series
    for path in chain.from_iterable(csv_paths):
-      if path in previously_processed_files:
-         l.info('skipping {}'.format(path))
-         continue
+      sha256 = get_sha256(path)
+      if previously_processed_files.exists('processed_files',
+                                           "path='{}'".format(path)):
+         previous_sha256 = previously_processed_files.get_one(
+            "SELECT sha256 FROM processed_files WHERE path='{}';"
+            .format(path))[0]
+         if sha256 == previous_sha256:
+            l.info('skipping {}'.format(path))
+            continue
 
       l.info('processing {}'.format(path))
 
@@ -76,7 +103,7 @@ def read_time_series(previously_processed_files):
          reader = csv.DictReader(csvfile)
          for row in reader:
             date = time_.utcify(datetime.datetime.strptime(row['Date'],
-                                '%b %d, %Y'))
+                                                           '%b %d, %Y'))
             page = row['Pages'].replace('\n', '').strip()
             region = row['Regions']
 
@@ -113,7 +140,7 @@ def read_time_series(previously_processed_files):
 
             time_series[date][region][page] = count
 
-      processed_files.add(path)
+      processed_files[path] = sha256
 
    if not time_series:
       l.info('no new data files')
@@ -130,13 +157,13 @@ def read_time_series(previously_processed_files):
 
    return (time_series, processed_files)
 
-def write_time_series(time_series, processed_files):
+def write_time_series(time_series, processed_files, previously_processed_files):
    '''Write out the time series to the databases. Right now, we're
       using a hashmod of 4. This results in ~100k rows per table for
       a full year's worth of data, which should provide for excellent
       performance.'''
    if not time_series:
-      l.info('no time series to write')
+      l.info('no time series data to write')
       return
 
    ds = timeseries.Dataset(args.outfile, 'D', 4, writeable=True)
@@ -172,10 +199,17 @@ def write_time_series(time_series, processed_files):
       date_ds.commit()
    #ds.dump()
 
-   # append the set of newly processed files to processed_files.txt
-   with open(os.path.join(args.outfile, 'processed_files.txt'), 'a') as f_out:
-      for f in sorted(processed_files):
-         f_out.write('{}\n'.format(f))
+   # update the DB of processed file names and their hashes
+   for path, sha256 in sorted(processed_files.items()):
+      if previously_processed_files.exists('processed_files',
+                                           "path='{}'".format(path)):
+         previously_processed_files.sql("UPDATE processed_files "
+                                        "SET sha256='{}' "
+                                        "WHERE path='{}';".format(sha256, path))
+      else:
+         previously_processed_files.sql("INSERT INTO processed_files "
+                                        "VALUES ('{}', '{}');".format(path,
+                                                                      sha256))
 
 try:
    args = u.parse_args(ap)

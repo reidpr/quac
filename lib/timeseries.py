@@ -780,7 +780,9 @@ class Dataset(object):
       self.fragment_tags = collections.OrderedDict()
       for gf in sorted(glob.iglob('%s/*.db' % self.filename)):
          file_name = os.path.split(os.path.splitext(gf)[0])[1]
-         if file_name != 'metadata':
+         # every dataset will contain a metadata.db file
+         # the CDC dataset will contain a processed_files.db file
+         if file_name != 'metadata' and file_name != 'processed_files':
             # The file name will be of the form timestamp_length, so this
             # splits on '_' to elicit the length. We could also open each
             # group and query it for length, but that's a bad idea because
