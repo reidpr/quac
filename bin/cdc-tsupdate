@@ -86,9 +86,12 @@ def read_time_series(previously_processed_files):
          previous_sha256 = previously_processed_files.get_one(
             "SELECT sha256 FROM processed_files WHERE path='{}';"
             .format(path))[0]
+
          if sha256 == previous_sha256:
             l.info('skipping {}'.format(path))
             continue
+         else:
+            l.warning('hash changed for {}'.format(path))
 
       l.info('processing {}'.format(path))
 
