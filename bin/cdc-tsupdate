@@ -38,7 +38,7 @@ def get_sha256(path):
       size. Idea comes from http://stackoverflow.com/a/3431838/1269634.'''
    sha256 = hashlib.sha256()
    with open(path, 'rb') as f:
-      # reading 1MiB at a time should provide sufficient performance for our
+      # reading 1 MiB at a time should provide sufficient performance for our
       # dataset of small files
       for chunk in iter(lambda: f.read(1048576), b''):
          sha256.update(chunk)
