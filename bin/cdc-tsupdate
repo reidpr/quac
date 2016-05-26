@@ -91,6 +91,10 @@ def read_time_series(previously_processed_files):
             l.info('skipping {}'.format(path))
             continue
          else:
+            # Note that if the hash changes, we're going to output this as a
+            # warning and will process the file as normal, potentially
+            # overwriting existing data. The assumption here is that a hash
+            # change is intentional (e.g., a data correction).
             l.warning('hash changed for {}'.format(path))
 
       l.info('processing {}'.format(path))
@@ -130,7 +134,12 @@ def read_time_series(previously_processed_files):
             if region not in time_series[date]:
                time_series[date][region] = dict()
 
-            # there is some overlap in content; ignore and take the first
+            # Some of the files contain overlapping data. That is, for some
+            # reason, for a specific date/region/page context, there are
+            # multiple counts. Anecdotally, the first count often looks
+            # "real" (e.g., 164), while the second count is generally small.
+            # Based on this, we accept the first count we encounter and throw
+            # away any follow-up counts.
             if page in time_series[date][region] and \
                     time_series[date][region][page] != count:
                #l.warning('differing count: {} --- {} --- {} --- {} --- {}'
