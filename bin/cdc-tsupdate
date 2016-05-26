@@ -137,9 +137,9 @@ def read_time_series(previously_processed_files):
             # Some of the files contain overlapping data. That is, for some
             # reason, for a specific date/region/page context, there are
             # multiple counts. Anecdotally, the first count often looks
-            # "real" (e.g., 164), while the second count is generally small.
-            # Based on this, we accept the first count we encounter and throw
-            # away any follow-up counts.
+            # "real" (e.g., 164), while the second count is generally
+            # relatively small (e.g., 1 or 2). Based on this, we accept the
+            # first count we encounter and throw away any follow-up counts.
             if page in time_series[date][region] and \
                     time_series[date][region][page] != count:
                #l.warning('differing count: {} --- {} --- {} --- {} --- {}'
