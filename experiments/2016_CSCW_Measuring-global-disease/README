@@ -1,0 +1,134 @@
+This file explains in brief what is in this directory and how one might use it
+to replicate the work published in Priedhorsky et al. 2016.
+
+Note that:
+
+  1. The guidance is untested and likely incomplete.
+  2. Things elsewhere in QUAC (e.g., data collection) are not documented here.
+
+If it doesn't work or you have questions, feel free to e-mail us.
+
+Prequisites: GNU make, bash, Python 3.5 plus some modules, Gnuplot 5, and
+maybe some other stuff. We used Ubuntu 15.10; portability is unknown.
+
+
+Replicating the published experiments
+-------------------------------------
+
+1. experiment.sh : Main driver script to run the experiment. It takes a few
+   arguments; see the code. The result will be an output directory of up to a
+   few GB ready for post-processing. Compute time on our 8-way box given our
+   parameters is overnight.
+
+2. analyze-many.mk : Makefile to drive post-processing, including producing
+   the TSVs and automated plots. (This does not include the hand-optimized
+   plots in the paper.) Compute time was maybe an hour for us?
+
+   cd to the output directory and run e.g.:
+
+     make -f /path/to/analyze-many.mk
+
+After these two steps, you'll hopefully end up with something that looks a lot
+like the "out/global" and "out/us+influenza" directories in the supplement.
+Ideally it would be bit-for-bit identical given the same input, other than the
+plot PDFs.
+
+
+Files that support the published experiments
+--------------------------------------------
+
+category_distance.ipynb
+model_options.ipynb
+
+  Jupyter notebooks supporting the pilot studies in "notebooks" in the
+  supplement.
+
+experiment.py
+
+  Main experiment driver program. Takes a bunch of arguments setting the
+  various experimental parameters. You probably want to run it via
+  experiment.sh rather than directly.
+
+analyze.mk
+
+  Post-process a single distance directory. Invoked by analyze-many.mk.
+
+data-for-plots_dl
+
+  Script to compute various summaries and statistics; output to TSV files.
+
+base.gp
+pred-all_n.gp
+pred-first_n.gp
+
+  Gnuplot scripts for the automated plots.
+
+rsquared-best
+
+  Script to show the best $r^2$ for each country/language pair. These results
+  ended up in Table 1 and elsewhere.
+
+distguess
+
+  Script to choose distance 2 or distance 3 for Experiment 2.
+
+
+Unpublished pilot experiment
+----------------------------
+
+We did a pilot experiment using human coding to evaluate the relevance of
+articles chosen by the algorithms. This ended up peripheral to our main
+argument, so it's mentioned only briefly in the paper.
+
+article-relevance.xlsx
+
+  Human coding of article URL relevance. This is not included; you must
+  produce it yourself if you want to do this analysis. The format can be
+  deduced from the following two scripts.
+
+content-analysis-urls
+
+  Transform model article codes into URLs for human relevance evaluation.
+
+relevance-data
+
+  Interpret article-relevance.xlsx and dump some TSVs for plotting.
+
+relv-summary.gp
+
+  Plot the above TSVs.
+
+
+Everything else
+---------------
+
+data-for-plots_dist
+
+  Obsolete post-processing script.
+
+err-comp_hn.gp
+err-simple_n.gp
+err-summary.gp
+pre-comp_hn.gp
+
+  Plots we thought we might want but didn't.
+
+parse-gml
+
+  Build a wiki link graph based on a GML from an external scraping product. We
+  used this before we realized that the Wikipedia API would be much better.
+
+spark/
+
+  Experiment code from when we thought it was a big data problem and best
+  solved with Apache Spark. forecast.py is QUAC's lib/forecast.py at the time.
+
+tinkering/experiment-mpi
+
+  Preliminary implementation of Map-Reduce in MPI, again from when we thought
+  it was a big data problem.
+
+tinkering/many-queries.sql
+tinkering/single-query.sql
+
+  Performance testing for SQLite.

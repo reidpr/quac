@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+
+import collections
+import gzip
+import os
+import re
+import sys
+
+import numpy as np
+import pandas as pd
+
+QUACLIB = os.path.abspath(os.path.dirname(__file__) + '/../../lib')
+sys.path.insert(0, QUACLIB)
+import u
+
+l = u.l
+u.logging_init('caurl')
+
+resultname = sys.argv[1]
+basename = os.path.basename(resultname.split('.')[0])
+basedir = os.path.abspath(os.path.dirname(resultname))
+dirname = basename
+(location, disease) = basename.split('+')
+
+l.info('starting in %s' % basedir)
+
+data = u.pickle_load(sys.argv[1])
+l.debug('loaded outbreak %s' % basename)
+
+os.chdir(dirname)
+u.mkdir_f('content')
+os.chdir('content')
+
+def urlify(url):
+   m = re.search(r'^([a-z]+)(\.[a-z]+)?\+(.+)\$norm$', url)
+   (lang, code, article) = m.groups()
+   # see https://wikitech.wikimedia.org/wiki/Analytics/Data/Pagecounts-all-sites
+   try:
+      domain = { None:   'wikipedia.org',
+                 '.b':   'wikibooks.org',
+                 '.d':   'wiktionary.org',
+                 '.f':   'wikimediafoundation.org',
+                 '.m':   'FIXME',
+                 '.n':   'wikinews.org',
+                 '.q':   'wikiquote.org',
+                 '.s':   'wikisource.org',
+                 '.v':   'wikiversity.org',
+                 '.voy': 'wikivoyage.org',
+                 '.w':   'mediawiki.org',
+                 '.wd':  'wikidata.org',
+               }[code]
+   except KeyError:
+      u.abort('domain code "%s" does not exist (%s %s)' % (code, lang, article))
+      raise
+   return 'http://%s.%s/wiki/%s' % (lang, domain, article)
+
+# Collect articles from all models in each forecast horizon.
+for (h, hdata) in data.items():
+   l.info('horizon = %d' % h)
+   urls = collections.Counter()
+   model_ct = 0
+   for (t, tdata) in hdata.items():
+      for (n, ndata) in tdata.items():
+         model_ct += 1
+         for url in ndata['data'].columns:
+            urls[url] += 1
+   l.info('found %d models with %d URLs, %d distinct'
+          % (model_ct, sum(urls.values()), len(urls)))
+   with open('h%d.articles.tsv' % h, 'w') as fp:
+      fp.write('article\turl\n')
+      for (url, ct) in urls.items():
+         full_url = urlify(url)
+         fp.write('%s\t%s\n' % (url, full_url))
+
+l.info('done')

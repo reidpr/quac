@@ -1,0 +1,102 @@
+#!/usr/bin/env python3
+
+import csv
+import os
+import sys
+
+import numpy as np
+import pandas as pd
+
+QUACLIB = os.path.abspath(os.path.dirname(__file__) + '/../../lib')
+sys.path.insert(0, QUACLIB)
+import u
+
+l = u.l
+u.logging_init('reld')
+
+CSVPARMS = {'sep':      '\t',
+            'quoting':  csv.QUOTE_NONE }
+
+# Map ISO 3166 alpha-2 country codes to ISO 639-1 languages codes that are
+# accessed significantly by Wikipedia users in that country (i.e.,
+# "appropriate" in our jargon).
+LANG = {'us': {'en'}}
+
+# Only do these horizons
+HORIZONS = { 0 }
+
+l.info('starting')
+
+# Relevance mapping. Use a dictionary rather than a set of relevant ones so we
+# crash if we encounter an unknown URL.
+relevance = pd.read_excel(sys.argv[1], index_col=1, parse_cols='A:B') \
+              .loc[:,'relvnt'] \
+              .to_dict()
+
+resultname = sys.argv[2]
+basename = os.path.basename(resultname.split('.')[0])
+basedir = os.path.abspath(os.path.dirname(resultname))
+dirname = basename
+(location, disease) = basename.split('+')
+
+models = u.pickle_load(sys.argv[2])
+country = sys.argv[2].split('+')[0]
+
+os.chdir(dirname)
+
+def relevant_p(url):
+   return relevance[url]
+
+def appropriate_p(url):
+   return relevant_p(url) and url.split('+')[0] in LANG[country]
+
+# delete horizons we aren't doing
+models = { h: hdata for (h, hdata) in models.items() if h in HORIZONS }
+
+# compute relevance fractions for each model
+for h in models.values():
+   for t in h.values():
+      for n in t.values():
+         n['relv'] = (  sum(map(relevant_p, n['data'].columns))
+                      / len(n['data'].columns))
+         n['appr'] = (  sum(map(appropriate_p, n['data'].columns))
+                      / len(n['data'].columns))
+
+# summarize results
+out = dict()
+for (h, hv) in models.items():
+   out[h] = dict()
+   for (t, tv) in hv.items():
+      out[h][t] = { 'relv': pd.Series(sorted(n['relv'] for n in tv.values())),
+                    'appr': pd.Series(sorted(n['appr'] for n in tv.values())) }
+
+u.mkdir_f('relevance')
+
+# For box plots.
+#
+# file per: horizon
+# rows:     model
+# columns:  training, fraction relevant, fraction relevant & appropriate language
+
+# For summary plots.
+#
+# file per: horizon
+# rows:     training
+# columns:  fraction relevant and appropriate
+#: min, 2.5th, 5th, median, 95th, 97.5th, max
+for (h, hv) in out.items():
+   df = pd.DataFrame(index=sorted(hv.keys()),
+                     columns=('relv_min', 'relv_025', 'relv_05', 'relv_50',
+                              'relv_95', 'relv_975', 'relv_max',
+                              'appr_min', 'appr_025', 'appr_05', 'appr_50',
+                              'appr_95', 'appr_975', 'appr_max'))
+   for (t, tv) in hv.items():
+      quantiles = (0, 0.025, 0.05, 0.5, 0.95, 0.975, 1)
+      row = list()
+      for k in ('relv', 'appr'):
+         for q in quantiles:
+            row.append(out[h][t][k].quantile(q))
+      df.loc[t] = row
+   df.to_csv('relevance/h%d.relv-summary.tsv' % h, **CSVPARMS)
+
+l.info('done')

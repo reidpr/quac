@@ -2,12 +2,98 @@
 
 # Copyright (c) Los Alamos National Security, LLC, and others.
 
+# https://en.wikipedia.org/wiki/Special:ApiSandbox is helpful.
+
 import datetime
+import os
 import re
+
+import requests
 
 import testable
 import time_
+import u
 
+l = u.l
+
+
+API_PAGELEN_DEFAULT = 500
+LANG_SEPARATOR = '+'
+# Wikipedia API requests contact info in the user agent. We try to guess the
+# user's e-mail address rather than configuring it.
+HEADERS = { 'User-Agent': ('QUAC http://reidpr.github.io/quac/ %s@%s'
+                           % (os.environ['USER'], u.domain())) }
+
+class Article_Not_Found(ValueError): pass
+
+
+def api_query(lang, args):
+   args.update({ 'action': 'query',
+                 'format': 'json' })
+   # Decode all arguments. Requests will encode them, and the Wikimedia API
+   # will deal with canonicalizing article URLs.
+   args = { k: (u.url_decode(v) if isinstance(v, str) else v)
+            for k, v in args.items() }
+   result = dict()
+   #l.debug('Wikipedia API User-Agent: %s' % HEADERS['User-Agent'])
+   while True:
+      r = requests.get('https://%s.wikipedia.org/w/api.php' % lang, args,
+                       headers=HEADERS)
+      l.debug('%d: %s' % (r.status_code, r.url))
+      r.raise_for_status()
+      j = r.json()
+      # Remove articles with negative IDs, which are assigned sequentially
+      # starting from -1 on each result page. This makes the pages
+      # un-mergeable.
+      if ('pages' in j['query']):
+         for pageid in list(j['query']['pages'].keys()):
+            if (int(pageid) < 0):
+               del j['query']['pages'][pageid]
+      result = u.dicts_merge(result, j['query'])
+      if ('continue' not in j):
+         break
+      # Set continue. There is also a generic continue parameter, but it fails
+      # with "Invalid continue param". FIXME: Deriving the parameter name is a
+      # total kludge.
+      del j['continue']['continue']
+      (ckey, cval) = j['continue'].popitem()
+      assert (len(j['continue']) == 0)
+      args[ckey] = cval
+   return result
+
+def api_get_categories(url, with_hidden=False, pagelen=API_PAGELEN_DEFAULT):
+   try:
+      (lang, url) = lang_split(url)
+   except ValueError:
+      raise Article_Not_Found('no language specified')
+   args = { 'prop': 'categories',
+            'titles': url,
+            'cllimit': pagelen,
+            'clprop': 'hidden' }
+   data = api_query(lang, args)['pages']
+   if (len(data) == 0):
+      raise Article_Not_Found('article not found')
+   data = data.popitem()[1]
+   if ('categories' in data):
+      for c in data['categories']:
+         if ('hidden' not in c or with_hidden):
+            yield (lang + LANG_SEPARATOR + c['title'])
+
+def api_get_links(url, namespace=0, pagelen=API_PAGELEN_DEFAULT):
+   (lang, url) = lang_split(url)
+   args = { 'generator': 'links',
+            'gpllimit': pagelen,
+            'gplnamespace': namespace,
+            'prop': 'info',
+            'redirects': 1,
+            'titles': url }
+   data = api_query(lang, args)
+   if ('missing' in data):
+      raise Article_Not_Found('article not found')
+   if ('pages' in data):
+      for p in data['pages'].values():
+         if ('missing' not in p):
+            yield (lang + LANG_SEPARATOR + p['title'])
 
 def hour_bizarro(x):
    '''Convert x into an hour number; it can be a filename or a metadata date
@@ -32,6 +118,12 @@ def hour_bizarro(x):
       do = x[0].toordinal() * 24
       return (do + min(x[1]['hours'].keys()),
               do + max(x[1]['hours'].keys()))
+
+def lang_split(url):
+   try:
+      return url.split(LANG_SEPARATOR, 1)
+   except ValueError:
+      raise Article_Not_Found('no language specified')
 
 def timestamp_parse(text):
    '''Parse the timestamp embedded in pagecount and projectcount files. A

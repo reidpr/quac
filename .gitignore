@@ -120,3 +120,6 @@ tests/twitter/tweets/geo
 # derived test wikimedia data
 tests/standalone/wp-access/ts.mk
 tests/standalone/wp-access/ts
+
+# Jupyter/iPython Notebook checkpoints
+.ipynb_checkpoints

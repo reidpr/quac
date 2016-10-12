@@ -1,0 +1,165 @@
+#!/usr/bin/env python3
+
+# Copyright © Los Alamos National Security, LLC, and others.
+
+'''\
+Using the Wikipedia API, build the degree-1 link graph starting from the
+articles specified on stdin. Article URLs are tagged with language,
+percent-encoded, and underscored.'''
+
+import functools
+import itertools
+import sys
+import time
+
+import quacpath
+import testable
+import u
+import timeseries
+import wikimedia
+
+l = u.l
+
+CAT_DIST_MAX=8
+
+
+### Setup ###
+
+ap = u.ArgumentParser(description=__doc__)
+gr = ap.default_group
+gr.add_argument('-d', '--distance',
+                action='store_true',
+                help='compute category distances')
+gr.add_argument('pickle',
+                metavar='GRAPH_FILE',
+                help='gzipped pickle containing graph')
+gr.add_argument('list_',
+                metavar='LIST_FILE',
+                help='text file containing all articles found, one per line')
+
+### Main ###
+
+def main():
+   graph = dict()
+   articles = set()
+   for root in sys.stdin:
+      root = root.strip()
+      root = timeseries.name_url_canonicalize(root)
+      try:
+         (lang, _) = wikimedia.lang_split(root)
+         links = { timeseries.name_url_canonicalize(l)
+                   for l in wikimedia.api_get_links(root) }
+         progress('fetched %s: %d links\n' % (root, len(links)))
+         links.add(root)  # article links to itself
+         articles |= links
+         if (not args.distance):
+            graph[root] = links
+         else:
+            graph[root] = dict()
+            for (i, url) in enumerate(sorted(links)):
+               progress('%s %d/%d %s %s: ' % (time.strftime('%H:%M:%S'), i+1,
+                                              len(links), root, url))
+               graph[root][url] = cat_distance(root, url)
+               progress(' \n')
+            progress('category cache: %s\n' % str(categories.cache_info()))
+      except wikimedia.Article_Not_Found as x:
+         u.abort(str(x))
+   u.pickle_dump(args.pickle, graph)
+   with open(args.list_, 'w', encoding='utf-8') as fp:
+      for a in sorted(articles):
+         print(a, file=fp)
+
+
+### Support ###
+
+throbber_chars = '|/-\\'
+throbber_idx = 0
+
+@functools.lru_cache(2**24)
+def categories(url):
+   global throbber_idx
+   throbber_idx = (throbber_idx + 1) % len(throbber_chars)
+   progress('%s\033[D' % throbber_chars[throbber_idx])
+   if (url is None):
+      return frozenset()
+   try:
+      return frozenset(wikimedia.api_get_categories(url))
+   except wikimedia.Article_Not_Found:
+      return frozenset()
+
+def cat_distance(a, b):
+   '''Number of category ascent iterations required to find a common category
+      between articles a and b.
+
+      For example, given the following category tree, where A, F, and G are
+      articles and the rest are categories:
+
+        - A
+          - B
+          - C
+            - D
+            - E
+        - F
+           - B
+           - D
+        - G
+           - E
+        - H
+
+      Distances are:
+
+        A,F: 1. The shared categories are B (A->B, F->B) and D (A->C->D,
+             F->D), and a shared category is encountered after one iteration.
+
+        A,G: 2. The shared category is E (A->C->E, G->E), and it is found
+             after two iterations.
+
+        A,H: Infinity. A and H share no categories. However, this is clamped
+             to CAT_DIST_MAX.
+
+        F,G: Also infinity.
+
+        H,H: Also infinity. Despite the fact that we are comparing the article
+             to itself, because it has no categories, none will be shared.
+             Another option is to define that the distance from an article to
+             itself is 1, regardless of categories; this is less desirable
+             because it would lead to a distance of a root article to itself
+             being 1 and all others infinity, which is too divergent.'''
+   # Short-cut if one or the other has no categories.
+   if (len(categories(a)) == 0 or len(categories(b)) == 0):
+      progress('%d ' % CAT_DIST_MAX)
+      return CAT_DIST_MAX
+   a_cats = set()
+   b_cats = set()
+   a_next = { a }
+   b_next = { b }
+   for d in range(1, CAT_DIST_MAX + 1):
+      progress('%d ' % d)
+      for (ac, bc) in itertools.zip_longest(a_next, b_next):
+         a_cats |= categories(ac)
+         b_cats |= categories(bc)
+         # Put the match test here, in the inner loop, because categories() is
+         # potentially an expensive Wikipedia API call outweighted by lots of
+         # set intersections. This test could also be optimized to only try
+         # the new stuff, but I figured this was fast enough and simpler.
+         if (len(a_cats & b_cats) > 0):
+            return d
+      a_next = a_cats.copy()
+      b_next = b_cats.copy()
+   return d
+
+def progress(msg):
+   sys.stderr.write(msg)
+   sys.stderr.flush()
+
+
+### Bootstrap ###
+
+if (__name__ == '__main__'):
+   try:
+      args = u.parse_args(ap)
+      u.configure(args.config)
+      u.logging_init('wplnk')
+      main()
+   except testable.Unittests_Only_Exception:
+      testable.register()

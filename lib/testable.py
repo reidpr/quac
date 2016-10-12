@@ -73,7 +73,9 @@ def register(teststr=None):
          test(calling_module)
 
 def test(module):
-   options = doctest.ELLIPSIS | doctest.REPORT_ONLY_FIRST_FAILURE
+   options = (  doctest.ELLIPSIS
+              | doctest.REPORT_ONLY_FIRST_FAILURE
+              | doctest.REPORT_UDIFF)
    doctest.testmod(module, optionflags=options)
 
 def test_interactive_null():

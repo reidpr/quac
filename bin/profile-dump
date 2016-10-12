@@ -6,6 +6,23 @@ import pstats
 import sys
 
 import quacpath
+import u
+
+
+ap = u.ArgumentParser()
+gr = ap.default_group
+gr.add_argument('-l', '--lines',
+                metavar='N',
+                type=int,
+                default=13,
+                help='lines of profile output')
+gr.add_argument('-p', '--percent',
+                action='store_true',
+                help='print percentages rather than cumulative time')
+gr.add_argument('prof_file',
+                metavar='PROFFILE',
+                help='profile data file')
+
 
 class Stats(pstats.Stats):
 
@@ -31,8 +48,12 @@ class Stats(pstats.Stats):
 def f8(x):
    return '%8.1f' % x
 
-try:
-   ct = int(sys.argv[2])
-except IndexError:
-   ct = 13
-Stats(sys.argv[1]).sort_stats('cumulative').print_stats(ct)
+
+args = u.parse_args(ap)
+
+if (args.percent):
+   stats_class = Stats
+else:
+   stats_class = pstats.Stats
+
+stats_class(args.prof_file).sort_stats('cumulative').print_stats(args.lines)

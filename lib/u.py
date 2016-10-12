@@ -24,6 +24,7 @@ import functools
 import inspect
 import io
 import itertools
+import heapq
 import logging
 import os
 import os.path
@@ -36,9 +37,12 @@ import random
 import re
 import resource
 import shlex
+import socket
 import subprocess
 import sys
 import time
+import urllib.parse
+import uuid
 
 import numpy as np
 
@@ -87,6 +91,9 @@ verbose = False
 log_timestamps = True
 
 ### Environment ###
+
+# We require a minimum Python version.
+assert (sys.version_info >= (3,4))
 
 # Use a consistent, widely available, boring locale.
 os.environ['LC_ALL'] = 'C'
@@ -191,6 +198,161 @@ class MyConfigParser(configparser.SafeConfigParser):
 c = MyConfigParser(inline_comment_prefixes=['#'])
 
 
+class Priority_Queue(object):
+
+   '''Priority queue with bounded size.
+
+      Create and add first three items:
+
+      >>> pq = Priority_Queue(3)
+      >>> pq
+      PQ(3, [])
+      >>> len(pq)
+      0
+      >>> pq.add(1, 'a')
+      >>> pq
+      PQ(3, [(1, 'a')])
+      >>> len(pq)
+      1
+      >>> pq.add(3, 'b')
+      >>> pq.add(2, 'c')
+      >>> pq
+      PQ(3, [(1, 'a'), (3, 'b'), (2, 'c')])
+      >>> len(pq)
+      3
+
+      Higher-priority value goes in, lowest is removed:
+
+      >>> pq.add(4, 'd')
+      >>> pq
+      PQ(3, [(2, 'c'), (3, 'b'), (4, 'd')])
+
+      Lower-priority value never goes in:
+
+      >>> pq.add(1, 'e')
+      >>> pq
+      PQ(3, [(2, 'c'), (3, 'b'), (4, 'd')])
+
+      No pop operation yet, but you can iterate through the items in various
+      ways. Note that these are in arbitrary order, not priority order.
+
+      >>> list(pq.items())
+      [(2, 'c'), (3, 'b'), (4, 'd')]
+      >>> list(pq.priorities())
+      [2, 3, 4]
+      >>> list(pq.values())
+      ['c', 'b', 'd']
+
+      Two queues can be merged into a new queue if their limits are the same.
+      This keeps the maximum priority items.
+
+      >>> pq2 = Priority_Queue(2)
+      >>> pq.merge(pq2)
+      Traceback (most recent call last):
+        ...
+      ValueError: cannot merge queues with different limits
+      >>> pq3 = Priority_Queue(3)
+      >>> pq3.add(3, 'e')
+      >>> pq3.add(5, 'f')
+      >>> pq3
+      PQ(3, [(3, 'e'), (5, 'f')])
+      >>> pq.merge(pq3)
+      PQ(3, [(3, 'b'), (4, 'd'), (5, 'f')])
+
+      Unlimited also an option (limit becomes sys.maxsize):
+
+      >>> Priority_Queue()
+      PQ(9223372036854775807, [])
+
+      It's OK if items can't be compared. Many NumPy and Pandas data types
+      have this property. (Note the strange exception when we try; see
+      <http://stackoverflow.com/questions/32342292/> for an explanation.)
+
+      >>> a = np.arange(2)
+      >>> b = np.arange(2)
+      >>> (1, a) > (1, pq)
+      Traceback (most recent call last):
+        ...
+      ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
+      >>> pq = Priority_Queue(3)
+      >>> pq.add(1, a)
+      >>> pq.add(1, b)
+
+      Limit must be at least 1:
+
+      >>> Priority_Queue(1)
+      PQ(1, [])
+      >>> Priority_Queue(0)
+      Traceback (most recent call last):
+        ...
+      ValueError: limit 0 is not greater than zero
+      >>> Priority_Queue(-1)
+      Traceback (most recent call last):
+        ...
+      ValueError: limit -1 is not greater than zero'''
+
+   # Items can be non-comparable, so we need a tie-breaker. The simple
+   # solution (recommended by the heapq docs) is to simply count queue
+   # insertions; however, in our case, this breaks down because we need to be
+   # able to merge queues. So, we use a hack based on low bits of the MAC
+   # address and PID to grope towards uniqueness. This assumes 64-bit integers
+   # and 16-bit PIDs, and all queues in the same process use the same
+   # sequence.
+   add_ct = (  os.getpid() << 48
+             ^ (uuid.getnode() & 0xffffffff) << 32)
+
+   def __init__(self, limit=None):
+      self.heap = list()
+      if (limit is None):
+         self.limit = sys.maxsize
+      elif (limit <= 0):
+         raise ValueError('limit %d is not greater than zero' % limit)
+      else:
+         self.limit = limit
+
+   def __len__(self):
+      return len(self.heap)
+
+   def __repr__(self):
+      return 'PQ(%d, %s)' % (self.limit, repr(list(self.items())))
+
+   def add(self, priority, value):
+      assert (len(self.heap) <= self.limit)
+      # Silently ignore NaN priorities, because they can't be ordered.
+      if (np.isnan(priority)):
+         return
+      if (len(self.heap) == self.limit):
+         # Queue full. This insertion is a no-op if the priority is below
+         # everything already on the heap (I looked at the source code).
+         heapq.heappushpop(self.heap, (priority, self.add_ct, value))
+      else:
+         # Queue not full.
+         #print(len(self.heap), priority, item)
+         heapq.heappush(self.heap, (priority, self.add_ct, value))
+      self.add_ct += 1
+
+   def items(self):
+      return ((p, v) for (p, t, v) in self.heap)
+
+   def merge(self, other):
+      if (self.limit != other.limit):
+         raise ValueError('cannot merge queues with different limits')
+      new = self.__class__(self.limit)
+      new.heap = heapq.nlargest(self.limit,
+                                itertools.chain(self.heap, other.heap),
+                                key=lambda pv: pv[0])
+      new.heap.reverse()
+      # new.heap is now sorted (see heapq.nlargest() docs), so it's also a
+      # heap and we need not heapq.heapify().
+      return new
+
+   def priorities(self):
+      return (p for (p, t, v) in self.heap)
+
+   def values(self):
+      return (v for (p, t, v) in self.heap)
+
+
 class Profiler(object):
 
    def __init__(self):
@@ -220,6 +382,10 @@ class defaultdict_recursive(collections.defaultdict):
    def __init__(self):
       self.default_factory = type(self)
 
+   def as_dict(self):
+      'Return self as a regular dict. Useful if you are done autovifivying.'
+      return { k: v.as_dict() if isinstance(v, type(self)) else v
+               for (k, v) in self.items() }
 
 class Deleted_To_Save_Memory(object):
    'Placeholder for objects removed to save memory, to make errors clearer.'
@@ -388,6 +554,62 @@ def copyupdate(template, updates):
    r = template.copy()
    r.update(updates)
    return r
+
+def dicts_merge(a, b):
+   '''Merge two dictionaries. If a key appears in both:
+
+        - If the values are:
+          - both mappings, they are merged recursively
+          - both lists, they are appended.
+          - equal, one or the other (arbitrarily) is used
+        - Otherwise, raise ValueError.
+
+      For example:
+
+      >>> pprint(dicts_merge({}, {}))
+      {}
+      >>> pprint(dicts_merge({1:2}, {}))
+      {1: 2}
+      >>> pprint(dicts_merge({1:2}, {3:4, 5:6}))
+      {1: 2, 3: 4, 5: 6}
+      >>> pprint(dicts_merge({1:{7:8}}, {1:{9:10}, 5:6}))
+      {1: {7: 8, 9: 10}, 5: 6}
+      >>> pprint(dicts_merge({1:[7,8]}, {1:[9,10], 5:6}))
+      {1: [7, 8, 9, 10], 5: 6}
+      >>> pprint(dicts_merge({1:2}, {1:2, 5:6}))
+      {1: 2, 5: 6}
+      >>> pprint(dicts_merge({1:2}, {1:4, 5:6}))
+      Traceback (most recent call last):
+        ...
+      ValueError: Un-mergeable duplicate keys
+      >>> pprint(dicts_merge({1:{7:8}}, {1:4, 5:6}))
+      Traceback (most recent call last):
+        ...
+      ValueError: Un-mergeable duplicate keys'''
+   c = dict()
+   keys = set(itertools.chain(a.keys(), b.keys()))
+   for k in keys:
+      if (k in a and k in b):
+         vals = (a[k], b[k])
+         if (all(isinstance(i, collections.abc.Mapping) for i in vals)):
+            c[k] = dicts_merge(a[k], b[k])
+         elif (all(isinstance(i, list) for i in vals)):
+            c[k] = a[k] + b[k]
+         elif (a[k] == b[k]):
+            c[k] = a[k]
+         else:
+            raise ValueError("Un-mergeable duplicate key %s: %s, %s"
+                             % (k, a[k], b[k]))
+      elif (k in a):
+         c[k] = a[k]
+      else:
+         assert (k in b and not k in a)
+         c[k] = b[k]
+   return c
+
+def domain():
+   'Return a guess at my domain name.'
+   return socket.getfqdn().split('.', 1)[1]
 
 def glob_maxnumeric(dir_):
    '''Given a directory that has zero or more files named only with digits,
@@ -593,7 +815,7 @@ def memoize(f):
 def memory_use():
    '''Return the amount of memory currently allocated to this process, in bytes,
       as a tuple of virtual memory (VMS), real memory (RSS). For example (note
-      flexibility in results to accomodate different operating systems):
+      flexibility in results to accommodate different operating systems):
 
       >>> a = 'a' * int(2e9)  # string 2 billion chars long
       >>> 2e9 < memory_use()[0] < 5e9
@@ -608,11 +830,14 @@ def memory_use():
    info = psutil.Process(os.getpid()).memory_info()
    return (info.vms, info.rss)
 
-def memory_use_log(detail=''):
+def memory_use_log(detail='', level=None):
    if (detail):
       detail = ' %s: ' % (detail)
+   if (level is None):
+      # l.debug is not defined at def time
+      level = l.debug
    (vms, rss) = memory_use()
-   l.debug('memory:%s vms=%s rss=%s' % (detail, fmt_bytes(vms), fmt_bytes(rss)))
+   level('memory:%s vms=%s rss=%s' % (detail, fmt_bytes(vms), fmt_bytes(rss)))
 
 def mkdir_f(path):
    '''Ensure that directory path exists. That is, if path already exists and
@@ -716,7 +941,7 @@ def pickle_dump(file_, obj):
       filename = file_
       if (not filename.endswith(PICKLE_SUFFIX)):
          filename += PICKLE_SUFFIX
-      fp = gzip.open(filename, 'wb')
+      fp = gzip.open(filename, 'wb', compresslevel=9)
    else:
       filename = '???'
       fp = file_
@@ -884,6 +1109,48 @@ def without_common_prefix(paths):
          strip_ct += 1
       return [i[strip_ct:] for i in paths]
 
+def url_decode(url):
+   """Given a URL fragment which may or may not be percent-encoded, return the
+      decoded version with appropriate non-ASCII Unicode characters, with
+      underscores replaced with spaces.
+
+        >>> url_decode('Sandy_Koufax')
+        'Sandy Koufax'
+        >>> url_decode('Sandy Koufax')
+        'Sandy Koufax'
+        >>> url_decode('Sandy%20Koufax')
+        'Sandy Koufax'
+        >>> url_decode('Doen%C3%A7a_cong%C3%AAnita')
+        'Doença congênita'
+        >>> url_decode('Doença%20cong%C3%AAnita')
+        'Doença congênita'
+        >>> url_decode('Doença congênita')
+        'Doença congênita'"""
+   url = urllib.parse.unquote(url)
+   url = url.replace('_', ' ')
+   return url
+
+def url_encoded(url):
+   """Given a URL fragment string which may already be percent-encoded, and
+      which may contain non-ASCII characters, return it as a percent-encoded
+      ASCII string with underscores instead of spaces.
+
+        >>> url_encoded('Sandy_Koufax')
+        'Sandy_Koufax'
+        >>> url_encoded('Sandy Koufax')
+        'Sandy_Koufax'
+        >>> url_encoded('Sandy%20Koufax')
+        'Sandy_Koufax'
+        >>> url_encoded('Doen%C3%A7a_cong%C3%AAnita')
+        'Doen%C3%A7a_cong%C3%AAnita'
+        >>> url_encoded('Doença%20cong%C3%AAnita')
+        'Doen%C3%A7a_cong%C3%AAnita'
+        >>> url_encoded('Doença congênita')
+        'Doen%C3%A7a_cong%C3%AAnita'"""
+   url = url_decode(url)
+   url = url.replace(' ', '_')
+   url = urllib.parse.quote(url)
+   return url
 
 def without_ext(filename, ext):
    """Return filename with extension ext (which may or may not begin with a
