@@ -23,10 +23,13 @@ More specifically, what is here:
     R. Priedhorsky, A. Culotta, and S. Y. Del Valle, "Inferring the Origin Locations of Tweets with Quantitative Confidence," in Proceedings of the 17th ACM Conference on Computer Supported Cooperative Work & Social Computing, 2014, pp. 1523–1536.
     http://dx.doi.org/10.1145/2531602.2531607
 
-  2014_PLOS-Comp-Bio_Wikidemics_feasibility
-    N. Generous, G. Fairchild, A. Deshpande, S. Y. Del Valle, and R. Priedhorsky, "Global Disease Monitoring and Forecasting with Wikipedia," PLOS Computational Biology, vol. 10, no. 11, p. e1003892, Nov. 2014.
-    http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003892
-    http://arxiv.org/abs/1405.3612
+  2014_PLOS-Comp-Bio_Wikidemics-feasibility
+    Generous et al., 2014
+    http://dx.doi.org/10.1371/journal.pcbi.1003892
+
+  2017_CSCW_Measuring-global-disease
+    Priedhorsky et al., 2017
+    http://dx.doi.org/10.1145/2998181.2998183
 
 Typically, experimental code is not included until after some publication
 milestone, which could be anything from paper submission to final publication.

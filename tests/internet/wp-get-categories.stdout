@@ -1,0 +1,48 @@
+$ wp-get-categories en+Main_page
+en+Category:Main Page
+$ wp-get-categories --hidden en+Main_page
+en+Category:Main Page
+en+Category:Protected redirects
+en+Category:Redirects from other capitalisations
+en+Category:Unprintworthy redirects
+en+Category:Wikipedia indefinitely move-protected pages
+en+Category:Wikipedia protected pages
+$ wp-get-categories --hidden -p2 en+Main_page
+en+Category:Main Page
+en+Category:Protected redirects
+en+Category:Redirects from other capitalisations
+en+Category:Unprintworthy redirects
+en+Category:Wikipedia indefinitely move-protected pages
+en+Category:Wikipedia protected pages
+$ wp-get-categories --hidden -p5 en+Main_page
+en+Category:Main Page
+en+Category:Protected redirects
+en+Category:Redirects from other capitalisations
+en+Category:Unprintworthy redirects
+en+Category:Wikipedia indefinitely move-protected pages
+en+Category:Wikipedia protected pages
+$ wp-get-categories ro+Pagina_principală
+ro+Categorie:Pagina principală
+$ wp-get-categories 'ro+Pagina principală'
+ro+Categorie:Pagina principală
+$ wp-get-categories ro+Pagina_principal%C4%83
+ro+Categorie:Pagina principală
+$ wp-get-categories ro+Pagina%20principal%C4%83
+ro+Categorie:Pagina principală
+$ wp-get-categories pt+Página_principal
+$ wp-get-categories en+NOTFOUND
+wpcat FATAL    article not found
+$ wp-get-categories
+usage: wp-get-categories [-d] [-p N] [-h] [--config FILE] [--notimes]
+                         [--unittest] [--verbose]
+                         URL
+wp-get-categories: error: the following arguments are required: URL
+$ wp-get-categories Main_page
+wpcat FATAL    no language specified
+$ wp-get-categories -p0 en+Main_page
+wpcat FATAL    invalid page size
+$ wp-get-categories -p foo en+Main_page
+usage: wp-get-categories [-d] [-p N] [-h] [--config FILE] [--notimes]
+                         [--unittest] [--verbose]
+                         URL
+wp-get-categories: error: argument -p/--page-size: invalid int value: 'foo'

@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+
+# Copyright © Los Alamos National Security, LLC, and others.
+
+'Print the categories of the given Wikipedia article, from the Wikipedia API.'
+
+import quacpath
+import testable
+import u
+import wikimedia
+
+l = u.l
+
+
+### Setup ###
+
+ap = u.ArgumentParser(description=__doc__)
+gr = ap.default_group
+gr.add_argument('-d', '--hidden',
+                action='store_true',
+                help='show hidden categories')
+gr.add_argument('-p', '--page-size',
+                metavar='N',
+                type=int,
+                default=wikimedia.API_PAGELEN_DEFAULT,
+                help='fetch in pages of length N')
+gr.add_argument('url',
+                metavar='URL',
+                help='article URL, e.g. "en+Main_Page"')
+
+### Main ###
+
+def main():
+   #l.info('starting')
+   try:
+      for a in wikimedia.api_get_categories(args.url, args.hidden,
+                                            args.page_size):
+         print(a)
+   except wikimedia.Article_Not_Found as x:
+      u.abort(str(x))
+   #l.info('done')
+
+
+### Bootstrap ###
+
+if (__name__ == '__main__'):
+   try:
+      args = u.parse_args(ap)
+      u.configure(args.config)
+      u.logging_init('wpcat')
+      if (args.page_size <= 0):
+         u.abort('invalid page size')
+      main()
+   except testable.Unittests_Only_Exception:
+      testable.register()

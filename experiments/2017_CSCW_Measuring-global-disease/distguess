@@ -1,0 +1,10 @@
+#!/bin/bash
+
+for ob in ??+*; do
+    echo
+    echo $ob 2,3
+    csvjoin -c t \
+            <(csvstack -d $'\t' $ob/* | csvgrep -c d -m 2 | csvcut -c1-3) \
+            <(csvstack -d $'\t' $ob/* | csvgrep -c d -m 3 | csvcut -c1-3) \
+        | csvstat -c 3,6 --sum
+done

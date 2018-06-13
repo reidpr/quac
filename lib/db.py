@@ -49,7 +49,13 @@ class SQLite(object):
                 'curs')
 
    def __init__(self, filename, writeable):
-      apsw.softheaplimit(c.getint('limt', 'sqlite_heap_bytes'))
+      try:
+         # This might fail because no configuration has been loaded, in which
+         # case use a modest but non-trivial default.
+         heap_bytes = c.getint('limt', 'sqlite_heap_bytes')
+      except Exception:
+         heap_bytes = 268435456
+      apsw.softheaplimit(heap_bytes)
       if (writeable):
          flags = apsw.SQLITE_OPEN_READWRITE | apsw.SQLITE_OPEN_CREATE
       else:

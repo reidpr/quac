@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Test that wp-get-categories script and underlying functionality works. We
+# assume that the categories of the English main page are constant.
+#
+# Copyright © Los Alamos National Security, LLC, and others.
+
+. ./environment.sh
+
+set +e
+
+
+# Basic category set
+x wp-get-categories en+Main_page
+x wp-get-categories --hidden en+Main_page
+
+# Multi-page queries
+x wp-get-categories --hidden -p2 en+Main_page  # fills all pages
+x wp-get-categories --hidden -p5 en+Main_page  # last page not full
+
+# Not in English
+x wp-get-categories ro+Pagina_principală
+
+# Various encodings of article
+x wp-get-categories "'ro+Pagina principală'"
+x wp-get-categories ro+Pagina_principal%C4%83
+x wp-get-categories ro+Pagina%20principal%C4%83
+
+# No categories
+x wp-get-categories pt+Página_principal
+
+# Non-existent article
+x wp-get-categories en+NOTFOUND
+
+# Errors
+x wp-get-categories
+x wp-get-categories Main_page
+x wp-get-categories -p0 en+Main_page
+x wp-get-categories -p foo en+Main_page
+
+exit 0

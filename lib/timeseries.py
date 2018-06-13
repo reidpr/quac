@@ -476,6 +476,8 @@ A Pandas-based interface is provided as well:
    2015-01-31 23:00   NaN      0.0      0.0
    <BLANKLINE>
    [744 rows x 3 columns]
+   >>> list(dsp.fetch_all(0))  # empty shard, but don't crash
+   []
    >>> dsp.fetch('notfound')
    Traceback (most recent call last):
      ...
@@ -529,6 +531,26 @@ The Pandas interface provides automatic normalization and resampling:
    2015-01-31 23:00           NaN           NaN
    <BLANKLINE>
    [744 rows x 2 columns]
+   >>> pd.DataFrame({ s.name: s for s in dsp.fetch_all(resample='D') })
+               foo  foo+bar  foo+baz
+   2015-01-01   22       86      126
+   2015-01-02  NaN        0        0
+   2015-01-03  NaN        0        0
+   ...
+   2015-01-29  NaN        0        0
+   2015-01-30  NaN        0        0
+   2015-01-31  NaN        0        0
+   >>> pd.DataFrame({ s.name: s for s in dsp.fetch_all(normalize=True,
+   ...                                                 resample='D') })
+               foo+bar$norm  foo+baz$norm
+   2015-01-01      3.909091      5.727273
+   2015-01-02           NaN           NaN
+   2015-01-03           NaN           NaN
+   ...
+   2015-01-30           NaN           NaN
+   2015-01-31           NaN           NaN
+   >>> list(dsp.fetch_all(0, normalize=True, resample='D'))
+   []
    >>> dsp.fetch('foo', normalize=True)
    Traceback (most recent call last):
      ...
@@ -586,7 +608,7 @@ import heapq
 import os
 import os.path
 import re
-import urllib.parse
+import sys
 import zlib
 import collections
 
@@ -672,9 +694,7 @@ def name_url_canonicalize(name):
         'en+Sandy%25_Koufax'"""
    m = URL_NAME_RE.search(name)
    (prefix, name, suffix) = m.groups(default='')
-   name = urllib.parse.unquote(name)
-   name = name.replace(' ', '_')
-   name = urllib.parse.quote(name)
+   name = u.url_encoded(name)
    return (prefix + name + suffix)
 
 class Fragment_Source(enum.Enum):
@@ -960,17 +980,18 @@ class Dataset_Pandas(Dataset):
       result.drop(missing_names, axis=1, inplace=True)
       return result
 
-   def fetch_all(self, normalize=False, *args, **kwargs):
+   def fetch_all(self, *args, normalize=False, resample=None, **kwargs):
       for (name, array) in super().fetch_all(*args, **kwargs):
          series = pd.Series(array, name=name, index=self.index)
-         if (not normalize):
-            yield series
-         else:
+         if (resample):
+            series = series.resample(resample, how='sum')
+         if (normalize):
             try:
-               yield self.normalize(series)
+               series = self.normalize(series)
             except ValueError:
                # It was a denominator series; ignore it.
-               pass
+               continue
+         yield series
 
 
 class Fragment_Group(object):
@@ -1133,11 +1154,16 @@ class Fragment_Group(object):
    def open(self, writeable):
       #l.debug('opening %s, writeable=%s' % (self.filename, writeable))
       self.connect(writeable)
+      # If a cache size is configured, use that; if that doesn't work for
+      # whatever reason, use something relatively modest but non-trivial.
+      try:
+         cache_kb = c.getint('limt', 'sqlite_page_cache_kb')
+      except Exception:
+         cache_kb = 262144
       # We use journal_mode = PERSIST to avoid metadata operations and
       # re-allocation, which can be expensive on parallel filesystems.
       self.db.sql("""PRAGMA cache_size = -%d;
-                     PRAGMA synchronous = OFF; """
-                  % c.getint('limt', 'sqlite_page_cache_kb'))
+                     PRAGMA synchronous = OFF; """ % cache_kb)
       self.initialize_db()
 
    def prune(self, keep_thr):

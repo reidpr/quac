@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+
+import collections
+import csv
+import glob
+import os
+from pprint import pprint
+import re
+import sys
+
+import pandas as pd
+
+FILENAME_RE = re.compile(r'/([a-z]{2}\+.+),([0-9])/')
+
+rsq_files = collections.defaultdict(set)
+for f in glob.glob('d?/*/rsquared-t.tsv'):
+   ob = FILENAME_RE.search(f).group(1)
+   rsq_files[ob].add(f)
+
+for (ob, files) in rsq_files.items():
+   files = sorted(files)
+   rsq_dfs = [ pd.read_table(f, index_col=0) for f in files ]
+   dists = [ int(FILENAME_RE.search(f).group(2)) for f in files ]
+   trainings = list(rsq_dfs[0].index)
+   rsq_df = pd.concat(rsq_dfs, axis=0, keys=dists, names=['d', 't'])
+   os.makedirs(ob, exist_ok=True)
+   for t in trainings:
+      df = rsq_df.loc(axis=0)[:,t]
+      df.to_csv('%s/t%d.rsquared.tsv' % (ob, t), sep='\t')
