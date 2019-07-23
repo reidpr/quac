@@ -1,3 +1,8 @@
+# Note: In our experiment, the category distance between Wikipedia articles
+# was loaded from a Python pickle file. The same information is available in
+# S2, so this version of the code loads it from there instead. We have verifed
+# that the two are identical.
+
 import gzip
 import pickle
 import re
@@ -18,9 +23,8 @@ ght_topic_distances = None
 raw2wiki = None
 top2wiki = None
 
-
 def load():
-   load_wiki_distances()
+   #load_wiki_distances()
    load_ght_distances()
 
 def load_ght_distances():
@@ -42,13 +46,25 @@ def load_ght_distances():
    top2wiki = { t:a for a,t in df.loc[:,"topic"].to_dict().items() if t != "" }
    assert (len(top2wiki) <= len(df))
 
+   # Original experiment code to compute Wikipedia distance map.
+   #ght_raw_distances_X = { q:wiki_distances[a] for q,a in raw2wiki.items() }
+   #ght_topic_distances_X = { q:wiki_distances[a] for q,a in top2wiki.items() }
+
+   # New, equivalent code.
    global ght_raw_distances
-   ght_raw_distances = { q:wiki_distances[a] for q,a in raw2wiki.items() }
+   ght_raw_distances = { r["raw query"]:r["distance"]
+                         for (i, r) in df.iterrows() }
    global ght_topic_distances
-   ght_topic_distances = { q:wiki_distances[a] for q,a in top2wiki.items() }
+   ght_topic_distances = { r["topic"]:r["distance"]
+                           for (i, r) in df.iterrows()
+                           if r["topic"] is not "" }
+
+   # Verify the two are the same.
+   #assert (ght_raw_distances == ght_raw_distances_X)
+   #assert (ght_topic_distances == ght_topic_distances_X)
 
 def load_wiki_distances():
-   gr = pickle.load(gzip.open(u.datapath / "S4_Dataset_wiki-graph.pkl.gz"))
+   gr = pickle.load(gzip.open(u.datapath / "wiki-graph.pkl.gz"))
    global wiki_distances
    wiki_distances = { k[3:]:v for k,v in gr["en+Influenza"].items() }
 
