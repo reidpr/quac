@@ -1,0 +1,9 @@
+# Some stuff requires Python 2. Here's the environment. :P
+dependencies:
+# python version
+- python=2.7.13
+# packages we use
+- xlrd=1.0.0
+# non-explicit dependencies
+- pip:
+  - google-api-python-client==1.6.2

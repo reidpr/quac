@@ -1,0 +1,78 @@
+Prerequisites
+=============
+
+You will need Anaconda or Miniconda to set up the Python environment.
+
+If you have trouble, let us know and we will try to help, but please realize
+this code is unsupported.
+
+
+Gathering the data
+==================
+
+This experiment requires four data sets. Three are provided in the
+supplemental data; one you must download yourself.
+
+The stated paths can be adjusted in "u.py".
+
+Supplemental data
+-----------------
+
+Create a subdirectory called "data" and put the Excel spreadsheets S1 and S2
+in it, and the S4 Python pickle file. (S3 will be computed on the fly as
+"synthetic.xlsx"; we provide ours for comparison purposes.)
+
+Google Health Trends data
+-------------------------
+
+Download this from Google. You need a Google Health Trends API key, which you
+can get via Google's request form (citation 32).
+
+Once you have the API key, you'll be given a document called "Health Trends
+API Getting Started Guide". This contains a Python module; save that as
+"ght_example.orig.py". Apply the patch "ght_example.patch" to create
+"ght_example.py". (We cannot distribute Google's file because it does not have
+a clear license.)
+
+Create and activate a Conda environment using "environment2.yml". Note that
+this environment is used only for downloading the Google data; a different one
+is for the experiment.
+
+Use the script "ght_get" to download the data. See the comment at the top of
+the script for an example. Download two datasets:
+
+  * Use the S2 spreadsheet to get "data/en+Influenza.ght.csv".
+  * Use the S4 spreadsheet to get "data/misc.ght.csv".
+
+Note that Google gives you a sample, so your results will differ slightly.
+
+
+Running the experiment
+======================
+
+1. Review "u.py" to make sure paths and other parameters are appropriate for
+   your system.
+
+2. Create and active a Conda environment using "environment3.yml".
+
+3. Run the experiment program to produce "data/out.pickle". This takes maybe
+   20–30 minutes.
+
+     $ ./experiment.py
+
+4. Start Jupyter Notebook and load "figures.ipynb".
+
+5. Run all cells. This takes a few minutes.
+
+You should now have the figures (PDF) and tables (.tex).
+
+
+Git notes
+=========
+
+* Derived files, the "data" directory, and ght_example*.py are ignored in
+  .gitignore. If you want to include these in your fork, adjust that file.
+
+* Output from Jupyter notebooks is embedded in *.ipynb files. Thus, simply by
+  running the notebook, Git will see many megabytes of changes. Set up the
+  script "nbstripout" as a Git filter to avoid this.

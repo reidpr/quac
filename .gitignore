@@ -123,3 +123,11 @@ tests/standalone/wp-access/ts
 
 # Jupyter/iPython Notebook checkpoints
 .ipynb_checkpoints
+
+# experiments
+experiments/2019_PLOS-Comp-Bio_Deceptiveness/*.pdf
+experiments/2019_PLOS-Comp-Bio_Deceptiveness/*.tex
+experiments/2019_PLOS-Comp-Bio_Deceptiveness/data
+experiments/2019_PLOS-Comp-Bio_Deceptiveness/ght_example.py
+experiments/2019_PLOS-Comp-Bio_Deceptiveness/ght_example.orig.py
+experiments/2019_PLOS-Comp-Bio_Deceptiveness/synthetic.xlsx

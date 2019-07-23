@@ -1,0 +1,39 @@
+--- ght_example.orig.py	2019-07-16 16:53:45.000000000 -0600
++++ ght_example.py	2019-07-16 17:10:01.000000000 -0600
+@@ -1,4 +1,15 @@
+-#!/usr/bin/python
++#!/usr/bin/env python2.7
++
++# This is a lightly modified copy of the sample code included in the Health
++# Trends API Getting Started Guide. It should not be distributed, because the
++# license is unclear.
++
++# Note: This only works on Python 2. Why? Because httplib2 doesn't support
++# proxies on Python 3 [1], and the Google API library uses httplib2, which is
++# crappy and obsolete (see above).
++#
++# [1]: https://github.com/jcgregorio/httplib2/wiki/Examples-Python3
++
+ """Sample code showing how to access the Google Flu Trends API."""
+ 
+ import csv
+@@ -81,6 +92,10 @@
+   for batch_start in batch_intervals:
+     batch_end = min(batch_start + MAX_QUERIES, len(queries))
+     query_batch = queries[batch_start:batch_end]
++
++    print >> sys.stderr, (  "query %d/%d: %s"
++                          % (batch_start, len(queries), query_batch[0]))
++
+     # Make API query
+     if geo_level == 'country':
+       # Country format is ISO-3166-2 (2-letters), e.g. 'US'
+@@ -110,7 +125,7 @@
+     res = req.execute()
+ 
+     # Sleep for 1 second so as to avoid hittting rate limiting.
+-    time.sleep(1)
++    time.sleep(1.1)
+ 
+     # Convert the data from the API into a dictionary of the form
+     # {(query, date): count, ...}

@@ -1,0 +1,83 @@
+#!/usr/bin/env python2.7
+
+# For the simulation experiment, call as:
+#
+#   $ ./ght_get $API_KEY ../../data/en+Influenza.xlsx \
+#               US week 7 2011-07-03 2016-07-02 > ../data/en+Influenza.ght.csv
+#
+# Note: The terms of service require that "data must be securely deleted
+# within 12 months of a publication". Therefore, don't check the output files
+# into the regular project Git repository. If you name them *.ght.csv, then
+# .gitignore will help with that.
+
+from __future__ import division, print_function
+
+import codecs
+import csv
+import sys
+
+import xlrd
+
+import ght_example
+
+ght_example.API_KEY = sys.argv[1]
+# The documented limit on number of queries is 30. However, we get HTTP 400
+# Bad Request at 8 queries. This is because there's also a limit of 2,000
+# total data points. We're requesting 261 weeks for the simulation experiment:
+# 261*7 = 1827 but 261*8 = 2000.
+ght_example.MAX_QUERIES = int(sys.argv[5])
+
+geo_code = sys.argv[3]
+time_gran = sys.argv[4]
+start_soi = sys.argv[6]
+end_eoi = sys.argv[7]
+
+if (len(geo_code) == 2):
+   geo_gran = "country"
+elif (len(geo_code) == 5):
+   geo_gran = "region"
+else:
+   assert len(geo_code) == 3
+   geo_gran = "dma"
+
+queries = list()
+sh = xlrd.open_workbook(sys.argv[2]).sheet_by_index(0)
+queries += [i.value for i in sh.col(2)][2:]
+#for i in sh.col(4)[2:]:
+#   print(i.value, type(i.value), file=sys.stderr)
+#   print(u"/m/" + i.value, file=sys.stderr)
+#sys.exit()
+topics = { c:t for t,c in zip((i.value for i in sh.col(3)[2:]),
+                              (u"/m/" + i.value for i in sh.col(4)[2:]))
+           if c != u"/m/" }
+queries += topics.keys()
+
+
+print("""\
+queries:                  %d
+geographic granularity:   %s
+geography:                %s
+time granularity:         %s
+start of first interval:  %s
+end of last interval:     %s"""
+      % (len(queries), geo_gran, geo_code, time_gran, start_soi, end_eoi),
+      file=sys.stderr)
+
+#print(queries, file=sys.stderr)
+table = ght_example.GetQueryVolumes(queries,
+                                    geo_level=geo_gran,
+                                    geo=geo_code,
+                                    frequency=time_gran,
+                                    start_date=start_soi,
+                                    end_date=end_eoi)
+
+fp = csv.writer(sys.stdout)
+header1 = table.pop(0)
+header2 = ["" if i[0] != "/" else i for i in header1]
+header1 = [i  if i[0] != "/" else codecs.encode(topics[i], "UTF-8")
+           for i in header1]
+fp.writerow(header1)
+fp.writerow(header2)
+
+for row in table:
+   fp.writerow(row)
